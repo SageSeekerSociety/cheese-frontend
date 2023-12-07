@@ -1,15 +1,13 @@
 <template>
     <v-app class="bg-page-background">
         <app-bar :links="links" />
-
-        <v-main>
-            <router-view />
-        </v-main>
+        <user-card :userData="fakeUserData"/>
     </v-app>
 </template>
-    
+
 <script lang="ts" setup>
 import AppBar from '@/components/common/AppBar/AppBar.vue'
+import UserCard from '@/components/common/user/UserCard.vue'
 
 const links = [
     {
@@ -28,5 +26,10 @@ const links = [
         path: "/explore",
     },
 ]
+
+const fakeUserData = {
+    UserNickName: 'Administrator',
+    UserDesc: '芝士雪豹，一言以蔽之',
+    UserAvatar: 'https://pica.zhimg.com/v2-c9f27d4b3a6e090de02f71925f8d8f50_l.jpg?source=32738c0c',
+}
 </script>
-    
