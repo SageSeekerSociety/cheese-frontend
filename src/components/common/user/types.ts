@@ -1,7 +1,8 @@
 export type UserData = {
-    UserNickName: string,
-    UserDesc: string,
-    UserAvatar: string,
+    username: string,
+    userDesc: string,
+    userAvatar: string,
+    userHeaderImg: string,
 }
 
 export type UserProps = {
