@@ -10,7 +10,7 @@
             height="65%"
             aspect-ratio="16/9"
             cover
-            :src="props.user_data.user_header_img"
+            :src="props.userData.userHeaderImg"
             id="header-img"
             />
             <v-container class="cut-align-center">
@@ -21,12 +21,12 @@
                 rounded="lg"
                 >
                 <!-- Your avatar content goes here -->
-                    <v-img :src="props.user_data.user_avatar"/>
+                    <v-img :src="props.userData.userAvatar"/>
                 </v-avatar>
                 <v-container class="info-wrapper">
                     <div class="info-bar-upper">
                         <span class="text-h4 font-weight-bold me-4">
-                        {{ props.user_data.username }}
+                        {{ props.userData.username }}
                         </span>
                         <v-spacer/>
                         <v-btn color="primary" variant="flat">
@@ -37,11 +37,11 @@
                     <div class="info-bar-lower">
                         <span>
                         <v-icon left>mdi-format-quote-open</v-icon>
-                        {{ props.user_data.user_description }}
+                        {{ props.userData.userDesc }}
                         </span>
                         <span>
                         <v-icon left>mdi-account</v-icon>
-                        {{ props.user_data.user_description }}
+                        {{ props.userData.userDesc }}
                         </span>
                     </div>
                 </v-container>
@@ -89,6 +89,6 @@
 import { UserProps } from './types';
 
 const props = withDefaults(defineProps<UserProps>(), {
-    user_data: () => ({})
+    userData: () => ({})
 })
 </script>
