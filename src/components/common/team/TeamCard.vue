@@ -71,9 +71,9 @@
 </style>
 
 <script lang="ts" setup>
-import { teamProps } from "./types";
+import { TeamProps } from "./types";
 
-const props = withDefaults(defineProps<teamProps>(), {
+const props = withDefaults(defineProps<TeamProps>(), {
   teamData: () => ({}),
 });
 </script>
