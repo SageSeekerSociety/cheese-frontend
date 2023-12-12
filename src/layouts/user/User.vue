@@ -2,7 +2,7 @@
     <v-app class="bg-page-background">
         <app-bar :links="links" />
         <v-main class="bg-grey-lighten-3">
-            <user-card :userData="fakeUserData"/>
+            <user-card :user_data="fakeuser_data"/>
             <v-container class="d-flex row">
                 <v-row>
                     <v-col class="pr-0">
@@ -53,13 +53,13 @@ const links = [
     },
 ]
 
-const fakeUserData = {
-    UserNickName: 'Administrator',
-    UserDesc: '芝士雪豹，一言以蔽之',
-    // UserAvatar: 'https://pica.zhimg.com/v2-c9f27d4b3a6e090de02f71925f8d8f50_l.jpg?source=32738c0c',
-    UserAvatar: 'https://gravatar.com/userimage/132994463/e7e95572d023b832c6e91517084c6968.jpeg?size=256',
-    UserHeaderImg: 'https://cdn.vuetifyjs.com/images/parallax/material.jpg',
-    // UserHeaderImg: 'https://s2.loli.net/2023/04/18/QTFneJBOH68Njlg.jpg',
+const fakeuser_data = {
+    username: 'Administrator',
+    user_description: '芝士雪豹，一言以蔽之',
+    // user_avatar: 'https://pica.zhimg.com/v2-c9f27d4b3a6e090de02f71925f8d8f50_l.jpg?source=32738c0c',
+    user_avatar: 'https://gravatar.com/userimage/132994463/e7e95572d023b832c6e91517084c6968.jpeg?size=256',
+    user_header_img: 'https://cdn.vuetifyjs.com/images/parallax/material.jpg',
+    // user_header_img: 'https://s2.loli.net/2023/04/18/QTFneJBOH68Njlg.jpg',
 }
 
 const selectedTab = ref(0);
