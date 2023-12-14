@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref } from "vue";
-import TeamCard from "@/components/common/team/TeamCard.vue";
+import TeamCard from "@/components/team/TeamCard.vue";
 
 // const fakeGroupData = {
 //   teamNickName: "编程入门学习组",

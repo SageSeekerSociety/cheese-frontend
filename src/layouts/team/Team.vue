@@ -9,7 +9,6 @@
 
 <script lang="ts" setup>
 import AppBar from "@/components/common/AppBar/AppBar.vue";
-import TeamCard from "@/components/common/team/TeamCard.vue";
 
 // const fakeGroupData = {
 //   teamNickName: "编程入门学习组",
@@ -25,6 +24,7 @@ const fakeTeamData = {
     "https://ods2.oddba.cn/user_files/66368/bbs/35961729_1676268464.png",
   teamAdmin: "Bocci",
 };
+
 const links = [
   {
     key: "Home",
@@ -32,14 +32,14 @@ const links = [
     path: "/",
   },
   {
-    key: "Team",
-    title: "小组",
-    path: "/team",
+    key: "Question",
+    title: "问答",
+    path: "/question",
   },
   {
-    key: "Explore",
-    title: "发现",
-    path: "/explore",
+    key: "Group",
+    title: "圈子",
+    path: "/team",
   },
-];
+]
 </script>

@@ -2,7 +2,7 @@
     <v-app class="bg-page-background">
         <app-bar :links="links" />
         <v-main class="bg-grey-lighten-3">
-            <user-card :userData="fakeUserData"/>
+            <user-card :userData="fakeUserData" />
             <v-container class="d-flex row">
                 <v-row>
                     <v-col class="pr-0">
@@ -33,7 +33,8 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import AppBar from '@/components/common/AppBar/AppBar.vue'
-import UserCard from '@/components/common/user/UserCard.vue'
+import UserCard from '@/components/user/UserCard.vue'
+
 
 const links = [
     {

@@ -74,6 +74,6 @@
 import { TeamProps } from "./types";
 
 const props = withDefaults(defineProps<TeamProps>(), {
-  teamData: () => ({}),
+  teamData: (props) => props.teamData,
 });
 </script>

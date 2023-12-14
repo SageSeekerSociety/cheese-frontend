@@ -11,6 +11,7 @@
 <script lang="ts" setup>
 import AppBar from '@/components/common/AppBar/AppBar.vue'
 
+
 const links = [
     {
         key: "Home",
