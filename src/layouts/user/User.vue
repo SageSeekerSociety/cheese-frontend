@@ -18,7 +18,7 @@
                     <v-col cols="3">
                         <v-sheet rounded="lg">
                             <v-list rounded="lg">
-                                <v-list-item v-for="n in 5" :key="n" link :title="`List Item ${n}`"></v-list-item> 
+                                <v-list-item v-for="n in 5" :key="n" link :title="`List Item ${n}`"></v-list-item>
                                 <v-divider class="my-2"></v-divider>
                                 <v-list-item color="grey-lighten-4" link title="Refresh"></v-list-item>
                             </v-list>
@@ -43,14 +43,14 @@ const links = [
         path: "/",
     },
     {
-        key: "Team",
-        title: "小组",
-        path: "/team",
+        key: "Question",
+        title: "问答",
+        path: "/question",
     },
     {
-        key: "Explore",
-        title: "发现",
-        path: "/explore",
+        key: "Group",
+        title: "圈子",
+        path: "/team",
     },
 ]
 
@@ -66,7 +66,7 @@ const fakeUserData = {
 const selectedTab = ref(0);
 
 const tabs = [
-  { label: '提问', route: '/user' },
-  { label: '回答', route: '/user/answer' },
+    { label: '提问', route: '/user' },
+    { label: '回答', route: '/user/answer' },
 ];
 </script>

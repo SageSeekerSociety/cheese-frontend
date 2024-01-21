@@ -1,52 +1,70 @@
 <template>
-
-<v-container>
-        <v-row>
-          <v-col>
-            <v-sheet min-height="70vh" rounded="lg" class="py-1 px-1">
-              <v-card flat v-for="item in fakeData" :key="item.title">
-                <v-card-title><span class="text-h6 font-weight-bold">{{ item.title }}</span></v-card-title>
-                <v-card-text>
-                  <p class="text-body-1">
-                    {{ item.author }}：{{ item.content }}
-                  </p>
-                </v-card-text>
-                <v-card-actions>
-                  <v-btn color="primary" variant="tonal">
-                    <v-icon size="24" class="me-2">mdi-menu-up</v-icon>
-                    {{ item.like_count }}
-                  </v-btn>
-                  <v-btn color="primary" variant="tonal" min-width="32px">
-                    <v-icon size="24">mdi-menu-down</v-icon>
-                  </v-btn>
-                  <v-btn variant="plain" color="on-background">
-                    <v-icon size="18" class="me-2">mdi-comment-outline</v-icon>
-                    评论
-                  </v-btn>
-                  <v-btn variant="plain" color="on-background">
-                    <v-icon size="18" class="me-2">mdi-star-outline</v-icon>
-                    收藏
-                  </v-btn>
-                  <v-btn variant="plain" color="on-background" min-width="32px">
-                    <v-icon size="18">mdi-dots-horizontal</v-icon>
-                  </v-btn>
-                </v-card-actions>
-              </v-card>
-            </v-sheet>
-          </v-col>
-          <v-col cols="3">
-            <v-sheet rounded="lg">
-              <v-list rounded="lg">
-                <v-list-item v-for="n in 5" :key="n" link :title="`List Item ${n}`"></v-list-item>
-
-                <v-divider class="my-2"></v-divider>
-
-                <v-list-item color="grey-lighten-4" link title="Refresh"></v-list-item>
-              </v-list>
-            </v-sheet>
-          </v-col>
-        </v-row>
-      </v-container>
+  <v-container>
+    <v-row>
+      <v-col>
+        <v-sheet min-height="70vh" rounded="lg" class="py-1 px-1">
+          <div class="d-flex justify-space-between align-center pa-4">
+            <div>
+              <span class="text-h6 font-weight-bold">热门问题</span>
+            </div>
+          </div>
+          <v-card flat v-for="item in fakeData" :key="item.title">
+            <v-card-title class="text-h6 font-weight-medium">{{ item.title }}</v-card-title>
+            <v-card-text class="text-body-1 font-weight-regular answer-body-text pb-1">
+                {{ item.author }}：{{ item.content }}
+            </v-card-text>
+            <v-card-actions class="px-3">
+              <v-btn color="primary" variant="tonal">
+                <v-icon size="24" class="me-2">mdi-menu-up</v-icon>
+                {{ item.like_count }}
+              </v-btn>
+              <v-btn color="primary" variant="tonal" min-width="32px">
+                <v-icon size="24">mdi-menu-down</v-icon>
+              </v-btn>
+              <v-btn variant="plain" color="on-background">
+                <v-icon size="18" class="me-2">mdi-comment-outline</v-icon>
+                评论
+              </v-btn>
+              <v-btn variant="plain" color="on-background">
+                <v-icon size="18" class="me-2">mdi-star-outline</v-icon>
+                收藏
+              </v-btn>
+              <v-btn variant="plain" color="on-background" min-width="32px">
+                <v-icon size="18">mdi-dots-horizontal</v-icon>
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-sheet>
+      </v-col>
+      <v-col cols="3">
+        <v-btn color="primary" variant="flat" class="mb-4" block rounded="lg">
+          提问
+        </v-btn>
+        <v-sheet rounded="lg">
+          <v-list rounded="lg">
+            <v-list-item title="我的收藏">
+              <template #prepend>
+                <v-icon icon="mdi-star"></v-icon>
+              </template>
+            </v-list-item>
+            <v-list-item title="我关注的问题">
+              <template #prepend>
+                <v-icon icon="mdi-crosshairs-question"></v-icon>
+              </template>
+              <template #append>
+                <v-badge content="3" inline></v-badge>
+              </template>
+            </v-list-item>
+            <v-list-item title="我的邀请">
+              <template #prepend>
+                <v-icon icon="mdi-account-plus"></v-icon>
+              </template>
+            </v-list-item>
+          </v-list>
+        </v-sheet>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -77,3 +95,9 @@ const fakeData = [
   }
 ]
 </script>
+
+<style scoped>
+.answer-body-text {
+  line-height: 1.5;
+}
+</style>

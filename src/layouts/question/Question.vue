@@ -19,14 +19,14 @@ const links = [
         path: "/",
     },
     {
-        key: "Team",
-        title: "小组",
-        path: "/team",
+        key: "Question",
+        title: "问答",
+        path: "/question",
     },
     {
-        key: "Explore",
-        title: "发现",
-        path: "/explore",
+        key: "Group",
+        title: "圈子",
+        path: "/team",
     },
 ]
 </script>

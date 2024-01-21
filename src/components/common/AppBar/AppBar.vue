@@ -1,5 +1,5 @@
 <template>
-    <v-app-bar app scroll-behavior="hide" flat>
+    <v-app-bar app flat>
         <v-container class="mx-auto d-flex align-center justify-center">
             <span class="text-h5 font-weight-bold me-4">🧀知是</span>
             <v-btn v-for="link in props.links" :key="link.key" :text="link.title" :to="link.path" variant="text"></v-btn>
@@ -11,7 +11,9 @@
             <v-btn icon class="me-4">
                 <v-icon>mdi-bell</v-icon>
             </v-btn>
-            <v-avatar color="grey-darken-1" size="32" />
+            <router-link to="/user">
+                <v-avatar color="grey-darken-1" size="32" />
+            </router-link>
         </v-container>
     </v-app-bar>
 </template>

@@ -12,27 +12,18 @@
                       item.title
                     }}</span>
                   </div>
-                  <div
-                    :class="
-                      item.isFollowed
-                        ? 'h-f-btn h-unfollow'
-                        : 'h-f-btn h-follow'
-                    "
-                  >
+                  <v-btn :variant="item.isFollowed ? 'tonal' : 'flat'" color="primary">
                     {{ item.isFollowed ? "已加入" : "未加入" }}
-                  </div>
+                  </v-btn>
                 </div>
               </v-card-title>
 
               <v-card-text>
-                <p>&nbsp;</p>
-                <p></p>
-                <p style="font-size: 16px">
+                <p style="font-size: 16px" class="py-2">
                   <v-icon size="24" class="me-2">mdi-account</v-icon>
                   {{ item.leader }}
                 </p>
-                <p>&nbsp;</p>
-                <p style="font-size: 16px">
+                <p style="font-size: 16px" class="py-2">
                   <v-icon size="24" class="me-2">mdi-text</v-icon>
                   {{ item.description }}
                 </p>
