@@ -1,14 +1,15 @@
 <template>
-  <v-app class="bg-page-background">
+  <my-app>
     <app-bar :links="links" />
 
     <v-main>
       <router-view />
     </v-main>
-  </v-app>
+  </my-app>
 </template>
   
 <script lang="ts" setup>
+import MyApp from '@/components/common/MyApp.vue';
 import AppBar from '@/components/common/AppBar/AppBar.vue'
 
 const links = [

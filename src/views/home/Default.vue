@@ -11,7 +11,7 @@
           <v-card flat v-for="item in fakeData" :key="item.title">
             <v-card-title class="text-h6 font-weight-medium">{{ item.title }}</v-card-title>
             <v-card-text class="text-body-1 font-weight-regular answer-body-text pb-1">
-                {{ item.author }}：{{ item.content }}
+              {{ item.author }}：{{ item.content }}
             </v-card-text>
             <v-card-actions class="px-3">
               <v-btn color="primary" variant="tonal">

@@ -1,5 +1,5 @@
 <template>
-    <v-app class="bg-page-background">
+    <my-app>
         <app-bar :links="links" />
         <v-main class="bg-grey-lighten-3">
             <user-card :userData="fakeUserData" />
@@ -27,11 +27,12 @@
                 </v-row>
             </v-container>
         </v-main>
-    </v-app>
+    </my-app>
 </template>
 
 <script lang="ts" setup>
 import { ref } from 'vue';
+import MyApp from '@/components/common/MyApp.vue';
 import AppBar from '@/components/common/AppBar/AppBar.vue'
 import UserCard from '@/components/user/UserCard.vue'
 

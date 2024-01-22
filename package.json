@@ -9,11 +9,13 @@
   },
   "dependencies": {
     "@mdi/font": "7.0.96",
+    "axios": "^1.6.5",
     "pinia": "^2.1.7",
     "roboto-fontface": "^0.10.0",
     "vue": "^3.3.11",
     "vue-router": "^4.2.5",
-    "vuetify": "^3.4.7"
+    "vuetify": "^3.4.7",
+    "vuetify-sonner": "^0.3.12"
   },
   "devDependencies": {
     "@babel/types": "^7.23.6",
