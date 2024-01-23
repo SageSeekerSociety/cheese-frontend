@@ -18,5 +18,10 @@ export default {
             name: 'SignUpVerifyEmail',
             component: () => import('@/views/account/signup/VerifyEmail.vue'),
         },
+        {
+            path: 'recover/password',
+            name: 'RecoverPasswordRequest',
+            component: () => import('@/views/account/recover/password/Start.vue'),
+        },
     ],
 }

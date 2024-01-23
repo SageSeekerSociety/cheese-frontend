@@ -44,4 +44,11 @@ export namespace UserApi {
       method: "POST",
       withCredentials: true,
     });
+
+  export const recoverPasswordRequest = (email: string) =>
+    ApiInstance.request({
+      url: "/users/recover/password/request",
+      method: "POST",
+      data: { email },
+    });
 }

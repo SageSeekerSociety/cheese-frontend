@@ -19,9 +19,9 @@
     </v-card-text>
     <v-card-actions>
       <v-btn variant="text" color="primary" to="signup">注册账户</v-btn>
-      <v-btn variant="plain" color="on-background">无法登录？</v-btn>
+      <v-btn variant="plain" color="on-background" to="recover/password">无法登录？</v-btn>
       <v-spacer />
-      <v-btn color="primary" @click="login">登录</v-btn>
+      <v-btn color="primary" @click="login" :loading="isSubmitting">登录</v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -38,7 +38,7 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
-const { handleSubmit, defineField } = useForm({
+const { handleSubmit, defineField, isSubmitting } = useForm({
   validationSchema: toTypedSchema(
     z.object({
       username: z.string().min(4).max(16),
