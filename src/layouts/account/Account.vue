@@ -39,8 +39,7 @@ import MyApp from '@/components/common/MyApp.vue';
 import { ref } from 'vue'
 const defaults = ref({
   VCard: {
-    // variant: 'outlined',
-    elevation: 4,
+    flat: true,
     rounded: "lg"
   },
   VTextField: {

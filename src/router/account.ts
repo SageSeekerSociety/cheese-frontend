@@ -6,12 +6,17 @@ export default {
         {
             path: 'signin',
             name: 'SignIn',
-            component: () => import('@/views/account/Login.vue'),
+            component: () => import('@/views/account/SignIn.vue'),
         },
         {
             path: 'signup',
-            name: 'SignUp',
-            component: () => import('@/views/account/Register.vue'),
+            name: 'SignUpStart',
+            component: () => import('@/views/account/signup/Start.vue'),
+        },
+        {
+            path: 'signup/verify-email',
+            name: 'SignUpVerifyEmail',
+            component: () => import('@/views/account/signup/VerifyEmail.vue'),
         },
     ],
 }
