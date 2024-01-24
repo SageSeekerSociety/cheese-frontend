@@ -1,4 +1,4 @@
-<template>  
+<template>
   <v-app :class="{ 'bg-page-background': props.pageBackground }">
     <v-sonner position="top-center" />
     <slot></slot>
@@ -6,11 +6,14 @@
 </template>
 
 <script lang="ts" setup>
-import { VSonner } from 'vuetify-sonner';
+import { VSonner } from "vuetify-sonner";
 
-const props = withDefaults(defineProps<{
-    pageBackground?: boolean
-}>(), {
-    pageBackground: true
-})
+const props = withDefaults(
+  defineProps<{
+    pageBackground?: boolean;
+  }>(),
+  {
+    pageBackground: true,
+  }
+);
 </script>

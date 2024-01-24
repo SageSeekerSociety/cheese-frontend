@@ -1,8 +1,8 @@
 <template>
-    <app-bar :links="links" />
-    <v-main class="bg-grey-lighten-3">
-      <router-view />
-    </v-main>
+  <app-bar :links="links" />
+  <v-main class="bg-grey-lighten-3">
+    <router-view />
+  </v-main>
 </template>
 
 <script lang="ts" setup>
@@ -40,5 +40,5 @@ const links = [
     title: "圈子",
     path: "/group",
   },
-]
+];
 </script>

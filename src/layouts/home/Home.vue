@@ -1,14 +1,14 @@
 <template>
-    <app-bar :links="links" />
+  <app-bar :links="links" />
 
-    <v-main>
-      <router-view />
-    </v-main>
+  <v-main>
+    <router-view />
+  </v-main>
 </template>
-  
+
 <script lang="ts" setup>
-import MyApp from '@/components/common/MyApp.vue';
-import AppBar from '@/components/common/AppBar/AppBar.vue'
+import MyApp from "@/components/common/MyApp.vue";
+import AppBar from "@/components/common/AppBar/AppBar.vue";
 
 const links = [
   {
@@ -26,6 +26,5 @@ const links = [
     title: "圈子",
     path: "/group",
   },
-]
+];
 </script>
-  

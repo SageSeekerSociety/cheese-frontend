@@ -1,4 +1,4 @@
-import { InternalAxiosRequestConfig } from 'axios';
+import { InternalAxiosRequestConfig } from "axios";
 import AccountService from "@/services/account";
 
 export default (config: InternalAxiosRequestConfig) => {

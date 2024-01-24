@@ -12,7 +12,10 @@
                       item.title
                     }}</span>
                   </div>
-                  <v-btn :variant="item.isFollowed ? 'tonal' : 'flat'" color="primary">
+                  <v-btn
+                    :variant="item.isFollowed ? 'tonal' : 'flat'"
+                    color="primary"
+                  >
                     {{ item.isFollowed ? "已加入" : "未加入" }}
                   </v-btn>
                 </div>

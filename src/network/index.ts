@@ -1,14 +1,19 @@
 // 引入axios以及一些类型
 import axios, {
-  AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig,
-} from 'axios';
-import { ResponseDataType } from './types';
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+} from "axios";
+import { ResponseDataType } from "./types";
 
 export interface Interceptor {
-  requestInterceptor: (res: InternalAxiosRequestConfig) => InternalAxiosRequestConfig | Promise<InternalAxiosRequestConfig>;
-  requestInterceptorErr?: (error: any) => any
+  requestInterceptor: (
+    res: InternalAxiosRequestConfig
+  ) => InternalAxiosRequestConfig | Promise<InternalAxiosRequestConfig>;
+  requestInterceptorErr?: (error: any) => any;
   responseInterceptor: (res: AxiosResponse) => AxiosResponse;
-  responseInterceptorErr?: (error: any) => any
+  responseInterceptorErr?: (error: any) => any;
 }
 
 export interface ApiType {
@@ -32,18 +37,24 @@ export default class Api {
     // 配置请求拦截器
     this.instance.interceptors.request.use(
       this.interceptor.requestInterceptor,
-      this.interceptor?.requestInterceptorErr,
+      this.interceptor?.requestInterceptorErr
     );
     // 配置响应拦截器
     this.instance.interceptors.response.use(
       this.interceptor.responseInterceptor,
-      this.interceptor?.responseInterceptorErr,
+      this.interceptor?.responseInterceptorErr
     );
   }
 
   // 加入泛型限定，返回数据类型为T，请求的数据类型为R
-  async request<T, R = any>(config: AxiosRequestConfig<R>): Promise<ResponseDataType<T>> {
-    const res = await this.instance.request<ResponseDataType<T>, AxiosResponse<ResponseDataType<T>>, R>(config);
+  async request<T, R = any>(
+    config: AxiosRequestConfig<R>
+  ): Promise<ResponseDataType<T>> {
+    const res = await this.instance.request<
+      ResponseDataType<T>,
+      AxiosResponse<ResponseDataType<T>>,
+      R
+    >(config);
     return res.data;
   }
 }
