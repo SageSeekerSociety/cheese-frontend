@@ -1,10 +1,5 @@
 module.exports = {
-  extends: [
-    'stylelint-config-standard-scss',
-    'stylelint-config-standard-vue/scss',
-    'stylelint-prettier/recommended',
-    'stylelint-config-prettier',
-  ],
+  extends: ['stylelint-config-standard-scss', 'stylelint-config-standard-vue/scss', 'stylelint-prettier/recommended'],
   plugins: ['stylelint-order', 'stylelint-prettier'],
   rules: {
     'order/properties-order': [
