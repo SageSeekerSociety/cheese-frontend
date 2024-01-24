@@ -1,3 +1,3 @@
-import { AxiosError } from "axios";
+import { AxiosError } from 'axios'
 
-export default (err: AxiosError) => err;
+export default (err: AxiosError) => err

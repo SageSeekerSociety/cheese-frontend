@@ -1,23 +1,23 @@
 export default {
-  path: "/",
-  name: "Home",
-  component: () => import("@/layouts/home/Home.vue"),
+  path: '/',
+  name: 'Home',
+  component: () => import('@/layouts/home/Home.vue'),
   children: [
     {
-      path: "",
-      name: "HomeDefault",
-      component: () => import("@/views/home/Default.vue"),
+      path: '',
+      name: 'HomeDefault',
+      component: () => import('@/views/home/Default.vue'),
       meta: {
-        title: "首页",
+        title: '首页',
       },
     },
     {
-      path: "explore",
-      name: "HomeExplore",
-      component: () => import("@/views/home/Explore.vue"),
+      path: 'explore',
+      name: 'HomeExplore',
+      component: () => import('@/views/home/Explore.vue'),
       meta: {
-        title: "发现",
+        title: '发现',
       },
     },
   ],
-};
+}

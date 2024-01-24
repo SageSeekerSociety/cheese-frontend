@@ -1,3 +1,3 @@
-import { AxiosResponse } from "axios";
+import { AxiosResponse } from 'axios'
 
-export default (response: AxiosResponse) => response;
+export default (response: AxiosResponse) => response

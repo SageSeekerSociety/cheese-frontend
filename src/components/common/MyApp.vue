@@ -6,14 +6,14 @@
 </template>
 
 <script lang="ts" setup>
-import { VSonner } from "vuetify-sonner";
+import { VSonner } from 'vuetify-sonner'
 
 const props = withDefaults(
   defineProps<{
-    pageBackground?: boolean;
+    pageBackground?: boolean
   }>(),
   {
     pageBackground: true,
   }
-);
+)
 </script>

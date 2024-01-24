@@ -1,11 +1,6 @@
-import Api, { ApiType } from "..";
-import { API_BASE_URL } from "../utils";
-import {
-  responseInterceptor,
-  requestInterceptorErr,
-  requestInterceptor,
-  responseInterceptorErr,
-} from "../Interceptors";
+import Api, { ApiType } from '..'
+import { API_BASE_URL } from '../utils'
+import { responseInterceptor, requestInterceptorErr, requestInterceptor, responseInterceptorErr } from '../Interceptors'
 
 const option: ApiType = {
   cfg: {
@@ -18,6 +13,6 @@ const option: ApiType = {
     requestInterceptor,
     responseInterceptorErr,
   },
-};
+}
 
-export default new Api(option);
+export default new Api(option)

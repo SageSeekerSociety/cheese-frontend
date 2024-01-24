@@ -3,19 +3,19 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed } from 'vue'
 
 const { hasAvatar, avatar, size } = withDefaults(
   defineProps<{
-    hasAvatar: boolean;
-    avatar: string;
-    size: string | number | undefined;
+    hasAvatar: boolean
+    avatar: string
+    size: string | number | undefined
   }>(),
   {
     hasAvatar: () => false,
-    avatar: () => "",
+    avatar: () => '',
   }
-);
+)
 
 const props = computed(() =>
   hasAvatar
@@ -23,7 +23,7 @@ const props = computed(() =>
         image: avatar,
       }
     : {
-        icon: "mdi-account",
+        icon: 'mdi-account',
       }
-);
+)
 </script>

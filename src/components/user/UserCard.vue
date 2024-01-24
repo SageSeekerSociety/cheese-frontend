@@ -2,12 +2,12 @@
   <v-container class="pb-0">
     <v-sheet class="profile-background-base" height="40vh" rounded="lg">
       <v-img
+        id="header-img"
         class="rounded-t-lg"
         height="65%"
         aspect-ratio="16/9"
         cover
         :src="props.userData.userHeaderImg"
-        id="header-img"
       />
       <v-container class="cut-align-center">
         <v-avatar class="rounded-avatar" color="white" size="180" rounded="lg">
@@ -40,6 +40,14 @@
     </v-sheet>
   </v-container>
 </template>
+
+<script lang="ts" setup>
+import { UserProps } from './types'
+
+const props = withDefaults(defineProps<UserProps>(), {
+  userData: () => ({}),
+})
+</script>
 
 <style scoped>
 .profile-background-base {
@@ -75,11 +83,3 @@
   justify-content: center;
 }
 </style>
-
-<script lang="ts" setup>
-import { UserProps } from "./types";
-
-const props = withDefaults(defineProps<UserProps>(), {
-  userData: () => ({}),
-});
-</script>

@@ -6,9 +6,7 @@
         <v-col cols="12" md="4">
           <h1 class="text-h3 font-weight-bold text-center">知是</h1>
 
-          <div class="text-subtitle-1 font-weight-light mb-1 text-center">
-            每个声音都值得被听见
-          </div>
+          <div class="text-subtitle-1 font-weight-light mb-1 text-center">每个声音都值得被听见</div>
         </v-col>
 
         <v-col cols="12" md="8">
@@ -30,24 +28,21 @@
       <span class="mr-1">|</span>
       <span class="mr-1"
         >Made with <v-icon color="red">mdi-heart</v-icon> by
-        <a href="https://github.com/SageSeekerSociety" target="_blank"
-          >SageSeekerSociety</a
-        ></span
+        <a href="https://github.com/SageSeekerSociety" target="_blank">SageSeekerSociety</a></span
       >
     </div>
   </v-footer>
 </template>
 
 <script lang="ts" setup>
-import MyApp from "@/components/common/MyApp.vue";
-import { ref } from "vue";
+import { ref } from 'vue'
 const defaults = ref({
   VCard: {
     flat: true,
-    rounded: "lg",
+    rounded: 'lg',
   },
   VTextField: {
-    variant: "underlined",
+    variant: 'underlined',
   },
-});
+})
 </script>

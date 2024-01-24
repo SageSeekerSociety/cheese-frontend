@@ -35,6 +35,14 @@
   </v-container>
 </template>
 
+<script lang="ts" setup>
+import { GroupProps } from './types'
+
+const props = withDefaults(defineProps<GroupProps>(), {
+  groupData: (props) => props.groupData,
+})
+</script>
+
 <style scoped>
 .profile-background-base {
   position: relative;
@@ -69,11 +77,3 @@
   justify-content: center;
 }
 </style>
-
-<script lang="ts" setup>
-import { GroupProps } from "./types";
-
-const props = withDefaults(defineProps<GroupProps>(), {
-  groupData: (props) => props.groupData,
-});
-</script>

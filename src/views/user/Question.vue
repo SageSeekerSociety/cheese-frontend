@@ -1,9 +1,7 @@
 <template>
-  <v-card flat v-for="item in fakeData" :key="item.title" class="pt-1">
+  <v-card v-for="item in fakeData" :key="item.title" flat class="pt-1">
     <v-card-title
-      ><span class="text-h6 font-weight-bold">{{
-        item.title
-      }}</span></v-card-title
+      ><span class="text-h6 font-weight-bold">{{ item.title }}</span></v-card-title
     >
     <v-card-subtitle>{{ item.data }}</v-card-subtitle>
     <v-card-actions>
@@ -25,12 +23,12 @@
 <script setup lang="ts">
 const fakeData = [
   {
-    title: "数据结构选择数组还是链表？",
-    data: "2021-07-01",
+    title: '数据结构选择数组还是链表？',
+    data: '2021-07-01',
   },
   {
-    title: "程序有 Bug 但是调不出来怎么办？",
-    data: "1926-08-17",
+    title: '程序有 Bug 但是调不出来怎么办？',
+    data: '1926-08-17',
   },
-];
+]
 </script>

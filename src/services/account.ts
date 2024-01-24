@@ -1,62 +1,62 @@
-import { User } from "@/types/users";
-import { ref } from "vue";
+import { User } from '@/types/users'
+import { ref } from 'vue'
 
 export class AccountService {
-  _loggedIn = ref(false);
-  _user = ref<User | null>(null);
-  _accessToken: string | null = null;
+  _loggedIn = ref(false)
+  _user = ref<User | null>(null)
+  _accessToken: string | null = null
 
   public get loggedIn() {
-    return this._loggedIn.value;
+    return this._loggedIn.value
   }
 
   public set loggedIn(value) {
-    this._loggedIn.value = value;
+    this._loggedIn.value = value
   }
 
   public get user() {
-    return this._user.value;
+    return this._user.value
   }
 
   public set user(value) {
-    this._user.value = value;
+    this._user.value = value
   }
 
   public get accessToken() {
-    return this._accessToken;
+    return this._accessToken
   }
 
   public set accessToken(value) {
-    this._accessToken = value;
+    this._accessToken = value
   }
 
   public init() {
-    const accessToken = localStorage.getItem("accessToken");
-    const user = localStorage.getItem("user");
+    const accessToken = localStorage.getItem('accessToken')
+    const user = localStorage.getItem('user')
     if (accessToken && user) {
-      this.accessToken = accessToken;
-      this.user = JSON.parse(user);
-      this.loggedIn = true;
+      this.accessToken = accessToken
+      this.user = JSON.parse(user)
+      this.loggedIn = true
     }
   }
 
   public async login(accessToken: string, user: User) {
-    this.loggedIn = true;
-    this.user = user;
-    this.accessToken = accessToken;
-    localStorage.setItem("accessToken", accessToken);
-    localStorage.setItem("user", JSON.stringify(user));
+    this.loggedIn = true
+    this.user = user
+    this.accessToken = accessToken
+    localStorage.setItem('accessToken', accessToken)
+    localStorage.setItem('user', JSON.stringify(user))
   }
 
   public async logout() {
-    this.loggedIn = false;
-    this.user = null;
-    this._accessToken = null;
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("user");
+    this.loggedIn = false
+    this.user = null
+    this._accessToken = null
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('user')
   }
 }
 
-const accountService = new AccountService();
+const accountService = new AccountService()
 
-export default accountService;
+export default accountService

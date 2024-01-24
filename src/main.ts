@@ -5,35 +5,35 @@
  */
 
 // Components
-import App from "./App.vue";
+import App from './App.vue'
 
 // Composables
-import { createApp } from "vue";
+import { createApp } from 'vue'
 
 // Plugins
-import { registerPlugins } from "@/plugins";
-import i18next from "i18next";
-import { z } from "zod";
-import { zodI18nMap } from "zod-i18n-map";
+import { registerPlugins } from '@/plugins'
+import i18next from 'i18next'
+import { z } from 'zod'
+import { zodI18nMap } from 'zod-i18n-map'
 // Import your language translation files
-import translation from "zod-i18n-map/locales/zh-CN/zod.json";
-import AccountService from "@/services/account";
+import translation from 'zod-i18n-map/locales/zh-CN/zod.json'
+import AccountService from '@/services/account'
 
-AccountService.init();
+AccountService.init()
 
-const app = createApp(App);
+const app = createApp(App)
 
-registerPlugins(app);
+registerPlugins(app)
 
-app.mount("#app");
+app.mount('#app')
 
 // Initialize i18next
 i18next.init({
-  lng: "zh-CN",
+  lng: 'zh-CN',
   resources: {
-    "zh-CN": {
+    'zh-CN': {
       zod: translation,
     },
   },
-});
-z.setErrorMap(zodI18nMap);
+})
+z.setErrorMap(zodI18nMap)
