@@ -1,5 +1,4 @@
 <template>
-  <my-app>
     <v-main>
       <v-container class="align-center fill-height">
         <v-row align="center">
@@ -31,7 +30,6 @@
             href="https://github.com/SageSeekerSociety" target="_blank">SageSeekerSociety</a></span>
       </div>
     </v-footer>
-  </my-app>
 </template>
 
 <script lang="ts" setup>

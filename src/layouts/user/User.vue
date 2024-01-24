@@ -1,33 +1,31 @@
 <template>
-    <my-app>
-        <app-bar :links="links" />
-        <v-main class="bg-grey-lighten-3">
-            <user-card :userData="fakeUserData" />
-            <v-container class="d-flex row">
-                <v-row>
-                    <v-col class="pr-0">
-                        <v-sheet rounded="lg">
-                            <v-tabs v-model="selectedTab">
-                                <v-tab v-for="tab in tabs" :key="tab.label" :to="tab.route" exact>
-                                    {{ tab.label }}
-                                </v-tab>
-                            </v-tabs>
-                            <router-view />
-                        </v-sheet>
-                    </v-col>
-                    <v-col cols="3">
-                        <v-sheet rounded="lg">
-                            <v-list rounded="lg">
-                                <v-list-item v-for="n in 5" :key="n" link :title="`List Item ${n}`"></v-list-item>
-                                <v-divider class="my-2"></v-divider>
-                                <v-list-item color="grey-lighten-4" link title="Refresh"></v-list-item>
-                            </v-list>
-                        </v-sheet>
-                    </v-col>
-                </v-row>
-            </v-container>
-        </v-main>
-    </my-app>
+    <app-bar :links="links" />
+    <v-main class="bg-grey-lighten-3">
+        <user-card :userData="fakeUserData" />
+        <v-container class="d-flex row">
+            <v-row>
+                <v-col class="pr-0">
+                    <v-sheet rounded="lg">
+                        <v-tabs v-model="selectedTab">
+                            <v-tab v-for="tab in tabs" :key="tab.label" :to="tab.route" exact>
+                                {{ tab.label }}
+                            </v-tab>
+                        </v-tabs>
+                        <router-view />
+                    </v-sheet>
+                </v-col>
+                <v-col cols="3">
+                    <v-sheet rounded="lg">
+                        <v-list rounded="lg">
+                            <v-list-item v-for="n in 5" :key="n" link :title="`List Item ${n}`"></v-list-item>
+                            <v-divider class="my-2"></v-divider>
+                            <v-list-item color="grey-lighten-4" link title="Refresh"></v-list-item>
+                        </v-list>
+                    </v-sheet>
+                </v-col>
+            </v-row>
+        </v-container>
+    </v-main>
 </template>
 
 <script lang="ts" setup>

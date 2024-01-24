@@ -1,11 +1,9 @@
 <template>
-  <my-app>
     <app-bar :links="links" />
 
     <v-main>
       <router-view />
     </v-main>
-  </my-app>
 </template>
   
 <script lang="ts" setup>
