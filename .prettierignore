@@ -1,0 +1,4 @@
+node_modules/*
+dist/*
+asset/*
+*.d.ts

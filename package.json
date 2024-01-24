@@ -6,8 +6,12 @@
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
-    "lint": "eslint . --fix --ignore-path .gitignore",
-    "test": "vitest"
+    "lint": "eslint . --fix",
+    "lint:css": "stylelint **/*.{vue,css,sass,scss} --fix",
+    "prettier": "prettier --write \"**/*.{vue,js,jsx,ts,tsx}\"",
+    "test": "vitest",
+    "postinstall": "husky install",
+    "commitlint": "commitlint --edit"
   },
   "dependencies": {
     "@mdi/font": "7.0.96",
@@ -26,16 +30,29 @@
   },
   "devDependencies": {
     "@babel/types": "^7.23.6",
+    "@commitlint/cli": "^18.5.0",
+    "@commitlint/config-conventional": "^18.5.0",
     "@testing-library/vue": "^8.0.1",
     "@types/node": "^18.19.8",
+    "@typescript-eslint/parser": "^6.19.1",
     "@vitejs/plugin-vue": "^4.6.2",
     "@vue/eslint-config-typescript": "^11.0.3",
     "cz-conventional-changelog": "^3.3.0",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
     "eslint-plugin-vue": "^9.20.1",
     "happy-dom": "^13.2.1",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.0",
     "prettier": "3.2.4",
+    "stylelint": "^16.2.0",
+    "stylelint-config-prettier": "^9.0.5",
+    "stylelint-config-standard": "^36.0.0",
+    "stylelint-config-standard-scss": "^13.0.0",
+    "stylelint-config-standard-vue": "^1.0.0",
+    "stylelint-order": "^6.0.4",
+    "stylelint-prettier": "^5.0.0",
     "typescript": "^5.3.3",
     "unplugin-fonts": "^1.1.1",
     "vite": "^5.0.12",
@@ -47,6 +64,13 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "lint-staged": {
+    "*.{js,vue,jsx,tsx}": [
+      "pnpm lint",
+      "prettier --write",
+      "eslint --cache --fix"
+    ]
   },
   "packageManager": "pnpm@8.11.0"
 }
