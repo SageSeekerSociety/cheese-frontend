@@ -35,6 +35,7 @@ import { z } from 'zod'
 import { ServerError } from '@/network/types/error'
 import AccountService from '@/services/account'
 import { useRouter } from 'vue-router'
+import { vuetifyConfig } from '@/utils/form'
 
 const router = useRouter()
 
@@ -48,12 +49,6 @@ const { handleSubmit, defineField, isSubmitting } = useForm({
       })
     })
   )
-})
-
-const vuetifyConfig = (state: { errors: any; }) => ({
-  props: {
-    'error-messages': state.errors,
-  },
 })
 
 const [username, usernameProps] = defineField('username', vuetifyConfig)

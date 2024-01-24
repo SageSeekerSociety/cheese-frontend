@@ -21,6 +21,7 @@ import { z } from 'zod';
 import { useSignupStore } from '@/store/signup';
 import { toast } from 'vuetify-sonner';
 import AccountService from '@/services/account';
+import { vuetifyConfig } from '@/utils/form';
 
 const signupStore = useSignupStore();
 
@@ -32,12 +33,6 @@ const { handleSubmit, defineField, isSubmitting } = useForm({
   )
 });
 
-const vuetifyConfig = (state: { errors: any; }) => ({
-  props: {
-    'error-messages': state.errors,
-    error: !!state.errors.length,
-  },
-});
 const [otp, otpProps] = defineField('otp', vuetifyConfig);
 const submit = handleSubmit(async ({ otp }) => {
   const res = await signupStore.signup(otp);

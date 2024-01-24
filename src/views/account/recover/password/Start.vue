@@ -26,6 +26,7 @@ import { toast } from 'vuetify-sonner';
 import { ref } from 'vue';
 import { ServerError } from '@/network/types/error';
 import { UserApi } from '@/network/api/user';
+import { vuetifyConfig } from '@/utils/form';
 
 const myAlert = ref<{
   message: string | undefined;
@@ -41,12 +42,6 @@ const { handleSubmit, defineField, isSubmitting } = useForm({
       email: z.string().email(),
     }),
   ),
-});
-
-const vuetifyConfig = (state: { errors: any; }) => ({
-  props: {
-    'error-messages': state.errors,
-  },
 });
 
 const [email, emailProps] = defineField('email', vuetifyConfig);

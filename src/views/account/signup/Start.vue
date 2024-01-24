@@ -41,19 +41,20 @@ import { z } from 'zod';
 import { useRouter } from 'vue-router';
 import { toast } from 'vuetify-sonner';
 import { ref } from 'vue';
-import { ServerError } from '@/network/types/error'
+import { ServerError } from '@/network/types/error';
+import { REGEX_PASSWORD, vuetifyConfig } from '@/utils/form';
 
 const error = ref('');
 
 const { handleSubmit, defineField, isSubmitting } = useForm({
   validationSchema: toTypedSchema(
     z.object({
-      username: z.string().min(4).max(16).regex(/^[a-zA-Z0-9_]{4,16}$/, { message: '用户名只能使用英文字母、数字、下划线' }),
-      nickname: z.string().min(2).max(16).regex(/^[a-zA-Z0-9_\u4e00-\u9fa5]{2,16}$/, { message: '昵称只能使用英文字母、数字、下划线、中文' }),
+      username: z.string().min(4).max(32).regex(/^[a-zA-Z0-9_-]{4,32}$/, { message: '用户名只能使用英文字母、数字、下划线' }),
+      nickname: z.string().min(1).max(16).regex(/^[a-zA-Z0-9_\u4e00-\u9fa5]{1,16}$/, { message: '昵称只能使用英文字母、数字、下划线、中文' }),
       // eslint-disable-next-line no-control-regex
-      password: z.string().min(8).regex(/^(?=.*[a-zA-Z])(?=.*\d)(?=.*[\x00-\x2F\x3A-\x40\x5B-\x60\x7B-\x7F]).{8,}$/, { message: '密码必须包含字母、数字、特殊字符' }),
+      password: z.string().min(8).regex(REGEX_PASSWORD, { message: '密码必须包含字母、数字、特殊字符' }),
       // eslint-disable-next-line no-control-regex
-      confirmPassword: z.string().min(8).regex(/^(?=.*[a-zA-Z])(?=.*\d)(?=.*[\x00-\x2F\x3A-\x40\x5B-\x60\x7B-\x7F]).{8,}$/, { message: '密码必须包含字母、数字、特殊字符' }),
+      confirmPassword: z.string().min(8).regex(REGEX_PASSWORD, { message: '密码必须包含字母、数字、特殊字符' }),
       email: z.string().email(),
       agree: z.boolean().refine((v) => v, { message: '请同意用户协议和隐私政策' }),
     }).superRefine(({ password, confirmPassword }, ctx) => {
@@ -66,12 +67,6 @@ const { handleSubmit, defineField, isSubmitting } = useForm({
       }
     }),
   ),
-});
-
-const vuetifyConfig = (state: { errors: any; }) => ({
-  props: {
-    'error-messages': state.errors,
-  },
 });
 
 const [username, usernameProps] = defineField('username', vuetifyConfig);
