@@ -38,7 +38,7 @@ export namespace UserApi {
       data: { email },
     });
 
-  export const refreshAccessToken = () => 
+  export const refreshAccessToken = () =>
     ApiInstance.request<{ accessToken: string }>({
       url: "/users/auth/refresh-token",
       method: "POST",
@@ -50,5 +50,18 @@ export namespace UserApi {
       url: "/users/recover/password/request",
       method: "POST",
       data: { email },
+    });
+
+  export const recoverPasswordVerify = (data: {
+    token: string;
+    newPassword: string;
+  }) =>
+    ApiInstance.request({
+      url: "/users/recover/password/verify",
+      method: "POST",
+      data: {
+        token: data.token,
+        new_password: data.newPassword,
+      },
     });
 }

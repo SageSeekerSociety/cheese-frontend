@@ -1,27 +1,39 @@
 export default {
-    path: '/account',
-    name: 'Account',
-    component: () => import('@/layouts/account/Account.vue'),
-    children: [
-        {
-            path: 'signin',
-            name: 'SignIn',
-            component: () => import('@/views/account/SignIn.vue'),
-        },
-        {
-            path: 'signup',
-            name: 'SignUpStart',
-            component: () => import('@/views/account/signup/Start.vue'),
-        },
-        {
-            path: 'signup/verify-email',
-            name: 'SignUpVerifyEmail',
-            component: () => import('@/views/account/signup/VerifyEmail.vue'),
-        },
-        {
-            path: 'recover/password',
-            name: 'RecoverPasswordRequest',
-            component: () => import('@/views/account/recover/password/Start.vue'),
-        },
-    ],
-}
+  path: "/account",
+  name: "Account",
+  component: () => import("@/layouts/account/Account.vue"),
+  children: [
+    {
+      path: "signin",
+      name: "SignIn",
+      component: () => import("@/views/account/SignIn.vue"),
+    },
+    {
+      path: "signup",
+      name: "SignUpStart",
+      component: () => import("@/views/account/signup/Start.vue"),
+    },
+    {
+      path: "signup/verify-email",
+      name: "SignUpVerifyEmail",
+      component: () => import("@/views/account/signup/VerifyEmail.vue"),
+    },
+    {
+      path: "recover/password",
+      name: "RecoverPasswordRequest",
+      component: () => import("@/views/account/recover/password/Start.vue"),
+    },
+    {
+      path: "recover/password/verify",
+      name: "RecoverPasswordVerify",
+      component: () => import("@/views/account/recover/password/Verify.vue"),
+      beforeEnter: (to: any, from: any, next: any) => {
+        if (!to.query.token) {
+          next({ name: "RecoverPasswordRequest" });
+        } else {
+          next();
+        }
+      },
+    },
+  ],
+};
