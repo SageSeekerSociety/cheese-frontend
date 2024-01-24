@@ -4,7 +4,7 @@
       <v-col>
         <v-sheet min-height="70vh" rounded="lg" class="py-1 px-1">
           <v-card flat v-for="item in fakeGroups" :key="item.title">
-            <router-link :to="`/team/${item.id}`" class="custom-link">
+            <router-link :to="`/group/${item.id}`" class="custom-link">
               <v-card-title>
                 <div class="d-flex justify-space-between align-center">
                   <div>

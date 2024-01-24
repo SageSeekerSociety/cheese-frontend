@@ -11,22 +11,22 @@
       <v-container class="cut-align-center">
         <v-avatar class="rounded-avatar" color="white" size="180" rounded="lg">
           <!-- Your avatar content goes here -->
-          <v-img v-if="props.teamData" :src="props.teamData.teamAvatar" />
+          <v-img v-if="props.groupData" :src="props.groupData.groupAvatar" />
         </v-avatar>
         <v-container class="info-wrapper">
           <div class="info-bar-upper">
             <span class="text-h4 font-weight-bold me-4">
-              {{ props.teamData.teamName }}
+              {{ props.groupData.groupName }}
             </span>
           </div>
           <div class="info-bar-lower">
             <span>
               <v-icon left>mdi-account</v-icon>
-              {{ props.teamData.teamAdmin }}
+              {{ props.groupData.groupAdmin }}
             </span>
             <span>
               <v-icon left>mdi-format-quote-open</v-icon>
-              {{ props.teamData.teamDesc }}
+              {{ props.groupData.groupDesc }}
             </span>
           </div>
         </v-container>
@@ -71,9 +71,9 @@
 </style>
 
 <script lang="ts" setup>
-import { TeamProps } from "./types";
+import { GroupProps } from "./types";
 
-const props = withDefaults(defineProps<TeamProps>(), {
-  teamData: (props) => props.teamData,
+const props = withDefaults(defineProps<GroupProps>(), {
+  groupData: (props) => props.groupData,
 });
 </script>

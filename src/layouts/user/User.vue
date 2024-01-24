@@ -49,7 +49,7 @@ const links = [
     {
         key: "Group",
         title: "圈子",
-        path: "/team",
+        path: "/group",
     },
 ]
 
