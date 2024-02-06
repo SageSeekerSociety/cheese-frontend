@@ -73,7 +73,7 @@ export namespace UserApi {
       method: 'GET',
     })
 
-  export const getUserFollower = (userid: number, data: { pageStart: number; pageSize: number; }) =>
+  export const getUserFollower = (userid: number, data: { pageStart: number; pageSize: number }) =>
     ApiInstance.request<UserList>({
       // url: `https://stoplight.io/mocks/huanchengstudio/cheese/2398548/users/${userid}/followers`,
       url: `/users/${userid}/followers`,
@@ -84,7 +84,7 @@ export namespace UserApi {
       },
     })
 
-  export const getUserFollowing = (userid: number, data: { pageStart: number; pageSize: number; }) =>
+  export const getUserFollowing = (userid: number, data: { pageStart: number; pageSize: number }) =>
     ApiInstance.request<UserList>({
       // url: `https://stoplight.io/mocks/huanchengstudio/cheese/2398548/users/${userid}/follow/users`,
       url: `/users/${userid}/follow/users`,
@@ -95,7 +95,7 @@ export namespace UserApi {
       },
     })
 
-  export const getQuestionList = (userid: number, data: { pageStart: number; pageSize: number; }) =>
+  export const getQuestionList = (userid: number, data: { pageStart: number; pageSize: number }) =>
     ApiInstance.request<QuestionList>({
       // url: `https://stoplight.io/mocks/huanchengstudio/cheese/2398548/users/${userid}/questions`,
       url: `/users/${userid}/questions`,
@@ -106,7 +106,7 @@ export namespace UserApi {
       },
     })
 
-  export const getAnswerList = (userid: number, data: { pageStart: number; pageSize: number; }) =>
+  export const getAnswerList = (userid: number, data: { pageStart: number; pageSize: number }) =>
     ApiInstance.request<AnswerList>({
       // url: `https://stoplight.io/mocks/huanchengstudio/cheese/2398548/users/${userid}/answers`,
       url: `/users/${userid}/answers`,

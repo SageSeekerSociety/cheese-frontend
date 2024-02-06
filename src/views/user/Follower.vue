@@ -1,6 +1,6 @@
 <template>
   <v-card flat class="pt-2 pb-2 rounded-lg mx-auto pl-5 pr-5">
-    <roaster v-if="loaded" :users="userList.users" />
+    <roster v-if="loaded" :users="userList.users" />
   </v-card>
 </template>
 
@@ -8,7 +8,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { UserApi } from '@/network/api/user'
 import { useRoute } from 'vue-router'
-import Roaster from '@/components/user/Roaster.vue'
+import Roster from '@/components/user/Roster.vue'
 import { UserList } from '@/types/userlist'
 
 const route = useRoute()
