@@ -1,6 +1,6 @@
-import { User } from './users';
-import { Page } from './page';
+import { User } from './users'
+import { Page } from './page'
 export type UserList = {
-    users: User[],
-    page: Page
+  users: User[]
+  page: Page
 }
