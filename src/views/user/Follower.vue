@@ -32,4 +32,3 @@ function fetchData() {
   return result
 }
 </script>
-@/types/userlist

@@ -19,8 +19,8 @@
             <v-spacer />
             <v-col class="text-right">
               <v-btn color="primary" variant="flat">
-                <v-icon left>mdi-cog</v-icon>
-                编辑资料
+                <v-icon left>mdi-plus</v-icon>
+                关注
               </v-btn>
             </v-col>
           </v-row>
