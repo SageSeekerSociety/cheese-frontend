@@ -68,15 +68,15 @@ export namespace UserApi {
 
   export const getUserInfo = (userid: number) =>
     ApiInstance.request<User>({
-      // url: `https://stoplight.io/mocks/huanchengstudio/cheese/2398548/users/${userid}`,
-      url: `/users/${userid}`,
+      url: `https://stoplight.io/mocks/huanchengstudio/cheese/2398548/users/${userid}`,
+      // url: `/users/${userid}`,
       method: 'GET',
     })
 
   export const getUserFollower = (userid: number, data: { pageStart: number; pageSize: number }) =>
     ApiInstance.request<UserList>({
-      // url: `https://stoplight.io/mocks/huanchengstudio/cheese/2398548/users/${userid}/followers`,
-      url: `/users/${userid}/followers`,
+      url: `https://stoplight.io/mocks/huanchengstudio/cheese/2398548/users/${userid}/followers`,
+      // url: `/users/${userid}/followers`,
       method: 'GET',
       data: {
         pageStart: data.pageStart,
@@ -86,8 +86,8 @@ export namespace UserApi {
 
   export const getUserFollowing = (userid: number, data: { pageStart: number; pageSize: number }) =>
     ApiInstance.request<UserList>({
-      // url: `https://stoplight.io/mocks/huanchengstudio/cheese/2398548/users/${userid}/follow/users`,
-      url: `/users/${userid}/follow/users`,
+      url: `https://stoplight.io/mocks/huanchengstudio/cheese/2398548/users/${userid}/follow/users`,
+      // url: `/users/${userid}/follow/users`,
       method: 'GET',
       data: {
         pageStart: data.pageStart,
@@ -97,8 +97,8 @@ export namespace UserApi {
 
   export const getQuestionList = (userid: number, data: { pageStart: number; pageSize: number }) =>
     ApiInstance.request<QuestionList>({
-      // url: `https://stoplight.io/mocks/huanchengstudio/cheese/2398548/users/${userid}/questions`,
-      url: `/users/${userid}/questions`,
+      url: `https://stoplight.io/mocks/huanchengstudio/cheese/2398548/users/${userid}/questions`,
+      // url: `/users/${userid}/questions`,
       method: 'GET',
       data: {
         pageStart: data.pageStart,
@@ -108,8 +108,8 @@ export namespace UserApi {
 
   export const getAnswerList = (userid: number, data: { pageStart: number; pageSize: number }) =>
     ApiInstance.request<AnswerList>({
-      // url: `https://stoplight.io/mocks/huanchengstudio/cheese/2398548/users/${userid}/answers`,
-      url: `/users/${userid}/answers`,
+      url: `https://stoplight.io/mocks/huanchengstudio/cheese/2398548/users/${userid}/answers`,
+      // url: `/users/${userid}/answers`,
       method: 'GET',
       data: {
         pageStart: data.pageStart,
