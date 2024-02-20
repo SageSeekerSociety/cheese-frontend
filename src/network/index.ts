@@ -1,6 +1,7 @@
 // 引入axios以及一些类型
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import { ResponseDataType } from './types'
+import { isAxiosResponse } from './utils'
 
 export interface Interceptor {
   requestInterceptor: (
@@ -41,6 +42,9 @@ export default class Api {
   // 加入泛型限定，返回数据类型为T，请求的数据类型为R
   async request<T, R = any>(config: AxiosRequestConfig<R>): Promise<ResponseDataType<T>> {
     const res = await this.instance.request<ResponseDataType<T>, AxiosResponse<ResponseDataType<T>>, R>(config)
-    return res.data
+    if (isAxiosResponse(res)) {
+      return res.data
+    }
+    return res
   }
 }
