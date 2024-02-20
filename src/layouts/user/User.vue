@@ -42,12 +42,12 @@ const links = [
   {
     key: 'Question',
     title: '问答',
-    path: '/question',
+    path: '/questions',
   },
   {
     key: 'Group',
     title: '圈子',
-    path: '/group',
+    path: '/groups',
   },
 ]
 
