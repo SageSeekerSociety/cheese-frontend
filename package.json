@@ -54,7 +54,8 @@
   "devDependencies": {
     "@babel/types": "^7.23.9",
     "@commitlint/cli": "^18.6.1",
-    "@commitlint/config-conventional": "^18.6.1",
+    "@commitlint/config-conventional": "18.6.0",
+    "@commitlint/types": "^18.6.1",
     "@testing-library/vue": "^8.0.2",
     "@types/node": "^18.19.15",
     "@typescript-eslint/parser": "^6.21.0",
