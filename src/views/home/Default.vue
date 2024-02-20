@@ -37,7 +37,9 @@
         </v-sheet>
       </v-col>
       <v-col cols="3">
-        <v-btn color="primary" variant="flat" class="mb-4" block rounded="lg"> 提问 </v-btn>
+        <v-btn color="primary" variant="flat" class="mb-4" block rounded="lg" :to="{ name: 'QuestionAsk' }">
+          提问
+        </v-btn>
         <v-sheet rounded="lg">
           <v-list rounded="lg">
             <v-list-item title="我的收藏">
