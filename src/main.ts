@@ -4,6 +4,10 @@
  * Bootstraps Vuetify and other plugins then mounts the App`
  */
 
+import 'editorjs-latex/dist/editorjs-latex.bundle.css'
+import 'katex/dist/katex.min.css'
+import '@/styles/content.scss'
+
 // Components
 import App from './App.vue'
 
