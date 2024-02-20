@@ -1,0 +1,53 @@
+.cdx-nested-list {
+  margin: 0;
+  padding: 0;
+  outline: none;
+  counter-reset: item;
+  list-style: none
+}
+
+.cdx-nested-list__item {
+  line-height: 1.6em;
+  display: flex;
+  margin: 2px 0
+}
+
+.cdx-nested-list__item [contenteditable] {
+  outline: none
+}
+
+.cdx-nested-list__item-body {
+  flex-grow: 2
+}
+
+.cdx-nested-list__item-content,
+.cdx-nested-list__item-children {
+  flex-basis: 100%
+}
+
+.cdx-nested-list__item-content {
+  word-break: break-word;
+  white-space: pre-wrap
+}
+
+.cdx-nested-list__item:before {
+  counter-increment: item;
+  margin-right: 5px;
+  white-space: nowrap
+}
+
+.cdx-nested-list--ordered>.cdx-nested-list__item:before {
+  content: counters(item, ".") ". "
+}
+
+.cdx-nested-list--unordered>.cdx-nested-list__item:before {
+  content: "•"
+}
+
+.cdx-nested-list__settings {
+  display: flex
+}
+
+.cdx-nested-list__settings .cdx-settings-button {
+  width: 50%
+}
