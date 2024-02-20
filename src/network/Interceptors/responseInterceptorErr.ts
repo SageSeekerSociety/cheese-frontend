@@ -21,6 +21,7 @@ export default (error: AxiosError<ResponseDataType>) => {
         return handleError(error)
       }
       // 一些操作，例如：刷新令牌，如令牌刷新失败时退出到登录页面
+      console.log('401 token expired')
       return refreshToken(error)
     case 403:
       return forbidden()
