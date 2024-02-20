@@ -6,12 +6,12 @@ import { QuestionList } from '@/types/questionlist'
 import { AnswerList } from '@/types/answerlist'
 
 export namespace UserApi {
-  export interface LoginResponseDataType {
+  export interface AuthResponseDataType {
     user: User
     accessToken: string
   }
 
-  export type RegisterResponseDataType = LoginResponseDataType
+  export type RegisterResponseDataType = AuthResponseDataType
 
   export const register = (data: {
     username: string
@@ -28,7 +28,7 @@ export namespace UserApi {
     })
 
   export const login = (data: { username: string; password: string }) =>
-    ApiInstance.request<LoginResponseDataType>({
+    ApiInstance.request<AuthResponseDataType>({
       url: '/users/auth/login',
       method: 'POST',
       data,
@@ -43,7 +43,7 @@ export namespace UserApi {
     })
 
   export const refreshAccessToken = () =>
-    ApiInstance.request<{ accessToken: string }>({
+    ApiInstance.request<AuthResponseDataType>({
       url: '/users/auth/refresh-token',
       method: 'POST',
       withCredentials: true,
