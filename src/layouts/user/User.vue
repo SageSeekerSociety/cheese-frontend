@@ -93,7 +93,7 @@ import { ref, onMounted, watch, computed } from 'vue'
 import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
 import { useRoute } from 'vue-router'
-import { UserApi } from '@/network/api/user'
+import { UserApi } from '@/network/api/users'
 import { ImageApi } from '@/network/api/image'
 import { User } from '@/types/users'
 import { useForm } from 'vee-validate'
@@ -112,12 +112,6 @@ const isActiveUser = computed(() => {
   return () => parseInt(route.params.id[0]) === AccountService._user.value?.id
 })
 
-onMounted(async () => {
-  const { data } = await fetchData()
-  userData.value = data
-  loaded.value = true
-})
-
 watch(
   // 切换用户时刷新
   () => route.params.id,
@@ -126,11 +120,7 @@ watch(
   }
 )
 
-const fetchData = async () => {
-  return await UserApi.getUserInfo(userID.value)
-}
-
-const { handleSubmit, defineField, handleReset } = useForm({
+const { handleSubmit, defineField, handleReset, resetForm } = useForm({
   validationSchema: toTypedSchema(
     z.object({
       nickname: z.string().min(4).max(16),
@@ -140,6 +130,22 @@ const { handleSubmit, defineField, handleReset } = useForm({
         .nonempty(),
     })
   ),
+})
+
+const fetchData = async () => {
+  return await UserApi.getUserInfo(userID.value)
+}
+
+onMounted(async () => {
+  const { data } = await fetchData()
+  userData.value = data
+  loaded.value = true
+  resetForm({
+    values: {
+      nickname: data.nickname,
+      intro: data.intro,
+    },
+  })
 })
 
 const [selectedNickname, nicknameProps] = defineField('nickname', vuetifyConfig)
@@ -231,3 +237,4 @@ const tabs = [
   },
 ]
 </script>
+@/network/api/users/user

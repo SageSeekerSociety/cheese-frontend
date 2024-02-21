@@ -1,5 +1,5 @@
-import { Question } from '@/types'
-import ApiInstance from './index'
+import { Question } from '@/types/question'
+import ApiInstance from '../index'
 
 export namespace QuestionApi {
   export type AskQuestionRequestData = {
@@ -14,6 +14,10 @@ export namespace QuestionApi {
     id: number
   }
 
+  export type QuestionDetailResponse = {
+    question: Question
+  }
+
   export const ask = (data: AskQuestionRequestData) =>
     ApiInstance.request<AskQuestionResponseData>({
       url: '/questions',
@@ -22,7 +26,7 @@ export namespace QuestionApi {
     })
 
   export const detail = (id: number) =>
-    ApiInstance.request<Question>({
+    ApiInstance.request<QuestionDetailResponse>({
       url: `/questions/${id}`,
       method: 'GET',
     })

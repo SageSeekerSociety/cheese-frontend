@@ -3,7 +3,7 @@
     <v-row>
       <v-col>
         <v-sheet min-height="70vh" rounded="lg" class="py-1 px-1">
-          <v-card v-for="item in groupList.groups" :key="item.id" flat>
+          <v-card v-for="item in groupList" :key="item.id" flat>
             <router-link :to="{ name: 'GroupDetail', params: { groupId: item.id } }" class="custom-link">
               <v-card-title>
                 <div class="d-flex justify-space-between align-center">
@@ -52,18 +52,16 @@
 
 <script setup lang="ts">
 import { GroupApi } from '@/network/api/group'
-import { GroupList } from '@/types/grouplist'
-import { on } from 'events'
-import { reactive } from 'vue'
-import { ref, onMounted, computed } from 'vue'
+import { Group } from '@/types/group'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
-const groupList = ref<GroupList>({} as GroupList)
+const groupList = ref<Group[]>([])
 const router = useRouter()
 
 onMounted(() => {
-  fetchAllGroupsData().then((result) => {
-    groupList.value = result.data
+  fetchAllGroupsData().then(({ data: { groups } }) => {
+    groupList.value = groups
   })
 })
 
@@ -72,7 +70,6 @@ function fetchAllGroupsData() {
     pageStart: 0,
     pageSize: 10,
   })
-  console.log(1)
   return result
 }
 
@@ -174,4 +171,3 @@ function createGroup() {
   color: #fff;
 }
 </style>
-@/network/api/group/group

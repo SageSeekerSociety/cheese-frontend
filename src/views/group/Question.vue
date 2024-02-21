@@ -1,6 +1,6 @@
 <template>
   <v-card v-if="loaded">
-    <v-card v-for="item in groupQuestionList.questions" :key="item.id" flat>
+    <v-card v-for="item in groupQuestionList" :key="item.id" flat>
       <v-card-title
         ><span class="text-h6 font-weight-bold">{{ item.title }}</span></v-card-title
       >
@@ -33,11 +33,11 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { QuestionList } from '@/types/questionlist'
 import { GroupApi } from '@/network/api/group'
 import { useRoute } from 'vue-router'
+import { Question } from '@/types/question'
 
-const groupQuestionList = ref<QuestionList>({} as QuestionList)
+const groupQuestionList = ref<Question[]>([])
 const route = useRoute()
 const groupId = computed(() => Number(route.params.groupId))
 const loaded = ref(false)
@@ -51,8 +51,8 @@ function fetchGroupQuestionList() {
 }
 
 onMounted(() => {
-  fetchGroupQuestionList().then((result) => {
-    groupQuestionList.value = result.data
+  fetchGroupQuestionList().then(({ data: { questions } }) => {
+    groupQuestionList.value = questions
     loaded.value = true
 
     // console.log('***')
@@ -80,4 +80,3 @@ onMounted(() => {
 //   ],
 // }
 </script>
-@/network/api/group/group

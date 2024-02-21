@@ -1,6 +1,7 @@
 import { User } from './users'
 import { Group } from './group'
 import { Topic } from './topic'
+
 export type Question = {
   id: number
   title: string
@@ -18,5 +19,5 @@ export type Question = {
   like_count: number
   view_count: number
   is_group: boolean
-  group: Group
+  group?: Group
 }

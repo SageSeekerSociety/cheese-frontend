@@ -3,7 +3,7 @@ import { ResponseDataType } from '../../types'
 import { Local } from '../../utils/storage'
 import ApiInstance from '../../api'
 import { messageFailed } from '../../utils/showMessage'
-import { UserApi } from '../../api/user'
+import { UserApi } from '../../api/users'
 import { useRouter } from 'vue-router'
 import AccountService from '@/services/account'
 

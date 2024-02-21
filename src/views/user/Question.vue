@@ -1,9 +1,9 @@
 <template>
-  <v-card v-for="item in QList.questions" :key="item.title" flat class="pt-2 pb-2 rounded-lg pl-2 pr-2">
+  <v-card v-for="item in questionList" :key="item.title" flat class="pt-2 pb-2 rounded-lg pl-2 pr-2">
     <v-card-title
       ><span class="text-h6 font-weight-bold">{{ item.title }}</span></v-card-title
     >
-    <v-card-subtitle>{{ item.contenet }}</v-card-subtitle>
+    <v-card-subtitle>{{ item.content }}</v-card-subtitle>
     <v-card-actions>
       <v-btn variant="plain" color="on-background">
         <v-icon size="18" class="me-2">mdi-message-text</v-icon>
@@ -22,18 +22,18 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { UserApi } from '@/network/api/user'
+import { UserApi } from '@/network/api/users'
 import { useRoute } from 'vue-router'
-import { QuestionList } from '@/types/questionlist'
+import { Question } from '@/types/question'
 
 const route = useRoute()
 const userID = computed(() => parseInt(route.params.id[0], 10))
-const QList = ref<QuestionList>({} as QuestionList)
+const questionList = ref<Question[]>([])
 const loaded = ref(false)
 
 onMounted(() => {
-  fetchData().then((result) => {
-    QList.value = result.data
+  fetchData().then(({ data: { questions } }) => {
+    questionList.value = questions
     loaded.value = true
   })
 })
