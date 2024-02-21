@@ -1,17 +1,17 @@
 <template>
-  <v-card v-for="item in fakeData" :key="item.title" flat class="pt-1">
+  <v-card v-for="item in QList.questions" :key="item.title" flat class="pt-2 pb-2 rounded-lg pl-2 pr-2">
     <v-card-title
       ><span class="text-h6 font-weight-bold">{{ item.title }}</span></v-card-title
     >
-    <v-card-subtitle>{{ item.data }}</v-card-subtitle>
+    <v-card-subtitle>{{ item.contenet }}</v-card-subtitle>
     <v-card-actions>
       <v-btn variant="plain" color="on-background">
         <v-icon size="18" class="me-2">mdi-message-text</v-icon>
-        回答
+        {{ item.answer_count }}回答
       </v-btn>
       <v-btn variant="plain" color="on-background">
         <v-icon size="18" class="me-2">mdi-star-outline</v-icon>
-        收藏
+        {{ item.follow_count }}收藏
       </v-btn>
       <v-btn variant="plain" color="on-background" min-width="32px">
         <v-icon size="18">mdi-dots-horizontal</v-icon>
@@ -21,14 +21,28 @@
 </template>
 
 <script setup lang="ts">
-const fakeData = [
-  {
-    title: '数据结构选择数组还是链表？',
-    data: '2021-07-01',
-  },
-  {
-    title: '程序有 Bug 但是调不出来怎么办？',
-    data: '1926-08-17',
-  },
-]
+import { ref, onMounted, computed } from 'vue'
+import { UserApi } from '@/network/api/user'
+import { useRoute } from 'vue-router'
+import { QuestionList } from '@/types/questionlist'
+
+const route = useRoute()
+const userID = computed(() => parseInt(route.params.id[0], 10))
+const QList = ref<QuestionList>({} as QuestionList)
+const loaded = ref(false)
+
+onMounted(() => {
+  fetchData().then((result) => {
+    QList.value = result.data
+    loaded.value = true
+  })
+})
+
+function fetchData() {
+  const result = UserApi.getQuestionList(userID.value, {
+    pageStart: 0,
+    pageSize: 10,
+  })
+  return result
+}
 </script>
