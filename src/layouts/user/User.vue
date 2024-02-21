@@ -35,8 +35,6 @@
                           <v-text-field
                             v-model="selectedNickname.value.value"
                             :error-messages="selectedNickname.errorMessage.value"
-                          ></v-text-field>
-
                           <v-list-subheader inset>个人简介</v-list-subheader>
                           <v-text-field
                             v-model="selectedIntro.value.value"
@@ -130,6 +128,7 @@ watch(
     window.location.reload()
   }
 )
+
 const fetchData = async () => {
   return await UserApi.getUserInfo(userID.value)
 }
@@ -153,6 +152,7 @@ const { handleSubmit, handleReset } = useForm({
     },
   },
 })
+
 const avatarRules = [
   (value: File[]) => {
     if (typeof value !== 'undefined' && value.length > 0 && value[0].size > 2 * 1024 * 1024)
