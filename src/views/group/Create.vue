@@ -26,6 +26,7 @@
                   v-bind="nameProps"
                   required
                 />
+                <v-checkbox v-model="isPrivate" label="将小组设为私有" />
                 <v-list-subheader inset>头像</v-list-subheader>
                 <v-file-input
                   v-model="selectedFile"
@@ -130,6 +131,7 @@ const { handleSubmit, defineField, isSubmitting } = useForm({
 
 const [name, nameProps] = defineField('name', vuetifyConfig)
 const [intro, introProps] = defineField('intro', vuetifyConfig)
+const isPrivate = ref(false)
 const router = useRouter()
 const fakeavatar = 'https://cdn.vuetifyjs.com/images/parallax/material.jpg'
 function submit() {
