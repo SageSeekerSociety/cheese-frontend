@@ -1,5 +1,5 @@
 export default {
-  path: '/group',
+  path: '/groups',
   name: 'Group',
   component: () => import('@/layouts/group/Group.vue'),
   meta: {
@@ -18,20 +18,30 @@ export default {
       children: [
         {
           path: '',
-          name: 'GroupDetailDefault',
+          name: 'GroupQuestion',
           component: () => import('@/views/group/Question.vue'), // 对应的视图组件
         },
-        // {
-        //   path: "question", // 定义动态路由参数 groupId
-        //   name: "Question",
-        //   component: () => import("@/views/group/Question.vue"), // 对应的视图组件
-        // },
         {
-          path: 'target', // 定义动态路由参数 groupId
+          path: 'target',
           name: 'GroupTarget',
-          component: () => import('@/views/group/Target.vue'), // 对应的视图组件
+          component: () => import('@/views/group/Target.vue'),
+        },
+        {
+          path: 'member',
+          name: 'GroupMember',
+          component: () => import('@/views/group/Member.vue'),
+        },
+        {
+          path: 'manage',
+          name: 'GroupManage',
+          component: () => import('@/views/group/Manage.vue'),
         },
       ],
+    },
+    {
+      path: 'create',
+      name: 'GroupCreate',
+      component: () => import('@/views/group/Create.vue'),
     },
   ],
 }

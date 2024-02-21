@@ -40,7 +40,7 @@ export namespace GroupApi {
   }
 
   export const getGroupInfo = (groupid: number) =>
-    ApiInstance.request<Group>({
+    ApiInstance.request<GetGroupInfoResponse>({
       url: `https://stoplight.io/mocks/huanchengstudio/cheese/2398548/groups/${groupid}`,
       method: 'GET',
     })
