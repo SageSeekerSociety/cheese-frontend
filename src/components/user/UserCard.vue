@@ -25,18 +25,18 @@
             </v-col>
           </v-row>
           <v-row>
-            <v-col cols="4" class="d-flex flex-column">
-              <div>
+            <v-col cols="10" class="d-flex flex-column">
+              <div class="text-truncate">
                 <v-icon left>mdi-format-quote-open</v-icon>
                 {{ profile.intro }}
               </div>
-              <div>
+              <div class="text-truncate">
                 <v-icon left>mdi-account</v-icon>
                 {{ profile.username }}
               </div>
             </v-col>
             <v-spacer />
-            <v-col cols="4" class="d-flex align-center justify-end">
+            <v-col cols="2" class="d-flex align-center justify-end">
               <v-btn
                 :ripple="false"
                 variant="plain"
