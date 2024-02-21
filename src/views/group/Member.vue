@@ -6,13 +6,15 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { GroupApi } from '@/network/api/group'
 import { useRoute } from 'vue-router'
+
 import Roster from '@/components/user/Roster.vue'
+
+import { GroupApi } from '@/network/api/group'
+
 import { UserList } from '@/types/userlist'
 
 const route = useRoute()
-// const userID = computed(() => parseInt(route.params.id[0], 10))
 const userList = ref<UserList>({} as UserList)
 const loaded = ref(false)
 const groupId = Number(route.params.groupId)
@@ -21,7 +23,6 @@ onMounted(() => {
   fetchData().then((result) => {
     userList.value = result.data
     loaded.value = true
-    // console.log(userList.value.users.length)
   })
 })
 
@@ -33,4 +34,3 @@ function fetchData() {
   return result
 }
 </script>
-@/network/api/group/group

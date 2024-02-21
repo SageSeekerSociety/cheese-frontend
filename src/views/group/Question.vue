@@ -33,14 +33,16 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { QuestionList } from '@/types/questionlist'
-import { GroupApi } from '@/network/api/group'
 import { useRoute } from 'vue-router'
 
+import { GroupApi } from '@/network/api/group'
+
+import { QuestionList } from '@/types/questionlist'
+
 const groupQuestionList = ref<QuestionList>({} as QuestionList)
-const route = useRoute()
 const groupId = computed(() => Number(route.params.groupId))
 const loaded = ref(false)
+const route = useRoute()
 
 function fetchGroupQuestionList() {
   const result = GroupApi.getGroupQuestionList(groupId.value, {
@@ -54,30 +56,8 @@ onMounted(() => {
   fetchGroupQuestionList().then((result) => {
     groupQuestionList.value = result.data
     loaded.value = true
-
-    // console.log('***')
-    // console.log(groupId)
-    // console.log('***')
-
     console.log(groupQuestionList.value)
     console.log('***')
-    // console.log(groupQuestionList.value.data[0].id)
   })
 })
-// const fakedata = {
-//   data: [
-//     {
-//       id: 0,
-//       title: 'string',
-//       content: 'string',
-//       author: {
-//         id: 0,
-//         nickname: 'string',
-//         avatar: 'string',
-//       },
-//       like_count: 0,
-//     },
-//   ],
-// }
 </script>
-@/network/api/group/group
