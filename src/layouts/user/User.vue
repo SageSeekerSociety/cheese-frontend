@@ -21,7 +21,7 @@
               <v-divider class="my-2" />
               <v-dialog width="800">
                 <template #activator="{ props }">
-                  <v-btn v-bind="props" color="primary" variant="text" block @click="resetDefault">
+                  <v-btn v-bind="props" color="primary" variant="text" block @click="handleReset">
                     <v-icon left>mdi-cog</v-icon>
                     编辑资料
                   </v-btn>
@@ -32,33 +32,27 @@
                       <v-row>
                         <v-col cols="8">
                           <v-list-subheader inset>昵称</v-list-subheader>
-                          <v-text-field
-                            v-model="selectedNickname.value.value"
-                            :error-messages="selectedNickname.errorMessage.value"
+                          <v-text-field v-model="selectedNickname" v-bind="nicknameProps"></v-text-field>
                           <v-list-subheader inset>个人简介</v-list-subheader>
-                          <v-text-field
-                            v-model="selectedIntro.value.value"
-                            :counter="60"
-                            :error-messages="selectedIntro.errorMessage.value"
-                          ></v-text-field>
+                          <v-text-field v-model="selectedIntro" :counter="60" v-bind="introProps"></v-text-field>
 
                           <v-list-subheader inset>头像</v-list-subheader>
                           <v-file-input
-                            v-model="selectedAvatar.value.value"
+                            v-model="selectedAvatar"
                             accept="image/*"
                             prepend-icon="mdi-plus"
                             label="选择文件"
                             chips
                             show-size
                             outlined
-                            :rules="avatarRules"
+                            v-bind="avatarProps"
                             @change="handleFileChange"
                           />
                         </v-col>
                         <v-col cols="4">
                           <v-list-subheader inset>预览</v-list-subheader>
                           <v-img
-                            v-if="selectedAvatar.value.value.length > 0"
+                            v-if="(selectedAvatar?.values?.length ?? 0) > 0"
                             :src="previewUrl"
                             aspect-ratio="1"
                             class="rounded-lg"
@@ -79,7 +73,7 @@
                     </form>
                     <v-card-actions>
                       <v-btn @click="submit"> 提交 </v-btn>
-                      <v-btn @click="resetDefault"> 重置 </v-btn>
+                      <v-btn @click="handleReset"> 重置 </v-btn>
                       <v-spacer />
                       <v-btn @click="isActive.value = false"> 关闭 </v-btn>
                     </v-card-actions>
@@ -95,15 +89,18 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, watch, computed, toRefs } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
+import { toTypedSchema } from '@vee-validate/zod'
+import { z } from 'zod'
 import { useRoute } from 'vue-router'
 import { UserApi } from '@/network/api/user'
 import { ImageApi } from '@/network/api/image'
 import { User } from '@/types/users'
-import { useField, useForm } from 'vee-validate'
+import { useForm } from 'vee-validate'
 import AccountService from '@/services/account'
 import AppBar from '@/components/common/AppBar/AppBar.vue'
 import UserCard from '@/components/user/UserCard.vue'
+import { vuetifyConfig } from '@/utils/form'
 
 const selectedTab = ref(0)
 const route = useRoute()
@@ -133,58 +130,46 @@ const fetchData = async () => {
   return await UserApi.getUserInfo(userID.value)
 }
 
-const { handleSubmit, handleReset } = useForm({
-  validationSchema: {
-    nickname(value: string) {
-      if (value?.length > 16) return '昵称不能超过16个字符。'
-      if (value?.length < 4) return '昵称不能少于4个字符。'
-      return true
-    },
-    intro(value: string) {
-      if (value?.length > 60) return '个人简介不能超过60个字符。'
-      if (value?.length < 1) return '个人简介不能为空。'
-      return true
-    },
-    avatar(value: File[]) {
-      if (typeof value !== 'undefined' && value.length > 0 && value[0].size > 2 * 1024 * 1024)
-        return '文件大小不能超过2MB。'
-      return true
-    },
-  },
+const { handleSubmit, defineField, handleReset } = useForm({
+  validationSchema: toTypedSchema(
+    z.object({
+      nickname: z.string().min(4).max(16),
+      intro: z.string().max(60),
+      avatar: z
+        .array(z.instanceof(File).refine((v) => v.size < 2 * 1024 * 1024, { message: '文件大小不能超过 2MB' }))
+        .nonempty(),
+    })
+  ),
 })
 
-const avatarRules = [
-  (value: File[]) => {
-    if (typeof value !== 'undefined' && value.length > 0 && value[0].size > 2 * 1024 * 1024)
-      return '文件大小不能超过2MB。'
-    return true
-  },
-]
-const selectedNickname = useField('nickname')
-const selectedIntro = useField('intro')
-const selectedAvatar = useField('avatar')
+const [selectedNickname, nicknameProps] = defineField('nickname', vuetifyConfig)
+const [selectedIntro, introProps] = defineField('intro', vuetifyConfig)
+const [selectedAvatar, avatarProps] = defineField('avatar', vuetifyConfig)
 const previewUrl = ref('')
-const resetDefault = () => {
-  previewUrl.value = ''
-  selectedNickname.value.value = userData.value.nickname
-  selectedIntro.value.value = userData.value.intro
-  selectedAvatar.value.value = []
-}
 const handleFileChange = () => {
   previewUrl.value = ''
-  if (selectedAvatar.value.value.length > 0) {
+  const length = selectedAvatar.value?.length ?? 0
+  if (length > 0) {
     readAvatar()
   }
 }
 const readAvatar = () => {
+  if (!selectedAvatar.value) return
+  if (selectedAvatar.value.length === 0) return
+  const file = selectedAvatar.value[0]
   const reader = new FileReader()
-  reader.readAsDataURL(selectedAvatar.value.value[0])
+  reader.readAsDataURL(file)
   reader.onload = (event) => {
     previewUrl.value = event.target?.result as string
   }
 }
 const uploadAvatar = () => {
-  const result = ImageApi.upload(selectedAvatar.value.value[0])
+  if (!selectedAvatar.value) return
+  if (selectedAvatar.value.length === 0) return
+  const file = selectedAvatar.value[0]
+  const formData = new FormData()
+  formData.append('file', file)
+  const result = ImageApi.upload(formData)
   return result
 }
 const submit = handleSubmit((values) => {
