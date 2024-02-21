@@ -45,4 +45,7 @@ export default defineConfig({
     // 这需要你安装 happy-dom 作为对等依赖（peer dependency）
     environment: 'happy-dom',
   },
+  optimizeDeps: {
+    include: ['editorjs-parser'],
+  },
 })

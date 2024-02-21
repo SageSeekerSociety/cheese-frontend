@@ -18,7 +18,7 @@ const links = [
   {
     key: 'Question',
     title: '问答',
-    path: '/question',
+    path: '/questions',
   },
   {
     key: 'Group',
