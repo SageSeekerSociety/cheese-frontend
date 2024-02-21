@@ -11,22 +11,22 @@
       <v-container class="cut-align-center">
         <v-avatar class="rounded-avatar" color="white" size="180" rounded="lg">
           <!-- Your avatar content goes here -->
-          <v-img v-if="props.groupData" :src="props.groupData.groupAvatar" />
+          <v-img v-if="profile" src="https://cdn.vuetifyjs.com/images/parallax/material.jpg" />
         </v-avatar>
         <v-container class="info-wrapper">
           <div class="info-bar-upper">
             <span class="text-h4 font-weight-bold me-4">
-              {{ props.groupData.groupName }}
+              {{ profile.name }}
             </span>
           </div>
           <div class="info-bar-lower">
             <span>
               <v-icon left>mdi-account</v-icon>
-              {{ props.groupData.groupAdmin }}
+              {{ profile.owner.nickname }}
             </span>
             <span>
               <v-icon left>mdi-format-quote-open</v-icon>
-              {{ props.groupData.groupDesc }}
+              {{ profile.intro }}
             </span>
           </div>
         </v-container>
@@ -36,11 +36,17 @@
 </template>
 
 <script lang="ts" setup>
-import { GroupProps } from './types'
+import { Group } from '@/types/group'
 
-const props = withDefaults(defineProps<GroupProps>(), {
-  groupData: (props) => props.groupData,
-})
+const { profile } = withDefaults(
+  defineProps<{
+    profile: Group
+  }>(),
+  {}
+)
+// const props = withDefaults(defineProps<GroupProps>(), {
+//   groupData: (props) => props.groupData,
+// })
 </script>
 
 <style scoped>
