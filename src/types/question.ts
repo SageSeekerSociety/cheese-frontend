@@ -4,8 +4,8 @@ import { Topic } from './topic'
 export type Question = {
   id: number
   title: string
-  contenet: string
-  user: User
+  content: string
+  author: User
   type: number
   topics: Topic[]
   created_at: number

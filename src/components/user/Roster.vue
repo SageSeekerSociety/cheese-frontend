@@ -34,7 +34,6 @@ const { users } = withDefaults(
     users: () => [],
   }
 )
-
 // onMounted(() => {
 //   console.log(users)
 // })
