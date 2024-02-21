@@ -28,7 +28,7 @@
 import RichEditor from '@/components/common/Editor/Editor.vue'
 import { ref } from 'vue'
 import EditorJS from '@editorjs/editorjs'
-import { QuestionApi } from '@/network/api/question'
+import { QuestionApi } from '@/network/api/questions'
 import { useRouter } from 'vue-router'
 import { DEFAULT_CONFIG } from '@/utils/editor'
 import { toast } from 'vuetify-sonner'

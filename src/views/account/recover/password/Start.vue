@@ -32,7 +32,7 @@ import { z } from 'zod'
 import { toast } from 'vuetify-sonner'
 import { ref } from 'vue'
 import { ServerError } from '@/network/types/error'
-import { UserApi } from '@/network/api/user'
+import { UserApi } from '@/network/api/users'
 import { vuetifyConfig } from '@/utils/form'
 
 const myAlert = ref<{
@@ -74,3 +74,4 @@ const submit = handleSubmit(async (value) => {
   }
 })
 </script>
+@/network/api/users/user

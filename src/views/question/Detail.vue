@@ -1,9 +1,9 @@
 <template>
   <v-container>
     <v-row>
-      <v-col v-if="data">
+      <v-col v-if="questionData">
         <v-card rounded="lg" flat>
-          <v-card-title>{{ data.title }}</v-card-title>
+          <v-card-title>{{ questionData.title }}</v-card-title>
           <v-card-text>
             <!-- eslint-disable-next-line vue/no-v-html -->
             <div class="question-content" v-html="contentHtml"></div>
@@ -18,33 +18,40 @@
 import { setTitle } from '@/utils/title'
 import { onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
 import { onMounted, ref, computed, watch } from 'vue'
-import { QuestionApi } from '@/network/api/question'
-import { Question } from '@/types'
+import { QuestionApi } from '@/network/api/questions'
+import { Question } from '@/types/question'
 import { parse } from '@/utils/parser'
 
 const route = useRoute()
 const router = useRouter()
 
-const data = ref<Question | null>(null)
+const questionData = ref<Question | null>(null)
 
 const contentHtml = computed(() => {
-  if (data.value) {
-    return parse(JSON.parse(data.value.content))
+  if (questionData.value) {
+    return parse(JSON.parse(questionData.value.content))
   }
   return ''
 })
 
 const load = async (id: number) => {
-  const res = await QuestionApi.detail(id)
-  data.value = res.data
-  console.log(res)
+  const {
+    data: { question },
+  } = await QuestionApi.detail(id)
+  questionData.value = question
 }
 
 onMounted(async () => {
   await load(parseInt(route.params.id as string))
 })
 
-watch(data, (newVal) => {
+onBeforeRouteUpdate(async (to, from) => {
+  if (to.params.id !== from.params.id) {
+    await load(parseInt(to.params.id as string))
+  }
+})
+
+watch(questionData, (newVal) => {
   if (newVal) {
     setTitle(newVal.title, route)
   }

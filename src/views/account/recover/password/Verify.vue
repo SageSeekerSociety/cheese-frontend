@@ -38,7 +38,7 @@ import { z } from 'zod'
 import { toast } from 'vuetify-sonner'
 import { computed, ref } from 'vue'
 import { ServerError } from '@/network/types/error'
-import { UserApi } from '@/network/api/user'
+import { UserApi } from '@/network/api/users'
 import { RULE_PASSWORD, vuetifyConfig } from '@/utils/form'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -97,3 +97,4 @@ const submit = handleSubmit(async (value) => {
   }
 })
 </script>
+@/network/api/users/user

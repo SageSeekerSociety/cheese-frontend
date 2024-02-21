@@ -42,7 +42,7 @@
 
 <script lang="ts" setup>
 import { toast } from 'vuetify-sonner'
-import { UserApi } from '@/network/api/user'
+import { UserApi } from '@/network/api/users'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
@@ -82,3 +82,4 @@ const login = handleSubmit(async (value) => {
   }
 })
 </script>
+@/network/api/users/user

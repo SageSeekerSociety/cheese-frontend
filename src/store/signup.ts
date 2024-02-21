@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { UserApi } from '@/network/api/user'
+import { UserApi } from '@/network/api/users'
 
 export const useSignupStore = defineStore('signup', {
   state: () => ({

@@ -1,15 +1,10 @@
-import { GroupList } from '@/types/grouplist'
+import { GetGroupListRes, GetGroupMemberListRes, GetGroupQuestionListRes, GetGroupTargetListRes } from './types'
 import ApiInstance from '../index'
-import { User } from '@/types/users'
-import { QuestionList } from '@/types/questionlist'
 import { Group } from '@/types/group'
-import exp from 'constants'
-import { TargetList } from '@/types/targetlist'
-import { UserList } from '@/types/userlist'
 
 export namespace GroupApi {
   export const getAllGroupList = (data: { pageStart: number; pageSize: number }) =>
-    ApiInstance.request<GroupList>({
+    ApiInstance.request<GetGroupListRes>({
       url: `https://stoplight.io/mocks/huanchengstudio/cheese/2398548/groups`,
       // url: '/groups',
       method: 'GET',
@@ -25,7 +20,7 @@ export namespace GroupApi {
     })
 
   export const getGroupQuestionList = (groupid: number, data: { pageStart: number; pageSize: number }) =>
-    ApiInstance.request<QuestionList>({
+    ApiInstance.request<GetGroupQuestionListRes>({
       url: `https://stoplight.io/mocks/huanchengstudio/cheese/2398548/groups/${groupid}/questions`,
       // url: '/group',
       method: 'GET',
@@ -35,17 +30,17 @@ export namespace GroupApi {
       },
     })
 
-  export type GetGroupInfoResponse = {
+  export type GetGroupInfoRes = {
     group: Group
   }
 
   export const getGroupInfo = (groupid: number) =>
-    ApiInstance.request<GetGroupInfoResponse>({
+    ApiInstance.request<GetGroupInfoRes>({
       url: `https://stoplight.io/mocks/huanchengstudio/cheese/2398548/groups/${groupid}`,
       method: 'GET',
     })
   export const getGroupTargetList = (groupid: number, data: { pageStart: number; pageSize: number }) =>
-    ApiInstance.request<TargetList>({
+    ApiInstance.request<GetGroupTargetListRes>({
       url: `https://stoplight.io/mocks/huanchengstudio/cheese/2398548/groups/${groupid}/targets`,
       method: 'GET',
       data: {
@@ -55,7 +50,7 @@ export namespace GroupApi {
       },
     })
   export const getGroupMemberList = (groupid: number, data: { pageStart: number; pageSize: number }) =>
-    ApiInstance.request<UserList>({
+    ApiInstance.request<GetGroupMemberListRes>({
       url: `https://stoplight.io/mocks/huanchengstudio/cheese/2398548/groups/${groupid}/members`,
       method: 'GET',
       data: {
