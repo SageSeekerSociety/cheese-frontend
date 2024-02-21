@@ -1,5 +1,5 @@
 export default {
-  path: '/user/:id',
+  path: '/users/:id',
   name: 'User',
   component: () => import('@/layouts/user/User.vue'),
   children: [
