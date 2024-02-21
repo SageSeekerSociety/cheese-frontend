@@ -1,5 +1,5 @@
 export default {
-  path: '/group',
+  path: '/groups',
   name: 'Group',
   component: () => import('@/layouts/group/Group.vue'),
   meta: {

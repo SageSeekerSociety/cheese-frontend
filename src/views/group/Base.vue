@@ -30,7 +30,7 @@ const tabs = [
       <v-col class="pr-0">
         <v-sheet rounded="lg">
           <v-tabs v-model="selectedTab">
-            <v-tab v-for="tab in tabs" :key="tab.label" :to="`/group/${fakeGroupData.groupid}/${tab.route}`" exact>
+            <v-tab v-for="tab in tabs" :key="tab.label" :to="`/groups/${fakeGroupData.groupid}/${tab.route}`" exact>
               {{ tab.label }}
             </v-tab>
           </v-tabs>
