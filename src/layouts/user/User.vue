@@ -117,13 +117,12 @@ const isActiveUser = computed(() => {
   return () => parseInt(route.params.id[0]) === AccountService._user.value?.id
 })
 
-onMounted(() => {
-  fetchData().then((result) => {
-    userData.value = result.data as User
-    loaded.value = true
-    // console.log(AccountService._loggedIn.value);
-  })
+onMounted(async () => {
+  const { data } = await fetchData()
+  userData.value = data
+  loaded.value = true
 })
+
 watch(
   // 切换用户时刷新
   () => route.params.id,
@@ -131,9 +130,8 @@ watch(
     window.location.reload()
   }
 )
-function fetchData() {
-  const result = UserApi.getUserInfo(userID.value)
-  return result
+const fetchData = async () => {
+  return await UserApi.getUserInfo(userID.value)
 }
 
 const { handleSubmit, handleReset } = useForm({
