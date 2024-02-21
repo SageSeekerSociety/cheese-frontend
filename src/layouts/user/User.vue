@@ -33,35 +33,32 @@
                         <v-col cols="8">
                           <v-list-subheader inset>昵称</v-list-subheader>
                           <v-text-field
-                            v-model="nickname.value.value"
-                            :counter="20"
-                            :error-messages="nickname.errorMessage.value"
-                          ></v-text-field>
-
+                            v-model="selectedNickname.value.value"
+                            :error-messages="selectedNickname.errorMessage.value"
                           <v-list-subheader inset>个人简介</v-list-subheader>
                           <v-text-field
-                            v-model="intro.value.value"
-                            :counter="300"
-                            :error-messages="intro.errorMessage.value"
+                            v-model="selectedIntro.value.value"
+                            :counter="60"
+                            :error-messages="selectedIntro.errorMessage.value"
                           ></v-text-field>
 
                           <v-list-subheader inset>头像</v-list-subheader>
                           <v-file-input
-                            v-model="selectedFile"
+                            v-model="selectedAvatar.value.value"
                             accept="image/*"
                             prepend-icon="mdi-plus"
                             label="选择文件"
                             chips
                             show-size
-                            show-size-hint
                             outlined
+                            :rules="avatarRules"
                             @change="handleFileChange"
                           />
                         </v-col>
                         <v-col cols="4">
                           <v-list-subheader inset>预览</v-list-subheader>
                           <v-img
-                            v-if="selectedFile.length > 0"
+                            v-if="selectedAvatar.value.value.length > 0"
                             :src="previewUrl"
                             aspect-ratio="1"
                             class="rounded-lg"
@@ -71,11 +68,11 @@
                           <v-img
                             v-else
                             :src="userData.avatar"
-                            color="grey-darken-1"
                             aspect-ratio="1"
                             class="rounded-lg"
                             rounded="0"
                             size="180"
+                            color="grey-darken-1"
                           />
                         </v-col>
                       </v-row>
@@ -118,13 +115,12 @@ const isActiveUser = computed(() => {
   return () => parseInt(route.params.id[0]) === AccountService._user.value?.id
 })
 
-onMounted(() => {
-  fetchData().then((result) => {
-    userData.value = result.data as User
-    loaded.value = true
-    // console.log(AccountService._loggedIn.value);
-  })
+onMounted(async () => {
+  const { data } = await fetchData()
+  userData.value = data
+  loaded.value = true
 })
+
 watch(
   // 切换用户时刷新
   () => route.params.id,
@@ -132,60 +128,74 @@ watch(
     window.location.reload()
   }
 )
-function fetchData() {
-  const result = UserApi.getUserInfo(userID.value)
-  return result
+
+const fetchData = async () => {
+  return await UserApi.getUserInfo(userID.value)
 }
 
 const { handleSubmit, handleReset } = useForm({
   validationSchema: {
     nickname(value: string) {
-      if (value?.length >= 4 && value.length <= 20) return true
-      return '昵称的长度需要在4-20个字符之间。'
+      if (value?.length > 16) return '昵称不能超过16个字符。'
+      if (value?.length < 4) return '昵称不能少于4个字符。'
+      return true
     },
     intro(value: string) {
-      if (value?.length <= 300) return true
-      return '个人简介不能超过300个字符。'
+      if (value?.length > 60) return '个人简介不能超过60个字符。'
+      if (value?.length < 1) return '个人简介不能为空。'
+      return true
     },
-    avatar(value: string) {
+    avatar(value: File[]) {
+      if (typeof value !== 'undefined' && value.length > 0 && value[0].size > 2 * 1024 * 1024)
+        return '文件大小不能超过2MB。'
       return true
     },
   },
 })
-const nickname = useField('nickname')
-const intro = useField('intro')
-const submit = handleSubmit((values) => {
-  uploadAvatar()
-  values.avatar = 'default.jpg'
-  alert(JSON.stringify(values, null, 2))
-})
-const selectedFile = ref([])
+
+const avatarRules = [
+  (value: File[]) => {
+    if (typeof value !== 'undefined' && value.length > 0 && value[0].size > 2 * 1024 * 1024)
+      return '文件大小不能超过2MB。'
+    return true
+  },
+]
+const selectedNickname = useField('nickname')
+const selectedIntro = useField('intro')
+const selectedAvatar = useField('avatar')
 const previewUrl = ref('')
 const resetDefault = () => {
-  nickname.value.value = userData.value.nickname
-  intro.value.value = userData.value.intro
-  selectedFile.value = []
+  previewUrl.value = ''
+  selectedNickname.value.value = userData.value.nickname
+  selectedIntro.value.value = userData.value.intro
+  selectedAvatar.value.value = []
 }
 const handleFileChange = () => {
-  if (selectedFile.value) {
+  previewUrl.value = ''
+  if (selectedAvatar.value.value.length > 0) {
     readAvatar()
-  } else {
-    previewUrl.value = ''
   }
 }
 const readAvatar = () => {
   const reader = new FileReader()
+  reader.readAsDataURL(selectedAvatar.value.value[0])
   reader.onload = (event) => {
     previewUrl.value = event.target?.result as string
   }
-  reader.readAsDataURL(selectedFile.value[0] as Blob)
 }
 const uploadAvatar = () => {
-  const formData = new FormData()
-  formData.append('file', selectedFile.value[0])
-  const result = ImageApi.upload(formData)
+  const result = ImageApi.upload(selectedAvatar.value.value[0])
   return result
 }
+const submit = handleSubmit((values) => {
+  // uploadAvatar()
+  const submitData = {
+    nickname: values.nickname,
+    intro: values.intro,
+    avatar: 'default.jpg',
+  }
+  alert(JSON.stringify(submitData, null, 2))
+})
 
 const links = [
   {
