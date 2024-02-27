@@ -19,13 +19,15 @@ import { registerPlugins } from '@/plugins'
 import i18next from 'i18next'
 import { z } from 'zod'
 import { zodI18nMap } from 'zod-i18n-map'
+import 'viewerjs/dist/viewer.css'
+import Viewer from 'v-viewer'
 // Import your language translation files
 import translation from 'zod-i18n-map/locales/zh-CN/zod.json'
 import AccountService from '@/services/account'
 
 AccountService.init()
 
-const app = createApp(App)
+const app = createApp(App).use(Viewer)
 
 registerPlugins(app)
 

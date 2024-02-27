@@ -9,36 +9,20 @@
       />
     </template>
     <v-card max-height="80vh">
-      <v-card
-        :title="(item === null ? '发布' : '编辑') + '动态'"
-        class="elevation-0"
-        style="display: flex; flex-direction: column; align-items: flex-start"
-      >
-        <v-textarea
-          v-model="text"
-          label="What's happening?!"
-          style="min-width: 100%"
-          no-resize
-          hide-details
-          clearable
-        />
-        <v-card
-          v-for="index in assets.length"
-          :key="index"
-          class="elevation-0"
-          style="padding-left: 10px; display: inline-flex; flex-direction: row; min-width: 90%; align-items: center"
-        >
+      <v-card :title="(item === null ? '发布' : '编辑') + '动态'" class="elevation-0 popup-main">
+        <v-textarea v-model="text" label="What's happening?!" class="popup-editor" no-resize hide-details clearable />
+        <v-card v-for="index in assets.length" :key="index" class="elevation-0 popup-asset-item">
           <v-file-input
             :key="index"
             v-model="assets[index - 1]"
             label="上传文件"
-            style="padding-top: 5px; padding-bottom: 5px; min-width: 80%"
+            class="popup-asset-select"
             hide-details
           />
           <v-btn
             variant="plain"
             color="error"
-            style="padding-left: 5px"
+            class="popup-asset-remove-button"
             density="compact"
             icon="mdi-trash-can-outline"
             @click="() => removeFileItem(index - 1)"
@@ -52,7 +36,7 @@
               prepend-icon="mdi-plus"
               color="deep-purple"
               variant="tonal"
-              class="elevation-2 ml-1 my-2"
+              class="elevation-2 popup-add-button"
               type="file"
               @click="newFileItem"
             />
@@ -110,6 +94,34 @@ const submit = () => {
 </script>
 
 <style scoped>
+.popup-main {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.popup-editor {
+  min-width: 100%;
+}
+.popup-asset-item {
+  padding-left: 10px;
+  display: inline-flex;
+  flex-direction: row;
+  min-width: 90%;
+  align-items: center;
+}
+.popup-asset-select {
+  padding-top: 5px;
+  padding-bottom: 5px;
+  min-width: 80%;
+}
+.popup-asset-remove-button {
+  padding-left: 5px;
+}
+.popup-add-button {
+  margin-left: 2px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
 .rainbow {
   background-image: linear-gradient(to left, violet, orange);
 }
