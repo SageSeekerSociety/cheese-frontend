@@ -1,13 +1,9 @@
+import { User } from '@/types/users'
+
 export type Insight = {
   id: number
   content: string
-  author: {
-    id: number
-    username: string
-    nickname: string
-    avatar: string
-    intro: string
-  }
+  author: User
   created_at: number
   updated_at: number
   is_like: boolean
