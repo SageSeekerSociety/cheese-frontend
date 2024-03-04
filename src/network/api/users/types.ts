@@ -17,3 +17,7 @@ export type UserList = {
   users: User[]
   page: Page
 }
+
+export type GetUserInfoResponse = {
+  user: User
+}

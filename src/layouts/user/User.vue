@@ -104,12 +104,12 @@ import { vuetifyConfig } from '@/utils/form'
 
 const selectedTab = ref(0)
 const route = useRoute()
-const userID = computed(() => parseInt(route.params.id[0]))
+const userID = computed(() => parseInt(route.params.id as string))
 const userData = ref({} as User)
 const loaded = ref(false)
 
 const isActiveUser = computed(() => {
-  return () => parseInt(route.params.id[0]) === AccountService._user.value?.id
+  return () => userID.value === AccountService._user.value?.id
 })
 
 watch(
@@ -137,13 +137,15 @@ const fetchData = async () => {
 }
 
 onMounted(async () => {
-  const { data } = await fetchData()
-  userData.value = data
+  const {
+    data: { user },
+  } = await fetchData()
+  userData.value = user
   loaded.value = true
   resetForm({
     values: {
-      nickname: data.nickname,
-      intro: data.intro,
+      nickname: user.nickname,
+      intro: user.intro,
     },
   })
 })

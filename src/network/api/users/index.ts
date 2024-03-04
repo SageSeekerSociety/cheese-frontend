@@ -1,6 +1,6 @@
 import ApiInstance from '../index'
 import { User } from '@/types/users'
-import { GetAnswerListResponse, GetQuestionListResponse, UserList } from './types'
+import { GetAnswerListResponse, GetQuestionListResponse, GetUserInfoResponse, UserList } from './types'
 
 export namespace UserApi {
   export interface AuthResponseDataType {
@@ -64,7 +64,7 @@ export namespace UserApi {
     })
 
   export const getUserInfo = (userid: number) =>
-    ApiInstance.request<User>({
+    ApiInstance.request<GetUserInfoResponse>({
       // url: `https://stoplight.io/mocks/huanchengstudio/cheese/2398548/users/${userid}`,
       url: `/users/${userid}`,
       method: 'GET',
