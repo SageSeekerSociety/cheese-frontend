@@ -4,11 +4,20 @@
       <v-col>
         <v-sheet min-height="70vh" rounded="lg" class="py-1 px-1">
           <div class="d-flex justify-space-between align-center pa-4">
+            <div style="display: flex; align-items: center">
+              <span class="text-h6 font-weight-bold">热门动态</span>
+              <div style="padding-left: 8px"><post-insight-entry /></div>
+            </div>
+          </div>
+          <v-card v-for="item in fakeInsightData" :key="item.id" flat>
+            <insight-card :item="item"></insight-card>
+          </v-card>
+          <div class="d-flex justify-space-between align-center pa-4">
             <div>
               <span class="text-h6 font-weight-bold">热门问题</span>
             </div>
           </div>
-          <v-card v-for="item in fakeData" :key="item.title" flat>
+          <v-card v-for="item in fakeQuestionData" :key="item.title" flat>
             <v-card-title class="text-h6 font-weight-medium">{{ item.title }}</v-card-title>
             <v-card-text class="text-body-1 font-weight-regular answer-body-text pb-1">
               {{ item.author }}：{{ item.content }}
@@ -68,7 +77,10 @@
 </template>
 
 <script setup lang="ts">
-const fakeData = [
+import PostInsightEntry from '@/components/common/Insights/PostInsightPopup.vue'
+import InsightCard from '@/components/common/Insights/InsightCard.vue'
+
+const fakeQuestionData = [
   {
     title: 'TCP和UDP的区别与应用场景',
     content:
@@ -96,6 +108,103 @@ const fakeData = [
       '解决涉及多个未知数的线性代数方程组时，高斯消元法是一个非常有用的工具。这种方法通过行操作将矩阵转换为行阶梯形式或简化的行阶梯形式，从而简化求解过程。下面是一些关于如何应用高斯消元法的步骤和建议：',
     author: '任易轩',
     like_count: 32,
+  },
+]
+
+const fakeInsightData = [
+  {
+    id: -1,
+    content: '我们正在使用 Vue 3 开发这个应用。',
+    author: {
+      id: -1,
+      username: 'li_hua',
+      nickname: '李华',
+      avatar: 'https://avatars.githubusercontent.com/u/107245128',
+      intro: 'Amateur Web developer',
+    },
+    created_at: 20240101,
+    updated_at: 20240102,
+    is_like: true,
+    like_count: 87825,
+    comment_count: 0,
+    view_count: 15080,
+    medias: [
+      {
+        id: -3,
+        type: 'image',
+        url: 'https://www.positivethinking.tech/wp-content/uploads/2021/01/Logo-Vuejs.png',
+        meta: {
+          width: 500,
+          height: 300,
+          size: 1,
+          thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/f/f1/Vue.png',
+        },
+      },
+      {
+        id: -3,
+        type: 'image',
+        url: 'https://www.positivethinking.tech/wp-content/uploads/2021/01/Logo-Vuejs.png',
+        meta: {
+          width: 500,
+          height: 300,
+          size: 1,
+          thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/f/f1/Vue.png',
+        },
+      },
+      {
+        id: -3,
+        type: 'image',
+        url: 'https://www.positivethinking.tech/wp-content/uploads/2021/01/Logo-Vuejs.png',
+        meta: {
+          width: 500,
+          height: 300,
+          size: 1,
+          thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/f/f1/Vue.png',
+        },
+      },
+
+      {
+        id: -3,
+        type: 'image',
+        url: 'https://www.positivethinking.tech/wp-content/uploads/2021/01/Logo-Vuejs.png',
+        meta: {
+          width: 500,
+          height: 300,
+          size: 1,
+          thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/f/f1/Vue.png',
+        },
+      },
+      {
+        id: -4,
+        type: 'image',
+        url: 'https://cdn.usdairy.com/optimize/getmedia/b5108b6f-59c3-4cc4-b1d5-4b9b0d1e0c54/swiss.jpg.jpg.aspx?format=webp',
+        meta: {
+          width: 400,
+          height: 400,
+          size: 1,
+          thumbnail:
+            'https://cdn.usdairy.com/optimize/getmedia/b5108b6f-59c3-4cc4-b1d5-4b9b0d1e0c54/swiss.jpg.jpg.aspx?format=webp',
+        },
+      },
+    ],
+  },
+  {
+    id: -2,
+    content: '另一些测试内容',
+    author: {
+      id: -2,
+      username: 'MikeMirzayanov',
+      nickname: 'Mike',
+      avatar: 'https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/man-person-icon.png',
+      intro: 'From ITMO University',
+    },
+    created_at: 20000101,
+    updated_at: 20000101,
+    is_like: false,
+    like_count: 0,
+    comment_count: 7,
+    view_count: 87,
+    medias: [],
   },
 ]
 </script>
