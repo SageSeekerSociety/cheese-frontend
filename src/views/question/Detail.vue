@@ -57,33 +57,3 @@ watch(questionData, (newVal) => {
   }
 })
 </script>
-
-<style lang="scss">
-.question-content {
-  table {
-    // font-family: verdana, arial, sans-serif;
-    // font-size: 12px;
-    color: #333333;
-    border-width: 1px;
-    border-color: #666666;
-    border-collapse: collapse;
-    // border-radius: 16px;
-  }
-
-  table th {
-    border-width: 1px;
-    padding: 8px;
-    border-style: solid;
-    border-color: #666666;
-    background-color: #dedede;
-  }
-
-  table td {
-    border-width: 1px;
-    padding: 8px;
-    border-style: solid;
-    border-color: #666666;
-    background-color: #ffffff;
-  }
-}
-</style>
