@@ -6,7 +6,6 @@ export namespace GroupApi {
   export const getAllGroupList = (data: { pageStart: number; pageSize: number }) =>
     ApiInstance.request<GetGroupListRes>({
       url: `https://stoplight.io/mocks/huanchengstudio/cheese/2398548/groups`,
-      // url: '/groups',
       method: 'GET',
       data: {
         keyWords: '',

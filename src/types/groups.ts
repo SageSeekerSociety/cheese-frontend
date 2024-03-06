@@ -6,7 +6,7 @@ export type Group = {
   name: string
   intro: string
   topics: Topic[]
-  owner: User
+  owner: GroupMember
   created_at: number
   updated_at: number
   member_count: number
