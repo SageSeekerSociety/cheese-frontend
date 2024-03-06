@@ -1,5 +1,5 @@
-import { User } from './users'
-import { Group } from './group'
+import { User, Group, AttitudeStats } from '.'
+
 export type Answer = {
   id: number
   question_id: number
@@ -7,9 +7,8 @@ export type Answer = {
   author: User
   created_at: number
   updated_at: number
-  agree_type: number
+  attitudes: AttitudeStats
   is_favorite: boolean
-  agree_count: number
   comment_count: number
   favorite_count: number
   view_count: number

@@ -28,9 +28,9 @@ import { ref } from 'vue'
 import { GroupApi } from '@/network/api/group'
 import { useRoute } from 'vue-router'
 import { onMounted } from 'vue'
-import { Target } from '@/types/target'
+import { GroupTarget } from '@/types'
 
-const groupTargetList = ref<Target[]>([])
+const groupTargetList = ref<GroupTarget[]>([])
 const route = useRoute()
 const groupId = Number(route.params.groupId)
 const loaded = ref(false)

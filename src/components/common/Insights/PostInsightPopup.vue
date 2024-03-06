@@ -55,7 +55,7 @@
 <script setup lang="ts">
 import { Ref, ref } from 'vue'
 import { InsightsApi } from '@/network/api/insights'
-import { Insight } from '@/types/insight'
+import { Insight } from '@/types'
 
 // TODO: load assets
 

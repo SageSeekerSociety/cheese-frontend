@@ -1,7 +1,4 @@
-import { Answer } from '@/types/answer'
-import { Page } from '@/types/page'
-import { Question } from '@/types/question'
-import { User } from '@/types/users'
+import { Answer, Page, Question, User } from '@/types'
 
 export type GetAnswerListResponse = {
   answers: Answer[]

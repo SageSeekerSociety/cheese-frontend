@@ -24,7 +24,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { UserApi } from '@/network/api/users'
 import { useRoute } from 'vue-router'
-import { Question } from '@/types/question'
+import { Question } from '@/types'
 
 const route = useRoute()
 const userID = computed(() => parseInt(route.params.id[0], 10))

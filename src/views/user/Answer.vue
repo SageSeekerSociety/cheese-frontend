@@ -9,7 +9,7 @@
     <v-card-actions>
       <v-btn color="primary" variant="tonal">
         <v-icon size="24" class="me-2">mdi-menu-up</v-icon>
-        {{ item.agree_count }}
+        {{ item.attitudes.difference }}
       </v-btn>
       <v-btn color="primary" variant="tonal" min-width="32px">
         <v-icon size="24">mdi-menu-down</v-icon>
@@ -33,8 +33,8 @@
 import { ref, onMounted, computed } from 'vue'
 import { UserApi } from '@/network/api/users'
 import { useRoute } from 'vue-router'
-import { Answer } from '@/types/answer'
-import { Page } from '@/types/page'
+import { Answer } from '@/types'
+import { Page } from '@/types'
 
 const route = useRoute()
 const userID = computed(() => parseInt(route.params.id[0], 10))
@@ -58,4 +58,3 @@ async function fetchData() {
   loaded.value = true
 }
 </script>
-@/network/api/users/user

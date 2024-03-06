@@ -74,7 +74,7 @@ import GroupCard from '@/components/group/GroupCard.vue'
 import { GroupApi } from '@/network/api/group'
 import { useRoute } from 'vue-router'
 import { onMounted } from 'vue'
-import { Group } from '@/types/group'
+import { Group } from '@/types'
 import { useRouter } from 'vue-router'
 
 const groupInfo = ref<Group>({} as Group)

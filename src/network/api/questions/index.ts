@@ -1,4 +1,4 @@
-import { Question } from '@/types/question'
+import { Question } from '@/types'
 import ApiInstance from '../index'
 
 export namespace QuestionApi {

@@ -1,4 +1,4 @@
-import { Group, Page, Question, Target, User } from '@/types'
+import { Group, Page, Question, GroupTarget, User } from '@/types'
 
 export type GetGroupListRes = {
   groups: Group[]
@@ -11,7 +11,7 @@ export type GetGroupQuestionListRes = {
 }
 
 export type GetGroupTargetListRes = {
-  targets: Target[]
+  targets: GroupTarget[]
   page: Page
 }
 

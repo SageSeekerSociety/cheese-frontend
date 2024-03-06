@@ -19,7 +19,7 @@ import { setTitle } from '@/utils/title'
 import { onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
 import { onMounted, ref, computed, watch } from 'vue'
 import { QuestionApi } from '@/network/api/questions'
-import { Question } from '@/types/question'
+import { Question } from '@/types'
 import { parse } from '@/utils/parser'
 
 const route = useRoute()

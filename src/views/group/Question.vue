@@ -10,7 +10,7 @@
       <v-card-actions>
         <v-btn color="primary" variant="tonal">
           <v-icon size="24" class="me-2">mdi-menu-up</v-icon>
-          {{ item.like_count }}
+          {{ item.attitudes.difference }}
         </v-btn>
         <v-btn color="primary" variant="tonal" min-width="32px">
           <v-icon size="24">mdi-menu-down</v-icon>
@@ -35,7 +35,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { GroupApi } from '@/network/api/group'
 import { useRoute } from 'vue-router'
-import { Question } from '@/types/question'
+import { Question } from '@/types'
 
 const groupQuestionList = ref<Question[]>([])
 const route = useRoute()

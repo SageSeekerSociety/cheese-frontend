@@ -52,7 +52,7 @@
 
 <script setup lang="ts">
 import { GroupApi } from '@/network/api/group'
-import { Group } from '@/types/group'
+import { Group } from '@/types'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 

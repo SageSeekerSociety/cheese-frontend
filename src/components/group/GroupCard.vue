@@ -36,7 +36,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Group } from '@/types/group'
+import { Group } from '@/types'
 
 const { profile } = withDefaults(
   defineProps<{

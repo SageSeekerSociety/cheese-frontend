@@ -33,7 +33,7 @@
         <template #default="{ isHovering, props }">
           <v-btn color="red" class="like-button" :active="false" v-bind="props">
             <v-icon class="me-2 like-button-icon">{{ isHovering ? activeIcon : inactiveIcon }}</v-icon>
-            {{ item.like_count === 0 ? '喜欢' : formatView(item.like_count) }}
+            {{ item.attitudes.positive_count === 0 ? '喜欢' : formatView(item.attitudes.positive_count) }}
           </v-btn>
         </template>
       </v-hover>
@@ -53,8 +53,9 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Insight } from '@/types/insight'
+import { Insight } from '@/types'
 import { computed } from 'vue'
+import { NewAttitudeType } from '@/constants'
 
 const viewerOptions = {
   url: 'data-src',
@@ -82,8 +83,12 @@ const props = withDefaults(
   }
 )
 const item = computed(() => props.item)
-const inactiveIcon = computed(() => (props.item.is_like ? 'mdi-heart' : 'mdi-heart-outline'))
-const activeIcon = computed(() => (props.item.is_like ? 'mdi-heart-outline' : 'mdi-heart'))
+const inactiveIcon = computed(() =>
+  props.item.attitudes.user_attitude === NewAttitudeType.Positive ? 'mdi-heart' : 'mdi-heart-outline'
+)
+const activeIcon = computed(() =>
+  props.item.attitudes.user_attitude === NewAttitudeType.Positive ? 'mdi-heart-outline' : 'mdi-heart'
+)
 const edited = ref(props.item.created_at !== props.item.updated_at)
 const displayDate = computed(() => {
   if (!edited.value) {

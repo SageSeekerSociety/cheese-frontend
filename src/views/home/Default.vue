@@ -79,6 +79,8 @@
 <script setup lang="ts">
 import PostInsightEntry from '@/components/common/Insights/PostInsightPopup.vue'
 import InsightCard from '@/components/common/Insights/InsightCard.vue'
+import { Insight } from '@/types'
+import { NewAttitudeType } from '@/constants'
 
 const fakeQuestionData = [
   {
@@ -111,7 +113,7 @@ const fakeQuestionData = [
   },
 ]
 
-const fakeInsightData = [
+const fakeInsightData: Insight[] = [
   {
     id: -1,
     content: '我们正在使用 Vue 3 开发这个应用。',
@@ -121,16 +123,24 @@ const fakeInsightData = [
       nickname: '李华',
       avatar: 'https://avatars.githubusercontent.com/u/107245128',
       intro: 'Amateur Web developer',
+      follow_count: 0,
+      fans_count: 0,
+      question_count: 0,
+      answer_count: 0,
+    },
+    attitudes: {
+      positive_count: 123,
+      negative_count: 0,
+      difference: 123,
+      user_attitude: NewAttitudeType.None,
     },
     created_at: 20240101,
     updated_at: 20240102,
-    is_like: true,
-    like_count: 87825,
     comment_count: 0,
     view_count: 15080,
     medias: [
       {
-        id: -3,
+        material_id: 1,
         type: 'image',
         url: 'https://www.positivethinking.tech/wp-content/uploads/2021/01/Logo-Vuejs.png',
         meta: {
@@ -139,9 +149,10 @@ const fakeInsightData = [
           size: 1,
           thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/f/f1/Vue.png',
         },
+        created_at: 20240101,
       },
       {
-        id: -3,
+        material_id: -3,
         type: 'image',
         url: 'https://www.positivethinking.tech/wp-content/uploads/2021/01/Logo-Vuejs.png',
         meta: {
@@ -150,9 +161,10 @@ const fakeInsightData = [
           size: 1,
           thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/f/f1/Vue.png',
         },
+        created_at: 20240101,
       },
       {
-        id: -3,
+        material_id: -3,
         type: 'image',
         url: 'https://www.positivethinking.tech/wp-content/uploads/2021/01/Logo-Vuejs.png',
         meta: {
@@ -161,10 +173,10 @@ const fakeInsightData = [
           size: 1,
           thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/f/f1/Vue.png',
         },
+        created_at: 20240101,
       },
-
       {
-        id: -3,
+        material_id: -3,
         type: 'image',
         url: 'https://www.positivethinking.tech/wp-content/uploads/2021/01/Logo-Vuejs.png',
         meta: {
@@ -173,9 +185,10 @@ const fakeInsightData = [
           size: 1,
           thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/f/f1/Vue.png',
         },
+        created_at: 20240101,
       },
       {
-        id: -4,
+        material_id: -4,
         type: 'image',
         url: 'https://cdn.usdairy.com/optimize/getmedia/b5108b6f-59c3-4cc4-b1d5-4b9b0d1e0c54/swiss.jpg.jpg.aspx?format=webp',
         meta: {
@@ -185,6 +198,7 @@ const fakeInsightData = [
           thumbnail:
             'https://cdn.usdairy.com/optimize/getmedia/b5108b6f-59c3-4cc4-b1d5-4b9b0d1e0c54/swiss.jpg.jpg.aspx?format=webp',
         },
+        created_at: 20240101,
       },
     ],
   },
@@ -197,11 +211,19 @@ const fakeInsightData = [
       nickname: 'Mike',
       avatar: 'https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/man-person-icon.png',
       intro: 'From ITMO University',
+      follow_count: 0,
+      fans_count: 0,
+      question_count: 0,
+      answer_count: 0,
+    },
+    attitudes: {
+      positive_count: 123,
+      negative_count: 0,
+      difference: 123,
+      user_attitude: NewAttitudeType.None,
     },
     created_at: 20000101,
     updated_at: 20000101,
-    is_like: false,
-    like_count: 0,
     comment_count: 7,
     view_count: 87,
     medias: [],

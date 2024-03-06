@@ -1,6 +1,6 @@
 import { GetGroupListRes, GetGroupMemberListRes, GetGroupQuestionListRes, GetGroupTargetListRes } from './types'
 import ApiInstance from '../index'
-import { Group } from '@/types/group'
+import { Group } from '@/types'
 
 export namespace GroupApi {
   export const getAllGroupList = (data: { pageStart: number; pageSize: number }) =>
