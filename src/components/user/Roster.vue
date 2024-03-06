@@ -1,7 +1,13 @@
 <template>
   <v-list v-if="users.length" lines="two">
-    <v-list-subheader inset>展示了{{ users.length }}位用户</v-list-subheader>
-    <v-list-item v-for="user in users" :key="user.id" link :to="{ name: 'User', params: { id: user.id } }">
+    <v-list-subheader>展示了{{ users.length }}位用户</v-list-subheader>
+    <v-list-item
+      v-for="user in users"
+      :key="user.id"
+      exact
+      link
+      :to="{ name: 'UserQuestion', params: { id: user.id } }"
+    >
       <v-row>
         <v-col cols="1">
           <user-avatar :has-avatar="!!user.avatar && user.avatar !== 'default.jpg'" :avatar="user.avatar" size="40" />
