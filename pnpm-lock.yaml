@@ -95,9 +95,15 @@ dependencies:
   stylelint:
     specifier: ^16.2.1
     version: 16.2.1(typescript@5.3.3)
+  v-viewer:
+    specifier: ^3.0.13
+    version: 3.0.13(viewerjs@1.11.6)(vue@3.4.19)
   vee-validate:
     specifier: ^4.12.5
     version: 4.12.5(vue@3.4.19)
+  viewerjs:
+    specifier: ^1.11.6
+    version: 1.11.6
   vue:
     specifier: ^3.4.19
     version: 3.4.19(typescript@5.3.3)
@@ -5371,6 +5377,17 @@ packages:
     hasBin: true
     dev: false
 
+  /v-viewer@3.0.13(viewerjs@1.11.6)(vue@3.4.19):
+    resolution: {integrity: sha512-T8pgGzlF0ZCHVpD/32OKsD8MlpI6tqYP3n1XLcSjvGQMc0ABn8nJ4AumxvzAKVQrLRWtDTG6qRGAyCPCmi7ceA==}
+    peerDependencies:
+      viewerjs: ^1.11.0
+      vue: ^3.0.0
+    dependencies:
+      lodash-es: 4.17.21
+      viewerjs: 1.11.6
+      vue: 3.4.19(typescript@5.3.3)
+    dev: false
+
   /validate-npm-package-license@3.0.4:
     resolution: {integrity: sha512-DpKm2Ui/xN7/HQKCtpZxoRWBhZ9Z0kqtygG8XCgNQ8ZlDnxuQmWhj566j8fN4Cu3/JmbhsDo7fcAJq4s9h27Ew==}
     dependencies:
@@ -5390,6 +5407,10 @@ packages:
       '@vue/devtools-api': 6.5.1
       type-fest: 4.10.2
       vue: 3.4.19(typescript@5.3.3)
+    dev: false
+
+  /viewerjs@1.11.6:
+    resolution: {integrity: sha512-TlhdSp2oEOLFXvEp4psKaeTjR5zBjTRcM/sHUN8PkV1UWuY8HKC8n7GaVdW5Xqnwdr/F1OmzLik1QwDjI4w/nw==}
     dev: false
 
   /vite-node@1.2.2(@types/node@18.19.15)(sass@1.70.0):
