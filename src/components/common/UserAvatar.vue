@@ -7,9 +7,9 @@ import { computed } from 'vue'
 
 const { hasAvatar, avatar, size } = withDefaults(
   defineProps<{
-    hasAvatar: boolean
     avatar: string
-    size: string | number | undefined
+    hasAvatar?: boolean
+    size?: string | number
   }>(),
   {
     hasAvatar: () => false,
