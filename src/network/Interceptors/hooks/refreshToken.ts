@@ -4,7 +4,7 @@ import { Local } from '../../utils/storage'
 import ApiInstance from '../../api'
 import { messageFailed } from '../../utils/showMessage'
 import { UserApi } from '../../api/users'
-import { useRouter } from 'vue-router'
+import router from '@/router'
 import AccountService from '@/services/account'
 
 const MAX_ERROR_COUNT = 5
@@ -12,8 +12,6 @@ const MAX_ERROR_COUNT = 5
 const queue: ((t: string) => any)[] = []
 let currentCount = 0
 let isRefreshing = false
-
-const router = useRouter()
 /*
 如使用react-router / vue-route请将 `window.location.replace('/login')` 推荐替换对应Api方法
 */
