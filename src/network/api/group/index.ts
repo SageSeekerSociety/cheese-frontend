@@ -1,6 +1,12 @@
-import { GetGroupListRes, GetGroupMemberListRes, GetGroupQuestionListRes, GetGroupTargetListRes } from './types'
+import {
+  GetGroupListRes,
+  GetGroupMemberListRes,
+  GetGroupQuestionListRes,
+  GetGroupTargetListRes,
+  GetGroupNameAvailablitiesRes,
+} from './types'
 import ApiInstance from '../index'
-import { Group } from '@/types'
+import { Group, GroupSettings } from '@/types'
 
 export namespace GroupApi {
   export const getAllGroupList = (data: { pageStart: number; pageSize: number }) =>
@@ -63,5 +69,17 @@ export namespace GroupApi {
       url: `https://stoplight.io/mocks/huanchengstudio/cheese/2398548/groups`,
       method: 'POST',
       data,
+    })
+  export const GetGroupNameAvailablities = (data: { name: string }) =>
+    ApiInstance.request<GetGroupNameAvailablitiesRes>({
+      url: `https://stoplight.io/mocks/huanchengstudio/cheese/2398548/groups/availablities/${data.name}/`,
+      method: 'GET',
+      data,
+    })
+  //todo: add cookie
+  export const GetGroupSettings = (groupid: number) =>
+    ApiInstance.request<GroupSettings>({
+      url: `https://stoplight.io/mocks/huanchengstudio/cheese/2398548/groups/${groupid}/settings`,
+      method: 'GET',
     })
 }

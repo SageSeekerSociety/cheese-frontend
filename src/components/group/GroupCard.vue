@@ -9,10 +9,9 @@
         src="https://cdn.vuetifyjs.com/images/parallax/material.jpg"
       />
       <v-container class="cut-align-center">
-        <v-avatar class="rounded-avatar" color="white" size="180" rounded="lg">
-          <!-- Your avatar content goes here -->
+        <!-- <v-avatar class="rounded-avatar" color="white" size="180" rounded="lg">
           <v-img v-if="profile" src="https://cdn.vuetifyjs.com/images/parallax/material.jpg" />
-        </v-avatar>
+        </v-avatar> -->
         <v-container class="info-wrapper">
           <div class="info-bar-upper">
             <span class="text-h4 font-weight-bold me-4">

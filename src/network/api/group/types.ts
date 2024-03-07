@@ -19,3 +19,7 @@ export type GetGroupMemberListRes = {
   users: User[]
   page: Page
 }
+export type GetGroupNameAvailablitiesRes = {
+  available: boolean
+  recommend: string[]
+}
