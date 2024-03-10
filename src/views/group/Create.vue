@@ -6,7 +6,7 @@
         <v-card-text>
           <v-alert v-if="error" closable :text="error" type="error" class="mb-4"></v-alert>
           <v-row>
-            <v-col cols="8">
+            <v-col cols="20">
               <v-form ref="signupForm" @submit.prevent="submit">
                 <v-text-field
                   v-model="name"
@@ -26,41 +26,7 @@
                   v-bind="nameProps"
                   required
                 />
-                <v-list-subheader inset>头像</v-list-subheader>
-                <v-file-input
-                  v-model="selectedFile"
-                  accept="image/*"
-                  prepend-icon="mdi-plus"
-                  label="选择文件"
-                  chips
-                  show-size
-                  show-size-hint
-                  outlined
-                  @change="handleFileChange"
-                />
               </v-form>
-            </v-col>
-            <v-col cols="4">
-              <v-list-subheader inset>预览</v-list-subheader>
-              <v-img height="200px" width="200px">
-                <v-img
-                  v-if="selectedFile.length > 0"
-                  :src="previewUrl"
-                  aspect-ratio="1"
-                  class="rounded-lg"
-                  rounded="0"
-                  size="180"
-                />
-                <v-img
-                  v-else
-                  :src="fakeavatar"
-                  color="grey-darken-1"
-                  aspect-ratio="1"
-                  class="rounded-lg"
-                  rounded="0"
-                  size="180"
-                />
-              </v-img>
             </v-col>
           </v-row>
         </v-card-text>
@@ -82,36 +48,12 @@ import { useRouter } from 'vue-router'
 import { useForm } from 'vee-validate'
 import { toast } from 'vuetify-sonner'
 import { REGEX_PASSWORD, vuetifyConfig } from '@/utils/form'
-
-import { ImageApi } from '@/network/api/image'
 import { ServerError } from '@/network/types/error'
+import { GroupApi } from '@/network/api/group'
 
 const error = ref('')
 const selectedFile = ref([])
 const previewUrl = ref('')
-
-const handleFileChange = () => {
-  if (selectedFile.value) {
-    readAvatar()
-  } else {
-    previewUrl.value = ''
-  }
-}
-
-const readAvatar = () => {
-  const reader = new FileReader()
-  reader.onload = (event) => {
-    previewUrl.value = event.target?.result as string
-  }
-  reader.readAsDataURL(selectedFile.value[0] as Blob)
-}
-const uploadAvatar = () => {
-  const formData = new FormData()
-  formData.append('file', selectedFile.value[0])
-  const result = ImageApi.upload(formData)
-  return result
-}
-
 const { handleSubmit, defineField, isSubmitting } = useForm({
   validationSchema: toTypedSchema(
     z.object({
@@ -132,9 +74,34 @@ const [name, nameProps] = defineField('name', vuetifyConfig)
 const [intro, introProps] = defineField('intro', vuetifyConfig)
 const router = useRouter()
 const fakeavatar = 'https://cdn.vuetifyjs.com/images/parallax/material.jpg'
-function submit() {
-  console.log('submit')
+
+// TODO
+async function submit() {
+  // try {
+  //   const response = GroupApi.GetGroupNameAvailablities(name).data.available
+  //   if (response.data.isNameTaken) {
+  //     ElMessage.error('名称已被占用')
+  //   } else {
+  //     const submitResponse = await axios.post('/api/submit', data)
+  //     // 处理提交响应
+  //   }
+  // } catch (error) {
+  //   console.error(error)
+  //   ElMessage.error('发生错误')
+  // }
 }
+// const login = handleSubmit(async (value) => {
+//   try {
+//     const { data } = await GroupApi.GetGroupNameAvailablities(value)
+//     AccountService.login(data.accessToken, data.user)
+//     toast.success('登录成功')
+//     router.replace('/')
+//   } catch (e) {
+//     if (e instanceof ServerError) {
+//       toast.error(e.message)
+//     }
+//   }
+// })
 // const submit = handleSubmit(async (value) => {
 //   try {
 //     await signupStore.startSignup(value)

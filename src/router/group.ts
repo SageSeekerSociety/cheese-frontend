@@ -9,32 +9,40 @@ export default {
     {
       path: '',
       name: 'GroupDefault',
-      component: () => import('@/views/group/Default.vue'),
+      component: () => import('@/views/group/GroupList.vue'),
     },
     {
       path: ':groupId', // 定义动态路由参数 groupId
-      name: 'GroupDetail',
-      component: () => import('@/views/group/Base.vue'), // 对应的视图组件
+      name: 'GroupID',
+      component: () => import('@/layouts/group/GroupId.vue'),
+      // components:  () => import('@/views/group/Base.vue'),
       children: [
         {
           path: '',
-          name: 'GroupQuestion',
-          component: () => import('@/views/group/Question.vue'), // 对应的视图组件
+          name: 'GroupDetail',
+          component: () => import('@/views/group/Base.vue'),
+          children: [
+            {
+              path: '',
+              name: 'GroupQuestion',
+              component: () => import('@/views/group/Question.vue'), // 对应的视图组件
+            },
+            {
+              path: 'target',
+              name: 'GroupTarget',
+              component: () => import('@/views/group/Target.vue'),
+            },
+            {
+              path: 'member',
+              name: 'GroupMember',
+              component: () => import('@/views/group/Member.vue'),
+            },
+          ],
         },
         {
-          path: 'target',
-          name: 'GroupTarget',
-          component: () => import('@/views/group/Target.vue'),
-        },
-        {
-          path: 'member',
-          name: 'GroupMember',
-          component: () => import('@/views/group/Member.vue'),
-        },
-        {
-          path: 'manage',
-          name: 'GroupManage',
-          component: () => import('@/views/group/Manage.vue'),
+          path: 'edit',
+          name: 'GroupEdit',
+          component: () => import('@/views/group/Edit.vue'),
         },
       ],
     },

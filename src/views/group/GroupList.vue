@@ -19,7 +19,7 @@
               <v-card-text>
                 <p style="font-size: 16px" class="py-2">
                   <v-icon size="24" class="me-2">mdi-account</v-icon>
-                  {{ item.owner.nickname }}
+                  {{ item.owner.user.nickname }}
                 </p>
                 <p style="font-size: 16px" class="py-2">
                   <v-icon size="24" class="me-2">mdi-text</v-icon>
