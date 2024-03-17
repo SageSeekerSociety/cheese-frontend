@@ -36,9 +36,9 @@
         <v-sheet rounded="lg">
           <v-list rounded="lg">
             <!-- <v-btn> Button</v-btn> -->
-            <v-list-item color="grey-lighten-4" link title="全部小组" @click="fetchAllGroupsData"></v-list-item>
-            <v-list-item color="grey-lighten-4" link title="我参与的小组"></v-list-item>
-            <v-list-item color="grey-lighten-4" link title="我管理的小组"></v-list-item>
+            <v-list-item color="grey-lighten-4" link title="最活跃月榜" @click="fetchAllGroupsData"></v-list-item>
+            <v-list-item color="grey-lighten-4" link title="新建的圈子"></v-list-item>
+            <v-list-item color="grey-lighten-4" link title="猜你喜欢"></v-list-item>
 
             <v-divider class="my-2"></v-divider>
 
