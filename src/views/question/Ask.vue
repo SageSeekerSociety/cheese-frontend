@@ -46,7 +46,7 @@ const submit = async () => {
   const content = JSON.stringify(outputData)
   const res = await QuestionApi.ask({ title: title.value, content, type: 0, topics: [] })
   toast.success('提问成功')
-  router.push({ name: 'QuestionDetail', params: { id: res.data.id } })
+  router.push({ name: 'QuestionAnswerList', params: { questionId: res.data.id } })
 }
 </script>
 
