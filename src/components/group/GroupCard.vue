@@ -21,11 +21,16 @@
           <div class="info-bar-lower">
             <span>
               <v-icon left>mdi-account</v-icon>
-              {{ profile.owner.nickname }}
+              {{ profile.owner.user.nickname }}
             </span>
             <span>
               <v-icon left>mdi-format-quote-open</v-icon>
               {{ profile.intro }}
+            </span>
+            <span>
+              <v-icon left>mdi-information</v-icon>
+              <a v-if="profile.member_count > 40" justify="center"> 大圈子</a>
+              <a v-else justify="center"> 小圈子</a>
             </span>
           </div>
         </v-container>
