@@ -1,6 +1,6 @@
 <template>
   <v-list v-if="users.length" lines="two">
-    <v-list-subheader>展示了{{ users.length }}位用户</v-list-subheader>
+    <v-list-subheader>{{ $t('users.showUsers', { count: users.length }) }}</v-list-subheader>
     <v-list-item
       v-for="user in users"
       :key="user.id"
