@@ -4,7 +4,7 @@
       <v-col>
         <v-sheet min-height="70vh" rounded="lg" class="py-1 px-1">
           <v-card v-for="item in groupList" :key="item.id" flat>
-            <router-link :to="{ name: 'GroupDetail', params: { groupId: item.id } }" class="custom-link">
+            <router-link :to="{ name: 'GroupQuestion', params: { groupId: item.id } }" class="custom-link">
               <v-card-title>
                 <div class="d-flex justify-space-between align-center">
                   <div>

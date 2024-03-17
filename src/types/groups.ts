@@ -82,6 +82,16 @@ export type GroupTargetCheckIn = {
   approved: boolean
 }
 
+export type GroupTargetCheckInStats = {
+  is_checked_in: boolean
+  continuous_count: number
+  continuous_rank: number
+  max_continuous_count: number
+  max_continuous_rank: number
+  total_count: number
+  total_rank: number
+}
+
 export type GroupJoinQuestion = {
   title: string
   content: string

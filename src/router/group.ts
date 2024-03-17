@@ -12,32 +12,24 @@ export default {
       component: () => import('@/views/group/GroupList.vue'),
     },
     {
-      path: ':groupId', // 定义动态路由参数 groupId
-      name: 'GroupID',
-      component: () => import('@/layouts/group/GroupId.vue'),
-      // components:  () => import('@/views/group/Base.vue'),
+      path: ':groupId',
+      name: 'GroupDetail',
+      component: () => import('@/views/group/Base.vue'),
       children: [
         {
           path: '',
-          name: 'GroupDetail',
-          component: () => import('@/views/group/Base.vue'),
-          children: [
-            {
-              path: '',
-              name: 'GroupQuestion',
-              component: () => import('@/views/group/Question.vue'), // 对应的视图组件
-            },
-            {
-              path: 'targets',
-              name: 'GroupTarget',
-              component: () => import('@/views/group/Target.vue'),
-            },
-            {
-              path: 'member',
-              name: 'GroupMember',
-              component: () => import('@/views/group/Member.vue'),
-            },
-          ],
+          name: 'GroupQuestion',
+          component: () => import('@/views/group/Question.vue'), // 对应的视图组件
+        },
+        {
+          path: 'targets',
+          name: 'GroupTarget',
+          component: () => import('@/views/group/Target.vue'),
+        },
+        {
+          path: 'member',
+          name: 'GroupMember',
+          component: () => import('@/views/group/Member.vue'),
         },
         {
           path: 'edit',

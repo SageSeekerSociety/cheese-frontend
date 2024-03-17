@@ -1,36 +1,50 @@
 <template>
-  <v-main v-if="loaded" class="bg-grey-lighten-3">
-    <group-card :profile="groupInfo" />
-    <v-container class="d-flex row">
-      <v-row>
-        <v-col class="pr-0">
-          <v-sheet rounded="lg">
-            <router-view />
-          </v-sheet>
-        </v-col>
-        <v-col cols="3">
-          <v-sheet class="pt-3 pb-3 rounded-lg">
-            <v-tabs v-model="selectedTab" direction="vertical">
+  <group-card v-if="loaded" :profile="groupInfo" />
+  <v-container>
+    <v-container fluid class="pa-0">
+      <v-row no-gutters>
+        <v-col>
+          <v-sheet rounded="lg" flat class="me-4">
+            <v-tabs v-model="selectedTab">
               <v-tab v-for="tab in tabs" :key="tab.label" :to="tab.route" exact>
                 {{ tab.label }}
               </v-tab>
             </v-tabs>
-            <v-divider class="my-2"></v-divider>
-            <v-list rounded="lg">
-              <v-list-item
-                v-for="linkitem in linkitems"
-                :key="linkitem.title"
-                :disabled="linkitem.disabled"
-                :title="linkitem.title"
-                style="font-size: 10px"
-                @click="linkitem.fun"
-              ></v-list-item>
-            </v-list>
+            <router-view />
           </v-sheet>
+        </v-col>
+        <v-col cols="3">
+          <v-card rounded="lg" flat>
+            <v-card-item>
+              <v-card-title> 小组信息 </v-card-title>
+            </v-card-item>
+            <v-card-text class="pa-0">
+              <v-list>
+                <v-list-item>
+                  <template #prepend>
+                    <v-icon>mdi-help</v-icon>
+                  </template>
+                  <v-list-item-title> {{ groupInfo.question_count }} 个问题 </v-list-item-title>
+                </v-list-item>
+                <v-list-item>
+                  <template #prepend>
+                    <v-icon>mdi-comment-question</v-icon>
+                  </template>
+                  <v-list-item-title> {{ groupInfo.answer_count }} 个回答 </v-list-item-title>
+                </v-list-item>
+                <v-list-item>
+                  <template #prepend>
+                    <v-icon>mdi-account-group</v-icon>
+                  </template>
+                  <v-list-item-title> {{ groupInfo.member_count }} 个成员 </v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-card-text>
+          </v-card>
         </v-col>
       </v-row>
     </v-container>
-  </v-main>
+  </v-container>
 </template>
 
 <script lang="ts" setup>
@@ -104,20 +118,6 @@ const tabs = [
 
 const linkitems = [
   {
-    title: '加入小组',
-    disabled: true,
-    fun: () => {
-      console.log('加入小组')
-    },
-  },
-  {
-    title: '退出小组',
-    disabled: false,
-    fun: () => {
-      console.log('退出小组')
-    },
-  },
-  {
     title: '创建问题',
     disabled: false,
     fun: () => {
@@ -141,4 +141,3 @@ const linkitems = [
   },
 ]
 </script>
-@/network/api/group/group
