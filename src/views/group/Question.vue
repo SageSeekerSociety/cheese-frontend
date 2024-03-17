@@ -1,5 +1,5 @@
 <template>
-  <v-card v-if="loaded">
+  <template v-if="loaded">
     <v-card v-for="item in groupQuestionList" :key="item.id" flat>
       <v-card-title
         ><span class="text-h6 font-weight-bold">{{ item.title }}</span></v-card-title
@@ -28,7 +28,10 @@
         </v-btn>
       </v-card-actions>
     </v-card>
-  </v-card>
+  </template>
+  <template v-else>
+    <v-skeleton-loader type="paragraph"></v-skeleton-loader>
+  </template>
 </template>
 
 <script setup lang="ts">

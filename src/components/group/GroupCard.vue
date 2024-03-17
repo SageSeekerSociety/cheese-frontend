@@ -1,40 +1,27 @@
 <template>
   <v-container class="pb-0">
-    <v-sheet class="profile-background-base" height="40vh" rounded="lg">
+    <v-sheet class="profile-background-base" rounded="lg">
       <v-img
-        class="rounded-t-lg"
-        height="65%"
-        aspect-ratio="16/9"
+        class="rounded-t-lg align-end pb-4"
+        height="200px"
         cover
         src="https://cdn.vuetifyjs.com/images/parallax/material.jpg"
-      />
-      <v-container class="cut-align-center">
-        <!-- <v-avatar class="rounded-avatar" color="white" size="180" rounded="lg">
-          <v-img v-if="profile" src="https://cdn.vuetifyjs.com/images/parallax/material.jpg" />
-        </v-avatar> -->
-        <v-container class="info-wrapper">
-          <div class="info-bar-upper">
-            <span class="text-h4 font-weight-bold me-4">
-              {{ profile.name }}
-            </span>
-          </div>
-          <div class="info-bar-lower">
-            <span>
-              <v-icon left>mdi-account</v-icon>
-              {{ profile.owner.user.nickname }}
-            </span>
-            <span>
-              <v-icon left>mdi-format-quote-open</v-icon>
-              {{ profile.intro }}
-            </span>
-            <span>
-              <v-icon left>mdi-information</v-icon>
-              <a v-if="profile.member_count > 40" justify="center"> 大圈子</a>
-              <a v-else justify="center"> 小圈子</a>
-            </span>
-          </div>
-        </v-container>
-      </v-container>
+      >
+        <span class="text-h4 font-weight-bold mx-8">
+          {{ profile.name }}
+          <v-chip> {{ profile.member_count > 40 ? '大圈子' : '小圈子' }} </v-chip>
+        </span>
+      </v-img>
+      <div class="py-4 mx-8 d-flex flex-column">
+        <span>
+          <v-icon left>mdi-account</v-icon>
+          {{ profile.owner.user.nickname }}
+        </span>
+        <span>
+          <v-icon left>mdi-format-quote-open</v-icon>
+          {{ profile.intro }}
+        </span>
+      </div>
     </v-sheet>
   </v-container>
 </template>
