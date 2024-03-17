@@ -1,26 +1,24 @@
 <template>
-  <!-- <v-card v-for="target in groupTargetList.targets" :key="target.id" min-height="100px" flat>
-    <v-card-title
-      ><span class="text-h6 font-weight-bold">{{ target.name }}</span></v-card-title
+  <template v-if="loaded">
+    <v-card
+      v-for="target in groupTargetList"
+      :key="target.id"
+      min-height="100px"
+      flat
+      :to="{ name: 'GroupTargetBase', params: { targetId: target.id } }"
     >
-    <v-card-text>
-      <p class="text-body-1">{{ item.author }}：{{ item.content }}</p>
-      <p class="text-body-1">{{ target.intro }}</p>
-    </v-card-text>
-    <v-divider></v-divider>
-  </v-card> -->
-  <v-card v-if="loaded" flat class="pt-2 pb-2 rounded-lg mx-auto pl-5 pr-5">
-    <v-card v-for="target in groupTargetList" :key="target.id" min-height="100px" flat>
-      <v-card-title
-        ><span class="text-h6 font-weight-bold">{{ target.name }}</span></v-card-title
-      >
+      <v-card-title>
+        <span class="text-h6 font-weight-bold">{{ target.name }}</span>
+      </v-card-title>
       <v-card-text>
         <!-- <p class="text-body-1">{{ item.author }}：{{ item.content }}</p> -->
         <p class="text-body-1">{{ target.intro }}</p>
       </v-card-text>
-      <v-divider></v-divider>
     </v-card>
-  </v-card>
+  </template>
+  <template v-else>
+    <v-skeleton-loader type="paragraph"></v-skeleton-loader>
+  </template>
 </template>
 
 <script setup lang="ts">
@@ -47,11 +45,11 @@ onMounted(() => {
   fetchGroupTargetList().then(({ data: { targets } }) => {
     groupTargetList.value = targets
     loaded.value = true
-    console.log('***')
-    console.log(groupId)
-    console.log('***')
+    // console.log('***')
+    // console.log(groupId)
+    // console.log('***')
 
-    console.log(groupTargetList.value)
+    // console.log(groupTargetList.value)
   })
 })
 </script>

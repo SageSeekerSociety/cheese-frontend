@@ -94,3 +94,10 @@ export type GroupSettings = {
   join_type: 'OPEN' | 'APPLICATION' | 'INVITATION_ONLY'
   join_questions: GroupJoinQuestion[]
 }
+
+export type GroupInfoPutData = {
+  name: string
+  intro: string
+  avatar: string
+  cover: string
+}

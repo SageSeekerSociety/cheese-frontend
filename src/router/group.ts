@@ -28,7 +28,7 @@ export default {
               component: () => import('@/views/group/Question.vue'), // 对应的视图组件
             },
             {
-              path: 'target',
+              path: 'targets',
               name: 'GroupTarget',
               component: () => import('@/views/group/Target.vue'),
             },
@@ -43,6 +43,11 @@ export default {
           path: 'edit',
           name: 'GroupEdit',
           component: () => import('@/views/group/Edit.vue'),
+        },
+        {
+          path: 'targets/:targetId',
+          name: 'GroupTargetBase',
+          component: () => import('@/views/group/target/TargetBase.vue'),
         },
       ],
     },

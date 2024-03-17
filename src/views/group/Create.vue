@@ -16,15 +16,18 @@
                   type="text"
                   v-bind="nameProps"
                   required
+                  variant="outlined"
                 />
-                <v-text-field
+
+                <v-textarea
                   v-model="intro"
                   label="圈子简述"
                   placeholder="请输入圈子简述"
-                  prepend-inner-icon="mdi-account"
+                  prepend-inner-icon="mdi-menu"
                   type="text"
                   v-bind="nameProps"
                   required
+                  variant="outlined"
                 />
               </v-form>
             </v-col>

@@ -1,6 +1,6 @@
 <template>
   <v-card flat class="pt-2 pb-2 rounded-lg mx-auto pl-5 pr-5">
-    <roster v-if="loaded" :users="userList" />
+    <MemberRoster v-if="loaded" :members="userList" />
   </v-card>
 </template>
 
@@ -8,18 +8,18 @@
 import { ref, onMounted } from 'vue'
 import { GroupApi } from '@/network/api/group'
 import { useRoute } from 'vue-router'
-import Roster from '@/components/user/Roster.vue'
+import MemberRoster from '@/components/group/MemberRoster.vue'
 import { User } from '@/types/users'
-
+import { GroupMember } from '@/types'
 const route = useRoute()
 // const userID = computed(() => parseInt(route.params.id[0], 10))
-const userList = ref<User[]>([])
+const userList = ref<GroupMember[]>([])
 const loaded = ref(false)
 const groupId = Number(route.params.groupId)
 
 onMounted(() => {
-  fetchData().then(({ data: { users } }) => {
-    userList.value = users
+  fetchData().then(({ data: { members } }) => {
+    userList.value = members
     loaded.value = true
     // console.log(userList.value.users.length)
   })

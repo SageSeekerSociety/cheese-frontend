@@ -44,14 +44,18 @@ export namespace GroupApi {
       url: `https://stoplight.io/mocks/huanchengstudio/cheese/2398548/groups/${groupid}`,
       method: 'GET',
     })
-  export const getGroupTargetList = (groupid: number, data: { pageStart: number; pageSize: number }) =>
+  export const getGroupTargetList = (groupId: number, data: { pageStart: number; pageSize: number }) =>
     ApiInstance.request<GetGroupTargetListRes>({
-      url: `https://stoplight.io/mocks/huanchengstudio/cheese/2398548/groups/${groupid}/targets`,
+      url: `https://stoplight.io/mocks/huanchengstudio/cheese/2398548/groups/${groupId}/targets`,
       method: 'GET',
       data: {
         pageStart: data.pageStart,
         pageSize: data.pageSize,
         type: 'recommend',
+      },
+      headers: {
+        Perfer: 'code=200, dynamic=true',
+        Accept: 'application/json',
       },
     })
   export const getGroupMemberList = (groupid: number, data: { pageStart: number; pageSize: number }) =>
@@ -61,6 +65,10 @@ export namespace GroupApi {
       data: {
         pageStart: data.pageStart,
         pageSize: data.pageSize,
+      },
+      headers: {
+        Prefer: 'code=200, dynamic=true',
+        Authorization: 'Bearer 123',
       },
     })
   //todo : add avatar, cookie, type

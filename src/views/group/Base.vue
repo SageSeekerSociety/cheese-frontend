@@ -94,7 +94,7 @@ const tabs = [
     },
   },
   {
-    label: '小组成员',
+    label: '圈子成员',
     route: {
       name: 'GroupMember',
       params: { groupId: route.params.groupId },
