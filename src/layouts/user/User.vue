@@ -16,10 +16,6 @@
                 {{ tab.label }}
               </v-tab>
             </v-tabs>
-
-            <!-- <div v-if="isActiveUser()">
-              <v-divider class="my-2" />
-            </div> -->
           </v-sheet>
         </v-col>
       </v-row>
@@ -28,11 +24,10 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, watch, computed, provide } from 'vue'
+import { ref, onMounted, computed, provide } from 'vue'
 import { useRoute, onBeforeRouteUpdate } from 'vue-router'
 import { UserApi } from '@/network/api/users'
 import { User } from '@/types/users'
-import AccountService from '@/services/account'
 import AppBar from '@/components/common/AppBar/AppBar.vue'
 import UserCard from '@/components/user/UserCard.vue'
 
@@ -41,10 +36,6 @@ const route = useRoute()
 const userId = computed(() => parseInt(route.params.id as string))
 const userData = ref({} as User)
 const loaded = ref(false)
-
-const isActiveUser = computed(() => {
-  return () => userId.value === AccountService._user.value?.id
-})
 
 const fetchData = async (userId: number) => {
   const {
@@ -57,14 +48,6 @@ const fetchData = async (userId: number) => {
 onMounted(async () => {
   await fetchData(userId.value)
 })
-
-// watch(
-//   // 切换用户时刷新
-//   () => route.params.id,
-//   () => {
-//     window.location.reload()
-//   }
-// )
 onBeforeRouteUpdate(async (to, from) => {
   if (to.params.id !== from.params.id) {
     await fetchData(parseInt(to.params.id as string))
@@ -72,18 +55,6 @@ onBeforeRouteUpdate(async (to, from) => {
 })
 
 console.log(route)
-
-// watch(
-//   () => route.name,
-//   (newRoute) => {
-//     if (!newRoute) return
-//     if (newRoute === 'User') {
-//       selectedTab.value = 'UserQuestion'
-//     } else {
-//       selectedTab.value = newRoute
-//     }
-//   }
-// )
 
 provide('userData', userData)
 
