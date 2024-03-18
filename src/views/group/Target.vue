@@ -1,7 +1,7 @@
 <template>
   <template v-if="loaded">
     <v-card
-      v-for="target in groupTargetList"
+      v-for="target in fakedata"
       :key="target.id"
       min-height="100px"
       flat
@@ -41,15 +41,75 @@ function fetchGroupTargetList() {
   return result
 }
 
-onMounted(() => {
-  fetchGroupTargetList().then(({ data: { targets } }) => {
-    groupTargetList.value = targets
-    loaded.value = true
-    // console.log('***')
-    // console.log(groupId)
-    // console.log('***')
+// onMounted(() => {
+//   fetchGroupTargetList().then(({ data: { targets } }) => {
+//     groupTargetList.value = targets
+loaded.value = true
+//     // console.log('***')
+//     // console.log(groupId)
+//     // console.log('***')
 
-    // console.log(groupTargetList.value)
-  })
-})
+//     // console.log(groupTargetList.value)
+//   })
+// })
+const fakedata = [
+  {
+    id: 123456789,
+    name: 'Target 1',
+    intro: '',
+    created_at: 1649251200,
+    is_timed: false,
+    frequency: 'once',
+    is_material_required: false,
+    start_time: 1649251300,
+    end_time: 1649251400,
+    materials: [
+      {
+        type: 'video',
+        allow_multiple: false,
+        allow_file_type: ['mp4', 'avi'],
+        title: 'Video Material',
+        description: 'Description for video material',
+        required: false,
+      },
+      {
+        type: 'image',
+        allow_multiple: false,
+        allow_file_type: ['jpg', 'png'],
+        title: 'Image Material',
+        description: 'Description for image material',
+        required: false,
+      },
+    ],
+  },
+  {
+    id: 987654321,
+    name: 'Target 2',
+    intro: '',
+    created_at: 1649251500,
+    is_timed: false,
+    frequency: 'daily',
+    is_material_required: false,
+    start_time: 1649251600,
+    end_time: 1649251700,
+    materials: [
+      {
+        type: 'file',
+        allow_multiple: false,
+        allow_file_type: ['pdf', 'docx'],
+        title: 'File Material',
+        description: 'Description for file material',
+        required: false,
+      },
+      {
+        type: 'video',
+        allow_multiple: false,
+        allow_file_type: ['mp4', 'avi'],
+        title: 'Video Material',
+        description: 'Description for video material',
+        required: false,
+      },
+    ],
+  },
+]
 </script>
