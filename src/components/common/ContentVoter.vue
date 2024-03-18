@@ -13,27 +13,40 @@
 </template>
 
 <script setup lang="ts">
+import { NewAttitudeType } from '@/constants'
 import { computed, toRefs } from 'vue'
 
 const emit = defineEmits(['upvote', 'downvote', 'cancelVote', 'clickCount'])
 
 const props = defineProps<{
   score: number
-  currentVote?: 'up' | 'down' | null
+  currentVote?: NewAttitudeType | 'up' | 'down' | null
 }>()
 
 const { score, currentVote } = toRefs(props)
 
+const trueCurrentVote = computed(() => {
+  if (currentVote.value === 'up' || currentVote.value === 'down' || currentVote.value === null) return currentVote.value
+  switch (currentVote.value) {
+    case NewAttitudeType.Positive:
+      return 'up'
+    case NewAttitudeType.Negative:
+      return 'down'
+    default:
+      return null
+  }
+})
+
 const upvoteBtnVariant = computed(() => {
-  return currentVote.value === 'up' ? 'flat' : 'tonal'
+  return trueCurrentVote.value === 'up' ? 'flat' : 'tonal'
 })
 
 const downvoteBtnVariant = computed(() => {
-  return currentVote.value === 'down' ? 'flat' : 'tonal'
+  return trueCurrentVote.value === 'down' ? 'flat' : 'tonal'
 })
 
 const upvote = () => {
-  if (currentVote.value === 'up') {
+  if (trueCurrentVote.value === 'up') {
     emit('cancelVote')
   } else {
     emit('upvote')
@@ -41,7 +54,7 @@ const upvote = () => {
 }
 
 const downvote = () => {
-  if (currentVote.value === 'down') {
+  if (trueCurrentVote.value === 'down') {
     emit('cancelVote')
   } else {
     emit('downvote')

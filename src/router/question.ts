@@ -15,12 +15,24 @@ export default {
       },
     },
     {
-      path: ':id(\\d+)',
+      path: ':questionId(\\d+)',
       name: 'QuestionDetail',
       component: () => import('@/views/question/Detail.vue'),
       meta: {
         title: '问题详情',
       },
+      children: [
+        {
+          path: '',
+          name: 'QuestionAnswerList',
+          component: () => import('@/views/question/DetailAnswerList.vue'),
+        },
+        {
+          path: 'answers/:answerId(\\d+)',
+          name: 'QuestionAnswer',
+          component: () => import('@/views/question/DetailAnswer.vue'),
+        },
+      ],
     },
   ],
 }
