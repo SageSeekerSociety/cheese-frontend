@@ -56,7 +56,57 @@ import { onMounted } from 'vue'
 import { Group } from '@/types'
 import { useRouter } from 'vue-router'
 
-const groupInfo = ref<Group>({} as Group)
+// const groupInfo = ref<Group>({} as Group)
+const groupInfo = {
+  id: 123456789,
+  name: 'Group A',
+  intro: "This is Group A's introduction",
+  owner: {
+    user: {
+      id: 987654321,
+      username: 'owner1',
+      nickname: 'Owner One',
+      avatar: 'https://example.com/avatar1.png',
+      intro: 'This user has not set an introduction yet.',
+      follow_count: 100,
+      fans_count: 50,
+      question_count: 20,
+      answer_count: 30,
+      is_follow: true,
+    },
+    membership: {
+      created_at: 1649251200,
+      from: 'application',
+      joined_at: 1649251300,
+      is_pending: false,
+    },
+    role: 'owner',
+    contributions: {
+      score: 1000,
+      question_count: 50,
+      answer_count: 80,
+      check_in_count: 10,
+    },
+  },
+  created_at: 1649251400,
+  updated_at: 1649251500,
+  member_count: 100,
+  question_count: 200,
+  answer_count: 300,
+  is_member: true,
+  topics: [
+    {
+      id: 1,
+      name: 'Topic A',
+    },
+    {
+      id: 2,
+      name: 'Topic B',
+    },
+  ],
+  role: 'admin',
+}
+
 const route = useRoute()
 const router = useRouter()
 const groupId = computed(() => Number(route.params.groupId))
@@ -70,19 +120,21 @@ watch(
     window.location.reload()
   }
 )
-onMounted(() => {
-  // console.log('***')
-  fetchGroupInfo().then(({ data: { group } }) => {
-    groupInfo.value = group
-    loaded.value = true
-    console.log(groupInfo.value)
-  })
-})
+// onMounted(() => {
+//   // console.log('***')
+//   fetchGroupInfo().then(({ data: { group } }) => {
+//     groupInfo.value = group
+loaded.value = true
+//     console.log(groupInfo.value)
+//   })
+// })
 
-function fetchGroupInfo() {
-  const result = GroupApi.getGroupInfo(groupId.value)
-  return result
-}
+// function fetchGroupInfo() {
+//   const result = GroupApi.getGroupInfo(groupId.value)
+//   return result
+// }
+
+function createTarget() {}
 
 // const fakeGroupData = {
 //   groupid: 520,
