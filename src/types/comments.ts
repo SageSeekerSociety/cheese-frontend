@@ -1,4 +1,4 @@
-import { CommentableType } from '@/constants'
+import { CommentTag, CommentableType } from '@/constants'
 import { User, AttitudeStats } from '.'
 
 export type Comment = {
@@ -9,4 +9,6 @@ export type Comment = {
   user: User
   created_at: number
   attitudes: AttitudeStats
+  tag?: CommentTag
+  sub_comments?: Comment[]
 }

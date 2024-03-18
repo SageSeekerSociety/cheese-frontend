@@ -1,6 +1,12 @@
 import ApiInstance from '../index'
-import { User } from '@/types/users'
-import { GetAnswerListResponse, GetQuestionListResponse, GetUserInfoResponse, UserList } from './types'
+import { User } from '@/types'
+import {
+  FollowUserResponse,
+  GetAnswerListResponse,
+  GetQuestionListResponse,
+  GetUserInfoResponse,
+  UserList,
+} from './types'
 
 export namespace UserApi {
   export interface AuthResponseDataType {
@@ -112,5 +118,17 @@ export namespace UserApi {
         pageStart: data.pageStart,
         pageSize: data.pageSize,
       },
+    })
+
+  export const followUser = (userId: number) =>
+    ApiInstance.request<FollowUserResponse>({
+      url: `/users/${userId}/followers`,
+      method: 'POST',
+    })
+
+  export const unfollowUser = (userId: number) =>
+    ApiInstance.request<FollowUserResponse>({
+      url: `/users/${userId}/followers`,
+      method: 'DELETE',
     })
 }

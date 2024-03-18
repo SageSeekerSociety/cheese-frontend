@@ -42,3 +42,8 @@ export enum GroupTargetMaterialType {
   Video = 'VIDEO',
   File = 'FILE',
 }
+
+export enum CommentTag {
+  Solved = 'SOLVED',
+  Ignored = 'IGNORED',
+}

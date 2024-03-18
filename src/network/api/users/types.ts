@@ -18,3 +18,7 @@ export type UserList = {
 export type GetUserInfoResponse = {
   user: User
 }
+
+export type FollowUserResponse = {
+  follow_count: number
+}
