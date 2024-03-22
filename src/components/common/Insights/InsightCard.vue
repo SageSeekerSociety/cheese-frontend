@@ -38,7 +38,7 @@
         </template>
       </v-hover>
       <v-btn min-width="0" variant="plain" color="on-background">
-        <v-icon class="minor-action-button">mdi-reply-outline</v-icon>
+        <v-icon class="minor-action-button" :onclick="toggleComments">mdi-reply-outline</v-icon>
         {{ item.comment_count === 0 ? '' : formatView(item.comment_count) }}
       </v-btn>
       <v-btn min-width="0" variant="plain" color="on-background">
@@ -48,6 +48,9 @@
         <v-icon class="minor-action-button">mdi-dots-horizontal</v-icon>
       </v-btn>
     </v-card-actions>
+    <v-container v-if="showComments">
+      <comment-box />
+    </v-container>
   </v-container>
 </template>
 
@@ -56,6 +59,7 @@ import { ref } from 'vue'
 import { Insight } from '@/types'
 import { computed } from 'vue'
 import { NewAttitudeType } from '@/constants'
+import CommentBox from '@/components/common/Comment/CommentBox.vue'
 
 const viewerOptions = {
   url: 'data-src',
@@ -104,6 +108,8 @@ const toolTipDate = computed(() => {
     return `发布于 ${formatTime(props.item.created_at)}`
   }
 })
+const showComments = ref(false)
+const toggleComments = () => (showComments.value = showComments.value ? false : true)
 </script>
 
 <style scoped>
