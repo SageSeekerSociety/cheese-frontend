@@ -3,7 +3,8 @@ import AccountService from '@/services/account'
 
 export default (config: InternalAxiosRequestConfig) => {
   const token = AccountService.accessToken
-  if (AccountService.loggedIn && token) {
+  const isRefreshingToken = config.url?.includes('/users/auth/refresh-token')
+  if (AccountService.loggedIn && token && !isRefreshingToken) {
     config.headers.Authorization = `Bearer ${token}`
   }
   return config
