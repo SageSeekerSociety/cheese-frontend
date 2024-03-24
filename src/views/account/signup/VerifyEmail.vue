@@ -22,6 +22,9 @@ import { useSignupStore } from '@/store/signup'
 import { toast } from 'vuetify-sonner'
 import AccountService from '@/services/account'
 import { vuetifyConfig } from '@/utils/form'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const signupStore = useSignupStore()
 
@@ -39,6 +42,7 @@ const submit = handleSubmit(async ({ otp }) => {
   if (res) {
     toast.success('注册成功')
     AccountService.login(res.data.accessToken, res.data.user)
+    router.push('/')
   }
 })
 </script>
