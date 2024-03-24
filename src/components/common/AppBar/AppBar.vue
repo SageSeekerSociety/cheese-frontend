@@ -46,7 +46,7 @@
             <div class="text-caption text-medium-emphasis">还差 50 声望值升级到下一级</div>
           </v-list-item>
           <v-divider class="mt-2"></v-divider>
-          <v-list-item to="/user">
+          <v-list-item :to="{ name: 'UserQuestion', params: { id: currentUser?.id } }">
             <template #prepend>
               <v-icon icon="mdi-account"></v-icon>
             </template>
@@ -76,6 +76,7 @@ const appBarProps = withDefaults(defineProps<AppBarProps>(), {
   links: () => [],
 })
 const loggedIn = computed(() => AccountService._loggedIn.value)
+const currentUser = computed(() => AccountService._user.value)
 const hasAvatar = computed(
   () =>
     !!AccountService._user.value?.avatar &&
