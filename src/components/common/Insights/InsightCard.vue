@@ -19,13 +19,23 @@
           <img :src="m.meta.thumbnail" :data-src="m.url" class="hover-dim media-thumbnail" />
         </template>
       </v-container>
+      <div>
+        <v-list v-if="'attachment' in item">
+          <v-list-item
+            :title="item.attachment?.title"
+            :subtitle="item.attachment?.description"
+            :prepend-icon="attachmentIcon"
+            @click="redirectToAttachment"
+          />
+        </v-list>
+      </div>
       <v-card-text min-width="0" class="d-flex ml-0 pl-0 pt-2 pb-0 text-subtitle-2 text-medium-emphasis">
         <div class="d-flex pl-0 ml-0 font-weight-regular">
           {{ displayDate }}&ensp;·&ensp;
           <v-tooltip v-if="edited" activator="parent" location="top">{{ toolTipDate }}</v-tooltip>
         </div>
         <div class="d-flex font-weight-bold">{{ formatView(item.view_count) }}</div>
-        <div class="d-flex font-weight-medium">&thinsp;阅读</div>
+        <div class="d-flex font-weight-medium">&thinsp;{{ $t('insights.card.reads') }}</div>
       </v-card-text>
     </v-card-text>
     <v-card-actions min-height="0" class="my-0 py-0 px-3">
@@ -33,7 +43,9 @@
         <template #default="{ isHovering, props }">
           <v-btn color="red" class="like-button" :active="false" v-bind="props">
             <v-icon class="me-2 like-button-icon">{{ isHovering ? activeIcon : inactiveIcon }}</v-icon>
-            {{ item.attitudes.positive_count === 0 ? '喜欢' : formatView(item.attitudes.positive_count) }}
+            {{
+              item.attitudes.positive_count === 0 ? $t('insights.card.like') : formatView(item.attitudes.positive_count)
+            }}
           </v-btn>
         </template>
       </v-hover>
@@ -60,6 +72,7 @@ import { Insight } from '@/types'
 import { computed } from 'vue'
 import { NewAttitudeType } from '@/constants'
 import CommentBox from '@/components/common/Comment/CommentBox.vue'
+import { t } from '@/i18n'
 
 const viewerOptions = {
   url: 'data-src',
@@ -93,23 +106,30 @@ const inactiveIcon = computed(() =>
 const activeIcon = computed(() =>
   props.item.attitudes.user_attitude === NewAttitudeType.Positive ? 'mdi-heart-outline' : 'mdi-heart'
 )
+const attachmentIcon = computed(() =>
+  props.item.attachment?.type === 'file' ? 'mdi-file-download' : 'mdi-link-variant'
+)
 const edited = ref(props.item.created_at !== props.item.updated_at)
 const displayDate = computed(() => {
   if (!edited.value) {
-    return `发布于 ${formatTime(props.item.created_at)}`
+    return `${t('insights.card.post')}${t('insights.card.at')} ${formatTime(props.item.created_at)}`
   } else {
-    return `编辑于 ${formatTime(props.item.updated_at)}`
+    return `${t('insights.card.edited')}${t('insights.card.at')} ${formatTime(props.item.updated_at)}`
   }
 })
 const toolTipDate = computed(() => {
   if (!edited.value) {
     return ''
   } else {
-    return `发布于 ${formatTime(props.item.created_at)}`
+    return `${t('insights.card.post')}${t('insights.card.at')} ${formatTime(props.item.created_at)}`
   }
 })
 const showComments = ref(false)
 const toggleComments = () => (showComments.value = showComments.value ? false : true)
+const redirectToAttachment = () => {
+  console.log(props.item.attachment?.url)
+  window.open(props.item.attachment?.url, '_blank')
+}
 </script>
 
 <style scoped>

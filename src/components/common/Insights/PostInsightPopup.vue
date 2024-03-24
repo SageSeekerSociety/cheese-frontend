@@ -5,35 +5,48 @@
         v-bind="props"
         class="rainbow"
         prepend-icon="mdi-fountain-pen-tip"
-        :text="(item === null ? '发布' : '编辑') + '动态'"
+        :text="(item === null ? $t('insights.popup.post') : $t('insights.popup.edit')) + $t('insights.general.insight')"
       />
     </template>
     <v-card max-height="80vh">
-      <v-card :title="(item === null ? '发布' : '编辑') + '动态'" class="elevation-0 popup-main">
-        <v-textarea v-model="text" label="What's happening?!" class="popup-editor" no-resize hide-details clearable />
+      <v-card
+        :title="
+          (item === null ? $t('insights.popup.post') : $t('insights.popup.edit')) + $t('insights.general.insight')
+        "
+        class="elevation-0 popup-main"
+      >
+        <v-textarea
+          v-model="text"
+          :label="$t('insights.popup.textAreaPlaceholder')"
+          class="popup-editor"
+          no-resize
+          hide-details
+          clearable
+        />
         <v-card v-for="index in assets.length" :key="index" class="elevation-0 popup-asset-item">
           <v-file-input
             :key="index"
             v-model="assets[index - 1]"
-            label="上传文件"
+            :label="$t('insights.popup.upload') + $t('insights.popup.media')"
             class="popup-asset-select"
+            prepend-icon=""
+            prepend-inner-icon="mdi-image"
             hide-details
           />
           <v-btn
             variant="plain"
             color="error"
             class="popup-asset-remove-button"
-            density="compact"
             icon="mdi-trash-can-outline"
             @click="() => removeFileItem(index - 1)"
           />
         </v-card>
-        <v-tooltip text="目前仅支持上传图片">
+        <v-tooltip :text="$t('insights.popup.addMediaButtonPlaceholder')">
           <template #activator="{ props }">
             <v-btn
               v-bind="props"
-              text="添加文件"
-              prepend-icon="mdi-plus"
+              :text="$t('insights.popup.add') + $t('insights.popup.media')"
+              prepend-icon="mdi-multimedia"
               color="deep-purple"
               variant="tonal"
               class="elevation-2 popup-add-button"
@@ -42,11 +55,35 @@
             />
           </template>
         </v-tooltip>
+        <v-checkbox
+          v-model="hasAttachment"
+          :label="$t('insights.popup.share') + $t('insights.popup.link') + '/' + $t('insights.popup.file')"
+        />
+        <v-container v-if="hasAttachment">
+          <v-select
+            v-model="attachmentType"
+            :label="$t('insights.popup.type')"
+            :items="[$t('insights.popup.link'), $t('insights.popup.file')]"
+          />
+          <v-file-input
+            v-if="attachmentType === $t('insights.popup.file')"
+            v-model="attachmentFile"
+            prepend-icon=""
+            prepend-inner-icon="mdi-file"
+            :label="$t('insights.popup.upload') + $t('insights.popup.file')"
+          />
+          <v-text-field
+            v-if="attachmentType === $t('insights.popup.link')"
+            v-model="userLink"
+            :label="$t('insights.popup.linkAreaPlaceholder')"
+            prepend-inner-icon="mdi-link"
+          />
+        </v-container>
       </v-card>
       <v-card-actions>
-        <v-btn text="放弃" color="error" @click="cancel" />
+        <v-btn :text="$t('insights.popup.discard')" color="error" @click="cancel" />
         <v-spacer />
-        <v-btn text="发布" color="primary" @click="submit" />
+        <v-btn :text="$t('insights.popup.post')" color="primary" @click="submit" />
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -56,8 +93,8 @@
 import { Ref, ref } from 'vue'
 import { InsightsApi } from '@/network/api/insights'
 import { Insight } from '@/types'
-
-// TODO: load assets
+import { computed } from 'vue'
+import { t } from '@/i18n'
 
 const props = withDefaults(
   defineProps<{
@@ -70,8 +107,18 @@ const props = withDefaults(
 const item: Insight | null = props.item
 const dialog = ref(false)
 const text = ref('')
+const hasAttachment = ref(false)
+const attachmentType = ref('')
+const attachmentFile: Ref<File[]> = ref([])
+const userLink = ref('')
 const assets: Ref<File[][]> = ref([])
 
+const translatedAttachmentType = computed(() => {
+  const mapping: { [key: string]: string | undefined } = {}
+  mapping[t('insights.popup.link')] = 'link'
+  mapping[t('insights.popup.file')] = 'file'
+  return mapping[attachmentType.value]
+})
 const newFileItem = () => {
   assets.value.push([])
 }
@@ -84,12 +131,35 @@ const cancel = () => {
 }
 const submit = () => {
   // TODO: implementation
+  const uploadedIds: string[] = []
+  assets.value.forEach((fileList: File[]) => {
+    const { id: id } = uploadFile(fileList[0])
+    uploadedIds.push(id)
+  })
+  const { id: attachmentId } = uploadFile(attachmentFile.value[0])
+
   if (item === null) {
     // post
+    const data: InsightsApi.PostInsightRequestData = {
+      content: text.value,
+      medias: uploadedIds, // TODO: adapt to new api
+    }
+    if (typeof attachmentId !== 'undefined' && typeof translatedAttachmentType.value !== 'undefined') {
+      data.attachment = {
+        type: translatedAttachmentType.value,
+        id: attachmentId,
+      }
+    }
   } else {
     // update
   }
   dialog.value = false
+}
+const uploadFile = (file: File) => {
+  // TODO: implementation (use material api)
+  return {
+    id: '0',
+  }
 }
 </script>
 
