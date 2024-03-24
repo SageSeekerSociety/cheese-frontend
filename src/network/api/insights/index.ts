@@ -1,5 +1,6 @@
-import { Insight } from '@/types'
+import { AttitudeInsightResponse, Insight } from '@/types'
 import ApiInstance from '../index'
+import { NewAttitudeType } from '@/constants'
 
 export namespace InsightsApi {
   // TODO: likes and comments
@@ -46,5 +47,11 @@ export namespace InsightsApi {
     ApiInstance.request<InsightDetailResponse>({
       url: `/insights/${id}`,
       method: 'GET',
+    })
+  export const postAttitude = (id: number, attitude: NewAttitudeType) =>
+    ApiInstance.request<AttitudeInsightResponse>({
+      url: `/insights/${id}/attitudes`,
+      method: 'POST',
+      data: { attitude_type: attitude },
     })
 }

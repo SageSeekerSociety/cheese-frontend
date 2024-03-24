@@ -13,6 +13,10 @@ export type Insight = {
   attachment?: InsightAttachment
 }
 
+export type AttitudeInsightResponse = {
+  attitudes: AttitudeStats
+}
+
 export type InsightMedia = {
   material_id: number
   created_at: number
