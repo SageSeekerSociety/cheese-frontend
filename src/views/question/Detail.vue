@@ -27,6 +27,11 @@
             </template>
           </v-card-item>
           <v-card-text>
+            <div class="d-flex flex-wrap align-center mb-4" style="gap: 8px">
+              <template v-for="topic in questionData.topics" :key="topic.id">
+                <v-chip color="primary" label>{{ topic.name }}</v-chip>
+              </template>
+            </div>
             <div class="d-flex align-center mb-2">
               <user-avatar :avatar="questionData.author.avatar" :size="24" />
               <span class="ms-2">{{ questionData.author.nickname }}</span>

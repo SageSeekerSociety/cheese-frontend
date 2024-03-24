@@ -1,4 +1,10 @@
 export default {
+  ask: {
+    buttons: {
+      addTopic: '添加话题（至少一个） | 添加话题（1/5） | 添加话题（{count}/5）',
+      createTopic: '创建 {name} 话题',
+    },
+  },
   detail: {
     createdAt: '发布于 {time}',
     updatedAt: '编辑于 {time}',
