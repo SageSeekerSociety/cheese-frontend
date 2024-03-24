@@ -8,7 +8,7 @@ export namespace InsightsApi {
   export type PostInsightRequestData = {
     content: string
     medias: { type: string; id: string }[]
-    attachment: { type: string; id: string }
+    attachment?: { type: string; id: string }
   }
 
   export type UpdateInsightRequestData = {
