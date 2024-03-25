@@ -14,6 +14,14 @@
           </v-card>
           <div class="d-flex justify-space-between align-center pa-4">
             <div>
+              <span class="text-h6 font-weight-bold">心愿瓶</span>
+            </div>
+          </div>
+          <v-card v-for="item in fakeRequestMaterialData" :key="item.id" flat>
+            <material-request-card :item="item" />
+          </v-card>
+          <div class="d-flex justify-space-between align-center pa-4">
+            <div>
               <span class="text-h6 font-weight-bold">热门问题</span>
             </div>
           </div>
@@ -79,7 +87,8 @@
 <script setup lang="ts">
 import PostInsightEntry from '@/components/common/Insights/PostInsightPopup.vue'
 import InsightCard from '@/components/common/Insights/InsightCard.vue'
-import { Insight } from '@/types'
+import MaterialRequestCard from '@/components/common/Materials/MaterialRequestCard.vue'
+import { Insight, MaterialRequest } from '@/types'
 import { NewAttitudeType } from '@/constants'
 
 const fakeQuestionData = [
@@ -227,6 +236,61 @@ const fakeInsightData: Insight[] = [
     comment_count: 7,
     view_count: 87,
     medias: [],
+  },
+]
+
+const fakeRequestMaterialData: MaterialRequest[] = [
+  {
+    id: 1,
+    title: '有人有ICS作业4吗？挺急的，在线等',
+    content: '好人一生平安，永远不死',
+    author: {
+      id: 1,
+      username: 'li_hua',
+      nickname: '李华',
+      avatar: 'https://avatars.githubusercontent.com/u/107245128',
+      intro: 'Amateur Web developer',
+      follow_count: 0,
+      fans_count: 0,
+      question_count: 0,
+      answer_count: 0,
+    },
+    attitudes: {
+      positive_count: 123,
+      negative_count: 0,
+      difference: 123,
+      user_attitude: NewAttitudeType.None,
+    },
+    created_at: 1711370030184,
+    updated_at: 1711370030184,
+    comment_count: 0,
+    view_count: 15080,
+  },
+  {
+    id: 2,
+    title: '一本满足',
+    content: '你说的对，但是一本好书可以改变人生',
+    author: {
+      id: 1,
+      username: 'li_hua',
+      nickname: '李华',
+      avatar: 'https://avatars.githubusercontent.com/u/107245128',
+      intro: 'Amateur Web developer',
+      follow_count: 0,
+      fans_count: 0,
+      question_count: 0,
+      answer_count: 0,
+    },
+    attitudes: {
+      positive_count: 123,
+      negative_count: 0,
+      difference: 123,
+      user_attitude: NewAttitudeType.None,
+    },
+    created_at: 1711370030184,
+    updated_at: 1711370030184,
+    comment_count: 0,
+    view_count: 15080,
   },
 ]
 </script>

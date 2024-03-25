@@ -1,3 +1,18 @@
+import { AttitudeStats } from './commons'
+import { User } from './users'
+
+export type MaterialRequest = {
+  id: number
+  title: string
+  content: string
+  author: User
+  created_at: number
+  updated_at: number
+  attitudes: AttitudeStats
+  comment_count: number
+  view_count: number
+}
+
 export type ImageMeta = {
   width: number
   height: number
