@@ -119,7 +119,7 @@ import { CommentTag } from '@/constants'
 
 const isPositive = ref(false)
 
-const comments: Comment[] = ref([
+const comments = ref<Comment[]>([
   {
     sub_comments: [
       {
