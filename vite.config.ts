@@ -2,6 +2,7 @@
 import vue from '@vitejs/plugin-vue'
 import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 import ViteFonts from 'unplugin-fonts/vite'
+import { prismjsPlugin } from 'vite-plugin-prismjs'
 
 // Utilities
 import { defineConfig } from 'vite'
@@ -26,6 +27,15 @@ export default defineConfig({
           },
         ],
       },
+    }),
+    prismjsPlugin({
+      // ['json', 'css'] 按需引入，'all' 所有语言
+      languages: 'all',
+      // 配置行号插件
+      plugins: ['line-numbers', 'copy-to-clipboard'],
+      // 主题名
+      theme: 'okaidia',
+      css: true,
     }),
   ],
   define: { 'process.env': {} },
