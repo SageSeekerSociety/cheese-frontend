@@ -1,5 +1,5 @@
 import { User } from '@/types/users'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 export class AccountService {
   _loggedIn = ref(false)
@@ -60,3 +60,5 @@ export class AccountService {
 const accountService = new AccountService()
 
 export default accountService
+
+export const currentUserId = computed(() => accountService.user?.id)

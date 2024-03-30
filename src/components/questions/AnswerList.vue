@@ -1,8 +1,6 @@
 <template>
   <v-sheet flat rounded="lg">
-    <slot name="header">
-      <div class="text-h6 font-weight-medium px-4 py-4">{{ $t('questions.answerList.title') }}</div>
-    </slot>
+    <slot name="header"></slot>
     <template v-if="refreshing">
       <v-skeleton-loader type="list-item-avatar, paragraph, button@2" />
       <v-skeleton-loader type="list-item-avatar, paragraph, button@2" />
@@ -12,7 +10,7 @@
         <blank-page />
       </template>
       <template v-else>
-        <answer-card v-for="answer in data" :key="answer.id" :answer="answer" />
+        <answer-card v-for="answer in data" :key="answer.id" :answer="answer" :question="questionData" />
       </template>
     </template>
   </v-sheet>
@@ -20,14 +18,17 @@
 
 <script setup lang="ts">
 import { usePaging } from '@/utils/paging'
-import { onMounted } from 'vue'
+import { inject, onMounted } from 'vue'
 import AnswerCard from '../answer/AnswerCard.vue'
 import BlankPage from '../common/BlankPage.vue'
 import { AnswersApi } from '@/network/api/answers'
+import { questionDataInjectionKey } from '@/keys'
 
 const props = defineProps<{
   questionId: number
 }>()
+
+const questionData = inject(questionDataInjectionKey)
 
 const { data, refresh, loadMore, refreshing, loadingMore } = usePaging(async (pageStart) => {
   const {

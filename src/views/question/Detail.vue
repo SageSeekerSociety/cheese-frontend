@@ -100,6 +100,31 @@
         <v-skeleton-loader v-else type="list-item-avatar, paragraph, button@2" />
       </v-col>
     </v-row>
+    <v-row v-if="questionData?.accepted_answer">
+      <v-col>
+        <v-alert
+          class="accept-alert"
+          type="success"
+          :title="$t('questions.detail.acceptedAnswerTitle', { user: questionData.accepted_answer.author.nickname })"
+        >
+          <template #append>
+            <v-btn
+              color="text"
+              variant="tonal"
+              :to="{
+                name: 'QuestionAnswer',
+                params: {
+                  questionId: questionData.id.toString(),
+                  answerId: questionData.accepted_answer.id.toString(),
+                },
+              }"
+            >
+              {{ $t('questions.detail.buttons.viewAcceptedAnswer') }}
+            </v-btn>
+          </template>
+        </v-alert>
+      </v-col>
+    </v-row>
     <v-row v-if="questionId">
       <v-col>
         <router-view />
@@ -143,7 +168,7 @@ import dayjs from 'dayjs'
 import EditorJS from '@editorjs/editorjs'
 import { setTitle } from '@/utils/title'
 import { onBeforeRouteUpdate, useRoute } from 'vue-router'
-import { onMounted, ref, computed, watch } from 'vue'
+import { onMounted, ref, computed, watch, provide } from 'vue'
 import { QuestionApi } from '@/network/api/questions'
 import { Question } from '@/types'
 import { parse } from '@/utils/parser'
@@ -157,6 +182,7 @@ import { useRouter } from 'vue-router'
 import { toast } from 'vuetify-sonner'
 import { t } from '@/i18n'
 import { NewAttitudeType } from '@/constants'
+import { questionDataInjectionKey } from '@/keys'
 
 let editor: EditorJS
 const onCreate = (editorInstance: EditorJS) => {
@@ -169,6 +195,8 @@ const router = useRouter()
 const questionId = computed(() => parseInt(route.params.questionId as string))
 
 const questionData = ref<Question | null>(null)
+
+provide(questionDataInjectionKey, questionData)
 
 const createdAt = computed(() => {
   if (questionData.value) {
@@ -284,5 +312,9 @@ watch(questionData, (newVal) => {
 
 .question-info {
   gap: 8px;
+}
+
+.accept-alert .v-alert__prepend {
+  align-self: stretch;
 }
 </style>

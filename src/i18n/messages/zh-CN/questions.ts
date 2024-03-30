@@ -18,6 +18,8 @@ export default {
       postAnswer: '发布回答',
       allAnswers: '查看全部回答 | 查看全部 {count} 条回答',
       invite: '邀请回答',
+      accept: '采纳这个回答',
+      viewAcceptedAnswer: '查看该回答',
     },
     postAnswerTitle: '回答问题',
     postAnswerPlaceholder: '请输入你的回答',
@@ -25,6 +27,7 @@ export default {
     postAnswerEmpty: '回答内容不能为空',
     postAnswerExist: '你已经回答过该问题，点击查看',
     inviteTitle: '邀请其他人回答，更快获得答案',
+    acceptedAnswerTitle: '来自 {user} 的回答已被采纳',
   },
   answerList: {
     title: '全部回答',

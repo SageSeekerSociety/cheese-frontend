@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-v-html -->
 <template>
   <v-card flat rounded="lg">
     <v-card-item>
@@ -7,9 +8,19 @@
         <user-avatar :avatar="answer.author.avatar" />
       </template>
     </v-card-item>
-    <v-card-text class="text-body-1 font-weight-regular answer-body-text pb-1">
-      <!-- eslint-disable-next-line vue/no-v-html -->
+    <v-card-text class="text-body-1 font-weight-regular answer-body-text pb-1 px-3">
       <div class="rich-content" v-html="contentHtml"></div>
+      <div v-if="question && question.author.id === currentUserId" class="mt-4">
+        <v-btn
+          v-if="!question.accepted_answer"
+          color="success"
+          variant="flat"
+          prepend-icon="mdi-check"
+          @click="acceptAnswer"
+        >
+          {{ $t('questions.detail.buttons.accept') }}
+        </v-btn>
+      </div>
     </v-card-text>
     <v-card-actions class="px-3">
       <content-voter
@@ -34,19 +45,29 @@
 </template>
 
 <script setup lang="ts">
-import { Answer } from '@/types'
+import { Answer, Question } from '@/types'
 import ContentVoter from '../common/ContentVoter.vue'
 import UserAvatar from '../common/UserAvatar.vue'
-import { toRefs, computed } from 'vue'
+import { toRefs, computed, inject } from 'vue'
 import { parse } from '@/utils/parser'
 import { AnswersApi } from '@/network/api/answers'
+import { QuestionApi } from '@/network/api/questions'
 import { NewAttitudeType } from '@/constants'
+import { currentUserId } from '@/services/account'
+import { toast } from 'vuetify-sonner'
+import { refreshInjectionKey } from '@/keys'
 
-const props = defineProps<{
-  answer: Answer
-}>()
+const props = withDefaults(
+  defineProps<{
+    answer: Answer
+    question?: Question | null
+  }>(),
+  {
+    question: null,
+  }
+)
 
-const { answer } = toRefs(props)
+const { answer, question } = toRefs(props)
 
 const contentHtml = computed(() => parse(JSON.parse(answer.value.content)))
 const currentVote = computed(() => {
@@ -59,6 +80,15 @@ const currentVote = computed(() => {
       return null
   }
 })
+
+const refresh = inject(refreshInjectionKey, () => {})
+
+const acceptAnswer = async () => {
+  if (!question.value) return
+  await QuestionApi.acceptAnswer(question.value.id, answer.value.id)
+  toast.success('采纳成功')
+  refresh()
+}
 
 const upvote = async () => {
   const { data } = await AnswersApi.postAttitude(answer.value.question_id, answer.value.id, NewAttitudeType.Positive)

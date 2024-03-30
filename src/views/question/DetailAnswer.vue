@@ -16,7 +16,7 @@
       }}
     </v-btn>
     <v-skeleton-loader v-else type="heading" class="mb-4" />
-    <answer-card v-if="answerData" :answer="answerData" />
+    <answer-card v-if="answerData" :answer="answerData" :question="questionData" />
     <v-skeleton-loader v-else type="list-item-avatar, paragraph, button@2" />
   </div>
 </template>
