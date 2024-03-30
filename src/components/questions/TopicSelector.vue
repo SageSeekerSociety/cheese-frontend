@@ -100,9 +100,10 @@ const selectTopic = (id: number) => {
     // create new topic
     createTopic(topic.name).then((topicId) => {
       if (!topics.value) {
-        topics.value = []
+        topics.value = [{ id: topicId, name: topic.name }]
+      } else {
+        topics.value.push({ id: topicId, name: topic.name })
       }
-      topics.value.push({ id: topicId, name: topic.name })
       closeTopicInput()
     })
     return
