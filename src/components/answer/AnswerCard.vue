@@ -9,7 +9,9 @@
       </template>
     </v-card-item>
     <v-card-text class="text-body-1 font-weight-regular answer-body-text pb-1 px-3">
-      <div class="rich-content" v-html="contentHtml"></div>
+      <collapsible-content :max-height="200">
+        <div class="rich-content" v-html="contentHtml"></div>
+      </collapsible-content>
       <div v-if="question && question.author.id === currentUserId" class="mt-4">
         <v-btn
           v-if="!question.accepted_answer"
@@ -48,6 +50,7 @@
 import { Answer, Question } from '@/types'
 import ContentVoter from '../common/ContentVoter.vue'
 import UserAvatar from '../common/UserAvatar.vue'
+import CollapsibleContent from '../common/CollapsibleContent.vue'
 import { toRefs, computed, inject } from 'vue'
 import { parse } from '@/utils/parser'
 import { AnswersApi } from '@/network/api/answers'

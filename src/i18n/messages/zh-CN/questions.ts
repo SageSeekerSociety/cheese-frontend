@@ -22,6 +22,7 @@ export default {
       addBounty: '悬赏',
       accept: '采纳这个回答',
       viewAcceptedAnswer: '查看该回答',
+      showAll: '展开全部',
     },
     postAnswerTitle: '回答问题',
     postAnswerPlaceholder: '请输入你的回答',

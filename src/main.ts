@@ -33,12 +33,14 @@ import { zodI18nMap } from 'zod-i18n-map'
 // Import your language translation files
 import translation from 'zod-i18n-map/locales/zh-CN/zod.json'
 import AccountService from '@/services/account'
+import { registerDirectives } from './directives'
 
 AccountService.init()
 
 const app = createApp(App)
 
 registerPlugins(app)
+registerDirectives(app)
 
 app.mount('#app')
 

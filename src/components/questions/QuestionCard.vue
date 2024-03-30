@@ -1,8 +1,13 @@
 <template>
   <v-card flat>
-    <v-card-title class="text-h6 font-weight-medium">{{ data.title }}</v-card-title>
+    <v-card-item>
+      <v-card-title class="text-h6 font-weight-medium">{{ data.title }}</v-card-title>
+    </v-card-item>
     <v-card-text class="text-body-1 font-weight-regular answer-body-text pb-1">
-      {{ data.author }}：{{ data.content }}
+      <collapsible-content :max-height="200">
+        <!-- eslint-disable-next-line vue/no-v-html -->
+        <div class="rich-content" v-html="contentHtml"></div>
+      </collapsible-content>
     </v-card-text>
     <v-card-actions class="px-3">
       <v-btn color="primary" variant="tonal">
@@ -29,8 +34,15 @@
 
 <script setup lang="ts">
 import { Question } from '@/types'
+import { parse } from '@/utils/parser'
+import { toRefs, computed } from 'vue'
+import CollapsibleContent from '../common/CollapsibleContent.vue'
 
-const { data } = defineProps<{
+const props = defineProps<{
   data: Question
 }>()
+
+const { data } = toRefs(props)
+
+const contentHtml = computed(() => parse(JSON.parse(data.value.content)))
 </script>
