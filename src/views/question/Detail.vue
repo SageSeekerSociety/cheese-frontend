@@ -36,6 +36,27 @@
               <user-avatar :avatar="questionData.author.avatar" :size="24" />
               <span class="ms-2">{{ questionData.author.nickname }}</span>
             </div>
+            <div class="d-flex align-center flex-wrap" style="gap: 8px">
+              <v-tooltip v-if="questionData.bounty && questionData.bounty > 0" bottom>
+                <template #activator="{ props }">
+                  <v-chip v-bind="props" color="primary" class="mb-2" prepend-icon="mdi-currency-usd">
+                    {{ $t('questions.detail.bounty', { bounty: questionData.bounty }) }}
+                    <template #append>
+                      <v-icon>mdi-cheese</v-icon>
+                      <v-icon size="12" class="ms-1">mdi-help-circle-outline</v-icon>
+                    </template>
+                  </v-chip>
+                </template>
+                <span>
+                  {{
+                    $t('questions.detail.bountyTip', {
+                      bounty: questionData.bounty,
+                      before: dayjs(questionData.bounty_start_at).add(3, 'days').format('YYYY-MM-DD HH:mm'),
+                    })
+                  }}
+                </span>
+              </v-tooltip>
+            </div>
             <!-- eslint-disable-next-line vue/no-v-html -->
             <div class="rich-content" v-html="contentHtml"></div>
           </v-card-text>
@@ -49,7 +70,11 @@
               @cancel-vote="attitudeQuestion(NewAttitudeType.None)"
             />
 
-            <v-dialog width="auto" scrollable>
+            <v-dialog
+              v-if="!questionData.accepted_answer && questionData.bounty && questionData.bounty > 0"
+              width="auto"
+              scrollable
+            >
               <template #activator="{ props: activatorProps }">
                 <v-btn variant="outlined" v-bind="activatorProps">
                   <v-icon size="18" class="me-2">mdi-account-multiple-plus</v-icon>
@@ -80,6 +105,49 @@
                     <v-spacer></v-spacer>
 
                     <v-btn text="关闭" @click="isActive.value = false"></v-btn>
+                  </v-card-actions>
+                </v-card>
+              </template>
+            </v-dialog>
+            <v-dialog v-else-if="!questionData.accepted_answer" v-model="bountyDialog" width="540px">
+              <template #activator="{ props: activatorProps }">
+                <v-btn prepend-icon="mdi-currency-usd" variant="outlined" v-bind="activatorProps">
+                  {{ $t('questions.detail.buttons.bounty') }}
+                </v-btn>
+              </template>
+
+              <template #default="{ isActive }">
+                <v-card>
+                  <v-card-item>
+                    <v-card-title class="text-h6">{{ $t('questions.detail.addBountyTitle') }}</v-card-title>
+                  </v-card-item>
+                  <v-card-text class="pa-1">
+                    <div class="px-3 mb-2">
+                      <v-slider
+                        v-model="addBountyInput"
+                        thumb-label="always"
+                        min="1"
+                        max="20"
+                        step="1"
+                        show-ticks
+                        hide-details
+                      >
+                        <template #append>
+                          <span style="vertical-align: baseline; min-width: 5rem; text-align: end">
+                            <span>悬赏 {{ addBountyInput }} </span><v-icon>mdi-cheese</v-icon>
+                          </span>
+                        </template>
+                      </v-slider>
+                    </div>
+                  </v-card-text>
+
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+
+                    <v-btn text="取消" @click="isActive.value = false"></v-btn>
+                    <v-btn variant="flat" color="primary" :loading="bountyLoading" @click="addBounty">{{
+                      $t('questions.detail.buttons.addBounty')
+                    }}</v-btn>
                   </v-card-actions>
                 </v-card>
               </template>
@@ -192,6 +260,10 @@ const onCreate = (editorInstance: EditorJS) => {
 const route = useRoute()
 const router = useRouter()
 
+const addBountyInput = ref<number>(1)
+const bountyDialog = ref(false)
+const bountyLoading = ref(false)
+
 const questionId = computed(() => parseInt(route.params.questionId as string))
 
 const questionData = ref<Question | null>(null)
@@ -223,6 +295,19 @@ const contentHtml = computed(() => {
   }
   return ''
 })
+
+const addBounty = async () => {
+  bountyLoading.value = true
+  try {
+    await QuestionApi.addBounty(questionData.value!.id, addBountyInput.value)
+    toast.success(t('questions.detail.addBountySuccess'))
+    bountyDialog.value = false
+  } catch (error) {
+    toast.error(`${error}`)
+  } finally {
+    bountyLoading.value = false
+  }
+}
 
 const load = async (id: number) => {
   const {

@@ -21,6 +21,7 @@ export type Question = {
   group?: Group
   has_bounty: boolean
   bounty: number
+  bounty_start_at: number
   is_solved: boolean
   accepted_answer?: Answer
 }
