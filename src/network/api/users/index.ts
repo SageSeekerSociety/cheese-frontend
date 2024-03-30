@@ -98,14 +98,14 @@ export namespace UserApi {
       },
     })
 
-  export const getQuestionList = (userid: number, data: { pageStart: number; pageSize: number }) =>
+  export const getQuestionList = (userId: number, pageStart?: number, pageSize: number = 20) =>
     ApiInstance.request<GetQuestionListResponse>({
       // url: `https://stoplight.io/mocks/huanchengstudio/cheese/2398548/users/${userid}/questions`,
-      url: `/users/${userid}/questions`,
+      url: `/users/${userId}/questions`,
       method: 'GET',
       data: {
-        pageStart: data.pageStart,
-        pageSize: data.pageSize,
+        page_start: pageStart,
+        page_size: pageSize,
       },
     })
 

@@ -7,6 +7,7 @@ import {
   QuestionInvitationRecommendResponse,
   QuestionInviteUserResponse,
   GetInvitationsResponse,
+  QuestionList,
 } from './types'
 import { NewAttitudeType } from '@/constants'
 
@@ -17,7 +18,15 @@ export namespace QuestionApi {
     type: number
     topics: number[]
     group_id?: number
+    bounty: number
   }
+
+  export const search = (query: string, pageStart?: number, pageSize: number = 20) =>
+    ApiInstance.request<QuestionList>({
+      url: '/questions',
+      method: 'GET',
+      params: { q: query, page_start: pageStart, page_size: pageSize },
+    })
 
   export const ask = (data: AskQuestionRequest) =>
     ApiInstance.request<AskQuestionResponse>({
@@ -75,5 +84,18 @@ export namespace QuestionApi {
       url: `/questions/${questionId}/invitations`,
       method: 'GET',
       params: { page_start: pageStart, page_size: pageSize },
+    })
+
+  export const addBounty = (questionId: number, bounty: number) =>
+    ApiInstance.request({
+      url: `/questions/${questionId}/bounty`,
+      method: 'PUT',
+      data: { bounty },
+    })
+
+  export const acceptAnswer = (questionId: number, answerId: number) =>
+    ApiInstance.request({
+      url: `/questions/${questionId}/acceptance?answer_id=${answerId}`,
+      method: 'PUT',
     })
 }
