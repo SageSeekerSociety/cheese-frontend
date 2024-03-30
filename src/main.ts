@@ -7,6 +7,7 @@
 import 'editorjs-latex/dist/editorjs-latex.bundle.css'
 import 'katex/dist/katex.min.css'
 import '@/styles/content.scss'
+import '@/styles/fonts.css'
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-cn'
 import relativeTime from 'dayjs/plugin/relativeTime'

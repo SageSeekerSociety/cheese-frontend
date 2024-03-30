@@ -1,5 +1,6 @@
 import edjsParser from 'editorjs-parser'
 import katex from 'katex'
+import Prism from 'prismjs'
 
 type NestedListItem = {
   content: string
@@ -79,6 +80,19 @@ const customParsers = {
     }
 
     return wrapper.outerHTML
+  },
+  code(data: { code: string; language: string; showlinenumbers: boolean; showCopyButton: boolean }) {
+    console.log(data)
+    const showLineNumbers = data.showlinenumbers ? 'line-numbers' : ''
+    const showCopyButton = data.showCopyButton ? 'copy-button' : ''
+    const container = makeDom('div', ['code-container'])
+    const preEl = makeDom('pre', [showLineNumbers, showCopyButton])
+    const codeEl = makeDom('code', [`language-${data.language}`], { innerHTML: data.code })
+    preEl.appendChild(codeEl)
+    container.appendChild(preEl)
+    Prism.highlightAllUnder(container)
+    console.log(container)
+    return container.innerHTML
   },
 }
 

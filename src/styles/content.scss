@@ -78,4 +78,9 @@
     border-color: #666666;
     background-color: #ffffff;
   }
+
+  pre,
+  code {
+    font-family: 'JetBrains Mono', Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace !important;
+  }
 }
