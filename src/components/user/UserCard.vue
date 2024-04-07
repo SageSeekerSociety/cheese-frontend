@@ -104,7 +104,7 @@
                 color="black"
                 :to="{ name: 'UserFollowing', params: { id: $route.params.id } }"
               >
-                {{ profile.fans_count }} <br />关注
+                {{ profile.fans_count }}<br />关注
               </v-btn>
               |
               <v-btn
