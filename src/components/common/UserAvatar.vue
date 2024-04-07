@@ -3,6 +3,7 @@
 </template>
 
 <script setup lang="ts">
+import { API_BASE_URL } from '@/network/utils'
 import { computed } from 'vue'
 
 const { hasAvatar, avatar, size } = withDefaults(
@@ -14,6 +15,7 @@ const { hasAvatar, avatar, size } = withDefaults(
   {
     hasAvatar: () => false,
     avatar: () => '',
+    size: () => 48,
   }
 )
 
@@ -23,7 +25,7 @@ const props = computed(() =>
         image: avatar,
       }
     : {
-        icon: 'mdi-account',
+        image: API_BASE_URL + '/avatars/default',
       }
 )
 </script>
