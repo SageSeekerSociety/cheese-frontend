@@ -22,3 +22,8 @@ export type GetUserInfoResponse = {
 export type FollowUserResponse = {
   follow_count: number
 }
+
+export type UpdateUserInfoResponse = {
+  code: number
+  message: string
+}
