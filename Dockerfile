@@ -7,7 +7,7 @@ RUN corepack enable
 FROM base as dev
 COPY . ./
 RUN pnpm install --frozen-lockfile
-CMD ["pnpm", "dev"]
+CMD ["pnpm", "dev", "--host"]
 
 FROM base as build
 ARG API_BASE_URL=localhost:8000
