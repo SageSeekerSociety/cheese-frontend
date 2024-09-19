@@ -42,6 +42,7 @@ const fetchData = async (userId: number) => {
     data: { user },
   } = await UserApi.getUserInfo(userId)
   userData.value = user
+  // console.log(user)
   loaded.value = true
 }
 
@@ -54,9 +55,14 @@ onBeforeRouteUpdate(async (to, from) => {
   }
 })
 
+const userRefresh = async () => {
+  await fetchData(userId.value)
+}
+
 console.log(route)
 
 provide('userData', userData)
+provide('userRefresh', userRefresh)
 
 const links = [
   {

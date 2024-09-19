@@ -5,6 +5,7 @@ import {
   GetAnswerListResponse,
   GetQuestionListResponse,
   GetUserInfoResponse,
+  UpdateUserInfoResponse,
   UserList,
 } from './types'
 
@@ -130,5 +131,13 @@ export namespace UserApi {
     ApiInstance.request<FollowUserResponse>({
       url: `/users/${userId}/followers`,
       method: 'DELETE',
+    })
+
+  export const updateUserInfo = (userId: number, data: { nickname: string; intro: string; avatarId: number }) =>
+    ApiInstance.request<UpdateUserInfoResponse>({
+      url: `/users/${userId}`,
+      method: 'PUT',
+      data,
+      withCredentials: true,
     })
 }
