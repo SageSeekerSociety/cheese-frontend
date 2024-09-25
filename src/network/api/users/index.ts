@@ -76,6 +76,13 @@ export namespace UserApi {
       method: 'GET',
     })
 
+  export const updateUserInfo = (userid: number, data: { nickname: string; intro: string; avatarId: number }) =>
+    ApiInstance.request({
+      url: `/users/${userid}`,
+      method: 'PUT',
+      data,
+    })
+
   export const getUserFollower = (userid: number, data: { pageStart: number; pageSize: number }) =>
     ApiInstance.request<UserList>({
       // url: `https://stoplight.io/mocks/huanchengstudio/cheese/2398548/users/${userid}/followers`,

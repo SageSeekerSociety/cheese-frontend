@@ -53,7 +53,13 @@
                                 color="grey-darken-1"
                               />
 
-                              <file-select v-model="selectedAvatar" accept="image/*" :max="1" class="uploader">
+                              <file-select
+                                v-model="selectedAvatar"
+                                accept="image/*"
+                                :max="1"
+                                class="uploader"
+                                @change="handleFileChange"
+                              >
                                 <v-btn icon>
                                   <v-icon>mdi-camera</v-icon>
                                 </v-btn>
@@ -124,13 +130,14 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
 import { User } from '@/types/users'
 import { UserApi } from '@/network/api/users'
-import { ImageApi } from '@/network/api/image'
+import { AvatarsApi } from '@/network/api/avatars'
 import { useForm } from 'vee-validate'
 import { vuetifyConfig } from '@/utils/form'
 import FileSelect from '../common/FileSelect.vue'
 import AccountService from '@/services/account'
 import UserAvatar from '../common/UserAvatar.vue'
 import { getAvatarUrl } from '@/utils/materials'
+import { toast } from 'vuetify-sonner'
 
 const profile = inject<Ref<User>>('userData', ref({} as User))
 
@@ -215,23 +222,29 @@ const readAvatar = () => {
     previewUrl.value = event.target?.result as string
   }
 }
-const uploadAvatar = () => {
-  if (!selectedAvatar.value) return
-  if (selectedAvatar.value.length === 0) return
-  const file = selectedAvatar.value[0]
-  const formData = new FormData()
-  formData.append('file', file)
-  const result = ImageApi.upload(formData)
-  return result
-}
-const submit = handleSubmit((values) => {
-  // uploadAvatar()
+const submit = handleSubmit(async (values) => {
+  let avatarId = profile.value.avatarId
+  if (selectedAvatar.value) {
+    try {
+      const { data } = await AvatarsApi.createAvatar(selectedAvatar.value[0])
+      avatarId = data.avatarId
+    } catch (error) {
+      toast.error('上传头像失败')
+      return
+    }
+  }
   const submitData = {
     nickname: values.nickname,
     intro: values.intro,
-    avatar: 'default.jpg',
+    avatarId: avatarId,
   }
-  alert(JSON.stringify(submitData, null, 2))
+  try {
+    await UserApi.updateUserInfo(profile.value.id, submitData)
+    toast.success('更新成功')
+    resetForm()
+  } catch (error) {
+    toast.error('更新失败')
+  }
 })
 </script>
 
