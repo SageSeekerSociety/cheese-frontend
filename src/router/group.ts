@@ -1,3 +1,5 @@
+import type { RouteRecordRaw } from 'vue-router'
+
 export default {
   path: '/groups',
   name: 'Group',
@@ -44,4 +46,4 @@ export default {
       component: () => import('@/views/group/Create.vue'),
     },
   ],
-}
+} as RouteRecordRaw

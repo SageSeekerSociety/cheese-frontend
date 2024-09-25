@@ -41,35 +41,30 @@
                     <v-card title="修改信息">
                       <form class="pt-2 pl-5 pr-5" @submit.prevent="submit">
                         <v-row>
+                          <v-col cols="4">
+                            <v-list-subheader inset>头像</v-list-subheader>
+                            <div class="avatar-upload">
+                              <v-img
+                                :src="previewUrl"
+                                aspect-ratio="1"
+                                class="rounded-lg avatar"
+                                rounded="0"
+                                size="180"
+                                color="grey-darken-1"
+                              />
+
+                              <file-select v-model="selectedAvatar" accept="image/*" :max="1" class="uploader">
+                                <v-btn icon>
+                                  <v-icon>mdi-camera</v-icon>
+                                </v-btn>
+                              </file-select>
+                            </div>
+                          </v-col>
                           <v-col cols="8">
                             <v-list-subheader inset>昵称</v-list-subheader>
                             <v-text-field v-model="selectedNickname" v-bind="nicknameProps"></v-text-field>
                             <v-list-subheader inset>个人简介</v-list-subheader>
                             <v-text-field v-model="selectedIntro" :counter="60" v-bind="introProps"></v-text-field>
-
-                            <v-list-subheader inset>头像</v-list-subheader>
-                            <v-file-input
-                              v-model="selectedAvatar"
-                              accept="image/*"
-                              prepend-icon="mdi-plus"
-                              label="选择文件"
-                              chips
-                              show-size
-                              outlined
-                              v-bind="avatarProps"
-                              @change="handleFileChange"
-                            />
-                          </v-col>
-                          <v-col cols="4">
-                            <v-list-subheader inset>预览</v-list-subheader>
-                            <v-img
-                              :src="previewUrl"
-                              aspect-ratio="1"
-                              class="rounded-lg"
-                              rounded="0"
-                              size="180"
-                              color="grey-darken-1"
-                            />
                           </v-col>
                         </v-row>
                       </form>
@@ -102,7 +97,7 @@
                 :ripple="false"
                 variant="plain"
                 color="black"
-                :to="{ name: 'UserFollowing', params: { id: $route.params.id } }"
+                :to="{ name: 'UserFollowing', params: { id: profile.id } }"
               >
                 {{ profile.fans_count }} <br />关注
               </v-btn>
@@ -111,7 +106,7 @@
                 :ripple="false"
                 variant="plain"
                 color="black"
-                :to="{ name: 'UserFollower', params: { id: $route.params.id } }"
+                :to="{ name: 'UserFollower', params: { id: profile.id } }"
               >
                 {{ profile.follow_count }} <br />粉丝
               </v-btn>
@@ -132,6 +127,7 @@ import { UserApi } from '@/network/api/users'
 import { ImageApi } from '@/network/api/image'
 import { useForm } from 'vee-validate'
 import { vuetifyConfig } from '@/utils/form'
+import FileSelect from '../common/FileSelect.vue'
 import AccountService from '@/services/account'
 import UserAvatar from '../common/UserAvatar.vue'
 
@@ -242,7 +238,7 @@ const submit = handleSubmit((values) => {
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .profile-background-base {
   position: relative;
 }
@@ -263,5 +259,16 @@ const submit = handleSubmit((values) => {
   padding-right: 0;
   padding-top: 0;
   padding-bottom: 0;
+}
+
+.avatar-upload {
+  position: relative;
+
+  .uploader {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    transform: translate(50%, 50%);
+  }
 }
 </style>

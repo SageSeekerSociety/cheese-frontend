@@ -31,3 +31,10 @@ export type Material = {
   url: string
   meta: ImageMeta | VideoMeta | AudioMeta | FileMeta
 }
+
+export type Attachment = {
+  id: number
+  type: string
+  url: string
+  meta: ImageMeta | VideoMeta | AudioMeta | FileMeta
+}

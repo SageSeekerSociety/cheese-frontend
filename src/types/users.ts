@@ -3,6 +3,7 @@ export type User = {
   username: string
   nickname: string
   avatar: string
+  avatarId: number
   intro: string
   follow_count: number
   fans_count: number

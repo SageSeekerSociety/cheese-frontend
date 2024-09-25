@@ -10,12 +10,13 @@ import '@/styles/content.scss'
 import '@/styles/fonts.css'
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-cn'
+import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 dayjs.extend(utc)
 dayjs.extend(timezone)
-
+dayjs.extend(duration)
 dayjs.locale('zh-cn')
 dayjs.extend(relativeTime)
 

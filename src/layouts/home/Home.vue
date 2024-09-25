@@ -21,9 +21,14 @@ const links = [
     path: '/questions',
   },
   {
-    key: 'Group',
-    title: '圈子',
-    path: '/groups',
+    key: 'Spaces',
+    title: '空间',
+    path: '/spaces',
+  },
+  {
+    key: 'Teams',
+    title: '小队',
+    path: '/teams',
   },
 ]
 </script>

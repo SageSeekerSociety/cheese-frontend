@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/no-v-html -->
 <template>
-  <v-card flat rounded="lg">
+  <v-card :id="`answer-${answer.id}`" flat rounded="lg">
     <v-card-item>
       <v-card-title>{{ answer.author.nickname }}</v-card-title>
       <v-card-subtitle>{{ answer.author.intro }}</v-card-subtitle>

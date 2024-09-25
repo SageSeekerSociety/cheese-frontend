@@ -1,0 +1,69 @@
+<template>
+  <div class="file-upload">
+    <input ref="input" type="file" :accept="accept" :multiple="max > 1" :max="max" @change="onFileChange" />
+    <div @click="onButtonClick">
+      <slot>
+        <v-btn>
+          <v-icon>mdi-upload</v-icon>
+          上传文件
+        </v-btn>
+      </slot>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, toRefs } from 'vue'
+
+const input = ref<HTMLInputElement | null>(null)
+
+const emit = defineEmits<{
+  error: [error: Error]
+}>()
+
+const files = defineModel<Array<File>>()
+const props = withDefaults(
+  defineProps<{
+    accept?: string
+    max: number
+  }>(),
+  {
+    accept: () => '*/*',
+    max: () => 1,
+  }
+)
+const { accept, max } = toRefs(props)
+
+const onFileChange = (e: Event) => {
+  const target = e.target as HTMLInputElement
+  if (!target.files) return
+  const newFiles = Array.from(target.files)
+  if (newFiles.length > max.value) {
+    emit('error', new Error(`最多只能上传 ${max.value} 个文件`))
+    return
+  }
+  files.value = newFiles
+  target.value = ''
+}
+
+const onButtonClick = () => {
+  input.value?.click()
+}
+</script>
+
+<style scoped lang="scss">
+.file-upload {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+
+  input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+  }
+}
+</style>

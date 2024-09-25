@@ -1,3 +1,5 @@
+import type { RouteRecordRaw } from 'vue-router'
+
 export default {
   path: '/users/:id',
   name: 'User',
@@ -29,4 +31,4 @@ export default {
       component: () => import('@/views/user/Follower.vue'),
     },
   ],
-}
+} as RouteRecordRaw

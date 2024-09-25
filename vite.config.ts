@@ -48,6 +48,39 @@ export default defineConfig({
   server: {
     port: 3000,
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vue: ['vue', 'vue-router'],
+          lodash: ['lodash'],
+          editorjs: ['@editorjs/editorjs'],
+          editorjsPlugins: [
+            '@editorjs/paragraph',
+            '@editorjs/header',
+            '@editorjs/quote',
+            '@editorjs/delimiter',
+            '@editorjs/warning',
+            '@editorjs/table',
+            '@editorjs/text-variant-tune',
+            '@editorjs/inline-code',
+            '@editorjs/underline',
+            '@editorjs/checklist',
+            '@editorjs/nested-list',
+          ],
+          editorjsLatex: ['editorjs-latex'],
+          editorjsMermaid: ['editorjs-mermaid'],
+          editorjsCodecup: ['@calumk/editorjs-codecup'],
+          dayjs: ['dayjs'],
+          // prismjs: ['prismjs'],
+          katex: ['katex'],
+        },
+        // manualChunks(id) {
+        //   console.log(id)
+        // },
+      },
+    },
+  },
   test: {
     // 启用类似 jest 的全局测试 API
     globals: true,

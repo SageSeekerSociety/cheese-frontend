@@ -24,13 +24,13 @@
       </v-btn>
       <v-menu v-if="loggedIn" open-on-hover location="bottom center" :offset="16" :close-on-content-click="false">
         <template #activator="{ props }">
-          <user-avatar :has-avatar="hasAvatar" :avatar="avatar" :size="32" v-bind="props"></user-avatar>
+          <user-avatar :avatar="avatar" :size="32" v-bind="props"></user-avatar>
         </template>
 
         <v-list max-width="300px">
           <v-list-item :title="nickname" :subtitle="intro">
             <template #prepend>
-              <user-avatar :has-avatar="hasAvatar" :avatar="avatar" :size="48"></user-avatar>
+              <user-avatar :avatar="avatar" :size="48"></user-avatar>
             </template>
           </v-list-item>
           <v-list-item>
@@ -72,6 +72,7 @@ import { computed, toRefs } from 'vue'
 import AccountService from '@/services/account'
 import UserAvatar from '../UserAvatar.vue'
 import { useRouter } from 'vue-router'
+import { getAvatarUrl } from '@/utils/materials'
 
 const appBarProps = withDefaults(defineProps<AppBarProps>(), {
   links: () => [],
@@ -89,13 +90,7 @@ const onSearchSubmit = () => {
 
 const loggedIn = computed(() => AccountService._loggedIn.value)
 const currentUser = computed(() => AccountService._user.value)
-const hasAvatar = computed(
-  () =>
-    !!AccountService._user.value?.avatar &&
-    AccountService._user.value?.avatar != 'default.jpg' &&
-    AccountService._user.value?.avatar != 'deafult.jpg'
-)
-const avatar = computed(() => AccountService._user.value?.avatar)
+const avatar = computed(() => getAvatarUrl(AccountService._user.value?.avatarId))
 const nickname = computed(() => AccountService._user.value?.nickname ?? '')
 const intro = computed(() => AccountService._user.value?.intro ?? '')
 </script>

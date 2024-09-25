@@ -175,4 +175,3 @@ const linkitems = [
   },
 ]
 </script>
-@/network/api/group/group

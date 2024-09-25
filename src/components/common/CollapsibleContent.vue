@@ -12,7 +12,7 @@
     <div v-if="!show" class="collapse-button-container" @click="show = true">
       <slot name="button">
         <v-btn variant="plain" block :ripple="false" prepend-icon="mdi-chevron-down" class="collapse-button">
-          {{ $t('questions.detail.buttons.showAll') }}
+          {{ t('questions.detail.buttons.showAll') }}
         </v-btn>
       </slot>
     </div>
@@ -21,6 +21,9 @@
 
 <script setup lang="ts">
 import { computed, ref, toRefs } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   maxHeight: number

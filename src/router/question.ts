@@ -1,3 +1,5 @@
+import type { RouteRecordRaw } from 'vue-router'
+
 export default {
   path: '/questions',
   name: 'Question',
@@ -35,4 +37,4 @@ export default {
       ],
     },
   ],
-}
+} as RouteRecordRaw

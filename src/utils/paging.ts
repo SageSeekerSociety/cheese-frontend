@@ -1,15 +1,20 @@
 import { Page } from '@/types'
-import { ref, Ref } from 'vue'
+import { ref, Ref, watch } from 'vue'
 
-type PagingFetcher<T> = (pageStart?: number) => Promise<{ data: T[]; page: Page }>
+type PagingFetcher<T, P> = (pageStart?: number, customParams?: P) => Promise<{ data: T[]; page: Page }>
 
 /**
  * Infinite scroll hook
  *
- * @param fetcher function to fetch data
- * @param initialPageStart item id to start fetching from, undefined to start from the beginning
+ * @param fetcher 获取数据的函数
+ * @param initialPageStart 开始获取的项目ID,undefined 表示从头开始
+ * @param initialCustomParams 初始自定义参数
  */
-export function usePaging<T>(fetcher: PagingFetcher<T>, initialPageStart?: number) {
+export function usePaging<T, P extends Record<string, any>>(
+  fetcher: PagingFetcher<T, P>,
+  initialPageStart?: number,
+  initialCustomParams: P = {} as P
+) {
   const data = ref<T[]>([]) as Ref<T[]>
   const pageCount = ref(0)
   const firstPageStart = ref(initialPageStart)
@@ -20,11 +25,14 @@ export function usePaging<T>(fetcher: PagingFetcher<T>, initialPageStart?: numbe
   const loadingMore = ref(false)
   const error = ref<Error | null>(null)
 
+  // 使用泛型 P 作为 customParams 的类型
+  const customParams = ref<P>(initialCustomParams)
+
   async function loadMore() {
     if (!hasMore.value || loadingMore.value || refreshing.value) return
     loadingMore.value = true
     try {
-      const { data: newData, page } = await fetcher(nextPageStart.value || 1)
+      const { data: newData, page } = await fetcher(nextPageStart.value || 1, customParams.value)
       data.value = [...data.value, ...newData]
       pageCount.value++
       nextPageStart.value = page.next_start
@@ -46,7 +54,7 @@ export function usePaging<T>(fetcher: PagingFetcher<T>, initialPageStart?: numbe
     if (refreshing.value) return
     refreshing.value = true
     try {
-      const { data: newData, page } = await fetcher(firstPageStart.value)
+      const { data: newData, page } = await fetcher(firstPageStart.value, customParams.value)
       data.value = newData
       pageCount.value = 1
       nextPageStart.value = page.next_start
@@ -64,7 +72,7 @@ export function usePaging<T>(fetcher: PagingFetcher<T>, initialPageStart?: numbe
     }
   }
 
-  function reset(newPageStart = initialPageStart) {
+  function reset(newPageStart = initialPageStart, newCustomParams?: P) {
     firstPageStart.value = newPageStart
     nextPageStart.value = newPageStart
     data.value = []
@@ -74,7 +82,21 @@ export function usePaging<T>(fetcher: PagingFetcher<T>, initialPageStart?: numbe
     refreshing.value = false
     loadingMore.value = false
     error.value = null
+
+    if (newCustomParams) {
+      customParams.value = newCustomParams
+    }
   }
+
+  // 监听自定义参数的变化
+  watch(
+    customParams,
+    () => {
+      reset(initialPageStart, customParams.value)
+      refresh()
+    },
+    { deep: true }
+  )
 
   return {
     data,
@@ -87,5 +109,6 @@ export function usePaging<T>(fetcher: PagingFetcher<T>, initialPageStart?: numbe
     hasMore,
     pageCount,
     nextPageStart,
+    customParams,
   }
 }
