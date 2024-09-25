@@ -33,7 +33,7 @@
               <user-avatar :avatar="avatar" :size="48"></user-avatar>
             </template>
           </v-list-item>
-          <v-list-item>
+          <!-- <v-list-item>
             <div class="d-flex ga-2">
               <v-chip prepend-icon="mdi-cheese" color="primary">50</v-chip>
             </div>
@@ -41,16 +41,16 @@
           <v-list-item>
             <v-progress-linear model-value="50" color="primary" rounded></v-progress-linear>
             <div class="text-caption text-medium-emphasis">还差 50 声望值升级到下一级</div>
-          </v-list-item>
+          </v-list-item> -->
           <v-divider class="mt-2"></v-divider>
-          <v-list-item :to="{ name: 'UserQuestion', params: { id: currentUser?.id } }">
+          <v-list-item :to="{ name: 'UserDefault', params: { id: currentUser?.id } }">
             <template #prepend>
               <v-icon icon="mdi-account"></v-icon>
             </template>
             <v-list-item-title>个人中心</v-list-item-title>
           </v-list-item>
           <v-divider></v-divider>
-          <v-list-item>
+          <v-list-item @click="onLogout">
             <template #prepend>
               <v-icon icon="mdi-exit-to-app"></v-icon>
             </template>
@@ -93,6 +93,11 @@ const currentUser = computed(() => AccountService._user.value)
 const avatar = computed(() => getAvatarUrl(AccountService._user.value?.avatarId))
 const nickname = computed(() => AccountService._user.value?.nickname ?? '')
 const intro = computed(() => AccountService._user.value?.intro ?? '')
+
+const onLogout = () => {
+  AccountService.logout()
+  router.push('/')
+}
 </script>
 
 <style>

@@ -46,7 +46,7 @@
         </v-sheet>
       </v-col>
       <v-col cols="3">
-        <v-btn color="primary" variant="flat" class="mb-4" block rounded="lg" :to="{ name: 'QuestionAsk' }">
+        <v-btn color="primary" variant="flat" class="mb-4" block rounded="lg" :to="{ name: 'QuestionAsk' }" disabled>
           提问
         </v-btn>
         <v-sheet rounded="lg">
