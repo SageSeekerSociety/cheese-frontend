@@ -6,6 +6,7 @@ export default {
   component: () => import('@/layouts/question/Question.vue'),
   meta: {
     title: '问答',
+    disabled: true,
   },
   children: [
     {
@@ -14,6 +15,7 @@ export default {
       component: () => import('@/views/question/Ask.vue'),
       meta: {
         title: '提问',
+        disabled: true,
       },
     },
     {
@@ -22,6 +24,7 @@ export default {
       component: () => import('@/views/question/Detail.vue'),
       meta: {
         title: '问题详情',
+        disabled: true,
       },
       children: [
         {

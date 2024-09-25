@@ -7,14 +7,13 @@ export default {
   children: [
     {
       path: '',
+      name: 'UserDefault',
+    },
+    {
+      path: 'question',
       name: 'UserQuestion',
       component: () => import('@/views/user/Question.vue'),
     },
-    // {
-    //   path: 'question',
-    //   name: 'UserQuestion',
-    //   component: () => import('@/views/user/Question.vue'),
-    // },
     {
       path: 'answer',
       name: 'UserAnswer',
@@ -31,4 +30,11 @@ export default {
       component: () => import('@/views/user/Follower.vue'),
     },
   ],
+  beforeEnter: (to, from, next) => {
+    if (to.name === 'UserDefault' || to.name === 'UserQuestion' || to.name === 'UserAnswer' || to.name === 'User') {
+      next({ name: 'UserFollowing', params: to.params })
+    } else {
+      next()
+    }
+  },
 } as RouteRecordRaw
