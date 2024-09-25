@@ -1,6 +1,6 @@
 <template>
   <v-list v-if="users.length" lines="two">
-    <v-list-subheader>{{ $t('users.showUsers', { count: users.length }) }}</v-list-subheader>
+    <v-list-subheader>{{ t('users.showUsers', { count: users.length }) }}</v-list-subheader>
     <v-list-item
       v-for="user in users"
       :key="user.id"
@@ -10,7 +10,7 @@
     >
       <v-row>
         <v-col cols="1">
-          <user-avatar :has-avatar="!!user.avatar && user.avatar !== 'default.jpg'" :avatar="user.avatar" size="40" />
+          <user-avatar :avatar="getAvatarUrl(user.avatarId)" size="40" />
         </v-col>
         <v-col cols="3">
           <v-list-item-title>{{ user.nickname }}</v-list-item-title>
@@ -31,6 +31,9 @@ import { User } from '@/types/users'
 import { defineProps, withDefaults, onMounted } from 'vue'
 import UserAvatar from '@/components/common/UserAvatar.vue'
 import BlankPage from '@/components/common/BlankPage.vue'
+import { getAvatarUrl } from '@/utils/materials'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 
 const { users } = withDefaults(
   defineProps<{

@@ -20,7 +20,6 @@
 </template>
 
 <script lang="ts" setup>
-import { VEmptyState } from 'vuetify/labs/VEmptyState'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()

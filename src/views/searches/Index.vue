@@ -36,7 +36,6 @@
 import QuestionCard from '@/components/questions/QuestionCard.vue'
 import AppBar from '@/components/common/AppBar/AppBar.vue'
 import BlankPage from '@/components/common/BlankPage.vue'
-import { VEmptyState } from 'vuetify/labs/VEmptyState'
 import { QuestionApi } from '@/network/api/questions'
 import { usePaging } from '@/utils/paging'
 import { onMounted, ref, watch } from 'vue'

@@ -10,7 +10,7 @@
       :to="{ name: 'QuestionAnswerList' }"
     >
       {{
-        $tc('questions.detail.buttons.allAnswers', questionData.answer_count, {
+        t('questions.detail.buttons.allAnswers', {
           count: questionData.answer_count,
         })
       }}
@@ -27,6 +27,9 @@ import { computed, onMounted, ref } from 'vue'
 import { AnswersApi } from '@/network/api/answers'
 import { Answer, Question } from '@/types'
 import AnswerCard from '@/components/answer/AnswerCard.vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const route = useRoute()
 

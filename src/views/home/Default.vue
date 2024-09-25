@@ -6,7 +6,7 @@
           <div class="d-flex justify-space-between align-center pa-4">
             <div style="display: flex; align-items: center">
               <span class="text-h6 font-weight-bold">热门动态</span>
-              <div style="padding-left: 8px"><post-insight-entry /></div>
+              <div style="padding-left: 8px"><post-insight-entry :item="null" /></div>
             </div>
           </div>
           <v-card v-for="item in fakeInsightData" :key="item.id" flat>
@@ -121,7 +121,7 @@ const fakeInsightData: Insight[] = [
       id: -1,
       username: 'li_hua',
       nickname: '李华',
-      avatar: 'https://avatars.githubusercontent.com/u/107245128',
+      avatarId: 1,
       intro: 'Amateur Web developer',
       follow_count: 0,
       fans_count: 0,
@@ -209,7 +209,7 @@ const fakeInsightData: Insight[] = [
       id: -2,
       username: 'MikeMirzayanov',
       nickname: 'Mike',
-      avatar: 'https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/man-person-icon.png',
+      avatarId: 1,
       intro: 'From ITMO University',
       follow_count: 0,
       fans_count: 0,

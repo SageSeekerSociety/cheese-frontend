@@ -4,6 +4,7 @@ import zhCN from './messages/zh-CN'
 type MessageSchema = typeof zhCN
 
 const i18n = createI18n<MessageSchema, 'zh-CN'>({
+  legacy: false,
   locale: 'zh-CN',
   fallbackLocale: 'zh-CN',
   messages: {
@@ -11,6 +12,6 @@ const i18n = createI18n<MessageSchema, 'zh-CN'>({
   },
 })
 
-export const { t, tc } = i18n.global
+export const { t } = i18n.global
 
 export default i18n

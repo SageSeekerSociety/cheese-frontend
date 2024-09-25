@@ -38,7 +38,7 @@
               <template v-if="item.raw.isFakeItem">
                 <v-list-item
                   v-bind="props"
-                  :title="$t('questions.ask.buttons.createTopic', { name: item.raw.name })"
+                  :title="t('questions.ask.buttons.createTopic', { name: item.raw.name })"
                 ></v-list-item>
               </template>
               <template v-else>
@@ -50,7 +50,7 @@
       </template>
       <template v-else>
         <v-btn variant="text" color="primary" prepend-icon="mdi-plus" class="included" @click="isAddingTopic = true">
-          {{ $tc('questions.ask.buttons.addTopic', topics?.length || 0, { count: topics?.length || 0 }) }}
+          {{ t('questions.ask.buttons.addTopic', { count: topics?.length || 0 }, topics?.length || 0) }}
         </v-btn>
       </template>
     </div>
@@ -62,6 +62,9 @@ import { Topic } from '@/types'
 import { ref } from 'vue'
 import { debounce } from 'lodash'
 import { TopicsApi } from '@/network/api/topics'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const topicInput = ref('')
 const topicSelected = ref<number | null>(null)

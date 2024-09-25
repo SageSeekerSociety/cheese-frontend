@@ -10,7 +10,7 @@
         cover
       />
       <v-container class="cut-align-center">
-        <user-avatar :has-avatar="hasAvatar" :avatar="profile.avatar" :size="120" :class="'rounded-lg'" :rounded="0" />
+        <user-avatar :avatar="getAvatarUrl(profile.avatarId)" :size="120" :class="'rounded-lg'" :rounded="0" />
         <v-container class="info-wrapper">
           <v-row>
             <v-col class="text-h4 font-weight-bold me-4">
@@ -130,12 +130,9 @@ import { vuetifyConfig } from '@/utils/form'
 import FileSelect from '../common/FileSelect.vue'
 import AccountService from '@/services/account'
 import UserAvatar from '../common/UserAvatar.vue'
+import { getAvatarUrl } from '@/utils/materials'
 
 const profile = inject<Ref<User>>('userData', ref({} as User))
-
-const hasAvatar = computed(() => {
-  return !!profile?.value.avatar && profile?.value.avatar != 'default.jpg' && profile?.value.avatar != 'deafult.jpg'
-})
 
 const myId = computed(() => AccountService._user.value?.id as number)
 const isActivatedUser = computed(() => {

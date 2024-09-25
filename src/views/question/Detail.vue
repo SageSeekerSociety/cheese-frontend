@@ -6,21 +6,25 @@
           <v-card-item>
             <v-card-title class="text-h5">{{ questionData.title }}</v-card-title>
             <v-card-subtitle class="d-flex align-center question-info">
-              <span>{{ $t('questions.detail.createdAt', { time: createdAt }) }}</span>
-              <span v-if="showUpdatedAt">{{ $t('questions.detail.updatedAt', { time: updatedAt }) }}</span>
-              <span>{{ $tc('questions.detail.viewCount', { count: questionData.view_count }) }}</span>
+              <span>{{ t('questions.detail.createdAt', { time: createdAt }) }}</span>
+              <span v-if="showUpdatedAt">{{ t('questions.detail.updatedAt', { time: updatedAt }) }}</span>
+              <span>{{ t('questions.detail.viewCount', { count: questionData.view_count }) }}</span>
             </v-card-subtitle>
             <template #append>
               <v-btn color="primary" :variant="questionData.is_follow ? 'tonal' : 'flat'" @click="toggleFollowQuestion">
                 <v-icon size="24" class="me-2">mdi-plus</v-icon>
                 <template v-if="questionData.is_follow">
-                  {{ $t('questions.detail.buttons.unfollow') }}
+                  {{ t('questions.detail.buttons.unfollow') }}
                 </template>
                 <template v-else>
                   {{
-                    $tc('questions.detail.buttons.follow', questionData.follow_count, {
-                      count: questionData.follow_count,
-                    })
+                    t(
+                      'questions.detail.buttons.follow',
+                      {
+                        count: questionData.follow_count,
+                      },
+                      questionData.follow_count
+                    )
                   }}
                 </template>
               </v-btn>
@@ -33,14 +37,14 @@
               </template>
             </div>
             <div class="d-flex align-center mb-2">
-              <user-avatar :avatar="questionData.author.avatar" :size="24" />
+              <user-avatar :avatar="getAvatarUrl(questionData.author.avatarId)" :size="24" />
               <span class="ms-2">{{ questionData.author.nickname }}</span>
             </div>
             <div class="d-flex align-center flex-wrap" style="gap: 8px">
               <v-tooltip v-if="questionData.bounty && questionData.bounty > 0" bottom>
                 <template #activator="{ props }">
                   <v-chip v-bind="props" color="primary" class="mb-2" prepend-icon="mdi-currency-usd">
-                    {{ $t('questions.detail.bounty', { bounty: questionData.bounty }) }}
+                    {{ t('questions.detail.bounty', { bounty: questionData.bounty }) }}
                     <template #append>
                       <v-icon>mdi-cheese</v-icon>
                       <v-icon size="12" class="ms-1">mdi-help-circle-outline</v-icon>
@@ -49,7 +53,7 @@
                 </template>
                 <span>
                   {{
-                    $t('questions.detail.bountyTip', {
+                    t('questions.detail.bountyTip', {
                       bounty: questionData.bounty,
                       before: dayjs(questionData.bounty_start_at).add(3, 'days').format('YYYY-MM-DD HH:mm'),
                     })
@@ -78,14 +82,14 @@
               <template #activator="{ props: activatorProps }">
                 <v-btn variant="outlined" v-bind="activatorProps">
                   <v-icon size="18" class="me-2">mdi-account-multiple-plus</v-icon>
-                  {{ $t('questions.detail.buttons.invite') }}
+                  {{ t('questions.detail.buttons.invite') }}
                 </v-btn>
               </template>
 
               <template #default="{ isActive }">
                 <v-card>
                   <v-card-item>
-                    <v-card-title class="text-h6">{{ $t('questions.detail.inviteTitle') }}</v-card-title>
+                    <v-card-title class="text-h6">{{ t('questions.detail.inviteTitle') }}</v-card-title>
                   </v-card-item>
                   <v-card-text style="padding: 8px">
                     <div class="px-3 mb-2">
@@ -112,14 +116,14 @@
             <v-dialog v-else-if="!questionData.accepted_answer" v-model="bountyDialog" width="540px">
               <template #activator="{ props: activatorProps }">
                 <v-btn prepend-icon="mdi-currency-usd" variant="outlined" v-bind="activatorProps">
-                  {{ $t('questions.detail.buttons.bounty') }}
+                  {{ t('questions.detail.buttons.bounty') }}
                 </v-btn>
               </template>
 
               <template #default="{ isActive }">
                 <v-card>
                   <v-card-item>
-                    <v-card-title class="text-h6">{{ $t('questions.detail.addBountyTitle') }}</v-card-title>
+                    <v-card-title class="text-h6">{{ t('questions.detail.addBountyTitle') }}</v-card-title>
                   </v-card-item>
                   <v-card-text class="pa-1">
                     <div class="px-3 mb-2">
@@ -146,7 +150,7 @@
 
                     <v-btn text="取消" @click="isActive.value = false"></v-btn>
                     <v-btn variant="flat" color="primary" :loading="bountyLoading" @click="addBounty">{{
-                      $t('questions.detail.buttons.addBounty')
+                      t('questions.detail.buttons.addBounty')
                     }}</v-btn>
                   </v-card-actions>
                 </v-card>
@@ -155,12 +159,12 @@
 
             <v-btn variant="plain">
               <v-icon size="18" class="me-2">mdi-comment-outline</v-icon>
-              {{ $t('questions.detail.buttons.comment') }}
+              {{ t('questions.detail.buttons.comment') }}
               <span v-if="questionData.comment_count">{{ questionData.comment_count }}</span>
             </v-btn>
             <v-btn variant="plain">
               <v-icon size="18" class="me-2">mdi-star-outline</v-icon>
-              {{ $t('questions.detail.buttons.favorite') }}
+              {{ t('questions.detail.buttons.favorite') }}
             </v-btn>
           </v-card-actions>
         </v-card>
@@ -173,7 +177,7 @@
         <v-alert
           class="accept-alert"
           type="success"
-          :title="$t('questions.detail.acceptedAnswerTitle', { user: questionData.accepted_answer.author.nickname })"
+          :title="t('questions.detail.acceptedAnswerTitle', { user: questionData.accepted_answer.author.nickname })"
         >
           <template #append>
             <v-btn
@@ -187,7 +191,7 @@
                 },
               }"
             >
-              {{ $t('questions.detail.buttons.viewAcceptedAnswer') }}
+              {{ t('questions.detail.buttons.viewAcceptedAnswer') }}
             </v-btn>
           </template>
         </v-alert>
@@ -202,12 +206,12 @@
       <v-col>
         <v-card flat rounded="lg" style="overflow: initial; z-index: initial">
           <v-card-item>
-            <v-card-title class="text-h6">{{ $t('questions.detail.postAnswerTitle') }}</v-card-title>
+            <v-card-title class="text-h6">{{ t('questions.detail.postAnswerTitle') }}</v-card-title>
           </v-card-item>
           <template v-if="questionData?.my_answer_id">
             <v-card-text>
               <v-alert type="info" @click="openMyAnswer">
-                {{ $t('questions.detail.postAnswerExist') }}
+                {{ t('questions.detail.postAnswerExist') }}
               </v-alert>
             </v-card-text>
           </template>
@@ -215,13 +219,13 @@
             <v-card-text>
               <rich-editor
                 holder="editor"
-                :config="{ ...DEFAULT_CONFIG, placeholder: $t('questions.detail.postAnswerPlaceholder') }"
+                :config="{ ...DEFAULT_CONFIG, placeholder: t('questions.detail.postAnswerPlaceholder') }"
                 @create="onCreate"
               />
             </v-card-text>
             <v-card-actions>
               <v-btn color="primary" variant="flat" @click="submit">{{
-                $t('questions.detail.buttons.postAnswer')
+                t('questions.detail.buttons.postAnswer')
               }}</v-btn>
             </v-card-actions>
           </template>
@@ -248,10 +252,12 @@ import { AnswersApi } from '@/network/api/answers'
 import ContentVoter from '@/components/common/ContentVoter.vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vuetify-sonner'
-import { t } from '@/i18n'
 import { NewAttitudeType } from '@/constants'
 import { questionDataInjectionKey } from '@/keys'
+import { useI18n } from 'vue-i18n'
+import { getAvatarUrl } from '@/utils/materials'
 
+const { t } = useI18n()
 let editor: EditorJS
 const onCreate = (editorInstance: EditorJS) => {
   editor = editorInstance

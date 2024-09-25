@@ -3,7 +3,7 @@
     <v-card-text class="py-1">
       <v-container class="pl-0 d-flex flex-row align-center">
         <v-avatar>
-          <v-img :src="item.author.avatar" />
+          <v-img :src="getAvatarUrl(item.author.avatarId)" />
         </v-avatar>
         <v-container class="py-0 pl-0 ml-2 my-auto d-flex flex-column">
           <div class="text-body-1 font-weight-bold author-nickname">{{ item.author.nickname }}</div>
@@ -56,7 +56,7 @@ import { ref } from 'vue'
 import { Insight } from '@/types'
 import { computed } from 'vue'
 import { NewAttitudeType } from '@/constants'
-
+import { getAvatarUrl } from '@/utils/materials'
 const viewerOptions = {
   url: 'data-src',
 }

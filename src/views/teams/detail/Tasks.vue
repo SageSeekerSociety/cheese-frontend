@@ -23,8 +23,8 @@ const tasks = ref<Task[]>([])
 const fetchTeamTasks = async (teamId: number) => {
   const { data } = await TasksApi.list({
     team: teamId,
-    sortBy: 'deadline',
-    sortOrder: 'asc',
+    sort_by: 'deadline',
+    sort_order: 'asc',
   })
   tasks.value = data.tasks
 }

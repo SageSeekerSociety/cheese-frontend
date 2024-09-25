@@ -15,11 +15,11 @@ const links = [
     title: '首页',
     path: '/',
   },
-  {
-    key: 'Question',
-    title: '问答',
-    path: '/questions',
-  },
+  // {
+  //   key: 'Question',
+  //   title: '问答',
+  //   path: '/questions',
+  // },
   {
     key: 'Spaces',
     title: '空间',

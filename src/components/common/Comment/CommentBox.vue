@@ -1,15 +1,10 @@
 <template>
-  <v-card :title="$t('comments.boxTitle')" class="rounded-lg" flat>
+  <v-card :title="t('comments.boxTitle')" class="rounded-lg" flat>
     <div v-for="comment in comments" :key="comment.id">
       <VSlideXReverseTransition>
         <v-sheet v-if="typeof comment.tag === 'undefined'" class="mb-3 mx-4 pa-3" rounded="lg" border>
           <div class="d-flex flex-row">
-            <user-avatar
-              :has-avatar="!!comment.user.avatar && comment.user.avatar !== 'default.jpg'"
-              :avatar="comment.user.avatar"
-              size="40"
-              class="me-3 mt-3"
-            />
+            <user-avatar :avatar="getAvatarUrl(comment.user.avatarId)" size="40" class="me-3 mt-3" />
             <div class="flex-grow-1">
               <div class="d-flex justify-space-between align-center mb-2">
                 <div class="d-flex flex-column">
@@ -52,12 +47,7 @@
                 <div v-for="subComment in comment.sub_comments" :key="subComment.id">
                   <v-sheet class="pa-3" rounded="lg">
                     <div class="d-flex flex-row">
-                      <user-avatar
-                        :has-avatar="!!subComment.user.avatar && subComment.user.avatar !== 'default.jpg'"
-                        :avatar="subComment.user.avatar"
-                        size="40"
-                        class="me-3 mt-3"
-                      />
+                      <user-avatar :avatar="getAvatarUrl(subComment.user.avatarId)" size="40" class="me-3 mt-3" />
                       <div class="flex-grow-1">
                         <div class="d-flex justify-space-between align-center mb-2">
                           <div class="d-flex flex-column">
@@ -105,6 +95,10 @@ import dayjs from 'dayjs'
 import { Comment } from '@/types'
 import { CommentableType } from '@/constants'
 import { CommentTag } from '@/constants'
+import { useI18n } from 'vue-i18n'
+import { getAvatarUrl } from '@/utils/materials'
+
+const { t } = useI18n()
 // import Comment from '@/types/comments'
 // import { defineProps, withDefaults, onMounted } from 'vue'
 
@@ -127,7 +121,7 @@ const comments = ref<Comment[]>([
         created_at: 1710319052678,
         user: {
           id: 4,
-          avatar: 'default.jpg',
+          avatarId: 1,
           nickname: '赵六',
           username: 'zhaoliu',
           intro: '我是赵六',
@@ -150,7 +144,7 @@ const comments = ref<Comment[]>([
         created_at: 1710319052678,
         user: {
           id: 5,
-          avatar: 'default.jpg',
+          avatarId: 1,
           nickname: '钱七',
           username: 'qianqi',
           intro: '我是钱七',
@@ -173,7 +167,7 @@ const comments = ref<Comment[]>([
     created_at: 1710319052678,
     user: {
       id: 1,
-      avatar: 'default.jpg',
+      avatarId: 1,
       nickname: '张三',
       username: 'zhangsan',
       intro: '我是张三',
@@ -197,7 +191,7 @@ const comments = ref<Comment[]>([
     created_at: 1710319052678,
     user: {
       id: 2,
-      avatar: 'default.jpg',
+      avatarId: 1,
       nickname: '李四',
       username: 'lisi',
       intro: '我是李四',
@@ -221,7 +215,7 @@ const comments = ref<Comment[]>([
     created_at: 1710319052678,
     user: {
       id: 3,
-      avatar: 'default.jpg',
+      avatarId: 1,
       nickname: '王五',
       username: 'wangwu',
       intro: '我是王五',

@@ -5,7 +5,7 @@
       <v-card-title>{{ answer.author.nickname }}</v-card-title>
       <v-card-subtitle>{{ answer.author.intro }}</v-card-subtitle>
       <template #prepend>
-        <user-avatar :avatar="answer.author.avatar" />
+        <user-avatar :avatar="getAvatarUrl(answer.author.avatarId)" />
       </template>
     </v-card-item>
     <v-card-text class="text-body-1 font-weight-regular answer-body-text pb-1 px-3">
@@ -20,7 +20,7 @@
           prepend-icon="mdi-check"
           @click="acceptAnswer"
         >
-          {{ $t('questions.detail.buttons.accept') }}
+          {{ t('questions.detail.buttons.accept') }}
         </v-btn>
       </div>
     </v-card-text>
@@ -35,12 +35,12 @@
       />
       <v-btn variant="plain">
         <v-icon size="18" class="me-2">mdi-comment-outline</v-icon>
-        {{ $t('questions.detail.buttons.comment') }}
+        {{ t('questions.detail.buttons.comment') }}
         <span v-if="answer.comment_count">{{ answer.comment_count }}</span>
       </v-btn>
       <v-btn variant="plain" @click="favorite">
         <v-icon size="18" class="me-2">mdi-star-outline</v-icon>
-        {{ answer.is_favorite ? $t('questions.detail.buttons.unfavorite') : $t('questions.detail.buttons.favorite') }}
+        {{ answer.is_favorite ? t('questions.detail.buttons.unfavorite') : t('questions.detail.buttons.favorite') }}
       </v-btn>
     </v-card-actions>
   </v-card>
@@ -59,6 +59,9 @@ import { NewAttitudeType } from '@/constants'
 import { currentUserId } from '@/services/account'
 import { toast } from 'vuetify-sonner'
 import { refreshInjectionKey } from '@/keys'
+import { useI18n } from 'vue-i18n'
+import { getAvatarUrl } from '@/utils/materials'
+const { t } = useI18n()
 
 const props = withDefaults(
   defineProps<{

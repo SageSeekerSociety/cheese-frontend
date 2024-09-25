@@ -2,15 +2,15 @@
   <v-list>
     <v-list-item v-for="(user, index) in data" :key="user.id" :title="user.nickname" :subtitle="user.intro">
       <template #prepend>
-        <user-avatar :avatar="user.avatar" />
+        <user-avatar :avatar="getAvatarUrl(user.avatarId)" />
       </template>
       <template #append>
         <v-btn :variant="isInvited[index] ? 'text' : 'outlined'" :disabled="isInvited[index]" @click="invite(index)">
           <v-icon class="me-2">mdi-account-multiple-plus</v-icon>
           {{
             isInvited[index]
-              ? $t('questions.invitationList.buttons.invited')
-              : $t('questions.invitationList.buttons.invite')
+              ? t('questions.invitationList.buttons.invited')
+              : t('questions.invitationList.buttons.invite')
           }}
         </v-btn>
       </template>
@@ -24,8 +24,11 @@ import { toRefs, ref, computed, onMounted } from 'vue'
 import { QuestionApi } from '@/network/api/questions'
 import UserAvatar from '../common/UserAvatar.vue'
 import { toast } from 'vuetify-sonner'
-import { t } from '@/i18n'
 import { getErrorMessage } from '@/utils/errors'
+import { getAvatarUrl } from '@/utils/materials'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   questionId: number

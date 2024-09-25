@@ -64,31 +64,36 @@ const links = [
     title: '首页',
     path: '/',
   },
+  // {
+  //   key: 'Question',
+  //   title: '问答',
+  //   path: '/questions',
+  // },
   {
-    key: 'Question',
-    title: '问答',
-    path: '/questions',
+    key: 'Spaces',
+    title: '空间',
+    path: '/spaces',
   },
   {
-    key: 'Group',
-    title: '圈子',
-    path: '/groups',
+    key: 'Teams',
+    title: '小队',
+    path: '/teams',
   },
 ]
 
 const tabs = [
-  {
-    label: '提问',
-    route: {
-      name: 'UserQuestion',
-    },
-  },
-  {
-    label: '回答',
-    route: {
-      name: 'UserAnswer',
-    },
-  },
+  // {
+  //   label: '提问',
+  //   route: {
+  //     name: 'UserQuestion',
+  //   },
+  // },
+  // {
+  //   label: '回答',
+  //   route: {
+  //     name: 'UserAnswer',
+  //   },
+  // },
   {
     label: '关注',
     route: {
