@@ -1,0 +1,73 @@
+import { markRaw } from 'vue'
+import { VuetifyTiptap, VuetifyViewer, createVuetifyProTipTap } from 'vuetify-pro-tiptap'
+import {
+  BaseKit,
+  Bold,
+  Italic,
+  Underline,
+  Strike,
+  Color,
+  Highlight,
+  Heading,
+  TextAlign,
+  FontFamily,
+  FontSize,
+  SubAndSuperScript,
+  BulletList,
+  OrderedList,
+  TaskList,
+  Indent,
+  Link,
+  Video,
+  Table,
+  Blockquote,
+  HorizontalRule,
+  Code,
+  CodeBlock,
+  Clear,
+  Fullscreen,
+  History,
+} from 'vuetify-pro-tiptap'
+import { AttachmentImage } from './extensions/image'
+import 'vuetify-pro-tiptap/style.css'
+
+export const vuetifyProTipTap = createVuetifyProTipTap({
+  lang: 'zhHans',
+  components: {
+    VuetifyTiptap,
+    VuetifyViewer,
+  },
+  extensions: [
+    BaseKit.configure({
+      placeholder: {
+        placeholder: '输入内容...',
+      },
+    }),
+    Bold,
+    Italic,
+    Underline,
+    Strike,
+    Code.configure({ divider: true }),
+    Heading,
+    TextAlign,
+    FontFamily,
+    FontSize,
+    Color,
+    Highlight.configure({ divider: true }),
+    SubAndSuperScript.configure({ divider: true }),
+    Clear.configure({ divider: true }),
+    BulletList,
+    OrderedList,
+    TaskList,
+    Indent.configure({ divider: true }),
+    Link,
+    AttachmentImage,
+    Video,
+    Table.configure({ divider: true }),
+    Blockquote,
+    HorizontalRule,
+    CodeBlock.configure({ divider: true }),
+    History.configure({ divider: true }),
+    Fullscreen,
+  ],
+})

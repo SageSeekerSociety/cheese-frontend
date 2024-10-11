@@ -84,3 +84,7 @@
     font-family: 'JetBrains Mono', Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace !important;
   }
 }
+
+.vuetify-pro-tiptap-editor--fullscreen {
+  z-index: 2000;
+}
