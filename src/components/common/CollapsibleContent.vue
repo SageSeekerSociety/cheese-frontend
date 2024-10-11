@@ -9,7 +9,7 @@
       <slot></slot>
     </div>
 
-    <div v-if="!show" class="collapse-button-container" @click="show = true">
+    <div v-if="shouldShowBtn" class="collapse-button-container" @click="show = true">
       <slot name="button">
         <v-btn variant="plain" block :ripple="false" prepend-icon="mdi-chevron-down" class="collapse-button">
           {{ t('questions.detail.buttons.showAll') }}
@@ -35,17 +35,21 @@ const show = defineModel<boolean>({
   default: false,
 })
 
+const contentHeightNotEnough = ref(false)
+
 const contentDiv = ref<HTMLElement | null>(null)
 const contentHeight = ref(0)
 const onContentMutation = () => {
   if (!contentDiv.value) return
+  console.log('onContentMutation', contentDiv.value.scrollHeight)
   contentHeight.value = contentDiv.value.scrollHeight
-  if (contentHeight.value <= maxHeight.value) {
-    show.value = true
-  }
+  contentHeightNotEnough.value = contentHeight.value <= maxHeight.value
 }
+
+const shouldShowBtn = computed(() => !show.value && !contentHeightNotEnough.value)
+
 const contentDivStyles = computed(() => ({
-  maxHeight: show.value ? `${contentHeight.value}px` : `${maxHeight.value}px`,
+  maxHeight: show.value || contentHeightNotEnough.value ? `${contentHeight.value}px` : `${maxHeight.value}px`,
 }))
 </script>
 
