@@ -11,6 +11,7 @@ export interface TaskSubmissionSchemaEntry {
 export interface Task {
   id: number
   name: string
+  intro: string
   submitterType: TaskSubmitterType
   creator: User
   deadline: number
@@ -30,6 +31,15 @@ export interface Task {
   updatedAt: number
 }
 
+export interface TaskSubmissionReview {
+  reviewed: boolean
+  detail: {
+    accepted: boolean
+    score: number
+    comment: string
+  }
+}
+
 export interface TaskSubmission {
   id: number
   member: TaskParticipantSummary
@@ -39,6 +49,7 @@ export interface TaskSubmission {
   createdAt: number
   updatedAt: number
   content: TaskSubmissionContent[]
+  review?: TaskSubmissionReview
 }
 
 export interface TaskSubmissionContent {

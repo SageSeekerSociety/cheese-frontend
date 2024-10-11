@@ -121,7 +121,9 @@
           </div>
           <v-divider class="my-4" />
           <div class="text-body-1">
-            {{ taskData?.description }}
+            <collapsible-content :max-height="200">
+              <TipTapViewer :value="taskDescription" />
+            </collapsible-content>
           </div>
         </v-sheet>
       </v-col>
@@ -211,20 +213,26 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="participantSubmissionsDialog" max-width="800px">
-    <v-card>
-      <v-card-title>{{ selectedParticipant?.name }} 的提交记录</v-card-title>
-      <v-card-text>
-        <TaskSubmissionHistory
-          v-if="selectedParticipant"
-          :task-id="Number(route.params.taskId)"
-          :member-id="selectedParticipant?.id"
-        />
-      </v-card-text>
-      <v-card-actions>
+  <v-dialog v-model="participantSubmissionsDialog" fullscreen scrollable>
+    <v-card color="surface-light">
+      <v-toolbar color="surface">
+        <v-btn icon="mdi-close" @click="participantSubmissionsDialog = false"></v-btn>
+
+        <v-toolbar-title>{{ selectedParticipant?.name }} 的提交记录</v-toolbar-title>
+
         <v-spacer></v-spacer>
-        <v-btn color="primary" variant="text" @click="participantSubmissionsDialog = false">关闭</v-btn>
-      </v-card-actions>
+      </v-toolbar>
+      <v-card-text>
+        <v-container>
+          <TaskSubmissionHistory
+            v-if="selectedParticipant"
+            :task-id="Number(route.params.taskId)"
+            :member-id="selectedParticipant?.id"
+            :show-title="false"
+            :reviewable="currentManageable"
+          />
+        </v-container>
+      </v-card-text>
     </v-card>
   </v-dialog>
 </template>
@@ -241,6 +249,8 @@ import { toast } from 'vuetify-sonner'
 import TaskSubmissionHistory from '@/components/tasks/TaskSubmissionHistory.vue'
 import { TeamsApi } from '@/network/api/teams'
 import { getAvatarUrl } from '@/utils/materials'
+import CollapsibleContent from '@/components/common/CollapsibleContent.vue'
+import TipTapViewer from '@/components/common/Editor/TipTapViewer.vue'
 
 const route = useRoute()
 const myTeams = ref<Team[]>([])
@@ -274,6 +284,14 @@ const isCreator = computed(() => AccountService.user?.id === taskData.value?.cre
 const participants = ref<TaskParticipantSummary[]>([])
 const participantSubmissionsDialog = ref(false)
 const selectedParticipant = ref<TaskParticipantSummary | null>(null)
+
+const taskDescription = computed(() => {
+  try {
+    return JSON.parse(taskData.value?.description ?? '{}')
+  } catch (error) {
+    return taskData.value?.description
+  }
+})
 
 const fetchParticipants = async () => {
   if (!taskData.value) return

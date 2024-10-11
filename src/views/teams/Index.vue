@@ -83,7 +83,7 @@
               </v-col>
               <v-col cols="12" md="8">
                 <v-text-field v-model="teamName" label="小队名称" />
-                <v-textarea v-model="teamDescription" label="小队描述" />
+                <tip-tap-editor ref="teamDescriptionEditor" v-model="teamDescription" output="html" label="小队描述" />
               </v-col>
             </v-row>
           </v-container>
@@ -106,13 +106,15 @@ import { toast } from 'vuetify-sonner'
 import type { Team } from '@/types'
 import { getAvatarUrl } from '@/utils/materials'
 import AccountService from '@/services/account'
-
+import TipTapEditor from '@/components/common/Editor/TipTapEditor.vue'
+import { JSONContent } from 'vuetify-pro-tiptap'
 const createTeamDialog = ref(false)
 const searchQuery = ref('')
 const searchTeamsData = ref<Team[]>([])
 const myTeams = ref<Team[]>([])
 const teamName = ref('')
-const teamDescription = ref('')
+const teamDescription = ref<JSONContent>({ type: 'doc', content: [] })
+const teamDescriptionEditor = ref<InstanceType<typeof TipTapEditor>>()
 const teamAvatar = ref<File | undefined>()
 
 const router = useRouter()
@@ -122,6 +124,10 @@ const openCreateTeamDialog = () => {
 }
 const createTeam = async () => {
   if (teamAvatar.value) {
+    let intro = teamDescriptionEditor.value?.editor?.getText() ?? ''
+    if (intro.length > 250) {
+      intro = `${intro.slice(0, 250)}…`
+    }
     const {
       data: { avatarId },
     } = await AvatarsApi.createAvatar(teamAvatar.value)
@@ -129,7 +135,8 @@ const createTeam = async () => {
       data: { team },
     } = await TeamsApi.create({
       name: teamName.value,
-      intro: teamDescription.value,
+      description: JSON.stringify(teamDescription.value),
+      intro,
       avatarId,
     })
     toast.success('创建小队成功')

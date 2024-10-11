@@ -71,9 +71,9 @@
               {{ task.creator.nickname }} 发布于 {{ dayjs(task.createdAt).format('YYYY-MM-DD HH:mm') }}
             </div>
             <div class="text-h6">{{ task.name }}</div>
-            <div class="text-subtitle-1 text-medium-emphasis">{{ task.description }}</div>
+            <div class="text-subtitle-1 text-medium-emphasis task-description">{{ task.intro }}</div>
           </div>
-          <div class="d-flex flex-column align-end">
+          <div class="d-flex flex-column align-end flex-shrink-0">
             <div class="text-primary">
               <template v-if="new Date(task.deadline) < new Date()"> 已结束 </template>
               <template v-else> 进行中 </template>
@@ -100,6 +100,7 @@ import { useRoute } from 'vue-router'
 import dayjs from 'dayjs'
 import { usePaging } from '@/utils/paging'
 import InfiniteScroll from '@/components/common/InfiniteScroll.vue'
+
 const searchQuery = ref('')
 const selectedSort = ref<{ by: 'createdAt' | 'updatedAt' | 'deadline'; order: 'asc' | 'desc' }>({
   by: 'createdAt',
@@ -127,6 +128,7 @@ const {
   async (pageStart, sort) => {
     const { data } = await TasksApi.list({
       space: spaceId,
+      page_start: pageStart,
       sort_by: sort?.by ?? 'createdAt',
       sort_order: sort?.order ?? 'desc',
     })
@@ -170,5 +172,12 @@ onMounted(async () => {
 
 .tasks-list-item {
   gap: 16px;
+}
+
+.task-description {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 </style>

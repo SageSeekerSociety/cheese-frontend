@@ -5,19 +5,38 @@
         <v-btn variant="text" prepend-icon="mdi-chevron-left" @click="goBack">返回</v-btn>
       </template>
     </v-toolbar>
-    <v-form class="pa-4" @submit.prevent="submitTask">
-      <v-text-field v-model="taskData.name" label="任务名称" required></v-text-field>
-      <v-radio-group v-model="taskData.submitterType" label="提交者类型" required inline>
+    <v-form ref="taskForm" class="pa-4" @submit.prevent="submitTask">
+      <v-text-field v-model="name" label="任务名称" required v-bind="nameProps"></v-text-field>
+      <v-radio-group v-model="submitterType" label="提交者类型" required inline v-bind="submitterTypeProps">
         <v-radio label="用户" value="USER"></v-radio>
         <v-radio label="小队" value="TEAM"></v-radio>
       </v-radio-group>
-      <v-text-field v-model="taskData.deadline" label="截止时间" type="datetime-local" required></v-text-field>
+      <v-text-field
+        v-model="deadline"
+        label="截止时间"
+        type="datetime-local"
+        required
+        v-bind="deadlineProps"
+      ></v-text-field>
       <div class="d-flex align-center">
-        <v-checkbox v-model="taskData.resubmittable" label="允许重新提交" color="primary"></v-checkbox>
-        <v-checkbox v-model="taskData.editable" label="允许编辑" color="primary"></v-checkbox>
+        <v-checkbox
+          v-model="resubmittable"
+          label="允许重新提交"
+          color="primary"
+          v-bind="resubmittableProps"
+        ></v-checkbox>
+        <v-checkbox v-model="editable" label="允许编辑" color="primary" v-bind="editableProps"></v-checkbox>
       </div>
-      <v-textarea v-model="taskData.description" label="任务描述" required></v-textarea>
-      <div v-for="(entry, index) in taskData.submissionSchema" :key="index" class="submission-schema-entry">
+      <TipTapEditor
+        ref="descriptionEditor"
+        v-model="taskDescription"
+        output="json"
+        rounded
+        :min-height="200"
+        :max-height="1000"
+        editor-class="tiptap-editor"
+      />
+      <div v-for="(entry, index) in taskSubmissionSchema" :key="index" class="submission-schema-entry">
         <div class="d-flex align-center justify-between mb-2">
           <span class="text-subtitle-2 font-weight-medium text-medium-emphasis">
             <v-icon>{{ entry.type === 'TEXT' ? 'mdi-text' : 'mdi-file' }}</v-icon>
@@ -62,44 +81,78 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { TasksApi } from '@/network/api/tasks'
 import { TaskSubmissionEntryType, TaskSubmissionSchemaEntry, TaskSubmitterType } from '@/types'
+import { useForm } from 'vee-validate'
+import { toTypedSchema } from '@vee-validate/zod'
+
+import TipTapEditor from '@/components/common/Editor/TipTapEditor.vue'
+import { VForm } from 'vuetify/lib/components/index.mjs'
+import { z } from 'zod'
+import { vuetifyConfig } from '@/utils/form'
+import { JSONContent } from 'vuetify-pro-tiptap'
+
+const taskForm = ref<InstanceType<typeof VForm> | null>(null)
+
+const { handleSubmit, defineField, isSubmitting } = useForm({
+  validationSchema: toTypedSchema(
+    z.object({
+      name: z.string().min(4).max(25),
+      submitterType: z.enum(['USER', 'TEAM']),
+      deadline: z.string(),
+      resubmittable: z.boolean().optional().default(false),
+      editable: z.boolean().optional().default(false),
+    })
+  ),
+})
+
+const [name, nameProps] = defineField('name', vuetifyConfig)
+const [submitterType, submitterTypeProps] = defineField('submitterType', vuetifyConfig)
+const [deadline, deadlineProps] = defineField('deadline', vuetifyConfig)
+const [resubmittable, resubmittableProps] = defineField('resubmittable', vuetifyConfig)
+const [editable, editableProps] = defineField('editable', vuetifyConfig)
+
+const descriptionEditor = ref<InstanceType<typeof TipTapEditor> | null>(null)
 
 const router = useRouter()
 const goBack = () => {
   router.go(-1)
 }
 
-const taskData = ref({
-  name: '',
-  submitterType: 'USER' as TaskSubmitterType,
-  deadline: '',
-  resubmittable: false,
-  editable: false,
-  description: '',
-  submissionSchema: [] as TaskSubmissionSchemaEntry[],
+const taskDescription = ref<JSONContent>({
+  type: 'doc',
+  content: [],
 })
+const taskSubmissionSchema = ref<TaskSubmissionSchemaEntry[]>([])
 
 const addSchemaEntry = (type: TaskSubmissionEntryType) => {
-  taskData.value.submissionSchema.push({ prompt: '', type })
+  taskSubmissionSchema.value.push({ prompt: '', type })
 }
 
 const removeSchemaEntry = (index: number) => {
-  taskData.value.submissionSchema.splice(index, 1)
+  taskSubmissionSchema.value.splice(index, 1)
 }
 
-const submitTask = async () => {
+const submitTask = handleSubmit(async (value) => {
+  console.log(value)
+  let intro = descriptionEditor.value?.editor?.getText() ?? ''
+  if (intro.length > 250) {
+    intro = intro.slice(0, 250) + '……'
+  }
   const spaceId = Number(router.currentRoute.value.params.spaceId)
   try {
     const postTaskData = {
-      ...taskData.value,
-      deadline: new Date(taskData.value.deadline).getTime(), // 将截止时间转换为时间戳
+      ...value,
+      description: JSON.stringify(taskDescription.value),
+      intro,
+      deadline: new Date(value.deadline).getTime(), // 将截止时间转换为时间戳
       space: spaceId,
+      submissionSchema: taskSubmissionSchema.value,
     }
     await TasksApi.create(postTaskData)
     router.replace({ name: 'SpacesDetailTasks', params: { spaceId } })
   } catch (error) {
     console.error('创建任务失败:', error)
   }
-}
+})
 </script>
 
 <style scoped>
