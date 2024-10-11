@@ -3,7 +3,13 @@
 import { Page, TaskParticipantSummary, TaskSubmission } from '@/types'
 import { Task } from '@/types'
 import { NewApiInstance } from '../index'
-import { PostTaskRequestData, PatchTaskRequestData, PostTaskSubmissionRequestData } from './types'
+import {
+  PostTaskRequestData,
+  PatchTaskRequestData,
+  PostTaskSubmissionRequestData,
+  PostTaskSubmissionReviewRequestData,
+  PatchTaskSubmissionReviewRequestData,
+} from './types'
 
 export namespace TasksApi {
   export const create = (data: PostTaskRequestData) =>
@@ -42,6 +48,8 @@ export namespace TasksApi {
     sort_order: 'asc' | 'desc'
     queryJoinability?: boolean
     querySubmittability?: boolean
+    keywords?: string
+    approved?: boolean
   }) =>
     NewApiInstance.request<{ tasks: Task[]; page: Page }>({
       url: '/tasks',
@@ -99,11 +107,33 @@ export namespace TasksApi {
       page_start?: number
       sort_by: 'createdAt' | 'updatedAt'
       sort_order: 'asc' | 'desc'
+      queryReview?: boolean
     }
   ) =>
     NewApiInstance.request<{ submissions: TaskSubmission[]; page: Page }>({
       url: `/tasks/${taskId}/submissions`,
       method: 'GET',
       params,
+    })
+
+  export const postSubmissionReview = (submissionId: number, data: PostTaskSubmissionReviewRequestData) =>
+    NewApiInstance.request<{ submission: TaskSubmission }>({
+      // the fucking backend designed the endpoint like this
+      url: `/tasks/submissions/${submissionId}/review`,
+      method: 'POST',
+      data,
+    })
+
+  export const patchSubmissionReview = (submissionId: number, data: PatchTaskSubmissionReviewRequestData) =>
+    NewApiInstance.request<{ submission: TaskSubmission }>({
+      url: `/tasks/submissions/${submissionId}/review`,
+      method: 'PATCH',
+      data,
+    })
+
+  export const deleteSubmissionReview = (submissionId: number) =>
+    NewApiInstance.request<{ submission: TaskSubmission }>({
+      url: `/tasks/submissions/${submissionId}/review`,
+      method: 'DELETE',
     })
 }

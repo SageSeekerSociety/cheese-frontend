@@ -19,9 +19,18 @@ export type PatchTaskRequestData = {
   editable?: boolean
   description?: string
   submissionSchema?: TaskSubmissionSchemaEntry[]
+  approved?: boolean
 }
 
 export type PostTaskSubmissionRequestData = {
   contentText?: string
   contentAttachmentId?: number
 }
+
+export type PostTaskSubmissionReviewRequestData = {
+  accepted: boolean
+  score: number
+  comment: string
+}
+
+export type PatchTaskSubmissionReviewRequestData = Partial<PostTaskSubmissionReviewRequestData>

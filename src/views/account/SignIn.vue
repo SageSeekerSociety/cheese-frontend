@@ -82,4 +82,3 @@ const login = handleSubmit(async (value) => {
   }
 })
 </script>
-@/network/api/users/user
