@@ -29,12 +29,29 @@
         <v-sheet rounded="lg">
           <v-list nav bg-color="transparent">
             <v-list-subheader>全部分类</v-list-subheader>
-            <v-list-item rounded="lg" :to="{ name: 'SpacesDetailTasks', params: { id: space?.id } }" color="primary">
+            <v-list-item
+              rounded="lg"
+              :to="{ name: 'SpacesDetailTasks', params: { spaceId: space?.id } }"
+              color="primary"
+            >
               <template #prepend>
                 <v-icon>mdi-trophy</v-icon>
               </template>
               <v-list-item-title>赛题</v-list-item-title>
             </v-list-item>
+            <template v-if="isCurrentUserAtLeastAdmin">
+              <v-list-subheader>管理员操作</v-list-subheader>
+              <v-list-item
+                rounded="lg"
+                :to="{ name: 'SpacesDetailAuditTasks', params: { spaceId: space?.id } }"
+                color="primary"
+              >
+                <template #prepend>
+                  <v-icon>mdi-check</v-icon>
+                </template>
+                <v-list-item-title>审核赛题</v-list-item-title>
+              </v-list-item>
+            </template>
           </v-list>
         </v-sheet>
       </v-col>
@@ -51,6 +68,7 @@ import { SpacesApi } from '@/network/api/spaces'
 import { ref, onMounted, computed } from 'vue'
 import { Space } from '@/types'
 import { getAvatarUrl } from '@/utils/materials'
+import AccountService from '@/services/account'
 
 const route = useRoute()
 
@@ -70,6 +88,11 @@ const getSpace = async (spaceId: number) => {
   const res = await SpacesApi.detail(spaceId)
   space.value = res.data.space
 }
+
+const isCurrentUserAtLeastAdmin = computed(() => {
+  const currentUser = AccountService._user.value
+  return space.value?.admins?.some((admin) => admin.user.id === currentUser?.id)
+})
 
 onMounted(async () => {
   await getSpace(Number(route.params.spaceId))

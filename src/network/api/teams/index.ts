@@ -4,6 +4,7 @@ import { Team, TeamMember, Page } from '@/types'
 export namespace TeamsApi {
   export type PostTeamRequestData = {
     name: string
+    description: string
     intro: string
     avatarId: number
   }

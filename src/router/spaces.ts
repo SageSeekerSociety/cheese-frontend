@@ -31,6 +31,11 @@ export default {
           name: 'SpacesDetailPublishTask',
           component: () => import('@/views/spaces/detail/PublishTask.vue'),
         },
+        {
+          path: 'tasks/audit',
+          name: 'SpacesDetailAuditTasks',
+          component: () => import('@/views/spaces/detail/AuditTask.vue'),
+        },
       ],
       beforeEnter: (to, _, next) => {
         if (to.name === 'SpacesDetailDefault' || to.name === 'SpacesDetail') {
