@@ -1,9 +1,17 @@
 <template>
   <div class="file-upload">
-    <input ref="input" type="file" :accept="accept" :multiple="max > 1" :max="max" @change="onFileChange" />
+    <input
+      ref="input"
+      type="file"
+      :accept="accept"
+      :multiple="max > 1"
+      :max="max"
+      :disabled="disabled"
+      @change="onFileChange"
+    />
     <div @click="onButtonClick">
       <slot>
-        <v-btn>
+        <v-btn :disabled="disabled">
           <v-icon>mdi-upload</v-icon>
           上传文件
         </v-btn>
@@ -18,6 +26,7 @@ import { ref, toRefs } from 'vue'
 const input = ref<HTMLInputElement | null>(null)
 
 const emit = defineEmits<{
+  change: [files: Array<File>]
   error: [error: Error]
 }>()
 
@@ -25,14 +34,16 @@ const files = defineModel<Array<File>>()
 const props = withDefaults(
   defineProps<{
     accept?: string
-    max: number
+    max?: number
+    disabled?: boolean
   }>(),
   {
     accept: () => '*/*',
     max: () => 1,
+    disabled: false,
   }
 )
-const { accept, max } = toRefs(props)
+const { accept, max, disabled } = toRefs(props)
 
 const onFileChange = (e: Event) => {
   const target = e.target as HTMLInputElement
@@ -44,6 +55,7 @@ const onFileChange = (e: Event) => {
   }
   files.value = newFiles
   target.value = ''
+  emit('change', newFiles)
 }
 
 const onButtonClick = () => {
