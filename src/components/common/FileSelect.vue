@@ -9,7 +9,7 @@
       :disabled="disabled"
       @change="onFileChange"
     />
-    <div @click="onButtonClick">
+    <div :class="contentClass" @click="onButtonClick">
       <slot>
         <v-btn :disabled="disabled">
           <v-icon>mdi-upload</v-icon>
@@ -34,6 +34,7 @@ const files = defineModel<Array<File>>()
 const props = withDefaults(
   defineProps<{
     accept?: string
+    contentClass?: string
     max?: number
     disabled?: boolean
   }>(),
@@ -41,6 +42,7 @@ const props = withDefaults(
     accept: () => '*/*',
     max: () => 1,
     disabled: false,
+    contentClass: '',
   }
 )
 const { accept, max, disabled } = toRefs(props)

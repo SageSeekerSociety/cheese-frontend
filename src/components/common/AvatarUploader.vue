@@ -1,5 +1,5 @@
 <template>
-  <div class="avatar-upload">
+  <div class="avatar-upload" :class="{ 'avatar-upload--empty': !avatarFile }">
     <v-img
       :src="previewUrl || undefined"
       aspect-ratio="1"
@@ -8,10 +8,18 @@
       size="180"
       color="grey-darken-1"
     />
-    <file-select v-model="files" accept="image/*" :max="1" class="uploader" @error="onError">
-      <v-btn icon>
-        <v-icon>mdi-camera</v-icon>
-      </v-btn>
+    <file-select
+      v-model="files"
+      accept="image/*"
+      :max="1"
+      class="uploader"
+      content-class="uploader-inner"
+      @error="onError"
+    >
+      <div class="rounded-lg d-flex flex-column align-center justify-center gap-4 pa-4 text-white uploader-inner">
+        <v-icon size="32">mdi-camera</v-icon>
+        <div class="text-body-1 text-white">{{ avatarFile ? '更换头像' : '上传头像' }}</div>
+      </div>
     </file-select>
   </div>
 </template>
@@ -48,11 +56,35 @@ const onError = (error: Error) => {
 .avatar-upload {
   position: relative;
 
+  &:not(.avatar-upload--empty):hover {
+    .uploader {
+      opacity: 1;
+    }
+  }
+
+  &.avatar-upload--empty {
+    .uploader {
+      opacity: 1;
+    }
+  }
+
   .uploader {
     position: absolute;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    top: 0;
+    left: 0;
     bottom: 0;
     right: 0;
-    transform: translate(50%, 50%);
+    border: 2px dashed rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0.25);
   }
+}
+</style>
+
+<style lang="scss">
+.uploader-inner {
+  height: 100%;
 }
 </style>

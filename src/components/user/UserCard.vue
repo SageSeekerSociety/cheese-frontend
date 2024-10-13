@@ -58,11 +58,15 @@
                                 accept="image/*"
                                 :max="1"
                                 class="uploader"
+                                content-class="uploader-inner"
                                 @change="handleFileChange"
                               >
-                                <v-btn icon>
-                                  <v-icon>mdi-camera</v-icon>
-                                </v-btn>
+                                <div
+                                  class="rounded-lg d-flex flex-column align-center justify-center gap-4 pa-4 text-white uploader-inner"
+                                >
+                                  <v-icon size="32">mdi-camera</v-icon>
+                                  <div class="text-body-1 text-white">上传头像</div>
+                                </div>
                               </file-select>
                             </div>
                           </v-col>
@@ -75,10 +79,10 @@
                         </v-row>
                       </form>
                       <v-card-actions>
-                        <v-btn @click="submit"> 提交 </v-btn>
-                        <v-btn @click="handleReset"> 重置 </v-btn>
-                        <v-spacer />
                         <v-btn @click="isActive.value = false"> 关闭 </v-btn>
+                        <v-spacer />
+                        <v-btn @click="handleReset"> 重置 </v-btn>
+                        <v-btn @click="submit"> 提交 </v-btn>
                       </v-card-actions>
                     </v-card>
                   </template>
@@ -276,9 +280,19 @@ const submit = handleSubmit(async (values) => {
 
   .uploader {
     position: absolute;
+    top: 0;
+    left: 0;
     bottom: 0;
     right: 0;
-    transform: translate(50%, 50%);
+    border: 2px dashed rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0.25);
   }
+}
+</style>
+
+<style lang="scss">
+.uploader-inner {
+  height: 100%;
 }
 </style>
