@@ -18,10 +18,10 @@
         required
         v-bind="deadlineProps"
       ></v-text-field>
-      <div class="d-flex align-center">
+      <div class="d-flex align-center gap-4">
         <v-checkbox
           v-model="resubmittable"
-          label="允许重新提交"
+          label="允许多次提交"
           color="primary"
           v-bind="resubmittableProps"
         ></v-checkbox>
@@ -35,8 +35,9 @@
         :min-height="200"
         :max-height="1000"
         editor-class="tiptap-editor"
+        title="任务描述"
       />
-      <div v-for="(entry, index) in taskSubmissionSchema" :key="index" class="submission-schema-entry">
+      <div v-for="(entry, index) in taskSubmissionSchema" :key="index" class="submission-schema-entry mt-4 pa-4">
         <div class="d-flex align-center justify-between mb-2">
           <span class="text-subtitle-2 font-weight-medium text-medium-emphasis">
             <v-icon>{{ entry.type === 'TEXT' ? 'mdi-text' : 'mdi-file' }}</v-icon>
@@ -50,7 +51,7 @@
         <v-text-field v-model="entry.prompt" label="提示" required></v-text-field>
       </div>
 
-      <div class="d-flex justify-end publish-task-btn-group">
+      <div class="d-flex justify-end publish-task-btn-group mt-4">
         <v-menu open-on-hover>
           <template #activator="{ props }">
             <v-btn v-bind="props">添加提交项</v-btn>
@@ -163,7 +164,5 @@ const submitTask = handleSubmit(async (value) => {
 .submission-schema-entry {
   border: 1px solid #e0e0e0;
   border-radius: 4px;
-  padding: 16px;
-  margin-bottom: 16px;
 }
 </style>

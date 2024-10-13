@@ -20,11 +20,43 @@
               <div class="text-body-2 text-medium-emphasis admin-text">{{ adminText }}</div>
             </div>
           </div>
+          <div class="flex-shrink-0">
+            <v-dialog v-if="isCurrentUserAtLeastAdmin" v-model="isUpdating" width="800">
+              <template #activator="{ props }">
+                <v-btn variant="tonal" color="primary" prepend-icon="mdi-pencil" v-bind="props"> 编辑信息 </v-btn>
+              </template>
+              <template #default>
+                <v-card>
+                  <v-card-title>编辑空间信息</v-card-title>
+                  <v-card-text>
+                    <v-form>
+                      <v-container fluid>
+                        <v-row>
+                          <v-col cols="12" md="4">
+                            <avatar-uploader v-model="selectedAvatar" />
+                          </v-col>
+                          <v-col cols="12" md="8">
+                            <v-text-field v-model="name" label="空间名称" v-bind="nameProps" />
+
+                            <v-list-subheader inset>个人简介</v-list-subheader>
+                            <v-text-field v-model="intro" :counter="255" v-bind="introProps" />
+                          </v-col>
+                        </v-row>
+                      </v-container>
+                    </v-form>
+                  </v-card-text>
+                  <v-card-actions>
+                    <v-btn color="primary" @click="closeUpdating">取消</v-btn>
+                    <v-btn color="primary" @click="submitUpdate">更新</v-btn>
+                  </v-card-actions>
+                </v-card>
+              </template>
+            </v-dialog>
+          </div>
         </div>
       </v-col>
     </v-row>
     <v-row>
-      <!-- 大屏下左右布局，左侧导航，右侧内容 -->
       <v-col cols="12" md="3">
         <v-sheet rounded="lg">
           <v-list nav bg-color="transparent">
@@ -92,10 +124,38 @@ import { ref, onMounted, computed } from 'vue'
 import { Space } from '@/types'
 import { getAvatarUrl } from '@/utils/materials'
 import AccountService from '@/services/account'
+import { z } from 'zod'
+import { useForm } from 'vee-validate'
+import { toTypedSchema } from '@vee-validate/zod'
+import { vuetifyConfig } from '@/utils/form'
+import AvatarUploader from '@/components/common/AvatarUploader.vue'
+import { AvatarsApi } from '@/network/api/avatars'
+import { toast } from 'vuetify-sonner'
 
 const route = useRoute()
 
 const space = ref<Space>()
+
+const isUpdating = ref(false)
+
+const { handleSubmit, defineField, handleReset, resetForm } = useForm({
+  validationSchema: toTypedSchema(
+    z.object({
+      name: z.string().max(32),
+      intro: z.string().max(255),
+    })
+  ),
+})
+
+const [name, nameProps] = defineField('name', vuetifyConfig)
+const [intro, introProps] = defineField('intro', vuetifyConfig)
+const selectedAvatar = ref<File>()
+
+const closeUpdating = () => {
+  isUpdating.value = false
+  selectedAvatar.value = undefined
+  handleReset()
+}
 
 const adminText = computed(() => {
   if (!space.value?.admins?.length) {
@@ -108,8 +168,14 @@ const adminText = computed(() => {
 })
 
 const getSpace = async (spaceId: number) => {
-  const res = await SpacesApi.detail(spaceId)
-  space.value = res.data.space
+  const { data } = await SpacesApi.detail(spaceId)
+  space.value = data.space
+  resetForm({
+    values: {
+      name: data.space?.name,
+      intro: data.space?.intro,
+    },
+  })
 }
 
 const isCurrentUserAtLeastAdmin = computed(() => {
@@ -121,8 +187,35 @@ onMounted(async () => {
   await getSpace(Number(route.params.spaceId))
 })
 
-onBeforeRouteUpdate(async (to) => {
-  await getSpace(Number(to.params.spaceId))
+onBeforeRouteUpdate(async (to, from) => {
+  if (to.params.spaceId !== from.params.spaceId) {
+    await getSpace(Number(to.params.spaceId))
+  }
+})
+
+const submitUpdate = handleSubmit(async (data) => {
+  console.log('submitUpdate', data)
+  if (!space.value?.id) {
+    return
+  }
+  try {
+    let avatarId = undefined
+    if (selectedAvatar.value) {
+      const { data: avatarData } = await AvatarsApi.createAvatar(selectedAvatar.value)
+      avatarId = avatarData.avatarId
+    }
+    await SpacesApi.update(space.value.id, {
+      name: data.name === space.value.name ? undefined : data.name,
+      intro: data.intro,
+      avatarId,
+    })
+    closeUpdating()
+    toast.success('更新成功')
+  } catch (error) {
+    toast.error('更新失败')
+  } finally {
+    await getSpace(Number(route.params.spaceId))
+  }
 })
 </script>
 
