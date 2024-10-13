@@ -4,7 +4,7 @@
       <v-col cols="12">
         <div class="d-flex align-center">
           <v-avatar size="96" :image="getAvatarUrl(space?.avatarId)" />
-          <div class="ml-8">
+          <div class="ml-8 flex-grow-1">
             <div class="text-h5">{{ space?.name }}</div>
             <div class="text-body-2 mt-1 text-grey-darken-1">{{ space?.intro }}</div>
             <div class="mt-2 admin-info-container">
@@ -29,16 +29,39 @@
         <v-sheet rounded="lg">
           <v-list nav bg-color="transparent">
             <v-list-subheader>全部分类</v-list-subheader>
-            <v-list-item
-              rounded="lg"
-              :to="{ name: 'SpacesDetailTasks', params: { spaceId: space?.id } }"
-              color="primary"
-            >
-              <template #prepend>
-                <v-icon>mdi-trophy</v-icon>
+            <v-list-group prepend-icon="mdi-trophy" value="tasks">
+              <template #activator="{ props }">
+                <v-list-item
+                  rounded="lg"
+                  :to="{ name: 'SpacesDetailTasks', params: { spaceId: space?.id }, query: { type: 'all' } }"
+                  v-bind="props"
+                >
+                  <template #prepend>
+                    <v-icon>mdi-trophy</v-icon>
+                  </template>
+                  <v-list-item-title>赛题</v-list-item-title>
+                </v-list-item>
               </template>
-              <v-list-item-title>赛题</v-list-item-title>
-            </v-list-item>
+
+              <v-list-item
+                rounded="lg"
+                :to="{ name: 'SpacesDetailTasks', params: { spaceId: space?.id }, query: { type: 'all' } }"
+                color="primary"
+                exact
+              >
+                <v-list-item-title>全部赛题</v-list-item-title>
+              </v-list-item>
+
+              <v-list-item
+                rounded="lg"
+                :to="{ name: 'SpacesDetailTasks', params: { spaceId: space?.id }, query: { type: 'published' } }"
+                color="primary"
+                exact
+              >
+                <v-list-item-title>我发布的赛题</v-list-item-title>
+              </v-list-item>
+            </v-list-group>
+
             <template v-if="isCurrentUserAtLeastAdmin">
               <v-list-subheader>管理员操作</v-list-subheader>
               <v-list-item

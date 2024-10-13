@@ -25,6 +25,13 @@ export default {
           path: 'tasks',
           name: 'SpacesDetailTasks',
           component: () => import('@/views/spaces/detail/Tasks.vue'),
+          beforeEnter: (to, _, next) => {
+            if (!to.query.type) {
+              next({ ...to, query: { type: 'all' } })
+            } else {
+              next()
+            }
+          },
         },
         {
           path: 'tasks/publish',

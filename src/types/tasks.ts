@@ -29,6 +29,7 @@ export interface Task {
   submittableAsTeam?: Team[]
   createdAt: number
   updatedAt: number
+  approved: boolean
 }
 
 export interface TaskSubmissionReview {

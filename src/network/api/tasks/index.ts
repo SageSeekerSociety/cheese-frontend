@@ -42,6 +42,7 @@ export namespace TasksApi {
   export const list = (params: {
     space?: number
     team?: number
+    owner?: number
     page_size?: number
     page_start?: number
     sort_by: 'createdAt' | 'updatedAt' | 'deadline'
