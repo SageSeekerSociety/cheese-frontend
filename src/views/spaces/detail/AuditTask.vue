@@ -48,7 +48,7 @@
                 <v-chip v-if="task.editable" size="small" color="info" variant="tonal">允许编辑提交</v-chip>
               </div>
               <div class="text-subtitle-2">赛题描述</div>
-              <TipTapViewer :value="JSON.parse(task.description)" />
+              <TipTapViewer :value="parseDescription(task.description)" />
               <div class="text-subtitle-2 mt-2 mb-2">提交要求</div>
               <template v-if="task.submissionSchema.length > 0">
                 <v-sheet
@@ -135,6 +135,14 @@ const rejectTask = async (taskId: number) => {
     toast.error('操作失败')
   } finally {
     await refresh()
+  }
+}
+
+const parseDescription = (description: string) => {
+  try {
+    return JSON.parse(description)
+  } catch (error) {
+    return description
   }
 }
 
