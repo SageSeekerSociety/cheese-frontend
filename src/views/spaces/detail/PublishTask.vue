@@ -42,7 +42,7 @@
         editor-class="tiptap-editor"
         title="任务描述"
       />
-      <div v-for="(entry, index) in taskSubmissionSchema" :key="index" class="submission-schema-entry mt-4 pa-4">
+      <!-- <div v-for="(entry, index) in taskSubmissionSchema" :key="index" class="submission-schema-entry mt-4 pa-4">
         <div class="d-flex align-center justify-between mb-2">
           <span class="text-subtitle-2 font-weight-medium text-medium-emphasis">
             <v-icon>{{ entry.type === 'TEXT' ? 'mdi-text' : 'mdi-file' }}</v-icon>
@@ -54,10 +54,10 @@
           </v-btn>
         </div>
         <v-text-field v-model="entry.prompt" label="提示" required></v-text-field>
-      </div>
+      </div> -->
 
       <div class="d-flex justify-end publish-task-btn-group mt-4">
-        <v-menu open-on-hover>
+        <!-- <v-menu open-on-hover>
           <template #activator="{ props }">
             <v-btn v-bind="props">添加提交项</v-btn>
           </template>
@@ -75,7 +75,7 @@
               <v-list-item-title>文件</v-list-item-title>
             </v-list-item>
           </v-list>
-        </v-menu>
+        </v-menu> -->
         <v-btn type="submit" color="primary" :loading="isSubmitting">提交</v-btn>
       </div>
     </v-form>
@@ -130,15 +130,21 @@ const taskDescription = ref<JSONContent>({
   type: 'doc',
   content: [],
 })
-const taskSubmissionSchema = ref<TaskSubmissionSchemaEntry[]>([])
 
-const addSchemaEntry = (type: TaskSubmissionEntryType) => {
-  taskSubmissionSchema.value.push({ prompt: '', type })
-}
+const taskSubmissionSchema = ref<TaskSubmissionSchemaEntry[]>([
+  {
+    prompt: '提交文件',
+    type: 'FILE',
+  },
+])
 
-const removeSchemaEntry = (index: number) => {
-  taskSubmissionSchema.value.splice(index, 1)
-}
+// const addSchemaEntry = (type: TaskSubmissionEntryType) => {
+//   taskSubmissionSchema.value.push({ prompt: '', type })
+// }
+
+// const removeSchemaEntry = (index: number) => {
+//   taskSubmissionSchema.value.splice(index, 1)
+// }
 
 const submitTask = handleSubmit(async (value) => {
   console.log(value)
