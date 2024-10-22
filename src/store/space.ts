@@ -1,8 +1,10 @@
-import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import { SpacesApi } from '@/network/api/spaces'
-import { Space, SpaceTaskTemplate, SpaceAnnouncement } from '@/types'
+import type { Space, SpaceAnnouncement, SpaceTaskTemplate } from '@/types'
+
+import { computed, ref } from 'vue'
 import { toast } from 'vuetify-sonner'
+import { defineStore } from 'pinia'
+
+import { SpacesApi } from '@/network/api/spaces'
 
 export const useSpaceStore = defineStore('space', () => {
   const currentSpace = ref<Space | null>(null)

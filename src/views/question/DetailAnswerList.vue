@@ -3,8 +3,9 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
 import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+
 import AnswerList from '@/components/questions/AnswerList.vue'
 
 const route = useRoute()

@@ -41,15 +41,17 @@
 </template>
 
 <script lang="ts" setup>
+import { useRouter } from 'vue-router'
 import { toast } from 'vuetify-sonner'
-import { UserApi } from '@/network/api/users'
-import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
+import { useForm } from 'vee-validate'
 import { z } from 'zod'
+
+import { vuetifyConfig } from '@/utils/form'
+
+import { UserApi } from '@/network/api/users'
 import { ServerError } from '@/network/types/error'
 import AccountService from '@/services/account'
-import { useRouter } from 'vue-router'
-import { vuetifyConfig } from '@/utils/form'
 
 const router = useRouter()
 

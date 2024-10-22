@@ -1,8 +1,10 @@
-import { mergeAttributes, Node } from '@tiptap/core'
 import type { ButtonView, GeneralOptions } from 'vuetify-pro-tiptap'
+
+import { mergeAttributes, Node } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
-import ImageView from './ImageView.vue'
+
 import ImageActionButton from './ImageActionButton.vue'
+import ImageView from './ImageView.vue'
 
 export interface AttachmentImageOptions extends GeneralOptions<AttachmentImageOptions> {
   /**

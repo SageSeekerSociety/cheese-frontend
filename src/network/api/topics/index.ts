@@ -1,5 +1,6 @@
+import type { CreateTopicResponse, SearchTopicsResponse } from './types'
+
 import ApiInstance from '../index'
-import { CreateTopicResponse, SearchTopicsResponse } from './types'
 
 export namespace TopicsApi {
   export const search = (query: string, pageSize = 20) =>

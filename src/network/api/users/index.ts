@@ -1,12 +1,13 @@
-import ApiInstance from '../index'
-import { User } from '@/types'
-import {
+import type { User } from '@/types'
+import type {
   FollowUserResponse,
   GetAnswerListResponse,
   GetQuestionListResponse,
   GetUserInfoResponse,
   UserList,
 } from './types'
+
+import ApiInstance from '../index'
 
 export namespace UserApi {
   export interface AuthResponseDataType {

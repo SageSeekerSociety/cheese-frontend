@@ -75,12 +75,12 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { z } from 'zod'
-import { toTypedSchema } from '@vee-validate/zod'
-
 import { useRouter } from 'vue-router'
-import { useForm } from 'vee-validate'
 import { toast } from 'vuetify-sonner'
+import { toTypedSchema } from '@vee-validate/zod'
+import { useForm } from 'vee-validate'
+import { z } from 'zod'
+
 import { REGEX_PASSWORD, vuetifyConfig } from '@/utils/form'
 
 import { ImageApi } from '@/network/api/image'
@@ -122,7 +122,7 @@ const { handleSubmit, defineField, isSubmitting } = useForm({
         .regex(/^[a-zA-Z0-9_\u4e00-\u9fa5]{1,16}$/, {
           message: '昵称只能使用英文字母、数字、下划线、中文',
         }),
-      // eslint-disable-next-line no-control-regex
+
       intro: z.string().min(1).max(20),
     })
   ),

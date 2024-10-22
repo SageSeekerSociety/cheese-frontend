@@ -1,4 +1,4 @@
-import { Answer, Page, Question, User } from '@/types'
+import type { Answer, Page, Question, User } from '@/types'
 
 export type GetAnswerListResponse = {
   answers: Answer[]

@@ -17,12 +17,15 @@
 </template>
 
 <script setup lang="ts">
-import { usePaging } from '@/utils/paging'
 import { inject, onMounted } from 'vue'
+
+import { usePaging } from '@/utils/paging'
+
 import AnswerCard from '../answer/AnswerCard.vue'
 import BlankPage from '../common/BlankPage.vue'
-import { AnswersApi } from '@/network/api/answers'
+
 import { questionDataInjectionKey } from '@/keys'
+import { AnswersApi } from '@/network/api/answers'
 
 const props = defineProps<{
   questionId: number

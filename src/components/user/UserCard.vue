@@ -129,19 +129,24 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed, inject, watch, Ref } from 'vue'
-import { toTypedSchema } from '@vee-validate/zod'
-import { z } from 'zod'
-import { User } from '@/types/users'
-import { UserApi } from '@/network/api/users'
-import { AvatarsApi } from '@/network/api/avatars'
-import { useForm } from 'vee-validate'
-import { vuetifyConfig } from '@/utils/form'
-import FileSelect from '../common/FileSelect.vue'
-import AccountService from '@/services/account'
-import UserAvatar from '../common/UserAvatar.vue'
-import { getAvatarUrl } from '@/utils/materials'
+import type { Ref } from 'vue'
+import type { User } from '@/types/users'
+
+import { computed, inject, onMounted, ref, watch } from 'vue'
 import { toast } from 'vuetify-sonner'
+import { toTypedSchema } from '@vee-validate/zod'
+import { useForm } from 'vee-validate'
+import { z } from 'zod'
+
+import { vuetifyConfig } from '@/utils/form'
+import { getAvatarUrl } from '@/utils/materials'
+
+import FileSelect from '../common/FileSelect.vue'
+import UserAvatar from '../common/UserAvatar.vue'
+
+import { AvatarsApi } from '@/network/api/avatars'
+import { UserApi } from '@/network/api/users'
+import AccountService from '@/services/account'
 
 const profile = inject<Ref<User>>('userData', ref({} as User))
 

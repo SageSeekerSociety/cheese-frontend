@@ -1,4 +1,4 @@
-import { Material, User, Team } from '.'
+import type { Material, Team, User } from '.'
 
 export type TaskSubmitterType = 'USER' | 'TEAM'
 export type TaskSubmissionEntryType = 'TEXT' | 'FILE'

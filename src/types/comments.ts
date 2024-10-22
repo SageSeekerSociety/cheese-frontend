@@ -1,5 +1,5 @@
-import { CommentTag, CommentableType } from '@/constants'
-import { User, AttitudeStats } from '.'
+import type { CommentableType, CommentTag } from '@/constants'
+import type { AttitudeStats, User } from '.'
 
 export type Comment = {
   id: number

@@ -77,9 +77,10 @@
 </template>
 
 <script setup lang="ts">
-import PostInsightEntry from '@/components/common/Insights/PostInsightPopup.vue'
+import type { Insight } from '@/types'
+
 import InsightCard from '@/components/common/Insights/InsightCard.vue'
-import { Insight } from '@/types'
+import PostInsightEntry from '@/components/common/Insights/PostInsightPopup.vue'
 import { NewAttitudeType } from '@/constants'
 
 const fakeQuestionData = [

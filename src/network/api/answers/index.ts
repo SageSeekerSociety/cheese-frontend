@@ -1,6 +1,12 @@
+import type { NewAttitudeType } from '@/constants'
+import type {
+  AnswerQuestionResponse,
+  AttitudeAnswerResponse,
+  GetAnswerDetailResponse,
+  GetAnswersResponse,
+} from './types'
+
 import ApiInstance from '../index'
-import { AnswerQuestionResponse, AttitudeAnswerResponse, GetAnswerDetailResponse, GetAnswersResponse } from './types'
-import { NewAttitudeType } from '@/constants'
 
 export namespace AnswersApi {
   export const getAnswers = (questionId: number, pageStart?: number, pageSize = 20) =>

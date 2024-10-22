@@ -13,8 +13,9 @@
 </template>
 
 <script setup lang="ts">
-import { NewAttitudeType } from '@/constants'
 import { computed, toRefs } from 'vue'
+
+import { NewAttitudeType } from '@/constants'
 
 const emit = defineEmits(['upvote', 'downvote', 'cancelVote', 'clickCount'])
 

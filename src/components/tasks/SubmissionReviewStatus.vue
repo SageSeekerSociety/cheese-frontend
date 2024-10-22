@@ -3,8 +3,9 @@
 </template>
 
 <script setup lang="ts">
+import type { TaskSubmissionReview } from '@/types'
+
 import { computed, toRefs } from 'vue'
-import { TaskSubmissionReview } from '@/types'
 
 const props = defineProps<{
   review: TaskSubmissionReview

@@ -27,12 +27,15 @@
 </template>
 
 <script setup lang="ts">
-import { User } from '@/types/users'
-import { defineProps, withDefaults, onMounted } from 'vue'
-import UserAvatar from '@/components/common/UserAvatar.vue'
-import BlankPage from '@/components/common/BlankPage.vue'
-import { getAvatarUrl } from '@/utils/materials'
+import type { User } from '@/types/users'
+
+import { defineProps, onMounted, withDefaults } from 'vue'
 import { useI18n } from 'vue-i18n'
+
+import { getAvatarUrl } from '@/utils/materials'
+
+import BlankPage from '@/components/common/BlankPage.vue'
+import UserAvatar from '@/components/common/UserAvatar.vue'
 const { t } = useI18n()
 
 const { users } = withDefaults(

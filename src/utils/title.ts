@@ -1,4 +1,4 @@
-import { RouteLocationNormalized, RouteLocationNormalizedLoaded } from 'vue-router'
+import type { RouteLocationNormalized, RouteLocationNormalizedLoaded } from 'vue-router'
 
 const titleMap: Record<string, string> = {}
 

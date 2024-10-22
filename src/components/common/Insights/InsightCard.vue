@@ -52,11 +52,14 @@
 </template>
 
 <script setup lang="ts">
+import type { Insight } from '@/types'
+
 import { ref } from 'vue'
-import { Insight } from '@/types'
 import { computed } from 'vue'
-import { NewAttitudeType } from '@/constants'
+
 import { getAvatarUrl } from '@/utils/materials'
+
+import { NewAttitudeType } from '@/constants'
 const viewerOptions = {
   url: 'data-src',
 }

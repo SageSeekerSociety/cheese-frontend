@@ -1,9 +1,11 @@
-import { AxiosError } from 'axios'
-import { ResponseDataType } from '../../types'
-import { Local } from '../../utils/storage'
+import type { AxiosError } from 'axios'
+import type { ResponseDataType } from '../../types'
+
 import ApiInstance from '../../api'
-import { messageFailed } from '../../utils/showMessage'
 import { UserApi } from '../../api/users'
+import { messageFailed } from '../../utils/showMessage'
+import { Local } from '../../utils/storage'
+
 import router from '@/router'
 import AccountService from '@/services/account'
 
@@ -62,7 +64,6 @@ export default async function refreshToken(error: AxiosError<ResponseDataType>) 
       queue.push((newToken: string) => {
         Reflect.set(config.headers!, 'Authorization', `Bearer ${newToken}`)
         console.log('queue', config)
-        // @ts-ignore
         resolve(ApiInstance.request<any>(config))
       })
     })

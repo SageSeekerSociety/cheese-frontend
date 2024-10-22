@@ -60,12 +60,15 @@
 </template>
 
 <script setup lang="ts">
+import type { Team } from '@/types'
+
+import { computed, onMounted, provide, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { TeamsApi } from '@/network/api/teams'
-import { Team } from '@/types'
-import { onMounted, ref, computed, provide } from 'vue'
+
 import { getAvatarUrl } from '@/utils/materials'
+
 import { teamDataInjectionKey } from '@/keys'
+import { TeamsApi } from '@/network/api/teams'
 
 const route = useRoute()
 const teamData = ref<Team>()

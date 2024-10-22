@@ -1,5 +1,6 @@
+import type { GetAttachmentDetailResponse, UploadAttachmentRequestData, UploadAttachmentResponseData } from './types'
+
 import ApiInstance from '../index'
-import { GetAttachmentDetailResponse, UploadAttachmentRequestData, UploadAttachmentResponseData } from './types'
 
 export namespace AttachmentsApi {
   export const upload = (data: UploadAttachmentRequestData) => {

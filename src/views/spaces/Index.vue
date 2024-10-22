@@ -51,12 +51,14 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue'
-import { SpacesApi } from '@/network/api/spaces'
+import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+
 import { getAvatarUrl } from '@/utils/materials'
 import { usePaging } from '@/utils/paging'
+
 import InfiniteScroll from '@/components/common/InfiniteScroll.vue'
-import { useI18n } from 'vue-i18n'
+import { SpacesApi } from '@/network/api/spaces'
 
 const { t } = useI18n()
 

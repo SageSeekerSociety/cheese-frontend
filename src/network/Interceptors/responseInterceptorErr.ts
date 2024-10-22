@@ -1,8 +1,10 @@
-import { AxiosError } from 'axios'
-import { ResponseDataType } from '../types/index'
+import type { AxiosError } from 'axios'
+import type { ResponseDataType } from '../types/index'
+
+import { ServerError } from '../types/error'
+
 import forbidden from './hooks/forbidden'
 import refreshToken from './hooks/refreshToken'
-import { ServerError } from '../types/error'
 
 const handleError = (error: AxiosError<ResponseDataType>) => {
   const response = error.response?.data

@@ -1,6 +1,7 @@
+import type { CommentableType, NewAttitudeType } from '@/constants'
+import type { CreateCommentResponse, GetCommentDetailResponse, GetCommentsResponse } from './types'
+
 import ApiInstance from '../index'
-import { CommentableType, NewAttitudeType } from '@/constants'
-import { GetCommentsResponse, CreateCommentResponse, GetCommentDetailResponse } from './types'
 
 export namespace CommentsApi {
   export const getComments = (commentableType: CommentableType, commentableId: number) =>

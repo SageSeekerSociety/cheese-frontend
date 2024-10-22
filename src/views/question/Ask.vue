@@ -67,18 +67,21 @@
 </template>
 
 <script setup lang="ts">
-import RichEditor from '@/components/common/Editor/Editor.vue'
-import EditorJS from '@editorjs/editorjs'
-import { QuestionApi } from '@/network/api/questions'
-import { useRoute, useRouter } from 'vue-router'
-import { DEFAULT_CONFIG } from '@/utils/editor'
-import { toast } from 'vuetify-sonner'
-import { useForm } from 'vee-validate'
-import { toTypedSchema } from '@vee-validate/zod'
-import { z } from 'zod'
-import { vuetifyConfig } from '@/utils/form'
-import TopicSelector from '@/components/questions/TopicSelector.vue'
+import type EditorJS from '@editorjs/editorjs'
+
 import { computed, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { toast } from 'vuetify-sonner'
+import { toTypedSchema } from '@vee-validate/zod'
+import { useForm } from 'vee-validate'
+import { z } from 'zod'
+
+import { DEFAULT_CONFIG } from '@/utils/editor'
+import { vuetifyConfig } from '@/utils/form'
+
+import RichEditor from '@/components/common/Editor/Editor.vue'
+import TopicSelector from '@/components/questions/TopicSelector.vue'
+import { QuestionApi } from '@/network/api/questions'
 
 let editor: EditorJS
 const router = useRouter()

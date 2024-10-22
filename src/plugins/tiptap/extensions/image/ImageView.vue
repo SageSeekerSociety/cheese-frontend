@@ -8,10 +8,12 @@
 </template>
 
 <script setup lang="ts">
-import { nodeViewProps, NodeViewWrapper, NodeViewContent } from '@tiptap/vue-3'
-import { onMounted, computed, ref } from 'vue'
-import { AttachmentsApi } from '@/network/api/attachments'
+import { computed, onMounted, ref } from 'vue'
+import { NodeViewContent, nodeViewProps, NodeViewWrapper } from '@tiptap/vue-3'
+
 import { getFullAttachmentUrl } from '@/utils/materials'
+
+import { AttachmentsApi } from '@/network/api/attachments'
 
 const props = defineProps(nodeViewProps)
 const realUrl = ref<string | null>(null)

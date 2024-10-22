@@ -1,4 +1,4 @@
-import { Group, Page, Question, GroupTarget, User } from '@/types'
+import type { Group, GroupTarget, Page, Question, User } from '@/types'
 
 export type GetGroupListRes = {
   groups: Group[]

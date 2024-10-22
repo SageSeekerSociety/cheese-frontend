@@ -1,4 +1,4 @@
-import { NewAttitudeType } from '@/constants'
+import type { NewAttitudeType } from '@/constants'
 
 export type AttitudeStats = {
   positive_count: number

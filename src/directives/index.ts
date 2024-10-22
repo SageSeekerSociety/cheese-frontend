@@ -1,5 +1,7 @@
 import 'resize-observer-polyfill'
-import { App } from 'vue'
+
+import type { App } from 'vue'
+
 import { debounce } from 'lodash'
 
 export function registerDirectives(app: App) {

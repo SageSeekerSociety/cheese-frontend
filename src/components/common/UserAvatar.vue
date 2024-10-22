@@ -3,8 +3,9 @@
 </template>
 
 <script setup lang="ts">
-import { API_BASE_URL } from '@/network/utils'
 import { computed } from 'vue'
+
+import { API_BASE_URL } from '@/network/utils'
 
 const { avatar, size } = withDefaults(
   defineProps<{

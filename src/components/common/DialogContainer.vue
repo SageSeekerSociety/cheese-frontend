@@ -24,8 +24,9 @@
 </template>
 
 <script lang="ts" setup>
-import { dialogs, closeDialog } from '@/plugins/dialog'
 import type { DialogInstance } from '@/plugins/dialog'
+
+import { closeDialog, dialogs } from '@/plugins/dialog'
 
 const onDialogClose = (id: number, isOpen: boolean) => {
   if (!isOpen) {

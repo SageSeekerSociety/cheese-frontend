@@ -24,11 +24,13 @@
 </template>
 
 <script setup lang="ts">
+import type { GroupTarget } from '@/types'
+
 import { ref } from 'vue'
-import { GroupApi } from '@/network/api/group'
-import { useRoute } from 'vue-router'
 import { onMounted } from 'vue'
-import { GroupTarget } from '@/types'
+import { useRoute } from 'vue-router'
+
+import { GroupApi } from '@/network/api/group'
 
 const groupTargetList = ref<GroupTarget[]>([])
 const route = useRoute()

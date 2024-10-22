@@ -8,11 +8,13 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed } from 'vue'
-import { UserApi } from '@/network/api/users'
+import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import QuestionCard from '@/components/questions/QuestionCard.vue'
+
 import { usePaging } from '@/utils/paging'
+
+import QuestionCard from '@/components/questions/QuestionCard.vue'
+import { UserApi } from '@/network/api/users'
 
 const route = useRoute()
 const userID = computed(() => parseInt(route.params.id[0], 10))

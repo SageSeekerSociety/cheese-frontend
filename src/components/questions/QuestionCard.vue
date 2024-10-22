@@ -33,9 +33,12 @@
 </template>
 
 <script setup lang="ts">
-import { Question } from '@/types'
+import type { Question } from '@/types'
+
+import { computed, toRefs } from 'vue'
+
 import { parse } from '@/utils/parser'
-import { toRefs, computed } from 'vue'
+
 import CollapsibleContent from '../common/CollapsibleContent.vue'
 
 const props = defineProps<{

@@ -1,5 +1,8 @@
-import { Avatar, AvatarType } from '@/types'
+import type { AvatarType } from '@/types'
+
 import ApiInstance from '../index'
+
+import { Avatar } from '@/types'
 
 export namespace AvatarsApi {
   export type GetAvailableAvatarIdsParams = {

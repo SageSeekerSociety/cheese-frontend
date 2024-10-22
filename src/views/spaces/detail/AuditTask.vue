@@ -98,17 +98,20 @@
 </template>
 
 <script setup lang="ts">
-import { TasksApi } from '@/network/api/tasks'
-import { ref, onMounted } from 'vue'
-import dayjs from 'dayjs'
-import { usePaging, createEmptyResult } from '@/utils/paging'
-import InfiniteScroll from '@/components/common/InfiniteScroll.vue'
-import TipTapViewer from '@/components/common/Editor/TipTapViewer.vue'
-import { toast } from 'vuetify-sonner'
-import { useSpaceStore } from '@/store/space'
-import { storeToRefs } from 'pinia'
-import { Task } from '@/types'
+import type { Task } from '@/types'
+
+import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { toast } from 'vuetify-sonner'
+import dayjs from 'dayjs'
+import { storeToRefs } from 'pinia'
+
+import { createEmptyResult, usePaging } from '@/utils/paging'
+
+import TipTapViewer from '@/components/common/Editor/TipTapViewer.vue'
+import InfiniteScroll from '@/components/common/InfiniteScroll.vue'
+import { TasksApi } from '@/network/api/tasks'
+import { useSpaceStore } from '@/store/space'
 
 const spaceStore = useSpaceStore()
 const { currentSpaceId } = storeToRefs(spaceStore)

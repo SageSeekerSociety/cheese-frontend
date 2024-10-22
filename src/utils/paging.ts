@@ -1,5 +1,7 @@
-import { Page } from '@/types'
-import { ref, Ref, watch } from 'vue'
+import type { Ref } from 'vue'
+import type { Page } from '@/types'
+
+import { ref, watch } from 'vue'
 
 type FetchResult<T> = { data: T[]; page: Page }
 

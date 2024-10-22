@@ -32,15 +32,17 @@
 </template>
 
 <script lang="ts" setup>
-import { useForm } from 'vee-validate'
-import { toTypedSchema } from '@vee-validate/zod'
-import { z } from 'zod'
-import { toast } from 'vuetify-sonner'
 import { computed, ref } from 'vue'
-import { ServerError } from '@/network/types/error'
-import { UserApi } from '@/network/api/users'
-import { RULE_PASSWORD, vuetifyConfig } from '@/utils/form'
 import { useRoute, useRouter } from 'vue-router'
+import { toast } from 'vuetify-sonner'
+import { toTypedSchema } from '@vee-validate/zod'
+import { useForm } from 'vee-validate'
+import { z } from 'zod'
+
+import { RULE_PASSWORD, vuetifyConfig } from '@/utils/form'
+
+import { UserApi } from '@/network/api/users'
+import { ServerError } from '@/network/types/error'
 
 const route = useRoute()
 const token = computed(() => route.query.token as string)

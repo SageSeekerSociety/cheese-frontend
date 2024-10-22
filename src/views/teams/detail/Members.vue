@@ -90,14 +90,17 @@
 </template>
 
 <script setup lang="ts">
-import { TeamsApi } from '@/network/api/teams'
-import { TeamMember } from '@/types'
-import { onMounted, ref, inject, computed } from 'vue'
+import type { TeamMember } from '@/types'
+
+import { computed, inject, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { getAvatarUrl } from '@/utils/materials'
-import { teamDataInjectionKey } from '@/keys'
-import AccountService from '@/services/account'
 import { toast } from 'vuetify-sonner'
+
+import { getAvatarUrl } from '@/utils/materials'
+
+import { teamDataInjectionKey } from '@/keys'
+import { TeamsApi } from '@/network/api/teams'
+import AccountService from '@/services/account'
 
 const route = useRoute()
 const isInviteDialogActive = ref(false)

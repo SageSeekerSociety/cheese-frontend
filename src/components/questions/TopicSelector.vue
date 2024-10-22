@@ -58,11 +58,13 @@
 </template>
 
 <script lang="ts" setup>
-import { Topic } from '@/types'
+import type { Topic } from '@/types'
+
 import { ref } from 'vue'
-import { debounce } from 'lodash'
-import { TopicsApi } from '@/network/api/topics'
 import { useI18n } from 'vue-i18n'
+import { debounce } from 'lodash'
+
+import { TopicsApi } from '@/network/api/topics'
 
 const { t } = useI18n()
 

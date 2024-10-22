@@ -47,20 +47,24 @@
 </template>
 
 <script setup lang="ts">
-import { Answer, Question } from '@/types'
+import type { Answer, Question } from '@/types'
+
+import { computed, inject, toRefs } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { toast } from 'vuetify-sonner'
+
+import { getAvatarUrl } from '@/utils/materials'
+import { parse } from '@/utils/parser'
+
+import CollapsibleContent from '../common/CollapsibleContent.vue'
 import ContentVoter from '../common/ContentVoter.vue'
 import UserAvatar from '../common/UserAvatar.vue'
-import CollapsibleContent from '../common/CollapsibleContent.vue'
-import { toRefs, computed, inject } from 'vue'
-import { parse } from '@/utils/parser'
+
+import { NewAttitudeType } from '@/constants'
+import { refreshInjectionKey } from '@/keys'
 import { AnswersApi } from '@/network/api/answers'
 import { QuestionApi } from '@/network/api/questions'
-import { NewAttitudeType } from '@/constants'
 import { currentUserId } from '@/services/account'
-import { toast } from 'vuetify-sonner'
-import { refreshInjectionKey } from '@/keys'
-import { useI18n } from 'vue-i18n'
-import { getAvatarUrl } from '@/utils/materials'
 const { t } = useI18n()
 
 const props = withDefaults(

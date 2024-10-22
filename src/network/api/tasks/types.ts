@@ -1,4 +1,4 @@
-import { TaskSubmissionSchemaEntry } from '@/types'
+import type { TaskSubmissionSchemaEntry } from '@/types'
 
 export type PostTaskRequestData = {
   name: string

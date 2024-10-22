@@ -1,5 +1,10 @@
-import { GroupRoleType, GroupTargetFrequency, GroupTargetMaterialType, GroupMemberInvitationStatus } from '@/constants'
-import { Topic, User } from '.'
+import type {
+  GroupMemberInvitationStatus,
+  GroupRoleType,
+  GroupTargetFrequency,
+  GroupTargetMaterialType,
+} from '@/constants'
+import type { Topic, User } from '.'
 
 export type Group = {
   id: number

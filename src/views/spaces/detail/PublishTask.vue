@@ -18,14 +18,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { TasksApi } from '@/network/api/tasks'
-import TaskForm from '@/components/tasks/TaskForm.vue'
-import { useSpaceStore } from '@/store/space'
-import { storeToRefs } from 'pinia'
+import type { TaskFormSubmitData, TaskSubmissionSchemaEntry } from '@/types'
+
+import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { TaskFormSubmitData, TaskSubmissionSchemaEntry } from '@/types'
+import { useRoute, useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
+
+import TaskForm from '@/components/tasks/TaskForm.vue'
+import { TasksApi } from '@/network/api/tasks'
+import { useSpaceStore } from '@/store/space'
 
 const router = useRouter()
 const route = useRoute()

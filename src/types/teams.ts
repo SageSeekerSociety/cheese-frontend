@@ -1,4 +1,4 @@
-import { User } from '.'
+import type { User } from '.'
 
 export type TeamMemberRoleType = 'OWNER' | 'ADMIN' | 'MEMBER'
 

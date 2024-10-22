@@ -1,4 +1,6 @@
-import { reactive, h, VNode } from 'vue'
+import type { VNode } from 'vue'
+
+import { h, reactive } from 'vue'
 
 interface DialogOptions<T = any> {
   title: string

@@ -25,7 +25,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, toRefs } from 'vue'
+import { ref, toRefs, watch } from 'vue'
+
 import FileSelect from './FileSelect.vue'
 
 const emit = defineEmits<{

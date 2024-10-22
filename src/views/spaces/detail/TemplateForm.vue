@@ -45,14 +45,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import TipTapEditor from '@/components/common/Editor/TipTapEditor.vue'
-import { JSONContent } from 'vuetify-pro-tiptap'
-import { toast } from 'vuetify-sonner'
-import { useSpaceStore } from '@/store/space'
-import { storeToRefs } from 'pinia'
+import type { JSONContent } from 'vuetify-pro-tiptap'
+
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
+import { toast } from 'vuetify-sonner'
+import { storeToRefs } from 'pinia'
+
+import TipTapEditor from '@/components/common/Editor/TipTapEditor.vue'
+import { useSpaceStore } from '@/store/space'
 
 const router = useRouter()
 const route = useRoute()

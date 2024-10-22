@@ -236,26 +236,29 @@
 </template>
 
 <script setup lang="ts">
-import dayjs from 'dayjs'
-import EditorJS from '@editorjs/editorjs'
-import { setTitle } from '@/utils/title'
+import type EditorJS from '@editorjs/editorjs'
+import type { Question } from '@/types'
+
+import { computed, onMounted, provide, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { onBeforeRouteUpdate, useRoute } from 'vue-router'
-import { onMounted, ref, computed, watch, provide } from 'vue'
-import { QuestionApi } from '@/network/api/questions'
-import { Question } from '@/types'
-import { parse } from '@/utils/parser'
-import { DEFAULT_CONFIG } from '@/utils/editor'
-import UserAvatar from '@/components/common/UserAvatar.vue'
-import RichEditor from '@/components/common/Editor/Editor.vue'
-import InvitationList from '@/components/questions/InvitationList.vue'
-import { AnswersApi } from '@/network/api/answers'
-import ContentVoter from '@/components/common/ContentVoter.vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vuetify-sonner'
+import dayjs from 'dayjs'
+
+import { DEFAULT_CONFIG } from '@/utils/editor'
+import { getAvatarUrl } from '@/utils/materials'
+import { parse } from '@/utils/parser'
+import { setTitle } from '@/utils/title'
+
+import ContentVoter from '@/components/common/ContentVoter.vue'
+import RichEditor from '@/components/common/Editor/Editor.vue'
+import UserAvatar from '@/components/common/UserAvatar.vue'
+import InvitationList from '@/components/questions/InvitationList.vue'
 import { NewAttitudeType } from '@/constants'
 import { questionDataInjectionKey } from '@/keys'
-import { useI18n } from 'vue-i18n'
-import { getAvatarUrl } from '@/utils/materials'
+import { AnswersApi } from '@/network/api/answers'
+import { QuestionApi } from '@/network/api/questions'
 
 const { t } = useI18n()
 let editor: EditorJS

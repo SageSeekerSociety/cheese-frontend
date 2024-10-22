@@ -32,11 +32,12 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
+
 import { useDialog } from '@/plugins/dialog'
 import { useSpaceStore } from '@/store/space'
-import { storeToRefs } from 'pinia'
-import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
 

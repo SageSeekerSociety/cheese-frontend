@@ -51,10 +51,12 @@
 </template>
 
 <script setup lang="ts">
-import { GroupApi } from '@/network/api/group'
-import { Group } from '@/types'
-import { ref, onMounted } from 'vue'
+import type { Group } from '@/types'
+
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+
+import { GroupApi } from '@/network/api/group'
 
 const groupList = ref<Group[]>([])
 const router = useRouter()

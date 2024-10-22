@@ -1,4 +1,4 @@
-import { User, Group, Topic, AttitudeStats, Answer } from '.'
+import type { Answer, AttitudeStats, Group, Topic, User } from '.'
 
 export type Question = {
   id: number

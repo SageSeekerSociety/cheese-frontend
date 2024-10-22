@@ -5,11 +5,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { GroupApi } from '@/network/api/group'
+import type { User } from '@/types/users'
+
+import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
+
 import Roster from '@/components/user/Roster.vue'
-import { User } from '@/types/users'
+import { GroupApi } from '@/network/api/group'
 
 const route = useRoute()
 // const userID = computed(() => parseInt(route.params.id[0], 10))

@@ -69,13 +69,15 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch } from 'vue'
+import type { Group } from '@/types'
+
+import { computed, ref, watch } from 'vue'
+import { onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
+
 import GroupCard from '@/components/group/GroupCard.vue'
 import { GroupApi } from '@/network/api/group'
-import { useRoute } from 'vue-router'
-import { onMounted } from 'vue'
-import { Group } from '@/types'
-import { useRouter } from 'vue-router'
 
 const groupInfo = ref<Group>({} as Group)
 const route = useRoute()

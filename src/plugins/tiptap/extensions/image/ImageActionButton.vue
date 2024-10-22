@@ -22,13 +22,15 @@
 </template>
 
 <script setup lang="ts">
-import FileSelect from '@/components/common/FileSelect.vue'
-import { ref } from 'vue'
 import type { Editor } from '@tiptap/vue-3'
-import { ActionButton } from 'vuetify-pro-tiptap'
-import { useI18n } from 'vue-i18n'
-import { AttachmentsApi } from '@/network/api/attachments'
 import type { ImageMeta } from '@/types'
+
+import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { ActionButton } from 'vuetify-pro-tiptap'
+
+import FileSelect from '@/components/common/FileSelect.vue'
+import { AttachmentsApi } from '@/network/api/attachments'
 
 const { t } = useI18n()
 

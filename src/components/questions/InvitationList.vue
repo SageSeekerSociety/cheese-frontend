@@ -19,14 +19,18 @@
 </template>
 
 <script setup lang="ts">
-import { User } from '@/types'
-import { toRefs, ref, computed, onMounted } from 'vue'
-import { QuestionApi } from '@/network/api/questions'
-import UserAvatar from '../common/UserAvatar.vue'
+import type { User } from '@/types'
+
+import { computed, onMounted, ref, toRefs } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { toast } from 'vuetify-sonner'
+
 import { getErrorMessage } from '@/utils/errors'
 import { getAvatarUrl } from '@/utils/materials'
-import { useI18n } from 'vue-i18n'
+
+import UserAvatar from '../common/UserAvatar.vue'
+
+import { QuestionApi } from '@/network/api/questions'
 
 const { t } = useI18n()
 

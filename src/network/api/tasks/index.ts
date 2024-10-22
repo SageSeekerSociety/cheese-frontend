@@ -1,15 +1,16 @@
 // src/api/tasks.ts
 
-import { Page, TaskParticipantSummary, TaskSubmission } from '@/types'
-import { Task } from '@/types'
-import { NewApiInstance } from '../index'
-import {
-  PostTaskRequestData,
+import type { Page, TaskParticipantSummary, TaskSubmission } from '@/types'
+import type { Task } from '@/types'
+import type {
   PatchTaskRequestData,
+  PatchTaskSubmissionReviewRequestData,
+  PostTaskRequestData,
   PostTaskSubmissionRequestData,
   PostTaskSubmissionReviewRequestData,
-  PatchTaskSubmissionReviewRequestData,
 } from './types'
+
+import { NewApiInstance } from '../index'
 
 export namespace TasksApi {
   export const create = (data: PostTaskRequestData) =>

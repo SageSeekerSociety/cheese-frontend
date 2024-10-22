@@ -54,15 +54,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, defineProps, defineEmits } from 'vue'
-import { useForm } from 'vee-validate'
-import { toTypedSchema } from '@vee-validate/zod'
-import { z } from 'zod'
-import { vuetifyConfig } from '@/utils/form'
-import TipTapEditor from '@/components/common/Editor/TipTapEditor.vue'
-import { JSONContent } from 'vuetify-pro-tiptap'
+import type { TaskFormSubmitData } from '@/types'
+
+import { defineEmits, defineProps, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { TaskFormSubmitData, TaskSubmitterType } from '@/types'
+import { JSONContent } from 'vuetify-pro-tiptap'
+import { toTypedSchema } from '@vee-validate/zod'
+import { useForm } from 'vee-validate'
+import { z } from 'zod'
+
+import { vuetifyConfig } from '@/utils/form'
+
+import TipTapEditor from '@/components/common/Editor/TipTapEditor.vue'
+import { TaskSubmitterType } from '@/types'
 
 const props = defineProps({
   initialData: {

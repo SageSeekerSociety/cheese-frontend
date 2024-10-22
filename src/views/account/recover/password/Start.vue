@@ -25,15 +25,17 @@
 </template>
 
 <script lang="ts" setup>
-import { useForm } from 'vee-validate'
-import { toTypedSchema } from '@vee-validate/zod'
-import { z } from 'zod'
+import { ref } from 'vue'
 // import { useRouter } from 'vue-router'
 import { toast } from 'vuetify-sonner'
-import { ref } from 'vue'
-import { ServerError } from '@/network/types/error'
-import { UserApi } from '@/network/api/users'
+import { toTypedSchema } from '@vee-validate/zod'
+import { useForm } from 'vee-validate'
+import { z } from 'zod'
+
 import { vuetifyConfig } from '@/utils/form'
+
+import { UserApi } from '@/network/api/users'
+import { ServerError } from '@/network/types/error'
 
 const myAlert = ref<{
   message: string | undefined

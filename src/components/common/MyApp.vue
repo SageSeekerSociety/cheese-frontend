@@ -9,8 +9,8 @@
 </template>
 
 <script lang="ts" setup>
-import { VSonner } from 'vuetify-sonner'
 import { defineAsyncComponent } from 'vue'
+import { VSonner } from 'vuetify-sonner'
 
 const DialogContainer = defineAsyncComponent(() => import('./DialogContainer.vue'))
 

@@ -1,15 +1,16 @@
-import ApiInstance from '../index'
-import {
+import type { NewAttitudeType } from '@/constants'
+import type {
+  AskQuestionResponse,
   AttitudeQuestionResponse,
   FollowQuestionResponse,
-  AskQuestionResponse,
+  GetInvitationsResponse,
   QuestionDetailResponse,
   QuestionInvitationRecommendResponse,
   QuestionInviteUserResponse,
-  GetInvitationsResponse,
   QuestionList,
 } from './types'
-import { NewAttitudeType } from '@/constants'
+
+import ApiInstance from '../index'
 
 export namespace QuestionApi {
   export type AskQuestionRequest = {

@@ -32,10 +32,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { GroupApi } from '@/network/api/group'
+import type { Question } from '@/types'
+
+import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { Question } from '@/types'
+
+import { GroupApi } from '@/network/api/group'
 
 const groupQuestionList = ref<Question[]>([])
 const route = useRoute()

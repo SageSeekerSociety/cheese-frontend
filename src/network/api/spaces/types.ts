@@ -1,4 +1,4 @@
-import { Space, Page } from '@/types'
+import type { Page, Space } from '@/types'
 
 export type PostSpaceRequestData = {
   name: string

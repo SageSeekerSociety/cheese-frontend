@@ -89,14 +89,17 @@
 </template>
 
 <script lang="ts" setup>
+import type { Comment } from '@/types'
+
 import { ref } from 'vue'
-import UserAvatar from '@/components/common/UserAvatar.vue'
+import { useI18n } from 'vue-i18n'
 import dayjs from 'dayjs'
-import { Comment } from '@/types'
+
+import { getAvatarUrl } from '@/utils/materials'
+
+import UserAvatar from '@/components/common/UserAvatar.vue'
 import { CommentableType } from '@/constants'
 import { CommentTag } from '@/constants'
-import { useI18n } from 'vue-i18n'
-import { getAvatarUrl } from '@/utils/materials'
 
 const { t } = useI18n()
 // import Comment from '@/types/comments'

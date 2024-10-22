@@ -33,14 +33,16 @@
 </template>
 
 <script lang="ts" setup>
-import QuestionCard from '@/components/questions/QuestionCard.vue'
-import AppBar from '@/components/common/AppBar/AppBar.vue'
-import BlankPage from '@/components/common/BlankPage.vue'
-import { QuestionApi } from '@/network/api/questions'
-import { usePaging } from '@/utils/paging'
 import { onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
+
+import { usePaging } from '@/utils/paging'
 import { setTitle } from '@/utils/title'
+
+import AppBar from '@/components/common/AppBar/AppBar.vue'
+import BlankPage from '@/components/common/BlankPage.vue'
+import QuestionCard from '@/components/questions/QuestionCard.vue'
+import { QuestionApi } from '@/network/api/questions'
 
 const route = useRoute()
 const search = ref(route.query.q as string)

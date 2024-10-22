@@ -1,4 +1,4 @@
-import { Page, Topic } from '@/types'
+import type { Page, Topic } from '@/types'
 
 export type SearchTopicsResponse = {
   topics: Topic[]

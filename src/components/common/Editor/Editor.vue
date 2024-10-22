@@ -3,9 +3,10 @@
 </template>
 
 <script setup lang="ts">
-import EditorJS from '@editorjs/editorjs'
-import { EditorConfig } from '@editorjs/editorjs'
+import type { EditorConfig } from '@editorjs/editorjs'
+
 import { onMounted, ref } from 'vue'
+import EditorJS from '@editorjs/editorjs'
 
 const emit = defineEmits<{
   create: [editor: EditorJS]

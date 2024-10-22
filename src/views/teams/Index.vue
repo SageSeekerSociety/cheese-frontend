@@ -97,17 +97,20 @@
 </template>
 
 <script setup lang="ts">
+import type { JSONContent } from 'vuetify-pro-tiptap'
+import type { Team } from '@/types'
+
 import { onMounted, ref } from 'vue'
-import AvatarUploader from '@/components/common/AvatarUploader.vue'
-import { AvatarsApi } from '@/network/api/avatars'
-import { TeamsApi } from '@/network/api/teams'
 import { useRouter } from 'vue-router'
 import { toast } from 'vuetify-sonner'
-import type { Team } from '@/types'
+
 import { getAvatarUrl } from '@/utils/materials'
-import AccountService from '@/services/account'
+
+import AvatarUploader from '@/components/common/AvatarUploader.vue'
 import TipTapEditor from '@/components/common/Editor/TipTapEditor.vue'
-import { JSONContent } from 'vuetify-pro-tiptap'
+import { AvatarsApi } from '@/network/api/avatars'
+import { TeamsApi } from '@/network/api/teams'
+import AccountService from '@/services/account'
 const createTeamDialog = ref(false)
 const searchQuery = ref('')
 const searchTeamsData = ref<Team[]>([])

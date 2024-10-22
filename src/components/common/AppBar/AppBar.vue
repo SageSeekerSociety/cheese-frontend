@@ -67,12 +67,16 @@
 </template>
 
 <script setup lang="ts">
-import { AppBarProps } from './types'
+import type { AppBarProps } from './types'
+
 import { computed, toRefs } from 'vue'
-import AccountService from '@/services/account'
-import UserAvatar from '../UserAvatar.vue'
 import { useRouter } from 'vue-router'
+
 import { getAvatarUrl } from '@/utils/materials'
+
+import UserAvatar from '../UserAvatar.vue'
+
+import AccountService from '@/services/account'
 
 const appBarProps = withDefaults(defineProps<AppBarProps>(), {
   links: () => [],

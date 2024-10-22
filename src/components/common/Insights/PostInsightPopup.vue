@@ -53,9 +53,12 @@
 </template>
 
 <script setup lang="ts">
-import { Ref, ref } from 'vue'
+import type { Ref } from 'vue'
+import type { Insight } from '@/types'
+
+import { ref } from 'vue'
+
 import { InsightsApi } from '@/network/api/insights'
-import { Insight } from '@/types'
 
 // TODO: load assets
 

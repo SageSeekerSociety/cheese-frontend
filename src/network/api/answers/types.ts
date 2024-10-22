@@ -1,4 +1,4 @@
-import { Answer, AttitudeStats, Question, Page } from '@/types'
+import type { Answer, AttitudeStats, Page, Question } from '@/types'
 
 export type AttitudeAnswerResponse = {
   attitudes: AttitudeStats

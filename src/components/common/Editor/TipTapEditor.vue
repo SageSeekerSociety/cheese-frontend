@@ -11,8 +11,10 @@
 </template>
 
 <script setup lang="ts">
+import type { JSONContent } from 'vuetify-pro-tiptap'
+
 import { computed, ref } from 'vue'
-import { JSONContent, VuetifyTiptap } from 'vuetify-pro-tiptap'
+import { VuetifyTiptap } from 'vuetify-pro-tiptap'
 
 const props = defineProps<{
   output?: 'json' | 'html' | 'text'

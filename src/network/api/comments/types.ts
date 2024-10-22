@@ -1,4 +1,4 @@
-import { Comment, Page } from '@/types'
+import type { Comment, Page } from '@/types'
 
 export type GetCommentsResponse = {
   comments: Comment[]

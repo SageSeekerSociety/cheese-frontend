@@ -11,10 +11,12 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
-import { TasksApi } from '@/network/api/tasks'
+import type { Task } from '@/types'
+
 import { onMounted, ref } from 'vue'
-import { Task } from '@/types'
+import { useRoute } from 'vue-router'
+
+import { TasksApi } from '@/network/api/tasks'
 
 const route = useRoute()
 

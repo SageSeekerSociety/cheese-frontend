@@ -1,5 +1,5 @@
-import { InjectionKey, Ref } from 'vue'
-import { Question, Team } from './types'
+import type { InjectionKey, Ref } from 'vue'
+import type { Question, Team } from './types'
 
 export const questionDataInjectionKey = Symbol('questionDataInjectionKey') as InjectionKey<Ref<Question | null>>
 

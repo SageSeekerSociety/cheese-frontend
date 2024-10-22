@@ -1,12 +1,13 @@
-import { NewApiInstance } from '../index'
-import { Space } from '@/types'
-import {
-  PostSpaceRequestData,
-  PatchSpaceRequestData,
+import type { Space } from '@/types'
+import type {
   GetSpacesResponseData,
-  PostSpaceAdminRequestData,
   PatchSpaceAdminRequestData,
+  PatchSpaceRequestData,
+  PostSpaceAdminRequestData,
+  PostSpaceRequestData,
 } from './types'
+
+import { NewApiInstance } from '../index'
 
 export namespace SpacesApi {
   export const create = (data: PostSpaceRequestData) =>

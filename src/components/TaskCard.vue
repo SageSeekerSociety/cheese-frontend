@@ -28,9 +28,10 @@
 </template>
 
 <script setup lang="ts">
-import { Task } from '@/types'
-import dayjs from 'dayjs'
+import type { Task } from '@/types'
+
 import { computed, toRefs } from 'vue'
+import dayjs from 'dayjs'
 
 const props = defineProps<{
   task: Task

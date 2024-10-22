@@ -22,12 +22,14 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
+import type { Answer, Question } from '@/types'
+
 import { computed, onMounted, ref } from 'vue'
-import { AnswersApi } from '@/network/api/answers'
-import { Answer, Question } from '@/types'
-import AnswerCard from '@/components/answer/AnswerCard.vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
+
+import AnswerCard from '@/components/answer/AnswerCard.vue'
+import { AnswersApi } from '@/network/api/answers'
 
 const { t } = useI18n()
 

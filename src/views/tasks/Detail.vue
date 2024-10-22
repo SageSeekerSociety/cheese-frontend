@@ -263,24 +263,27 @@
 </template>
 
 <script setup lang="ts">
-import AccountService from '@/services/account'
-import { TasksApi } from '@/network/api/tasks'
-import { AttachmentsApi } from '@/network/api/attachments'
-import { Task, TaskParticipantSummary, Team } from '@/types'
-import { onMounted, ref, reactive, watchEffect, onWatcherCleanup, computed, useTemplateRef } from 'vue'
+import type { PatchTaskRequestData } from '@/network/api/tasks/types'
+import type { Task, TaskParticipantSummary, Team } from '@/types'
+
+import { computed, onMounted, onWatcherCleanup, reactive, ref, useTemplateRef, watchEffect } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
-import dayjs from 'dayjs'
+import { VForm } from 'vuetify/lib/components/index.mjs'
 import { toast } from 'vuetify-sonner'
-import TaskSubmissionHistory from '@/components/tasks/TaskSubmissionHistory.vue'
-import { TeamsApi } from '@/network/api/teams'
+import dayjs from 'dayjs'
+
 import { getAvatarUrl } from '@/utils/materials'
+import { setTitle } from '@/utils/title'
+
 import CollapsibleContent from '@/components/common/CollapsibleContent.vue'
 import TipTapViewer from '@/components/common/Editor/TipTapViewer.vue'
-import { setTitle } from '@/utils/title'
-import { VForm } from 'vuetify/lib/components/index.mjs'
 import TaskForm from '@/components/tasks/TaskForm.vue'
-import { PatchTaskRequestData } from '@/network/api/tasks/types'
-import { useI18n } from 'vue-i18n'
+import TaskSubmissionHistory from '@/components/tasks/TaskSubmissionHistory.vue'
+import { AttachmentsApi } from '@/network/api/attachments'
+import { TasksApi } from '@/network/api/tasks'
+import { TeamsApi } from '@/network/api/teams'
+import AccountService from '@/services/account'
 
 const route = useRoute()
 const myTeams = ref<Team[]>([])

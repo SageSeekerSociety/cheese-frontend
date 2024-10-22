@@ -1,4 +1,4 @@
-import { AttitudeStats, ImageMeta, VideoMeta, User } from '.'
+import type { AttitudeStats, ImageMeta, User, VideoMeta } from '.'
 
 export type Insight = {
   id: number

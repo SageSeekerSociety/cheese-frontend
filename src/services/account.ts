@@ -1,4 +1,5 @@
-import { User } from '@/types/users'
+import type { User } from '@/types/users'
+
 import { computed, ref } from 'vue'
 
 export class AccountService {

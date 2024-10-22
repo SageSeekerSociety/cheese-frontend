@@ -1,5 +1,6 @@
+import type { Page, Team, TeamMember } from '@/types'
+
 import { NewApiInstance } from '../index'
-import { Team, TeamMember, Page } from '@/types'
 
 export namespace TeamsApi {
   export type PostTeamRequestData = {

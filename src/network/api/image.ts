@@ -1,4 +1,5 @@
 import Api from '..'
+
 import ApiInstance from './index'
 
 export namespace ImageApi {

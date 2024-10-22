@@ -1,18 +1,18 @@
-import { EditorConfig } from '@editorjs/editorjs'
-import Paragraph from '@editorjs/paragraph'
-import Header from '@editorjs/header'
-import Quote from '@editorjs/quote'
+import type { EditorConfig } from '@editorjs/editorjs'
+
+import Codecup from '@calumk/editorjs-codecup'
+import Checklist from '@editorjs/checklist'
 import Delimiter from '@editorjs/delimiter'
+import Header from '@editorjs/header'
+import InlineCode from '@editorjs/inline-code'
+import NestedList from '@editorjs/nested-list'
+import Paragraph from '@editorjs/paragraph'
+import Quote from '@editorjs/quote'
+import Table from '@editorjs/table'
+import TextVariantTune from '@editorjs/text-variant-tune'
+import Underline from '@editorjs/underline'
 import Warning from '@editorjs/warning'
 import LaTeX from 'editorjs-latex'
-import Mermaid from 'editorjs-mermaid'
-import Table from '@editorjs/table'
-import Codecup from '@calumk/editorjs-codecup'
-import TextVariantTune from '@editorjs/text-variant-tune'
-import InlineCode from '@editorjs/inline-code'
-import Underline from '@editorjs/underline'
-import Checklist from '@editorjs/checklist'
-import NestedList from '@editorjs/nested-list'
 
 export const DEFAULT_CONFIG: EditorConfig = {
   placeholder: '问题描述',
@@ -38,7 +38,6 @@ export const DEFAULT_CONFIG: EditorConfig = {
     delimiter: Delimiter,
     warning: Warning,
     math: LaTeX,
-    mermaid: Mermaid,
     code: Codecup,
     table: Table,
     textVariant: {

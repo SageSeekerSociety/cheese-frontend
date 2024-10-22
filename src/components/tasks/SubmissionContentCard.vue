@@ -25,8 +25,9 @@
 </template>
 
 <script setup lang="ts">
-import { FileMeta, TaskSubmissionContent } from '@/types'
-import { getFullAttachmentUrl, formatFileSize } from '@/utils/materials'
+import type { FileMeta, TaskSubmissionContent } from '@/types'
+
+import { formatFileSize, getFullAttachmentUrl } from '@/utils/materials'
 
 defineProps<{
   content: TaskSubmissionContent

@@ -70,15 +70,17 @@
 </template>
 
 <script lang="ts" setup>
-import { useSignupStore } from '@/store/signup'
-import { useForm } from 'vee-validate'
-import { toTypedSchema } from '@vee-validate/zod'
-import { z } from 'zod'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vuetify-sonner'
-import { ref } from 'vue'
-import { ServerError } from '@/network/types/error'
+import { toTypedSchema } from '@vee-validate/zod'
+import { useForm } from 'vee-validate'
+import { z } from 'zod'
+
 import { REGEX_PASSWORD, vuetifyConfig } from '@/utils/form'
+
+import { ServerError } from '@/network/types/error'
+import { useSignupStore } from '@/store/signup'
 
 const error = ref('')
 
@@ -100,11 +102,11 @@ const { handleSubmit, defineField, isSubmitting } = useForm({
           .regex(/^[a-zA-Z0-9_\u4e00-\u9fa5]{1,16}$/, {
             message: '昵称只能使用英文字母、数字、下划线、中文',
           }),
-        // eslint-disable-next-line no-control-regex
+
         password: z.string().min(8).regex(REGEX_PASSWORD, {
           message: '密码必须包含字母、数字、特殊字符',
         }),
-        // eslint-disable-next-line no-control-regex
+
         confirmPassword: z.string().min(8).regex(REGEX_PASSWORD, {
           message: '密码必须包含字母、数字、特殊字符',
         }),

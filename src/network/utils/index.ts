@@ -1,5 +1,5 @@
-import { AxiosResponse } from 'axios'
-import { ResponseDataType } from '../types'
+import type { AxiosResponse } from 'axios'
+import type { ResponseDataType } from '../types'
 
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 export const NEW_API_BASE_URL = import.meta.env.VITE_NEW_API_BASE_URL

@@ -65,17 +65,20 @@
 </template>
 
 <script setup lang="ts">
-import { TasksApi } from '@/network/api/tasks'
-import { ref, onMounted, watch, computed } from 'vue'
+import type { Task } from '@/types'
+
+import { computed, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
+
 import { usePaging } from '@/utils/paging'
+
 import InfiniteScroll from '@/components/common/InfiniteScroll.vue'
 import TaskCard from '@/components/TaskCard.vue'
-import { Task } from '@/types'
+import { TasksApi } from '@/network/api/tasks'
 import { currentUserId } from '@/services/account'
 import { useSpaceStore } from '@/store/space'
-import { storeToRefs } from 'pinia'
-import { useI18n } from 'vue-i18n'
 
 type SortBy = 'createdAt' | 'updatedAt' | 'deadline'
 type SortOrder = 'asc' | 'desc'

@@ -1,6 +1,7 @@
+import { useRouter } from 'vue-router'
+
 import { messageFailed } from '../../utils/showMessage'
 import { Local } from '../../utils/storage'
-import { useRouter } from 'vue-router'
 
 const router = useRouter()
 

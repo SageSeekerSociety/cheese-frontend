@@ -1,6 +1,9 @@
 // 引入axios以及一些类型
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
-import { ResponseDataType } from './types'
+import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
+import type { ResponseDataType } from './types'
+
+import axios from 'axios'
+
 import { isAxiosResponse } from './utils'
 
 export interface Interceptor {

@@ -30,11 +30,13 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter, useRoute } from 'vue-router'
-import { SpaceTaskTemplate } from '@/types'
-import { useSpaceStore } from '@/store/space'
-import { storeToRefs } from 'pinia'
+import type { SpaceTaskTemplate } from '@/types'
+
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
+
+import { useSpaceStore } from '@/store/space'
 
 const router = useRouter()
 const route = useRoute()

@@ -1,4 +1,4 @@
-import { User, Group, AttitudeStats } from '.'
+import type { AttitudeStats, Group, User } from '.'
 
 export type Answer = {
   id: number

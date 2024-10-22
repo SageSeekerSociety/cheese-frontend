@@ -15,14 +15,16 @@
 </template>
 
 <script lang="ts" setup>
-import { useForm } from 'vee-validate'
-import { toTypedSchema } from '@vee-validate/zod'
-import { z } from 'zod'
-import { useSignupStore } from '@/store/signup'
-import { toast } from 'vuetify-sonner'
-import AccountService from '@/services/account'
-import { vuetifyConfig } from '@/utils/form'
 import { useRouter } from 'vue-router'
+import { toast } from 'vuetify-sonner'
+import { toTypedSchema } from '@vee-validate/zod'
+import { useForm } from 'vee-validate'
+import { z } from 'zod'
+
+import { vuetifyConfig } from '@/utils/form'
+
+import AccountService from '@/services/account'
+import { useSignupStore } from '@/store/signup'
 
 const router = useRouter()
 

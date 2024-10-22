@@ -1,4 +1,5 @@
-import { Insight } from '@/types'
+import type { Insight } from '@/types'
+
 import ApiInstance from '../index'
 
 export namespace InsightsApi {

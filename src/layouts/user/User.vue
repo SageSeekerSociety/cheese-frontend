@@ -24,12 +24,14 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed, provide } from 'vue'
-import { useRoute, onBeforeRouteUpdate } from 'vue-router'
-import { UserApi } from '@/network/api/users'
-import { User } from '@/types/users'
+import type { User } from '@/types/users'
+
+import { computed, onMounted, provide, ref } from 'vue'
+import { onBeforeRouteUpdate, useRoute } from 'vue-router'
+
 import AppBar from '@/components/common/AppBar/AppBar.vue'
 import UserCard from '@/components/user/UserCard.vue'
+import { UserApi } from '@/network/api/users'
 
 const selectedTab = ref<string | null>(null)
 const route = useRoute()

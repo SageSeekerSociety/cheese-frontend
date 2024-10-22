@@ -1,15 +1,17 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import { refreshTitle } from '@/utils/title'
 import type { RouteRecordRaw } from 'vue-router'
+
+import { createRouter, createWebHistory } from 'vue-router'
+
+import { refreshTitle } from '@/utils/title'
 
 import AccountRoutes from './account'
 import GroupRoutes from './group'
 import HomeRoutes from './home'
-import UserRoutes from './user'
 import QuestionRoutes from './question'
 import SpacesRoutes from './spaces'
 import TasksRoutes from './tasks'
 import TeamsRoutes from './teams'
+import UserRoutes from './user'
 
 const routes: RouteRecordRaw[] = [
   AccountRoutes,

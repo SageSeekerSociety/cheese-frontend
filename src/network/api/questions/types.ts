@@ -1,4 +1,4 @@
-import { Question, Page, AttitudeStats, User, QuestionInvitation } from '@/types'
+import type { AttitudeStats, Page, Question, QuestionInvitation, User } from '@/types'
 
 export type QuestionList = {
   questions: Question[]

@@ -103,19 +103,23 @@
 </template>
 
 <script setup lang="ts">
+import type { TaskSubmissionReview } from '@/types'
+
 import { computed, onMounted, watch } from 'vue'
-import { TasksApi } from '@/network/api/tasks'
-import dayjs from 'dayjs'
-import { usePaging } from '@/utils/paging'
-import InfiniteScroll from '@/components/common/InfiniteScroll.vue'
-import SubmissionContentCard from './SubmissionContentCard.vue'
-import { z } from 'zod'
-import { useForm } from 'vee-validate'
-import { toTypedSchema } from '@vee-validate/zod'
-import { vuetifyConfig } from '@/utils/form'
-import { TaskSubmissionReview } from '@/types'
 import { toast } from 'vuetify-sonner'
+import { toTypedSchema } from '@vee-validate/zod'
+import dayjs from 'dayjs'
+import { useForm } from 'vee-validate'
+import { z } from 'zod'
+
+import { vuetifyConfig } from '@/utils/form'
+import { usePaging } from '@/utils/paging'
+
+import SubmissionContentCard from './SubmissionContentCard.vue'
 import SubmissionReviewStatus from './SubmissionReviewStatus.vue'
+
+import InfiniteScroll from '@/components/common/InfiniteScroll.vue'
+import { TasksApi } from '@/network/api/tasks'
 
 const {
   taskId,
