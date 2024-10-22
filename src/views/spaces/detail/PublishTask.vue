@@ -7,9 +7,9 @@
     </v-toolbar>
     <v-form ref="taskForm" class="pa-4" @submit.prevent="submitTask">
       <v-text-field v-model="name" label="任务名称" required v-bind="nameProps"></v-text-field>
-      <v-radio-group v-model="submitterType" label="提交者类型" required inline v-bind="submitterTypeProps">
-        <v-radio label="用户" value="USER"></v-radio>
-        <v-radio label="小队" value="TEAM"></v-radio>
+      <v-radio-group v-model="submitterType" label="参与者类型" required inline v-bind="submitterTypeProps">
+        <v-radio label="个人参与" value="USER"></v-radio>
+        <v-radio label="小队参与" value="TEAM"></v-radio>
       </v-radio-group>
       <v-radio-group v-model="rank" label="任务等级" required inline v-bind="rankProps">
         <v-radio label="初级" :value="1"></v-radio>
@@ -30,7 +30,7 @@
           color="primary"
           v-bind="resubmittableProps"
         ></v-checkbox>
-        <v-checkbox v-model="editable" label="允许编辑" color="primary" v-bind="editableProps"></v-checkbox>
+        <v-checkbox v-model="editable" label="允许编辑提交" color="primary" v-bind="editableProps"></v-checkbox>
       </div>
       <TipTapEditor
         ref="descriptionEditor"
