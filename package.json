@@ -75,6 +75,7 @@
     "@types/prismjs": "^1.26.4",
     "@typescript-eslint/parser": "^6.21.0",
     "@vitejs/plugin-vue": "^4.6.2",
+    "@vitejs/plugin-vue-jsx": "^4.0.1",
     "@vue/eslint-config-prettier": "^9.0.0",
     "@vue/eslint-config-typescript": "^13.0.0",
     "cz-conventional-changelog": "^3.3.0",
@@ -112,5 +113,5 @@
       "eslint --cache --fix"
     ]
   },
-  "packageManager": "pnpm@8.11.0"
+  "packageManager": "pnpm@8.15.9+sha512.499434c9d8fdd1a2794ebf4552b3b25c0a633abcee5bb15e7b5de90f32f47b513aca98cd5cfd001c31f0db454bc3804edccd578501e4ca293a6816166bbd9f81"
 }

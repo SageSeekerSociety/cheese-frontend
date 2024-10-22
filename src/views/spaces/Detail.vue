@@ -169,14 +169,6 @@
       </v-col>
     </v-row>
   </v-container>
-  <v-dialog v-model="isAnnouncementDialogOpen" width="800">
-    <v-card>
-      <v-card-title>{{ currentAnnouncement?.title }}</v-card-title>
-      <v-card-text>
-        <tip-tap-viewer v-if="currentAnnouncement?.content" :value="currentAnnouncement?.content" />
-      </v-card-text>
-    </v-card>
-  </v-dialog>
   <v-dialog v-model="isAnnouncementCreatingOrUpdating" width="800">
     <template #default="{ isActive }">
       <v-card>
@@ -205,7 +197,7 @@
   </v-dialog>
 </template>
 
-<script lang="ts" setup>
+<script lang="tsx" setup>
 import { useRoute, onBeforeRouteUpdate } from 'vue-router'
 import { SpacesApi } from '@/network/api/spaces'
 import { ref, onMounted, computed } from 'vue'
@@ -229,14 +221,12 @@ import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
 
 const route = useRoute()
-const { confirm } = useDialog()
+const dialog = useDialog()
 const { t } = useI18n()
 
 const spaceStore = useSpaceStore()
 const { currentSpace: space, announcements } = storeToRefs(spaceStore)
 
-const isAnnouncementDialogOpen = ref(false)
-const currentAnnouncement = ref<SpaceAnnouncement>()
 const isAnnouncementCreatingOrUpdating = ref(false)
 const updatingAnnouncementIndex = ref<number>()
 const newAnnouncementTitle = ref('')
@@ -302,12 +292,11 @@ const openAnnouncementUpdating = (index: number) => {
 }
 
 const openAnnouncementDialog = (announcement: SpaceAnnouncement) => {
-  currentAnnouncement.value = announcement
-  isAnnouncementDialogOpen.value = true
+  dialog.custom(announcement.title, () => <TipTapViewer value={announcement.content} />, { showCancel: false })
 }
 
 const deleteAnnouncement = async (index: number) => {
-  const result = await confirm(t('spaces.detail.confirmDeleteAnnouncement')).wait()
+  const result = await dialog.confirm(t('spaces.detail.confirmDeleteAnnouncement')).wait()
   if (!result) {
     return
   }
