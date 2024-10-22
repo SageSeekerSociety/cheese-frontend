@@ -8,7 +8,7 @@
       </template>
     </v-toolbar>
 
-    <v-list>
+    <v-list rounded="lg">
       <v-list-item
         prepend-icon="mdi-file-outline"
         :title="t('spaces.detail.selectTemplate.blankTemplate')"

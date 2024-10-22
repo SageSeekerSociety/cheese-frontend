@@ -106,7 +106,7 @@
             <template v-if="currentJoinable">
               <v-btn color="primary" variant="flat" @click="joinTask">领取赛题</v-btn>
             </template>
-            <template v-else>
+            <template v-else-if="!isCreator">
               <div v-if="countdown || isExpired" class="text-center">
                 <div v-if="countdown && !isExpired" class="countdown-display">
                   <span class="countdown-number text-primary">{{ countdown.days }}</span> 天
@@ -117,6 +117,9 @@
                 <div v-else class="expired-text text-error">已截止</div>
                 <div v-if="countdown" class="text-caption">剩余时间</div>
               </div>
+            </template>
+            <template v-if="isCreator">
+              <v-btn color="primary" variant="outlined" @click="openEditDialog"> 编辑赛题 </v-btn>
             </template>
           </div>
           <v-divider class="my-4" />
@@ -235,6 +238,28 @@
       </v-card-text>
     </v-card>
   </v-dialog>
+
+  <!-- 添加编辑对话框 -->
+  <v-dialog v-model="editDialogOpen" fullscreen scrollable>
+    <v-card>
+      <v-toolbar color="primary" dark>
+        <v-btn icon @click="editDialogOpen = false">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+        <v-toolbar-title>{{ t('tasks.detail.editTask') }}</v-toolbar-title>
+        <v-spacer></v-spacer>
+      </v-toolbar>
+      <v-card-text>
+        <v-container>
+          <TaskForm
+            :initial-data="editTaskData"
+            :submit-button-text="t('tasks.detail.save')"
+            @submit="submitEditTask"
+          />
+        </v-container>
+      </v-card-text>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script setup lang="ts">
@@ -243,7 +268,7 @@ import { TasksApi } from '@/network/api/tasks'
 import { AttachmentsApi } from '@/network/api/attachments'
 import { Task, TaskParticipantSummary, Team } from '@/types'
 import { onMounted, ref, reactive, watchEffect, onWatcherCleanup, computed, useTemplateRef } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import dayjs from 'dayjs'
 import { toast } from 'vuetify-sonner'
 import TaskSubmissionHistory from '@/components/tasks/TaskSubmissionHistory.vue'
@@ -252,6 +277,10 @@ import { getAvatarUrl } from '@/utils/materials'
 import CollapsibleContent from '@/components/common/CollapsibleContent.vue'
 import TipTapViewer from '@/components/common/Editor/TipTapViewer.vue'
 import { setTitle } from '@/utils/title'
+import { VForm } from 'vuetify/lib/components/index.mjs'
+import TaskForm from '@/components/tasks/TaskForm.vue'
+import { PatchTaskRequestData } from '@/network/api/tasks/types'
+import { useI18n } from 'vue-i18n'
 
 const route = useRoute()
 const myTeams = ref<Team[]>([])
@@ -263,6 +292,7 @@ const progressDialog = ref(false)
 const uploadProgress = ref(0)
 const submissionHistoryRef = useTemplateRef<typeof TaskSubmissionHistory>('submissionHistoryRef')
 
+const { t } = useI18n()
 const fetchTaskDetail = async (taskId: number, clearSubmissionContent = true) => {
   const {
     data: { task },
@@ -270,6 +300,15 @@ const fetchTaskDetail = async (taskId: number, clearSubmissionContent = true) =>
   taskData.value = task
   if (clearSubmissionContent) {
     submissionContent.value = reactive(task.submissionSchema.map(() => ({})))
+  }
+  if (task) {
+    editTaskData.value.name = task.name
+    editTaskData.value.submitterType = task.submitterType
+    editTaskData.value.rank = task.rank
+    editTaskData.value.deadline = dayjs(task.deadline).format('YYYY-MM-DDTHH:mm')
+    editTaskData.value.resubmittable = task.resubmittable
+    editTaskData.value.editable = task.editable
+    editTaskData.value.description = JSON.parse(task.description)
   }
 }
 
@@ -527,6 +566,50 @@ const currentViewRoleTitle = computed(() => {
   const currentRole = viewRoles.value.find((role) => role.value === selectedViewRole.value)
   return currentRole ? currentRole.title : ''
 })
+
+// 添加新的响应式变量
+const editDialogOpen = ref(false)
+const editTaskData = computed(() => {
+  if (!taskData.value) return {}
+  return {
+    name: taskData.value.name,
+    submitterType: taskData.value.submitterType,
+    rank: taskData.value.rank,
+    deadline: dayjs(taskData.value.deadline).format('YYYY-MM-DDTHH:mm'),
+    resubmittable: taskData.value.resubmittable,
+    editable: taskData.value.editable,
+    description: JSON.parse(taskData.value.description),
+  }
+})
+
+// 添加打开编辑对话框的方法
+const openEditDialog = () => {
+  if (taskData.value) {
+    editTaskData.value.name = taskData.value.name
+    editTaskData.value.submitterType = taskData.value.submitterType
+    editTaskData.value.rank = taskData.value.rank
+    editTaskData.value.deadline = dayjs(taskData.value.deadline).format('YYYY-MM-DDTHH:mm')
+    editTaskData.value.resubmittable = taskData.value.resubmittable
+    editTaskData.value.editable = taskData.value.editable
+    editTaskData.value.description = JSON.parse(taskData.value.description)
+  }
+  editDialogOpen.value = true
+}
+
+// 添加提交编辑的方法
+const submitEditTask = async (updatedTaskData: PatchTaskRequestData) => {
+  if (!taskData.value) return
+
+  try {
+    await TasksApi.update(taskData.value.id, updatedTaskData)
+    toast.success(t('tasks.detail.updateSuccess'))
+    editDialogOpen.value = false
+    await fetchTaskDetail(taskData.value.id, false)
+  } catch (error) {
+    toast.error(t('tasks.detail.updateFailed'))
+    console.error(t('tasks.detail.updateFailed'), error)
+  }
+}
 </script>
 
 <style scoped>

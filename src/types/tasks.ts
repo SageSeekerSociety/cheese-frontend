@@ -29,6 +29,7 @@ export interface Task {
   submittableAsTeam?: Team[]
   createdAt: number
   updatedAt: number
+  rank: number
   approved: boolean
 }
 
@@ -65,4 +66,14 @@ export interface TaskParticipantSummary {
   intro: string
   name: string
   avatarId: number
+}
+
+export type TaskFormSubmitData = {
+  name: string
+  submitterType: TaskSubmitterType
+  rank: number
+  deadline: number
+  resubmittable: boolean
+  editable: boolean
+  description: string
 }

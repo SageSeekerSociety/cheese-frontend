@@ -13,7 +13,7 @@
       </template>
     </v-toolbar>
 
-    <v-list v-if="templates.length > 0">
+    <v-list v-if="templates.length > 0" rounded="lg">
       <v-list-item v-for="(template, index) in templates" :key="index" :title="template.name">
         <template #subtitle>
           {{ template.description }}

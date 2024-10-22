@@ -14,7 +14,7 @@ export type PostTaskRequestData = {
 
 export type PatchTaskRequestData = {
   name?: string
-  deadline?: string
+  deadline?: number
   resubmittable?: boolean
   editable?: boolean
   description?: string

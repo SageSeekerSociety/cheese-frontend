@@ -1,0 +1,28 @@
+{
+  "form": {
+    "taskName": "赛题名称",
+    "participantType": "参与者类型",
+    "individual": "个人",
+    "team": "小队",
+    "taskLevel": "赛题难度",
+    "beginner": "初级",
+    "intermediate": "中级",
+    "advanced": "高级",
+    "deadline": "截止日期",
+    "allowMultipleSubmissions": "允许多次提交",
+    "allowEditSubmissions": "允许编辑提交",
+    "taskDescription": "赛题描述"
+  },
+  "detail": {
+    "editTask": "编辑赛题",
+    "save": "保存",
+    "updateSuccess": "赛题更新成功",
+    "updateFailed": "更新赛题失败"
+  },
+  "publish": {
+    "title": "发布赛题",
+    "back": "返回",
+    "submit": "提交",
+    "createFailed": "创建赛题失败"
+  }
+}
