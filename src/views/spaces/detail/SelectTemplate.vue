@@ -26,28 +26,16 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { SpacesApi } from '@/network/api/spaces'
 import { SpaceTaskTemplate } from '@/types'
+import { useSpaceStore } from '@/store/space'
+import { storeToRefs } from 'pinia'
 
 const router = useRouter()
 const route = useRoute()
 const spaceId = Number(route.params.spaceId)
 
-const templates = ref<SpaceTaskTemplate[]>([])
-
-onMounted(async () => {
-  await loadTemplates()
-})
-
-const loadTemplates = async () => {
-  try {
-    const response = await SpacesApi.detail(spaceId)
-    const taskTemplates = JSON.parse(response.data.space.taskTemplates || '[]')
-    templates.value = taskTemplates
-  } catch (error) {
-    console.error('加载模板失败:', error)
-  }
-}
+const spaceStore = useSpaceStore()
+const { templates } = storeToRefs(spaceStore)
 
 const goBack = () => {
   router.go(-1)

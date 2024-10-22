@@ -205,7 +205,7 @@
 import { useRoute, onBeforeRouteUpdate } from 'vue-router'
 import { SpacesApi } from '@/network/api/spaces'
 import { ref, onMounted, computed } from 'vue'
-import { Space, SpaceAnnouncement } from '@/types'
+import { SpaceAnnouncement } from '@/types'
 import { getAvatarUrl } from '@/utils/materials'
 import AccountService from '@/services/account'
 import { z } from 'zod'
@@ -220,12 +220,15 @@ import TipTapEditor from '@/components/common/Editor/TipTapEditor.vue'
 import { useDialog } from '@/plugins/dialog'
 import dayjs from 'dayjs'
 import { setTitle } from '@/utils/title'
+import { useSpaceStore } from '@/store/space'
+import { storeToRefs } from 'pinia'
 
 const route = useRoute()
 const { confirm } = useDialog()
 
-const space = ref<Space>()
-const announcements = ref<SpaceAnnouncement[]>([])
+const spaceStore = useSpaceStore()
+const { currentSpace: space, announcements } = storeToRefs(spaceStore)
+
 const isAnnouncementDialogOpen = ref(false)
 const currentAnnouncement = ref<SpaceAnnouncement>()
 const isAnnouncementCreatingOrUpdating = ref(false)
@@ -266,17 +269,11 @@ const adminText = computed(() => {
 })
 
 const getSpace = async (spaceId: number) => {
-  const { data } = await SpacesApi.detail(spaceId)
-  space.value = data.space
-  try {
-    announcements.value = JSON.parse(data.space.announcements || '[]')
-  } catch (error) {
-    announcements.value = []
-  }
+  await spaceStore.fetchSpace(spaceId)
   resetForm({
     values: {
-      name: data.space?.name,
-      intro: data.space?.intro,
+      name: space.value?.name,
+      intro: space.value?.intro,
     },
   })
 }
@@ -305,16 +302,7 @@ const deleteAnnouncement = async (index: number) => {
   if (!result) {
     return
   }
-  announcements.value.splice(index, 1)
-  if (!space.value?.id) {
-    return
-  }
-  try {
-    await SpacesApi.update(space.value.id, { announcements: JSON.stringify(announcements.value) })
-    toast.success('删除成功')
-  } catch (error) {
-    toast.error('删除失败')
-  }
+  await spaceStore.deleteAnnouncement(index)
 }
 
 const submitAnnouncement = async () => {
@@ -322,31 +310,20 @@ const submitAnnouncement = async () => {
     toast.error('您没有权限发布公告')
     return
   }
-  const newAnnouncements = announcements.value
-  if (updatingAnnouncementIndex.value !== undefined) {
-    newAnnouncements[updatingAnnouncementIndex.value] = {
-      ...announcements.value[updatingAnnouncementIndex.value],
-      title: newAnnouncementTitle.value,
-      content: newAnnouncementContent.value,
-      updatedAt: Date.now(),
-      publisher: AccountService._user.value?.nickname,
-    } as SpaceAnnouncement
-  } else {
-    newAnnouncements.push({
-      title: newAnnouncementTitle.value,
-      content: newAnnouncementContent.value,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-      publisher: AccountService._user.value?.nickname,
-    } as SpaceAnnouncement)
+  const newAnnouncement: SpaceAnnouncement = {
+    title: newAnnouncementTitle.value,
+    content: newAnnouncementContent.value,
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    publisher: AccountService._user.value?.nickname || '',
   }
-  newAnnouncements.sort((a, b) => b.updatedAt - a.updatedAt)
 
-  if (!space.value?.id) {
-    return
-  }
   try {
-    await SpacesApi.update(space.value.id, { announcements: JSON.stringify(newAnnouncements) })
+    if (updatingAnnouncementIndex.value !== undefined) {
+      await spaceStore.updateAnnouncement(updatingAnnouncementIndex.value, newAnnouncement)
+    } else {
+      await spaceStore.addAnnouncement(newAnnouncement)
+    }
     isAnnouncementCreatingOrUpdating.value = false
     updatingAnnouncementIndex.value = undefined
     toast.success('发布成功')

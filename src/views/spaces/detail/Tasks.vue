@@ -73,7 +73,8 @@ import InfiniteScroll from '@/components/common/InfiniteScroll.vue'
 import TaskCard from '@/components/TaskCard.vue'
 import { Task } from '@/types'
 import { currentUserId } from '@/services/account'
-import { SpacesApi } from '@/network/api/spaces'
+import { useSpaceStore } from '@/store/space'
+import { storeToRefs } from 'pinia'
 
 type SortBy = 'createdAt' | 'updatedAt' | 'deadline'
 type SortOrder = 'asc' | 'desc'
@@ -99,7 +100,7 @@ const sortOptions = ref<{ title: string; value: { by: SortBy; order: SortOrder }
 ])
 const selectedSortOption = ref(sortOptions.value[0].value)
 
-const queryOptions = computed(() => ({
+const queryOptions = computed<QueryOptions>(() => ({
   space: Number(route.params.spaceId),
   ...selectedSortOption.value,
   keywords: searchQuery.value ? searchQuery.value : undefined,
@@ -117,7 +118,7 @@ const {
   loadingMore,
 } = usePaging<Task, QueryOptions>(
   async (pageStart, queryOptions) => {
-    if (!queryOptions)
+    if (!queryOptions || !queryOptions.space)
       return {
         data: [],
         page: { page_start: 0, total: 0, page_size: 0, has_prev: false, prev_start: 0, has_more: false, next_start: 0 },
@@ -141,14 +142,18 @@ const submitSearch = () => {
   searchQuery.value = searchQueryInput.value
 }
 
+const spaceStore = useSpaceStore()
+const { currentSpace } = storeToRefs(spaceStore)
+
 const navigateToPublishTask = async () => {
   try {
-    const response = await SpacesApi.detail(Number(route.params.spaceId))
-    const taskTemplates = JSON.parse(response.data.space.taskTemplates || '[]')
-    if (taskTemplates.length > 0) {
-      router.push({ name: 'SpacesDetailSelectTemplate', params: { spaceId: route.params.spaceId } })
-    } else {
-      router.push({ name: 'SpacesDetailPublishTask', params: { spaceId: route.params.spaceId } })
+    if (currentSpace.value) {
+      const taskTemplates = JSON.parse(currentSpace.value.taskTemplates || '[]')
+      if (taskTemplates.length > 0) {
+        router.push({ name: 'SpacesDetailSelectTemplate', params: { spaceId: route.params.spaceId } })
+      } else {
+        router.push({ name: 'SpacesDetailPublishTask', params: { spaceId: route.params.spaceId } })
+      }
     }
   } catch (error) {
     console.error('获取空间详情失败:', error)

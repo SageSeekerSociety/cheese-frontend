@@ -28,60 +28,35 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { SpacesApi } from '@/network/api/spaces'
+import { useRouter } from 'vue-router'
 import { useDialog } from '@/plugins/dialog'
+import { useSpaceStore } from '@/store/space'
+import { storeToRefs } from 'pinia'
 import { SpaceTaskTemplate } from '@/types'
 
 const router = useRouter()
-const route = useRoute()
-const spaceId = Number(route.params.spaceId)
 
 const { confirm } = useDialog()
 
-const templates = ref<SpaceTaskTemplate[]>([])
-
-onMounted(async () => {
-  await loadTemplates()
-})
-
-const loadTemplates = async () => {
-  try {
-    const response = await SpacesApi.detail(spaceId)
-    const taskTemplates = JSON.parse(response.data.space.taskTemplates || '[]')
-    templates.value = taskTemplates
-  } catch (error) {
-    console.error('加载模板失败:', error)
-  }
-}
+const spaceStore = useSpaceStore()
+const { currentSpaceId, templates } = storeToRefs(spaceStore)
 
 const goBack = () => {
   router.go(-1)
 }
 
 const createTemplate = () => {
-  router.push({ name: 'SpacesDetailCreateTemplate', params: { spaceId } })
+  router.push({ name: 'SpacesDetailCreateTemplate', params: { spaceId: currentSpaceId.value } })
 }
 
 const editTemplate = (index: number) => {
-  router.push({ name: 'SpacesDetailEditTemplate', params: { spaceId, templateIndex: index } })
+  router.push({ name: 'SpacesDetailEditTemplate', params: { spaceId: currentSpaceId.value, templateIndex: index } })
 }
 
 const deleteTemplate = async (index: number) => {
-  if (confirm('确定要删除这个模板吗？')) {
-    templates.value.splice(index, 1)
-    await updateTemplates()
-  }
-}
+  const result = await confirm('确定要删除这个模板吗？').wait()
+  if (!result) return
 
-const updateTemplates = async () => {
-  try {
-    await SpacesApi.update(spaceId, {
-      taskTemplates: JSON.stringify(templates.value),
-    })
-  } catch (error) {
-    console.error('更新模板失败:', error)
-  }
+  await spaceStore.deleteTemplate(index)
 }
 </script>

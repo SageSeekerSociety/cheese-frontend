@@ -29,14 +29,19 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { SpacesApi } from '@/network/api/spaces'
 import TipTapEditor from '@/components/common/Editor/TipTapEditor.vue'
 import { JSONContent } from 'vuetify-pro-tiptap'
+import { toast } from 'vuetify-sonner'
+import { useSpaceStore } from '@/store/space'
+import { storeToRefs } from 'pinia'
 
 const router = useRouter()
 const route = useRoute()
 const spaceId = Number(route.params.spaceId)
 const templateIndex = route.params.templateIndex ? Number(route.params.templateIndex) : undefined
+
+const spaceStore = useSpaceStore()
+const { currentSpace, templates } = storeToRefs(spaceStore)
 
 const isEditing = computed(() => templateIndex !== undefined)
 
@@ -54,12 +59,17 @@ onMounted(async () => {
 })
 
 const loadTemplate = async () => {
+  if (!currentSpace.value) return
+
   try {
-    const response = await SpacesApi.detail(spaceId)
-    const taskTemplates = JSON.parse(response.data.space.taskTemplates || '[]')
-    if (templateIndex !== undefined && taskTemplates[templateIndex]) {
-      template.value = taskTemplates[templateIndex]
-      template.value.content = JSON.parse(taskTemplates[templateIndex].content)
+    if (templateIndex !== undefined && templates.value[templateIndex]) {
+      const templateData = templates.value[templateIndex]
+      template.value = {
+        name: templateData.name,
+        description: templateData.description,
+        title: templateData.title,
+        content: JSON.parse(templateData.content),
+      }
     }
   } catch (error) {
     console.error('加载模板失败:', error)
@@ -67,9 +77,10 @@ const loadTemplate = async () => {
 }
 
 const saveTemplate = async () => {
+  if (!currentSpace.value) return
+
   try {
-    const response = await SpacesApi.detail(spaceId)
-    let taskTemplates = JSON.parse(response.data.space.taskTemplates || '[]')
+    let updatedTemplates = [...templates.value]
 
     const updatedTemplate = {
       ...template.value,
@@ -77,14 +88,12 @@ const saveTemplate = async () => {
     }
 
     if (isEditing.value && templateIndex !== undefined) {
-      taskTemplates[templateIndex] = updatedTemplate
+      updatedTemplates[templateIndex] = updatedTemplate
     } else {
-      taskTemplates.push(updatedTemplate)
+      updatedTemplates.push(updatedTemplate)
     }
 
-    await SpacesApi.update(spaceId, {
-      taskTemplates: JSON.stringify(taskTemplates),
-    })
+    await spaceStore.updateTemplates(updatedTemplates)
 
     router.push({ name: 'SpacesDetailManageTemplates', params: { spaceId } })
   } catch (error) {

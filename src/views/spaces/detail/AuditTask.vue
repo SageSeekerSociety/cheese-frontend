@@ -80,15 +80,19 @@
 
 <script setup lang="ts">
 import { TasksApi } from '@/network/api/tasks'
-import { ref, onMounted, watch, watchEffect } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, onMounted } from 'vue'
 import dayjs from 'dayjs'
-import { usePaging } from '@/utils/paging'
+import { usePaging, createEmptyResult } from '@/utils/paging'
 import InfiniteScroll from '@/components/common/InfiniteScroll.vue'
 import TipTapViewer from '@/components/common/Editor/TipTapViewer.vue'
 import { toast } from 'vuetify-sonner'
-const route = useRoute()
-const spaceId = Number(route.params.spaceId)
+import { useSpaceStore } from '@/store/space'
+import { storeToRefs } from 'pinia'
+import { Task } from '@/types'
+
+const spaceStore = useSpaceStore()
+const { currentSpaceId } = storeToRefs(spaceStore)
+
 const expandedTaskId = ref<number | null>(null)
 
 const {
@@ -100,8 +104,11 @@ const {
   refreshing,
   loadingMore,
 } = usePaging(async (pageStart) => {
+  if (!currentSpaceId.value) {
+    return createEmptyResult<Task>()
+  }
   const { data } = await TasksApi.list({
-    space: spaceId,
+    space: currentSpaceId.value,
     page_start: pageStart,
     sort_by: 'createdAt',
     sort_order: 'desc',

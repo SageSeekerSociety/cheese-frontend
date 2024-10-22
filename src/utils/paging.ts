@@ -1,7 +1,23 @@
 import { Page } from '@/types'
 import { ref, Ref, watch } from 'vue'
 
-type PagingFetcher<T, P> = (pageStart?: number, customParams?: P) => Promise<{ data: T[]; page: Page }>
+type FetchResult<T> = { data: T[]; page: Page }
+
+type PagingFetcher<T, P> = (pageStart?: number, customParams?: P) => Promise<FetchResult<T>>
+
+export const createEmptyResult = <T>(): FetchResult<T> => {
+  return {
+    data: [],
+    page: {
+      page_start: 0,
+      page_size: 0,
+      prev_start: 0,
+      next_start: 0,
+      has_prev: false,
+      has_more: false,
+    },
+  }
+}
 
 /**
  * Infinite scroll hook

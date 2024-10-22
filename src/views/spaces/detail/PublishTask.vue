@@ -86,8 +86,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { TasksApi } from '@/network/api/tasks'
-import { SpacesApi } from '@/network/api/spaces'
-import { TaskSubmissionEntryType, TaskSubmissionSchemaEntry, TaskSubmitterType, SpaceTaskTemplate } from '@/types'
+import { TaskSubmissionSchemaEntry } from '@/types'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import TipTapEditor from '@/components/common/Editor/TipTapEditor.vue'
@@ -95,6 +94,8 @@ import { VForm } from 'vuetify/lib/components/index.mjs'
 import { z } from 'zod'
 import { vuetifyConfig } from '@/utils/form'
 import { JSONContent } from 'vuetify-pro-tiptap'
+import { useSpaceStore } from '@/store/space'
+import { storeToRefs } from 'pinia'
 
 const taskForm = ref<InstanceType<typeof VForm> | null>(null)
 
@@ -146,13 +147,20 @@ const taskSubmissionSchema = ref<TaskSubmissionSchemaEntry[]>([
 //   taskSubmissionSchema.value.splice(index, 1)
 // }
 
+const spaceStore = useSpaceStore()
+const { currentSpaceId, templates } = storeToRefs(spaceStore)
+
 const submitTask = handleSubmit(async (value) => {
   console.log(value)
   let intro = descriptionEditor.value?.editor?.getText() ?? ''
   if (intro.length > 250) {
     intro = intro.slice(0, 250) + '……'
   }
-  const spaceId = Number(router.currentRoute.value.params.spaceId)
+  const spaceId = currentSpaceId.value
+  if (!spaceId) {
+    console.error('Space ID not found')
+    return
+  }
   try {
     const postTaskData = {
       ...value,
@@ -178,16 +186,10 @@ onMounted(async () => {
 })
 
 const loadTemplate = async (templateId: number) => {
-  try {
-    const response = await SpacesApi.detail(Number(route.params.spaceId))
-    const taskTemplates = JSON.parse(response.data.space.taskTemplates || '[]')
-    const template = taskTemplates[templateId] as SpaceTaskTemplate
-    if (template) {
-      name.value = template.title
-      taskDescription.value = JSON.parse(template.content)
-    }
-  } catch (error) {
-    console.error('加载模板失败:', error)
+  const template = templates.value[templateId]
+  if (template) {
+    name.value = template.title
+    taskDescription.value = JSON.parse(template.content)
   }
 }
 </script>
