@@ -78,13 +78,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { TasksApi } from '@/network/api/tasks'
-import { TaskSubmissionEntryType, TaskSubmissionSchemaEntry, TaskSubmitterType } from '@/types'
+import { SpacesApi } from '@/network/api/spaces'
+import { TaskSubmissionEntryType, TaskSubmissionSchemaEntry, TaskSubmitterType, SpaceTaskTemplate } from '@/types'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
-
 import TipTapEditor from '@/components/common/Editor/TipTapEditor.vue'
 import { VForm } from 'vuetify/lib/components/index.mjs'
 import { z } from 'zod'
@@ -114,6 +114,7 @@ const [editable, editableProps] = defineField('editable', vuetifyConfig)
 const descriptionEditor = ref<InstanceType<typeof TipTapEditor> | null>(null)
 
 const router = useRouter()
+const route = useRoute()
 const goBack = () => {
   router.go(-1)
 }
@@ -154,6 +155,27 @@ const submitTask = handleSubmit(async (value) => {
     console.error('创建任务失败:', error)
   }
 })
+
+onMounted(async () => {
+  const templateId = route.query.templateId
+  if (templateId && templateId !== 'blank') {
+    await loadTemplate(Number(templateId))
+  }
+})
+
+const loadTemplate = async (templateId: number) => {
+  try {
+    const response = await SpacesApi.detail(Number(route.params.spaceId))
+    const taskTemplates = JSON.parse(response.data.space.taskTemplates || '[]')
+    const template = taskTemplates[templateId] as SpaceTaskTemplate
+    if (template) {
+      name.value = template.title
+      taskDescription.value = JSON.parse(template.content)
+    }
+  } catch (error) {
+    console.error('加载模板失败:', error)
+  }
+}
 </script>
 
 <style scoped>

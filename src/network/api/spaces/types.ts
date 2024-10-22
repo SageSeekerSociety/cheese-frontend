@@ -4,12 +4,16 @@ export type PostSpaceRequestData = {
   name: string
   intro: string
   avatarId: number
+  announcements?: string
+  taskTemplates?: string
 }
 
 export type PatchSpaceRequestData = {
   name?: string
   intro?: string
   avatarId?: number
+  announcements?: string
+  taskTemplates?: string
 }
 
 export type PostSpaceAdminRequestData = {

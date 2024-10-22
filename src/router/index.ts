@@ -1,4 +1,3 @@
-// Composables
 import { createRouter, createWebHistory } from 'vue-router'
 import { refreshTitle } from '@/utils/title'
 import type { RouteRecordRaw } from 'vue-router'

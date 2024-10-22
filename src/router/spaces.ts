@@ -43,6 +43,26 @@ export default {
           name: 'SpacesDetailAuditTasks',
           component: () => import('@/views/spaces/detail/AuditTask.vue'),
         },
+        {
+          path: 'templates',
+          name: 'SpacesDetailManageTemplates',
+          component: () => import('@/views/spaces/detail/ManageTemplates.vue'),
+        },
+        {
+          path: 'templates/create',
+          name: 'SpacesDetailCreateTemplate',
+          component: () => import('@/views/spaces/detail/TemplateForm.vue'),
+        },
+        {
+          path: 'templates/:templateIndex/edit',
+          name: 'SpacesDetailEditTemplate',
+          component: () => import('@/views/spaces/detail/TemplateForm.vue'),
+        },
+        {
+          path: 'select-template',
+          name: 'SpacesDetailSelectTemplate',
+          component: () => import('@/views/spaces/detail/SelectTemplate.vue'),
+        },
       ],
       beforeEnter: (to, _, next) => {
         if (to.name === 'SpacesDetailDefault' || to.name === 'SpacesDetail') {

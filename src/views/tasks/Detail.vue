@@ -243,7 +243,7 @@ import { TasksApi } from '@/network/api/tasks'
 import { AttachmentsApi } from '@/network/api/attachments'
 import { Task, TaskParticipantSummary, Team } from '@/types'
 import { onMounted, ref, reactive, watchEffect, onWatcherCleanup, computed, useTemplateRef } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import dayjs from 'dayjs'
 import { toast } from 'vuetify-sonner'
 import TaskSubmissionHistory from '@/components/tasks/TaskSubmissionHistory.vue'
@@ -251,6 +251,7 @@ import { TeamsApi } from '@/network/api/teams'
 import { getAvatarUrl } from '@/utils/materials'
 import CollapsibleContent from '@/components/common/CollapsibleContent.vue'
 import TipTapViewer from '@/components/common/Editor/TipTapViewer.vue'
+import { setTitle } from '@/utils/title'
 
 const route = useRoute()
 const myTeams = ref<Team[]>([])
@@ -314,6 +315,7 @@ const fetchMyTeams = async () => {
 onMounted(async () => {
   await fetchMyTeams()
   await fetchTaskDetail(Number(route.params.taskId))
+  setTitle(taskData.value?.name || '赛题', route)
   if (taskData.value?.deadline) {
     startCountdown()
   }

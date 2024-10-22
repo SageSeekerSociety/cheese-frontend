@@ -6,6 +6,23 @@ export type Space = {
   name: string
   avatarId: number
   admins: SpaceAdmin[]
+  announcements: string
+  taskTemplates: string
+}
+
+export type SpaceAnnouncement = {
+  title: string
+  content: string
+  createdAt: number
+  updatedAt: number
+  publisher: string
+}
+
+export type SpaceTaskTemplate = {
+  name: string
+  description: string
+  title: string
+  content: string
 }
 
 export type SpaceAdmin = {

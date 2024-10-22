@@ -42,7 +42,7 @@
           prepend-inner-icon="mdi-tag"
         ></v-select> -->
       </div>
-      <v-btn variant="flat" :to="{ name: 'SpacesDetailPublishTask', params: { spaceId: queryOptions.space } }">
+      <v-btn variant="flat" @click="navigateToPublishTask">
         <v-icon left>mdi-plus</v-icon>
         发布赛题
       </v-btn>
@@ -67,12 +67,13 @@
 <script setup lang="ts">
 import { TasksApi } from '@/network/api/tasks'
 import { ref, onMounted, watch, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { usePaging } from '@/utils/paging'
 import InfiniteScroll from '@/components/common/InfiniteScroll.vue'
 import TaskCard from '@/components/TaskCard.vue'
 import { Task } from '@/types'
 import { currentUserId } from '@/services/account'
+import { SpacesApi } from '@/network/api/spaces'
 
 type SortBy = 'createdAt' | 'updatedAt' | 'deadline'
 type SortOrder = 'asc' | 'desc'
@@ -87,7 +88,7 @@ type QueryOptions = {
   queryType: QueryType
 }
 const route = useRoute()
-
+const router = useRouter()
 const searchQueryInput = ref('')
 const searchQuery = ref<string>()
 
@@ -138,6 +139,22 @@ const {
 
 const submitSearch = () => {
   searchQuery.value = searchQueryInput.value
+}
+
+const navigateToPublishTask = async () => {
+  try {
+    const response = await SpacesApi.detail(Number(route.params.spaceId))
+    const taskTemplates = JSON.parse(response.data.space.taskTemplates || '[]')
+    if (taskTemplates.length > 0) {
+      router.push({ name: 'SpacesDetailSelectTemplate', params: { spaceId: route.params.spaceId } })
+    } else {
+      router.push({ name: 'SpacesDetailPublishTask', params: { spaceId: route.params.spaceId } })
+    }
+  } catch (error) {
+    console.error('获取空间详情失败:', error)
+    // 如果出错，直接跳转到发布赛题页面
+    router.push({ name: 'SpacesDetailPublishTask', params: { spaceId: route.params.spaceId } })
+  }
 }
 
 watch(
