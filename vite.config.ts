@@ -1,13 +1,13 @@
 // Plugins
+import { fileURLToPath, URL } from 'node:url'
+
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
-import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 import ViteFonts from 'unplugin-fonts/vite'
-import { prismjsPlugin } from 'vite-plugin-prismjs'
-
 // Utilities
 import { defineConfig } from 'vite'
-import { fileURLToPath, URL } from 'node:url'
+import { prismjsPlugin } from 'vite-plugin-prismjs'
+import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -71,7 +71,6 @@ export default defineConfig({
             '@editorjs/nested-list',
           ],
           editorjsLatex: ['editorjs-latex'],
-          editorjsMermaid: ['editorjs-mermaid'],
           editorjsCodecup: ['@calumk/editorjs-codecup'],
           dayjs: ['dayjs'],
           // prismjs: ['prismjs'],

@@ -12,7 +12,6 @@ declare module 'editorjs-undo';
 declare module '@editorjs/text-variant-tune';
 declare module '@calumk/editorjs-codecup';
 declare module '@editorjs/table';
-declare module 'editorjs-mermaid';
 declare module '@editorjs/image';
 declare module 'editorjs-latex';
 declare module '@editorjs/warning';

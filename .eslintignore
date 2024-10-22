@@ -1,6 +1,0 @@
-node_modules/*
-dist/*
-asset/*
-*.d.ts
-commitlint.config.cjs
-stylelint.config.cjs
