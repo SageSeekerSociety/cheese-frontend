@@ -1,15 +1,8 @@
 import comments from './comments.json'
-import editor from './editor'
-import questions from './questions'
-import spaces from './spaces'
+import editor from './editor.json'
+import questions from './questions.json'
+import spaces from './spaces.json'
 import tasks from './tasks.json'
-import users from './users'
+import users from './users.json'
 
-export default {
-  editor,
-  questions,
-  users,
-  comments,
-  spaces,
-  tasks,
-}
+export default { editor, questions, users, comments, spaces, tasks }
