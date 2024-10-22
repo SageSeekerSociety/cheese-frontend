@@ -11,6 +11,11 @@
         <v-radio label="用户" value="USER"></v-radio>
         <v-radio label="小队" value="TEAM"></v-radio>
       </v-radio-group>
+      <v-radio-group v-model="rank" label="任务等级" required inline v-bind="rankProps">
+        <v-radio label="初级" :value="1"></v-radio>
+        <v-radio label="中级" :value="2"></v-radio>
+        <v-radio label="高级" :value="3"></v-radio>
+      </v-radio-group>
       <v-text-field
         v-model="deadline"
         label="截止时间"
@@ -71,7 +76,7 @@
             </v-list-item>
           </v-list>
         </v-menu>
-        <v-btn type="submit" color="primary">提交</v-btn>
+        <v-btn type="submit" color="primary" :loading="isSubmitting">提交</v-btn>
       </div>
     </v-form>
   </v-sheet>
@@ -96,8 +101,9 @@ const taskForm = ref<InstanceType<typeof VForm> | null>(null)
 const { handleSubmit, defineField, isSubmitting } = useForm({
   validationSchema: toTypedSchema(
     z.object({
-      name: z.string().min(4).max(25),
+      name: z.string().max(25),
       submitterType: z.enum(['USER', 'TEAM']),
+      rank: z.number().int().min(1).max(3),
       deadline: z.string(),
       resubmittable: z.boolean().optional().default(false),
       editable: z.boolean().optional().default(false),
@@ -107,6 +113,7 @@ const { handleSubmit, defineField, isSubmitting } = useForm({
 
 const [name, nameProps] = defineField('name', vuetifyConfig)
 const [submitterType, submitterTypeProps] = defineField('submitterType', vuetifyConfig)
+const [rank, rankProps] = defineField('rank', vuetifyConfig)
 const [deadline, deadlineProps] = defineField('deadline', vuetifyConfig)
 const [resubmittable, resubmittableProps] = defineField('resubmittable', vuetifyConfig)
 const [editable, editableProps] = defineField('editable', vuetifyConfig)
@@ -145,7 +152,8 @@ const submitTask = handleSubmit(async (value) => {
       ...value,
       description: JSON.stringify(taskDescription.value),
       intro,
-      deadline: new Date(value.deadline).getTime(), // 将截止时间转换为时间戳
+      deadline: new Date(value.deadline).getTime(),
+      rank: value.rank,
       space: spaceId,
       submissionSchema: taskSubmissionSchema.value,
     }
