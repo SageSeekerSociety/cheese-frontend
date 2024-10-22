@@ -1,15 +1,33 @@
 <template>
   <v-sheet flat rounded="lg">
-    <v-toolbar :title="isEditing ? '编辑赛题模板' : '创建赛题模板'" color="transparent" density="compact">
+    <v-toolbar
+      :title="isEditing ? t('spaces.detail.templateForm.editTitle') : t('spaces.detail.templateForm.createTitle')"
+      color="transparent"
+      density="compact"
+    >
       <template #prepend>
-        <v-btn variant="text" prepend-icon="mdi-chevron-left" @click="goBack">返回</v-btn>
+        <v-btn variant="text" prepend-icon="mdi-chevron-left" @click="goBack">{{
+          t('spaces.detail.templateForm.back')
+        }}</v-btn>
       </template>
     </v-toolbar>
 
     <v-form ref="form" class="pa-4" @submit.prevent="saveTemplate">
-      <v-text-field v-model="template.name" label="模板名称" required></v-text-field>
-      <v-textarea v-model="template.description" label="模板描述" rows="3"></v-textarea>
-      <v-text-field v-model="template.title" label="赛题标题" required></v-text-field>
+      <v-text-field
+        v-model="template.name"
+        :label="t('spaces.detail.templateForm.templateName')"
+        required
+      ></v-text-field>
+      <v-textarea
+        v-model="template.description"
+        :label="t('spaces.detail.templateForm.templateDescription')"
+        rows="3"
+      ></v-textarea>
+      <v-text-field
+        v-model="template.title"
+        :label="t('spaces.detail.templateForm.contestTitle')"
+        required
+      ></v-text-field>
       <TipTapEditor
         v-model="template.content"
         output="json"
@@ -17,10 +35,10 @@
         :min-height="200"
         :max-height="1000"
         editor-class="tiptap-editor"
-        title="赛题描述"
+        :title="t('spaces.detail.templateForm.contestDescription')"
       />
       <div class="d-flex justify-end mt-4">
-        <v-btn type="submit" color="primary">保存</v-btn>
+        <v-btn type="submit" color="primary">{{ t('spaces.detail.templateForm.save') }}</v-btn>
       </div>
     </v-form>
   </v-sheet>
@@ -34,6 +52,7 @@ import { JSONContent } from 'vuetify-pro-tiptap'
 import { toast } from 'vuetify-sonner'
 import { useSpaceStore } from '@/store/space'
 import { storeToRefs } from 'pinia'
+import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
 const route = useRoute()
@@ -51,6 +70,8 @@ const template = ref({
   title: '',
   content: {} as JSONContent,
 })
+
+const { t } = useI18n()
 
 onMounted(async () => {
   if (isEditing.value) {
@@ -72,7 +93,8 @@ const loadTemplate = async () => {
       }
     }
   } catch (error) {
-    console.error('加载模板失败:', error)
+    console.error(t('spaces.detail.templateForm.loadTemplateFailed'), error)
+    toast.error(t('spaces.detail.templateForm.loadTemplateFailed'))
   }
 }
 
@@ -95,9 +117,13 @@ const saveTemplate = async () => {
 
     await spaceStore.updateTemplates(updatedTemplates)
 
+    toast.success(
+      isEditing.value ? t('spaces.detail.templateForm.updateSuccess') : t('spaces.detail.templateForm.createSuccess')
+    )
     router.push({ name: 'SpacesDetailManageTemplates', params: { spaceId } })
   } catch (error) {
-    console.error('保存模板失败:', error)
+    console.error(t('spaces.detail.templateForm.saveTemplateFailed'), error)
+    toast.error(t('spaces.detail.templateForm.saveTemplateFailed'))
   }
 }
 

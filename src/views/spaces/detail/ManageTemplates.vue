@@ -1,11 +1,15 @@
 <template>
   <v-sheet flat rounded="lg">
-    <v-toolbar title="管理赛题模板" color="transparent" density="compact">
+    <v-toolbar :title="t('spaces.detail.manageTemplates.title')" color="transparent" density="compact">
       <template #prepend>
-        <v-btn variant="text" prepend-icon="mdi-chevron-left" @click="goBack">返回</v-btn>
+        <v-btn variant="text" prepend-icon="mdi-chevron-left" @click="goBack">{{
+          t('spaces.detail.manageTemplates.back')
+        }}</v-btn>
       </template>
       <template #append>
-        <v-btn color="primary" prepend-icon="mdi-plus" @click="createTemplate">创建模板</v-btn>
+        <v-btn color="primary" prepend-icon="mdi-plus" @click="createTemplate">{{
+          t('spaces.detail.manageTemplates.createTemplate')
+        }}</v-btn>
       </template>
     </v-toolbar>
 
@@ -22,7 +26,7 @@
     </v-list>
 
     <v-sheet v-else class="pa-4 text-center">
-      <p class="text-medium-emphasis">暂无任务模板</p>
+      <p class="text-medium-emphasis">{{ t('spaces.detail.manageTemplates.noTemplates') }}</p>
     </v-sheet>
   </v-sheet>
 </template>
@@ -32,7 +36,7 @@ import { useRouter } from 'vue-router'
 import { useDialog } from '@/plugins/dialog'
 import { useSpaceStore } from '@/store/space'
 import { storeToRefs } from 'pinia'
-import { SpaceTaskTemplate } from '@/types'
+import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
 
@@ -40,6 +44,7 @@ const { confirm } = useDialog()
 
 const spaceStore = useSpaceStore()
 const { currentSpaceId, templates } = storeToRefs(spaceStore)
+const { t } = useI18n()
 
 const goBack = () => {
   router.go(-1)
@@ -54,7 +59,7 @@ const editTemplate = (index: number) => {
 }
 
 const deleteTemplate = async (index: number) => {
-  const result = await confirm('确定要删除这个模板吗？').wait()
+  const result = await confirm(t('spaces.detail.manageTemplates.deleteConfirm')).wait()
   if (!result) return
 
   await spaceStore.deleteTemplate(index)

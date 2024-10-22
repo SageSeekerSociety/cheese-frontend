@@ -1,24 +1,43 @@
 <template>
   <v-sheet flat rounded="lg">
-    <v-toolbar title="发布赛题" color="transparent" density="compact">
+    <v-toolbar :title="t('spaces.detail.publishTask.title')" color="transparent" density="compact">
       <template #prepend>
-        <v-btn variant="text" prepend-icon="mdi-chevron-left" @click="goBack">返回</v-btn>
+        <v-btn variant="text" prepend-icon="mdi-chevron-left" @click="goBack">{{
+          t('spaces.detail.publishTask.back')
+        }}</v-btn>
       </template>
     </v-toolbar>
     <v-form ref="taskForm" class="pa-4" @submit.prevent="submitTask">
-      <v-text-field v-model="name" label="任务名称" required v-bind="nameProps"></v-text-field>
-      <v-radio-group v-model="submitterType" label="参与者类型" required inline v-bind="submitterTypeProps">
-        <v-radio label="个人参与" value="USER"></v-radio>
-        <v-radio label="小队参与" value="TEAM"></v-radio>
+      <v-text-field
+        v-model="name"
+        :label="t('spaces.detail.publishTask.taskName')"
+        required
+        v-bind="nameProps"
+      ></v-text-field>
+      <v-radio-group
+        v-model="submitterType"
+        :label="t('spaces.detail.publishTask.participantType')"
+        required
+        inline
+        v-bind="submitterTypeProps"
+      >
+        <v-radio :label="t('spaces.detail.publishTask.individual')" value="USER"></v-radio>
+        <v-radio :label="t('spaces.detail.publishTask.team')" value="TEAM"></v-radio>
       </v-radio-group>
-      <v-radio-group v-model="rank" label="任务等级" required inline v-bind="rankProps">
-        <v-radio label="初级" :value="1"></v-radio>
-        <v-radio label="中级" :value="2"></v-radio>
-        <v-radio label="高级" :value="3"></v-radio>
+      <v-radio-group
+        v-model="rank"
+        :label="t('spaces.detail.publishTask.taskLevel')"
+        required
+        inline
+        v-bind="rankProps"
+      >
+        <v-radio :label="t('spaces.detail.publishTask.beginner')" :value="1"></v-radio>
+        <v-radio :label="t('spaces.detail.publishTask.intermediate')" :value="2"></v-radio>
+        <v-radio :label="t('spaces.detail.publishTask.advanced')" :value="3"></v-radio>
       </v-radio-group>
       <v-text-field
         v-model="deadline"
-        label="截止时间"
+        :label="t('spaces.detail.publishTask.deadline')"
         type="datetime-local"
         required
         v-bind="deadlineProps"
@@ -26,11 +45,16 @@
       <div class="d-flex align-center gap-4">
         <v-checkbox
           v-model="resubmittable"
-          label="允许多次提交"
+          :label="t('spaces.detail.publishTask.allowMultipleSubmissions')"
           color="primary"
           v-bind="resubmittableProps"
         ></v-checkbox>
-        <v-checkbox v-model="editable" label="允许编辑提交" color="primary" v-bind="editableProps"></v-checkbox>
+        <v-checkbox
+          v-model="editable"
+          :label="t('spaces.detail.publishTask.allowEditSubmissions')"
+          color="primary"
+          v-bind="editableProps"
+        ></v-checkbox>
       </div>
       <TipTapEditor
         ref="descriptionEditor"
@@ -40,7 +64,7 @@
         :min-height="200"
         :max-height="1000"
         editor-class="tiptap-editor"
-        title="任务描述"
+        :title="t('spaces.detail.publishTask.taskDescription')"
       />
       <!-- <div v-for="(entry, index) in taskSubmissionSchema" :key="index" class="submission-schema-entry mt-4 pa-4">
         <div class="d-flex align-center justify-between mb-2">
@@ -76,7 +100,7 @@
             </v-list-item>
           </v-list>
         </v-menu> -->
-        <v-btn type="submit" color="primary" :loading="isSubmitting">提交</v-btn>
+        <v-btn type="submit" color="primary" :loading="isSubmitting">{{ t('spaces.detail.publishTask.submit') }}</v-btn>
       </div>
     </v-form>
   </v-sheet>
@@ -96,6 +120,7 @@ import { vuetifyConfig } from '@/utils/form'
 import { JSONContent } from 'vuetify-pro-tiptap'
 import { useSpaceStore } from '@/store/space'
 import { storeToRefs } from 'pinia'
+import { useI18n } from 'vue-i18n'
 
 const taskForm = ref<InstanceType<typeof VForm> | null>(null)
 
@@ -150,6 +175,8 @@ const taskSubmissionSchema = ref<TaskSubmissionSchemaEntry[]>([
 const spaceStore = useSpaceStore()
 const { currentSpaceId, templates } = storeToRefs(spaceStore)
 
+const { t } = useI18n()
+
 const submitTask = handleSubmit(async (value) => {
   console.log(value)
   let intro = descriptionEditor.value?.editor?.getText() ?? ''
@@ -174,7 +201,7 @@ const submitTask = handleSubmit(async (value) => {
     await TasksApi.create(postTaskData)
     router.replace({ name: 'SpacesDetailTasks', params: { spaceId } })
   } catch (error) {
-    console.error('创建任务失败:', error)
+    console.error(t('spaces.detail.publishTask.createTaskFailed'), error)
   }
 })
 

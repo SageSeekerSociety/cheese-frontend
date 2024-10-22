@@ -8,7 +8,7 @@
             density="comfortable"
             flat
             hide-details
-            label="搜索空间"
+            :label="t('spaces.index.searchPlaceholder')"
             prepend-inner-icon="mdi-magnify"
             rounded="lg"
             single-line
@@ -31,6 +31,9 @@
       :is-empty="spaces.length === 0"
       @load-more="loadMore"
     >
+      <template #empty>
+        <v-empty-state :title="t('spaces.index.noSpaces')"></v-empty-state>
+      </template>
       <v-row>
         <v-col v-for="space in spaces" :key="space.id" cols="12" sm="6" md="4">
           <v-card flat rounded="lg" :to="`/spaces/${space.id}`" :prepend-avatar="getAvatarUrl(space.avatarId)">
@@ -50,16 +53,18 @@
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
 import { SpacesApi } from '@/network/api/spaces'
-import { Space } from '@/types'
 import { getAvatarUrl } from '@/utils/materials'
 import { usePaging } from '@/utils/paging'
 import InfiniteScroll from '@/components/common/InfiniteScroll.vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const searchQuery = ref('')
 const selectedSort = ref('newest')
 const sortOptions = [
-  { text: '最新', value: 'newest' },
-  { text: '最热', value: 'hot' },
+  { text: t('spaces.index.sortOptions.newest'), value: 'newest' },
+  { text: t('spaces.index.sortOptions.hot'), value: 'hot' },
 ]
 
 const {

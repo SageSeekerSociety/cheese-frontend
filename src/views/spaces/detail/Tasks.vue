@@ -7,7 +7,7 @@
           density="compact"
           flat
           hide-details
-          label="在当前空间中搜索"
+          :label="t('spaces.detail.tasks.searchPlaceholder')"
           prepend-inner-icon="mdi-magnify"
           rounded="lg"
           single-line
@@ -18,7 +18,7 @@
         <v-select
           v-model="selectedSortOption"
           :items="sortOptions"
-          label="排序"
+          :label="t('spaces.detail.tasks.sort')"
           density="compact"
           flat
           hide-details
@@ -44,7 +44,7 @@
       </div>
       <v-btn variant="flat" @click="navigateToPublishTask">
         <v-icon left>mdi-plus</v-icon>
-        发布赛题
+        {{ t('spaces.detail.tasks.publishTask') }}
       </v-btn>
     </div>
     <div class="tasks-list">
@@ -56,7 +56,7 @@
         :on-load-more="loadMore"
       >
         <template #empty>
-          <v-empty-state icon="mdi-trophy" title="暂无赛题"></v-empty-state>
+          <v-empty-state icon="mdi-trophy" :title="t('spaces.detail.tasks.noTasks')"></v-empty-state>
         </template>
         <TaskCard v-for="task in tasks" :key="task.id" :task="task" class="tasks-list-item" />
       </infinite-scroll>
@@ -75,6 +75,7 @@ import { Task } from '@/types'
 import { currentUserId } from '@/services/account'
 import { useSpaceStore } from '@/store/space'
 import { storeToRefs } from 'pinia'
+import { useI18n } from 'vue-i18n'
 
 type SortBy = 'createdAt' | 'updatedAt' | 'deadline'
 type SortOrder = 'asc' | 'desc'
@@ -93,10 +94,12 @@ const router = useRouter()
 const searchQueryInput = ref('')
 const searchQuery = ref<string>()
 
+const { t } = useI18n()
+
 const sortOptions = ref<{ title: string; value: { by: SortBy; order: SortOrder } }[]>([
-  { title: '最新发布', value: { by: 'createdAt', order: 'desc' } },
-  { title: '最新更新', value: { by: 'updatedAt', order: 'desc' } },
-  { title: '最近截止', value: { by: 'deadline', order: 'asc' } },
+  { title: t('spaces.detail.tasks.sortOptions.latestPublished'), value: { by: 'createdAt', order: 'desc' } },
+  { title: t('spaces.detail.tasks.sortOptions.latestUpdated'), value: { by: 'updatedAt', order: 'desc' } },
+  { title: t('spaces.detail.tasks.sortOptions.nearestDeadline'), value: { by: 'deadline', order: 'asc' } },
 ])
 const selectedSortOption = ref(sortOptions.value[0].value)
 

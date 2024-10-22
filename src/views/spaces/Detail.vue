@@ -23,12 +23,12 @@
           <div class="flex-shrink-0">
             <v-btn-group color="primary" density="comfortable" variant="flat" rounded="lg" divided>
               <v-btn class="pe-2" prepend-icon="mdi-pencil">
-                <div class="text-none font-weight-regular">编辑信息</div>
+                <div class="text-none font-weight-regular">{{ t('spaces.detail.editInfo') }}</div>
 
                 <v-dialog v-if="isCurrentUserAtLeastAdmin" v-model="isUpdating" activator="parent" width="800">
                   <template #default>
                     <v-card>
-                      <v-card-title>编辑空间信息</v-card-title>
+                      <v-card-title>{{ t('spaces.detail.editSpaceInfo') }}</v-card-title>
                       <v-card-text>
                         <v-form>
                           <v-container fluid>
@@ -37,9 +37,9 @@
                                 <avatar-uploader v-model="selectedAvatar" />
                               </v-col>
                               <v-col cols="12" md="8">
-                                <v-text-field v-model="name" label="空间名称" v-bind="nameProps" />
+                                <v-text-field v-model="name" :label="t('spaces.detail.spaceName')" v-bind="nameProps" />
 
-                                <v-list-subheader inset>个人简介</v-list-subheader>
+                                <v-list-subheader inset>{{ t('spaces.detail.intro') }}</v-list-subheader>
                                 <v-text-field v-model="intro" :counter="255" v-bind="introProps" />
                               </v-col>
                             </v-row>
@@ -47,8 +47,8 @@
                         </v-form>
                       </v-card-text>
                       <v-card-actions>
-                        <v-btn color="primary" @click="closeUpdating">取消</v-btn>
-                        <v-btn color="primary" @click="submitUpdate">更新</v-btn>
+                        <v-btn color="primary" @click="closeUpdating">{{ t('spaces.detail.cancel') }}</v-btn>
+                        <v-btn color="primary" @click="submitUpdate">{{ t('spaces.detail.update') }}</v-btn>
                       </v-card-actions>
                     </v-card>
                   </template>
@@ -62,7 +62,7 @@
                   <v-list density="compact" min-width="250" rounded="lg" slim>
                     <v-list-item
                       prepend-icon="mdi-bullhorn"
-                      title="发布公告"
+                      :title="t('spaces.detail.publishAnnouncement')"
                       link
                       @click="openAnnouncementCreating"
                     ></v-list-item>
@@ -104,7 +104,7 @@
       <v-col cols="12" md="3">
         <v-sheet rounded="lg">
           <v-list nav bg-color="transparent">
-            <v-list-subheader>全部分类</v-list-subheader>
+            <v-list-subheader>{{ t('spaces.detail.allCategories') }}</v-list-subheader>
             <v-list-group prepend-icon="mdi-trophy" value="tasks">
               <template #activator="{ props }">
                 <v-list-item
@@ -115,7 +115,7 @@
                   <template #prepend>
                     <v-icon>mdi-trophy</v-icon>
                   </template>
-                  <v-list-item-title>赛题</v-list-item-title>
+                  <v-list-item-title>{{ t('spaces.detail.contests') }}</v-list-item-title>
                 </v-list-item>
               </template>
 
@@ -125,7 +125,7 @@
                 color="primary"
                 exact
               >
-                <v-list-item-title>全部赛题</v-list-item-title>
+                <v-list-item-title>{{ t('spaces.detail.allContests') }}</v-list-item-title>
               </v-list-item>
 
               <v-list-item
@@ -134,12 +134,12 @@
                 color="primary"
                 exact
               >
-                <v-list-item-title>我发布的赛题</v-list-item-title>
+                <v-list-item-title>{{ t('spaces.detail.myPublishedContests') }}</v-list-item-title>
               </v-list-item>
             </v-list-group>
 
             <template v-if="isCurrentUserAtLeastAdmin">
-              <v-list-subheader>管理员操作</v-list-subheader>
+              <v-list-subheader>{{ t('spaces.detail.adminOperations') }}</v-list-subheader>
               <v-list-item
                 rounded="lg"
                 :to="{ name: 'SpacesDetailAuditTasks', params: { spaceId: space?.id } }"
@@ -148,7 +148,7 @@
                 <template #prepend>
                   <v-icon>mdi-check</v-icon>
                 </template>
-                <v-list-item-title>审核赛题</v-list-item-title>
+                <v-list-item-title>{{ t('spaces.detail.auditContests') }}</v-list-item-title>
               </v-list-item>
               <v-list-item
                 rounded="lg"
@@ -158,7 +158,7 @@
                 <template #prepend>
                   <v-icon>mdi-file-document-edit</v-icon>
                 </template>
-                <v-list-item-title>管理赛题模板</v-list-item-title>
+                <v-list-item-title>{{ t('spaces.detail.manageTemplates.title') }}</v-list-item-title>
               </v-list-item>
             </template>
           </v-list>
@@ -180,21 +180,25 @@
   <v-dialog v-model="isAnnouncementCreatingOrUpdating" width="800">
     <template #default="{ isActive }">
       <v-card>
-        <v-card-title>{{ updatingAnnouncementIndex !== undefined ? '编辑公告' : '发布公告' }}</v-card-title>
+        <v-card-title>{{
+          updatingAnnouncementIndex !== undefined
+            ? t('spaces.detail.editAnnouncement')
+            : t('spaces.detail.publishAnnouncement')
+        }}</v-card-title>
         <v-card-text>
           <v-form @submit.prevent="submitAnnouncement">
-            <v-text-field v-model="newAnnouncementTitle" label="公告标题" />
+            <v-text-field v-model="newAnnouncementTitle" :label="t('spaces.detail.announcementTitle')" />
             <tip-tap-editor
               ref="newAnnouncementContentEditor"
               v-model="newAnnouncementContent"
               output="html"
-              label="公告内容"
+              :label="t('spaces.detail.announcementContent')"
             />
           </v-form>
         </v-card-text>
         <v-card-actions>
-          <v-btn color="primary" @click="isActive.value = false">取消</v-btn>
-          <v-btn color="primary" @click="submitAnnouncement">发布</v-btn>
+          <v-btn color="primary" @click="isActive.value = false">{{ t('spaces.detail.cancel') }}</v-btn>
+          <v-btn color="primary" @click="submitAnnouncement">{{ t('spaces.detail.publish') }}</v-btn>
         </v-card-actions>
       </v-card>
     </template>
@@ -222,9 +226,11 @@ import dayjs from 'dayjs'
 import { setTitle } from '@/utils/title'
 import { useSpaceStore } from '@/store/space'
 import { storeToRefs } from 'pinia'
+import { useI18n } from 'vue-i18n'
 
 const route = useRoute()
 const { confirm } = useDialog()
+const { t } = useI18n()
 
 const spaceStore = useSpaceStore()
 const { currentSpace: space, announcements } = storeToRefs(spaceStore)
@@ -260,11 +266,14 @@ const closeUpdating = () => {
 
 const adminText = computed(() => {
   if (!space.value?.admins?.length) {
-    return '暂无管理员'
+    return t('spaces.detail.noAdmins')
   } else if (space.value?.admins?.length === 1) {
-    return `创建者 ${space.value?.admins[0].user.nickname}`
+    return t('spaces.detail.creator', { creator: space.value?.admins[0].user.nickname })
   } else {
-    return `创建者 ${space.value?.admins[0].user.nickname} 和 ${space.value?.admins.length - 1} 位管理员`
+    return t('spaces.detail.creatorAndAdmins', {
+      creator: space.value?.admins[0].user.nickname,
+      count: space.value?.admins.length - 1,
+    })
   }
 })
 
@@ -298,7 +307,7 @@ const openAnnouncementDialog = (announcement: SpaceAnnouncement) => {
 }
 
 const deleteAnnouncement = async (index: number) => {
-  const result = await confirm('确定要删除该公告吗？').wait()
+  const result = await confirm(t('spaces.detail.confirmDeleteAnnouncement')).wait()
   if (!result) {
     return
   }
@@ -307,7 +316,7 @@ const deleteAnnouncement = async (index: number) => {
 
 const submitAnnouncement = async () => {
   if (!isCurrentUserAtLeastAdmin.value) {
-    toast.error('您没有权限发布公告')
+    toast.error(t('spaces.detail.noPermission'))
     return
   }
   const newAnnouncement: SpaceAnnouncement = {
@@ -326,11 +335,10 @@ const submitAnnouncement = async () => {
     }
     isAnnouncementCreatingOrUpdating.value = false
     updatingAnnouncementIndex.value = undefined
-    toast.success('发布成功')
+    toast.success(t('spaces.detail.publishSuccess'))
   } catch (error) {
-    toast.error('发布失败')
-  } finally {
-    await getSpace(Number(route.params.spaceId))
+    toast.error(t('spaces.detail.publishFailed'))
+    console.error('发布公告失败:', error)
   }
 }
 
@@ -367,9 +375,9 @@ const submitUpdate = handleSubmit(async (data) => {
       avatarId,
     })
     closeUpdating()
-    toast.success('更新成功')
+    toast.success(t('spaces.detail.updateSuccess'))
   } catch (error) {
-    toast.error('更新失败')
+    toast.error(t('spaces.detail.updateFailed'))
   } finally {
     await getSpace(Number(route.params.spaceId))
   }
