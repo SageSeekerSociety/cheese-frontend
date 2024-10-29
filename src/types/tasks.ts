@@ -75,5 +75,6 @@ export type TaskFormSubmitData = {
   deadline: number
   resubmittable: boolean
   editable: boolean
+  intro: string
   description: string
 }

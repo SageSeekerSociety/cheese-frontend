@@ -86,7 +86,7 @@ const emit = defineEmits<{
 const { t } = useI18n()
 
 const taskForm = ref(null)
-const descriptionEditor = ref(null)
+const descriptionEditor = ref<InstanceType<typeof TipTapEditor> | null>(null)
 
 const { handleSubmit, defineField, isSubmitting } = useForm({
   validationSchema: toTypedSchema(
@@ -120,9 +120,11 @@ const formData = reactive({
 })
 
 const submitForm = handleSubmit((values) => {
+  const descriptionText = descriptionEditor.value?.editor?.getText()
   const submissionData: TaskFormSubmitData = {
     ...values,
     description: JSON.stringify(formData.description),
+    intro: descriptionText || '',
     deadline: new Date(values.deadline).getTime(),
   }
   emit('submit', submissionData)
