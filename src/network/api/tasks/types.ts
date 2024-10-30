@@ -3,7 +3,8 @@ import type { TaskSubmissionSchemaEntry } from '@/types'
 export type PostTaskRequestData = {
   name: string
   submitterType: 'USER' | 'TEAM'
-  deadline: number
+  deadline: number | null
+  defaultDeadline: number
   resubmittable: boolean
   editable: boolean
   description: string
@@ -14,11 +15,17 @@ export type PostTaskRequestData = {
 
 export type PatchTaskRequestData = {
   name?: string
-  deadline?: number
+  deadline?: number | null
+  defaultDeadline?: number
   resubmittable?: boolean
   editable?: boolean
   description?: string
   submissionSchema?: TaskSubmissionSchemaEntry[]
+  approved?: boolean
+}
+
+export type PatchTaskParticipantRequestData = {
+  deadline?: number
   approved?: boolean
 }
 

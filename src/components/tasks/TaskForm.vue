@@ -17,13 +17,16 @@
       <v-radio :label="t('tasks.form.advanced')" :value="3"></v-radio>
     </v-radio-group>
     <v-text-field
-      v-model="formData.deadline"
-      :label="t('tasks.form.deadline')"
-      type="datetime-local"
+      v-model.number="formData.defaultDeadline"
+      :label="t('tasks.form.defaultDeadline')"
+      type="number"
       required
-      v-bind="deadlineProps"
+      prefix="领取赛题后"
+      suffix="天"
+      min="1"
+      v-bind="defaultDeadlineProps"
     ></v-text-field>
-    <div class="d-flex align-center gap-4">
+    <!-- <div class="d-flex align-center gap-4">
       <v-checkbox
         v-model="formData.resubmittable"
         :label="t('tasks.form.allowMultipleSubmissions')"
@@ -36,7 +39,7 @@
         color="primary"
         v-bind="editableProps"
       ></v-checkbox>
-    </div>
+    </div> -->
     <TipTapEditor
       ref="descriptionEditor"
       v-model="formData.description"
@@ -58,7 +61,6 @@ import type { TaskFormSubmitData } from '@/types'
 
 import { defineEmits, defineProps, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { JSONContent } from 'vuetify-pro-tiptap'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import { z } from 'zod'
@@ -66,7 +68,6 @@ import { z } from 'zod'
 import { vuetifyConfig } from '@/utils/form'
 
 import TipTapEditor from '@/components/common/Editor/TipTapEditor.vue'
-import { TaskSubmitterType } from '@/types'
 
 const props = defineProps({
   initialData: {
@@ -94,9 +95,7 @@ const { handleSubmit, defineField, isSubmitting } = useForm({
       name: z.string().max(25),
       submitterType: z.enum(['USER', 'TEAM']),
       rank: z.number().int().min(1).max(3),
-      deadline: z.string(),
-      resubmittable: z.boolean().optional().default(false),
-      editable: z.boolean().optional().default(false),
+      defaultDeadline: z.number().int().min(1).default(30),
     })
   ),
   initialValues: props.initialData,
@@ -105,17 +104,13 @@ const { handleSubmit, defineField, isSubmitting } = useForm({
 const [name, nameProps] = defineField('name', vuetifyConfig)
 const [submitterType, submitterTypeProps] = defineField('submitterType', vuetifyConfig)
 const [rank, rankProps] = defineField('rank', vuetifyConfig)
-const [deadline, deadlineProps] = defineField('deadline', vuetifyConfig)
-const [resubmittable, resubmittableProps] = defineField('resubmittable', vuetifyConfig)
-const [editable, editableProps] = defineField('editable', vuetifyConfig)
+const [defaultDeadline, defaultDeadlineProps] = defineField('defaultDeadline', vuetifyConfig)
 
 const formData = reactive({
   name,
   submitterType,
   rank,
-  deadline,
-  resubmittable,
-  editable,
+  defaultDeadline,
   description: props.initialData.description || { type: 'doc', content: [] },
 })
 
@@ -125,7 +120,9 @@ const submitForm = handleSubmit((values) => {
     ...values,
     description: JSON.stringify(formData.description),
     intro: descriptionText || '',
-    deadline: new Date(values.deadline).getTime(),
+    deadline: null,
+    resubmittable: true,
+    editable: true,
   }
   emit('submit', submissionData)
 })

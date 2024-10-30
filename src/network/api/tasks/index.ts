@@ -3,6 +3,7 @@
 import type { Page, TaskParticipantSummary, TaskSubmission } from '@/types'
 import type { Task } from '@/types'
 import type {
+  PatchTaskParticipantRequestData,
   PatchTaskRequestData,
   PatchTaskSubmissionReviewRequestData,
   PostTaskRequestData,
@@ -77,6 +78,14 @@ export namespace TasksApi {
     NewApiInstance.request<{ participants: TaskParticipantSummary[] }>({
       url: `/tasks/${taskId}/participants`,
       method: 'GET',
+    })
+
+  export const updateParticipant = (taskId: number, member: number, data: PatchTaskParticipantRequestData) =>
+    NewApiInstance.request<{ task: Task }>({
+      url: `/tasks/${taskId}/participants`,
+      method: 'PATCH',
+      params: { member },
+      data,
     })
 
   export const createSubmission = (taskId: number, member: number, data: PostTaskSubmissionRequestData[]) =>

@@ -72,7 +72,8 @@ export type TaskFormSubmitData = {
   name: string
   submitterType: TaskSubmitterType
   rank: number
-  deadline: number
+  deadline: number | null
+  defaultDeadline: number
   resubmittable: boolean
   editable: boolean
   intro: string
