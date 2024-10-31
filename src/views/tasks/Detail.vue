@@ -122,24 +122,34 @@
                 <v-chip v-if="taskData?.resubmittable" variant="tonal">可重复提交</v-chip>
               </div>
             </div>
-            <template v-if="currentJoinable">
-              <v-btn color="primary" variant="flat" @click="joinTask">领取赛题</v-btn>
-            </template>
-            <template v-else-if="!isCreator">
-              <div v-if="countdown || isExpired" class="text-center">
-                <div v-if="countdown && !isExpired" class="countdown-display">
-                  <span class="countdown-number text-primary">{{ countdown.days }}</span> 天
-                  <span class="countdown-number text-primary">{{ countdown.hours }}</span> 时
-                  <span class="countdown-number text-primary">{{ countdown.minutes }}</span> 分
-                  <span class="countdown-number text-primary">{{ countdown.seconds }}</span> 秒
+            <div class="flex-shrink-0 d-flex flex-row align-center gap-4">
+              <template v-if="currentJoinable">
+                <v-btn color="primary" variant="flat" @click="joinTask">领取赛题</v-btn>
+              </template>
+              <template v-else-if="!isCreator">
+                <div v-if="countdown || isExpired" class="text-center">
+                  <div v-if="countdown && !isExpired" class="countdown-display">
+                    <span class="countdown-number text-primary">{{ countdown.days }}</span> 天
+                    <span class="countdown-number text-primary">{{ countdown.hours }}</span> 时
+                    <span class="countdown-number text-primary">{{ countdown.minutes }}</span> 分
+                    <span class="countdown-number text-primary">{{ countdown.seconds }}</span> 秒
+                  </div>
+                  <div v-else class="expired-text text-error">已截止</div>
+                  <div v-if="countdown" class="text-caption">剩余时间</div>
                 </div>
-                <div v-else class="expired-text text-error">已截止</div>
-                <div v-if="countdown" class="text-caption">剩余时间</div>
-              </div>
-            </template>
-            <template v-if="isCreator">
-              <v-btn color="primary" variant="outlined" @click="openEditDialog"> 编辑赛题 </v-btn>
-            </template>
+              </template>
+              <template v-if="currentManageable">
+                <v-btn-group color="primary" density="compact" variant="flat" rounded="lg" divided>
+                  <v-btn class="pe-2" prepend-icon="mdi-pencil" @click="openEditDialog">
+                    <div class="text-none font-weight-regular">编辑赛题</div>
+                  </v-btn>
+
+                  <v-btn icon @click="deleteTask">
+                    <v-icon icon="mdi-delete"></v-icon>
+                  </v-btn>
+                </v-btn-group>
+              </template>
+            </div>
           </div>
           <v-divider class="my-4" />
           <div class="text-body-1">
@@ -287,8 +297,7 @@ import type { Task, TaskParticipantSummary, Team } from '@/types'
 
 import { computed, onMounted, onWatcherCleanup, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute } from 'vue-router'
-import { VForm } from 'vuetify/lib/components/index.mjs'
+import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vuetify-sonner'
 import dayjs from 'dayjs'
 
@@ -303,9 +312,13 @@ import TaskSubmissionHistory from '@/components/tasks/TaskSubmissionHistory.vue'
 import { AttachmentsApi } from '@/network/api/attachments'
 import { TasksApi } from '@/network/api/tasks'
 import { TeamsApi } from '@/network/api/teams'
+import { useDialog } from '@/plugins/dialog'
 import AccountService from '@/services/account'
 
+const dialogs = useDialog()
+
 const route = useRoute()
+const router = useRouter()
 const myTeams = ref<Team[]>([])
 const taskData = ref<Task | null>(null)
 const submissionContent = ref<{ contentText?: string; contentAttachment?: File }[]>([])
@@ -625,6 +638,15 @@ const submitEditTask = async (updatedTaskData: PatchTaskRequestData) => {
   } catch (error) {
     toast.error(t('tasks.detail.updateFailed'))
     console.error(t('tasks.detail.updateFailed'), error)
+  }
+}
+
+const deleteTask = async () => {
+  if (!taskData.value) return
+  if (await dialogs.confirm('确定要删除赛题吗？').wait()) {
+    await TasksApi.del(taskData.value.id)
+    toast.success('删除成功')
+    router.back()
   }
 }
 </script>
