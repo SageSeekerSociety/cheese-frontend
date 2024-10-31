@@ -97,6 +97,7 @@
                 {{ taskData?.creator.nickname }} 发布于 {{ dayjs(taskData?.createdAt).format('YYYY-MM-DD HH:mm') }}
               </div>
               <div class="d-flex flex-row align-center" style="gap: 4px">
+                <v-chip :color="taskStatusType">{{ taskStatusText }}</v-chip>
                 <v-chip color="primary" variant="tonal">{{
                   taskData?.submitterType === 'USER' ? '个人任务' : '小队任务'
                 }}</v-chip>
@@ -274,6 +275,7 @@ import { toast } from 'vuetify-sonner'
 import dayjs from 'dayjs'
 
 import { getAvatarUrl } from '@/utils/materials'
+import { getTaskStatusText, getTaskStatusType } from '@/utils/tasks'
 import { setTitle } from '@/utils/title'
 
 import CollapsibleContent from '@/components/common/CollapsibleContent.vue'
@@ -314,6 +316,9 @@ const fetchTaskDetail = async (taskId: number, clearSubmissionContent = true) =>
     editTaskData.value.description = JSON.parse(task.description)
   }
 }
+
+const taskStatusText = computed(() => getTaskStatusText(taskData.value))
+const taskStatusType = computed(() => getTaskStatusType(taskData.value))
 
 const currentMember = computed(() => {
   if (selectedViewRole.value === 'creator' || selectedViewRole.value === 'participant') {

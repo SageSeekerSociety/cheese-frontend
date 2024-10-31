@@ -33,32 +33,24 @@ import type { Task } from '@/types'
 import { computed, toRefs } from 'vue'
 import dayjs from 'dayjs'
 
+import { getTaskStatusText, getTaskStatusType } from '@/utils/tasks'
+
 const props = defineProps<{
   task: Task
 }>()
 
 const { task } = toRefs(props)
 
-const taskStatusText = computed(() => {
-  if (!task.value) return ''
-  if (!task.value.approved) return '审核中'
-  if (new Date(task.value.deadline) < new Date()) return '已结束'
-  return '进行中'
-})
+const taskStatusText = computed(() => getTaskStatusText(task.value))
 
-const taskStatusType = computed(() => {
-  if (!task.value) return undefined
-  if (!task.value.approved) return 'info'
-  if (new Date(task.value.deadline) < new Date()) return 'error'
-  return 'primary'
-})
+const taskStatusType = computed(() => getTaskStatusType(task.value))
 </script>
 
 <style scoped lang="scss">
 .task-description {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  display: flex;
+  flex-direction: column;
+  line-clamp: 2;
   overflow: hidden;
 }
 </style>

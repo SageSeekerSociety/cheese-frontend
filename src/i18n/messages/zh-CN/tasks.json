@@ -25,5 +25,10 @@
     "back": "返回",
     "submit": "提交",
     "createFailed": "创建赛题失败"
+  },
+  "status": {
+    "pending": "审核中",
+    "ongoing": "报名中",
+    "ended": "已截止"
   }
 }
