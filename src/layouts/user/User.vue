@@ -61,11 +61,11 @@ console.log(route)
 provide('userData', userData)
 
 const links = [
-  {
-    key: 'Home',
-    title: '首页',
-    path: '/',
-  },
+  // {
+  //   key: 'Home',
+  //   title: '首页',
+  //   path: '/',
+  // },
   // {
   //   key: 'Question',
   //   title: '问答',
