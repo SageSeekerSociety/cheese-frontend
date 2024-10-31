@@ -68,7 +68,9 @@
       "allowEditSubmissions": "允许编辑提交",
       "taskDescription": "任务描述",
       "submit": "提交",
-      "createTaskFailed": "创建任务失败:"
+      "createSuccess": "创建任务成功",
+      "createSuccessAndWaitingAudit": "创建任务成功，等待审核",
+      "createFailed": "创建任务失败:"
     },
     "selectTemplate": {
       "title": "选择赛题模板",

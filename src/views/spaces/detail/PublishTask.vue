@@ -23,6 +23,7 @@ import type { TaskFormSubmitData, TaskSubmissionSchemaEntry } from '@/types'
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
+import { toast } from 'vuetify-sonner'
 import { storeToRefs } from 'pinia'
 
 import TaskForm from '@/components/tasks/TaskForm.vue'
@@ -66,10 +67,20 @@ const submitTask = async (taskData: TaskFormSubmitData) => {
     return
   }
   try {
-    await TasksApi.create({ ...taskData, submissionSchema: taskSubmissionSchema.value, space: spaceId })
-    router.replace({ name: 'SpacesDetailTasks', params: { spaceId } })
+    const {
+      data: {
+        task: { approved },
+      },
+    } = await TasksApi.create({ ...taskData, submissionSchema: taskSubmissionSchema.value, space: spaceId })
+    if (!approved) {
+      toast.success(t('spaces.detail.publishTask.createSuccessAndWaitingAudit'))
+    } else {
+      toast.success(t('spaces.detail.publishTask.createSuccess'))
+    }
+    router.replace({ name: 'SpacesDetailTasks', params: { spaceId }, query: { type: 'published' } })
   } catch (error) {
-    console.error(t('tasks.publish.createFailed'), error)
+    console.error(t('spaces.detail.publishTask.createFailed'), error)
+    toast.error(t('spaces.detail.publishTask.createFailed'))
   }
 }
 
