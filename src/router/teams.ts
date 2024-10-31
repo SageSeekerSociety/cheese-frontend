@@ -35,7 +35,7 @@ export default {
       beforeEnter: (to, _, next) => {
         console.log('to', to)
         if (to.name === 'TeamsDetailDefault' || to.name === 'TeamsDetail') {
-          next({ name: 'TeamsDetailTasks', params: to.params })
+          next({ name: 'TeamsDetailMembers', params: to.params })
         } else {
           next()
         }

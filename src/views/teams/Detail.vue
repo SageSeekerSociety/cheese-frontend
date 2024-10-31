@@ -37,12 +37,12 @@
               </template>
               <v-list-item-title>概览</v-list-item-title>
             </v-list-item> -->
-            <v-list-item rounded="lg" color="primary" :to="{ name: 'TeamsDetailTasks', params: route.params }">
+            <!-- <v-list-item rounded="lg" color="primary" :to="{ name: 'TeamsDetailTasks', params: route.params }">
               <template #prepend>
                 <v-icon>mdi-trophy</v-icon>
               </template>
               <v-list-item-title>赛题</v-list-item-title>
-            </v-list-item>
+            </v-list-item> -->
             <v-list-item rounded="lg" color="primary" :to="{ name: 'TeamsDetailMembers', params: route.params }">
               <template #prepend>
                 <v-icon>mdi-account-group</v-icon>
