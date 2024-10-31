@@ -111,6 +111,7 @@ import { createEmptyResult, usePaging } from '@/utils/paging'
 import TipTapViewer from '@/components/common/Editor/TipTapViewer.vue'
 import InfiniteScroll from '@/components/common/InfiniteScroll.vue'
 import { TasksApi } from '@/network/api/tasks'
+import { CancelError, useDialog } from '@/plugins/dialog'
 import { useSpaceStore } from '@/store/space'
 
 const spaceStore = useSpaceStore()
@@ -119,6 +120,7 @@ const { currentSpaceId } = storeToRefs(spaceStore)
 const expandedTaskId = ref<number | null>(null)
 
 const { t } = useI18n()
+const dialogs = useDialog()
 
 const {
   data: tasks,
@@ -160,9 +162,22 @@ const approveTask = async (taskId: number) => {
 
 const rejectTask = async (taskId: number) => {
   try {
-    await TasksApi.update(taskId, { approved: false })
+    const rejectReason = await dialogs
+      .prompt(t('spaces.detail.auditTasks.rejectReason'), {
+        title: t('spaces.detail.auditTasks.rejectReasonDialogTitle'),
+        required: true,
+      })
+      .wait()
+    if (!rejectReason) {
+      toast.error(t('spaces.detail.auditTasks.rejectReasonRequired'))
+      return
+    }
+    await TasksApi.update(taskId, { approved: false, rejectReason })
     toast.success(t('spaces.detail.auditTasks.operationSuccess'))
   } catch (error) {
+    if (error instanceof CancelError) {
+      return
+    }
     console.error(error)
     toast.error(t('spaces.detail.auditTasks.operationFailed'))
   } finally {

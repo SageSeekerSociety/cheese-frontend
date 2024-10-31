@@ -1,6 +1,7 @@
 import type { VNode } from 'vue'
 
 import { h, reactive } from 'vue'
+import { VTextField } from 'vuetify/lib/components/index.mjs'
 
 interface DialogOptions<T = any> {
   title: string
@@ -22,8 +23,10 @@ export const dialogs = reactive<DialogInstance[]>([])
 
 const showDialog = <T>(options: DialogOptions<T>): DialogInstance<T> => {
   let resolvePromise!: (value: T) => void
-  const waitPromise = new Promise<T>((resolve) => {
+  let rejectPromise!: (reason?: any) => void
+  const waitPromise = new Promise<T>((resolve, reject) => {
     resolvePromise = resolve
+    rejectPromise = reject
   })
 
   const dialog: DialogInstance<T> = {
@@ -34,33 +37,43 @@ const showDialog = <T>(options: DialogOptions<T>): DialogInstance<T> => {
   }
 
   ;(dialog as any).resolvePromise = resolvePromise
-
+  ;(dialog as any).rejectPromise = rejectPromise
   dialogs.push(dialog)
 
   return dialog
 }
 
-export const closeDialog = <T>(id: number, result: T) => {
+export class CancelError extends Error {
+  constructor() {
+    super('cancel')
+  }
+}
+
+export const closeDialog = <T>(id: number, result: T, isCancel = false) => {
   const index = dialogs.findIndex((d) => d.id === id)
   if (index > -1) {
     const dialog = dialogs[index] as DialogInstance<T>
-    ;(dialog as any).resolvePromise(result) // 使用存储的 resolvePromise 函数
+    if (isCancel) {
+      ;(dialog as any).rejectPromise(new CancelError())
+    } else {
+      ;(dialog as any).resolvePromise(result)
+    }
     dialogs.splice(index, 1)
   }
 }
 
 export function useDialog() {
-  const alert = (message: string): DialogInstance<void> =>
+  const alert = (message: string, options?: { title?: string }): DialogInstance<void> =>
     showDialog({
-      title: '提示',
+      title: options?.title || '提示',
       content: message,
       showCancel: false,
       onConfirm: () => {},
     })
 
-  const confirm = (message: string): DialogInstance<boolean> =>
+  const confirm = (message: string, options?: { title?: string }): DialogInstance<boolean> =>
     showDialog({
-      title: '确认',
+      title: options?.title || '确认',
       content: message,
       showCancel: true,
       onConfirm: () => true,
@@ -69,16 +82,17 @@ export function useDialog() {
 
   const prompt = (
     message: string,
-    options?: { defaultValue?: string; placeholder?: string }
+    options?: { title?: string; defaultValue?: string; placeholder?: string; required?: boolean }
   ): DialogInstance<string> => {
     let inputValue = options?.defaultValue || ''
     return showDialog({
-      title: '输入',
+      title: options?.title || '输入',
       content: () =>
-        h('v-text-field', {
+        h(VTextField, {
           modelValue: inputValue,
           placeholder: options?.placeholder,
           label: message,
+          required: options?.required,
           'onUpdate:modelValue': (value: string) => {
             inputValue = value
           },

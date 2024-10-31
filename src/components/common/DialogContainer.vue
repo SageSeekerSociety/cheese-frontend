@@ -43,6 +43,6 @@ const onCancel = (dialog: DialogInstance) => {
   if (dialog.onCancel) {
     dialog.onCancel()
   }
-  closeDialog(dialog.id, false)
+  closeDialog(dialog.id, false, true)
 }
 </script>

@@ -31,6 +31,7 @@ export interface Task {
   updatedAt: number
   rank: number
   approved: boolean
+  rejectReason?: string
 }
 
 export interface TaskSubmissionReview {

@@ -43,7 +43,10 @@
       "approve": "通过",
       "reject": "驳回",
       "operationSuccess": "操作成功",
-      "operationFailed": "操作失败"
+      "operationFailed": "操作失败",
+      "rejectReason": "驳回原因",
+      "rejectReasonRequired": "驳回原因不能为空",
+      "rejectReasonDialogTitle": "请输入驳回原因"
     },
     "manageTemplates": {
       "title": "管理赛题模板",

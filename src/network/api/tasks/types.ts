@@ -22,6 +22,7 @@ export type PatchTaskRequestData = {
   description?: string
   submissionSchema?: TaskSubmissionSchemaEntry[]
   approved?: boolean
+  rejectReason?: string
 }
 
 export type PatchTaskParticipantRequestData = {
