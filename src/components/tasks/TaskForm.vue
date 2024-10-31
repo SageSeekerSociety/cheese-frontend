@@ -73,7 +73,7 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import { z } from 'zod'
 
-import { vuetifyConfig } from '@/utils/form'
+import { truncateString, vuetifyConfig } from '@/utils/form'
 
 import TipTapEditor from '@/components/common/Editor/TipTapEditor.vue'
 
@@ -140,7 +140,7 @@ const submitForm = handleSubmit((values) => {
   const submissionData: TaskFormSubmitData = {
     ...values,
     description: JSON.stringify(formData.description),
-    intro: descriptionText || '',
+    intro: truncateString(descriptionText || '', 255),
     deadline: deadlineDate.getTime(),
     resubmittable: true,
     editable: true,
