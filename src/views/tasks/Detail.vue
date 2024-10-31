@@ -25,21 +25,27 @@
               @click="selectedViewRole = role.value"
             >
               <template #prepend>
-                <v-avatar size="32">
+                <v-avatar size="32" class="position-relative">
                   <v-img :src="getAvatarUrl(AccountService.user?.avatarId)" />
+                  <v-icon
+                    v-if="selectedViewRole === role.value"
+                    color="white"
+                    class="position-absolute selected-view-role-icon"
+                  >
+                    mdi-check-circle
+                  </v-icon>
                 </v-avatar>
               </template>
               <v-list-item-title>{{ role.title }}</v-list-item-title>
               <template #append>
                 <v-icon>{{ role.type === 'creator' ? 'mdi-crown' : 'mdi-account' }}</v-icon>
-                <v-icon v-if="selectedViewRole === role.value" color="primary" class="ml-2">mdi-check</v-icon>
               </template>
             </v-list-item>
 
             <!-- 可参与的小队视角 -->
-            <v-list-subheader v-if="viewRoles.some((role) => role.type === 'team' && !role.isSubmittable)"
-              >可参与的小队</v-list-subheader
-            >
+            <v-list-subheader v-if="viewRoles.some((role) => role.type === 'team' && !role.isSubmittable)">
+              可参与的小队
+            </v-list-subheader>
             <v-list-item
               v-for="role in viewRoles.filter((role) => role.type === 'team' && !role.isSubmittable)"
               :key="role.value"
@@ -48,15 +54,21 @@
               @click="selectedViewRole = role.value"
             >
               <template #prepend>
-                <v-avatar size="32">
+                <v-avatar size="32" class="position-relative">
                   <v-img v-if="role.avatarId" :src="getAvatarUrl(role.avatarId)" />
                   <v-icon v-else>{{ role.icon }}</v-icon>
+                  <v-icon
+                    v-if="selectedViewRole === role.value"
+                    color="white"
+                    class="position-absolute selected-view-role-icon"
+                  >
+                    mdi-check-circle
+                  </v-icon>
                 </v-avatar>
               </template>
               <v-list-item-title>{{ role.title }}</v-list-item-title>
               <template #append>
                 <v-icon>mdi-lock-open</v-icon>
-                <v-icon v-if="selectedViewRole === role.value" color="primary" class="ml-2">mdi-check</v-icon>
               </template>
             </v-list-item>
 
@@ -72,15 +84,21 @@
               @click="selectedViewRole = role.value"
             >
               <template #prepend>
-                <v-avatar size="32">
+                <v-avatar size="32" class="position-relative">
                   <v-img v-if="role.avatarId" :src="getAvatarUrl(role.avatarId)" />
                   <v-icon v-else>{{ role.icon }}</v-icon>
+                  <v-icon
+                    v-if="selectedViewRole === role.value"
+                    color="white"
+                    class="position-absolute selected-view-role-icon"
+                  >
+                    mdi-check-circle
+                  </v-icon>
                 </v-avatar>
               </template>
               <v-list-item-title>{{ role.title }}</v-list-item-title>
               <template #append>
                 <v-icon>mdi-upload</v-icon>
-                <v-icon v-if="selectedViewRole === role.value" color="primary" class="ml-2">mdi-check</v-icon>
               </template>
             </v-list-item>
           </v-list>
@@ -267,7 +285,7 @@
 import type { PatchTaskRequestData } from '@/network/api/tasks/types'
 import type { Task, TaskParticipantSummary, Team } from '@/types'
 
-import { computed, onMounted, onWatcherCleanup, reactive, ref, useTemplateRef, watchEffect } from 'vue'
+import { computed, onMounted, onWatcherCleanup, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { VForm } from 'vuetify/lib/components/index.mjs'
@@ -368,25 +386,6 @@ onMounted(async () => {
   }
   if (isCreator.value) {
     await fetchParticipants()
-    selectedViewRole.value = taskData.value?.submitterType === 'USER' ? 'participant' : 'creator'
-  } else {
-    if (taskData.value?.submitterType === 'TEAM') {
-      const submittableTeam = taskData.value.submittableAsTeam?.find((team) =>
-        myTeams.value.some((myTeam) => myTeam.id === team.id)
-      )
-      if (submittableTeam) {
-        selectedViewRole.value = submittableTeam.id.toString()
-      } else {
-        const joinableTeam = taskData.value.joinableAsTeam?.find((team) =>
-          myTeams.value.some((myTeam) => myTeam.id === team.id)
-        )
-        if (joinableTeam) {
-          selectedViewRole.value = joinableTeam.id.toString()
-        }
-      }
-    } else {
-      selectedViewRole.value = 'participant'
-    }
   }
 })
 
@@ -493,21 +492,11 @@ const joinTask = async () => {
   }
 }
 
-// 添加新的响应式变量
 const selectedViewRole = ref<'participant' | 'creator' | string>('participant')
 
-// 计算可用的浏览身份
 const viewRoles = computed(() => {
   const roles = []
   if (taskData.value?.submitterType === 'USER') {
-    roles.push({
-      value: 'participant',
-      title: '参与者',
-      type: 'participant',
-      isSubmittable: taskData.value.submittable,
-      avatarId: null,
-      icon: 'mdi-account',
-    })
     if (isCreator.value) {
       roles.push({
         value: 'creator',
@@ -516,6 +505,16 @@ const viewRoles = computed(() => {
         isSubmittable: false,
         avatarId: null,
         icon: 'mdi-crown',
+      })
+    }
+    if (taskData.value?.approved) {
+      roles.push({
+        value: 'participant',
+        title: '参与者',
+        type: 'participant',
+        isSubmittable: taskData.value.submittable,
+        avatarId: null,
+        icon: 'mdi-account',
       })
     }
   } else if (taskData.value?.submitterType === 'TEAM') {
@@ -529,26 +528,36 @@ const viewRoles = computed(() => {
         icon: 'mdi-crown',
       })
     }
-    myTeams.value.forEach((team) => {
-      const isSubmittable = taskData.value?.submittableAsTeam?.some((submittableTeam) => submittableTeam.id === team.id)
-      const isJoinable = taskData.value?.joinableAsTeam?.some((joinableTeam) => joinableTeam.id === team.id)
-      if (isSubmittable || isJoinable) {
-        roles.push({
-          value: team.id.toString(),
-          title: team.name,
-          type: 'team',
-          avatarId: team.avatarId,
-          isSubmittable: isSubmittable,
-          icon: null,
-        })
-      }
-    })
+    if (taskData.value?.approved) {
+      myTeams.value.forEach((team) => {
+        const isSubmittable = taskData.value?.submittableAsTeam?.some(
+          (submittableTeam) => submittableTeam.id === team.id
+        )
+        const isJoinable = taskData.value?.joinableAsTeam?.some((joinableTeam) => joinableTeam.id === team.id)
+        if (isSubmittable || isJoinable) {
+          roles.push({
+            value: team.id.toString(),
+            title: team.name,
+            type: 'team',
+            avatarId: team.avatarId,
+            isSubmittable: isSubmittable,
+            icon: null,
+          })
+        }
+      })
+    }
   }
   return roles
 })
 
-// 新增的计算属性
+watch(viewRoles, (newValue) => {
+  if (newValue.length > 0) {
+    selectedViewRole.value = newValue[0].value
+  }
+})
+
 const currentJoinable = computed(() => {
+  if (!taskData.value?.approved) return false
   if (taskData.value?.submitterType === 'USER') {
     return taskData.value.joinable && selectedViewRole.value === 'participant'
   } else {
@@ -635,5 +644,12 @@ const submitEditTask = async (updatedTaskData: PatchTaskRequestData) => {
 .file-card {
   gap: 4px;
   padding: 8px;
+}
+
+.selected-view-role-icon {
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.3);
+  font-size: 16px;
 }
 </style>
