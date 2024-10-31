@@ -1,6 +1,5 @@
 import 'vuetify-pro-tiptap/style.css'
 
-import { markRaw } from 'vue'
 import { createVuetifyProTipTap, VuetifyTiptap, VuetifyViewer } from 'vuetify-pro-tiptap'
 import {
   BaseKit,
@@ -28,7 +27,6 @@ import {
   TaskList,
   TextAlign,
   Underline,
-  Video,
 } from 'vuetify-pro-tiptap'
 
 import { AttachmentImage } from './extensions/image'
@@ -64,7 +62,6 @@ export const vuetifyProTipTap = createVuetifyProTipTap({
     Indent.configure({ divider: true }),
     Link,
     AttachmentImage,
-    Video,
     Table.configure({ divider: true }),
     Blockquote,
     HorizontalRule,

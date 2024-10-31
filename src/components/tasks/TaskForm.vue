@@ -115,7 +115,10 @@ const { handleSubmit, defineField, isSubmitting } = useForm({
       defaultDeadline: z.number().int().min(1).default(30),
     })
   ),
-  initialValues: props.initialData,
+  initialValues: {
+    ...props.initialData,
+    deadline: new Date(props.initialData.deadline),
+  },
 })
 
 const [name, nameProps] = defineField('name', vuetifyConfig)
