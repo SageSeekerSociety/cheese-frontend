@@ -1,11 +1,6 @@
 <template>
   <v-sheet flat rounded="lg">
     <v-toolbar :title="t('spaces.detail.manageTemplates.title')" color="transparent" density="compact">
-      <template #prepend>
-        <v-btn variant="text" prepend-icon="mdi-chevron-left" @click="goBack">{{
-          t('spaces.detail.manageTemplates.back')
-        }}</v-btn>
-      </template>
       <template #append>
         <v-btn color="primary" prepend-icon="mdi-plus" @click="createTemplate">{{
           t('spaces.detail.manageTemplates.createTemplate')
@@ -46,10 +41,6 @@ const { confirm } = useDialog()
 const spaceStore = useSpaceStore()
 const { currentSpaceId, templates } = storeToRefs(spaceStore)
 const { t } = useI18n()
-
-const goBack = () => {
-  router.go(-1)
-}
 
 const createTemplate = () => {
   router.push({ name: 'SpacesDetailCreateTemplate', params: { spaceId: currentSpaceId.value } })
