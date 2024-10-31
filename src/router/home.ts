@@ -22,4 +22,7 @@ export default {
       },
     },
   ],
+  beforeEnter: (to, _, next) => {
+    next({ name: 'SpacesDefault' })
+  },
 } as RouteRecordRaw

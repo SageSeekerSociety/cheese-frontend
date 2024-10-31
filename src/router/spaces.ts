@@ -2,6 +2,7 @@ import type { RouteRecordRaw } from 'vue-router'
 
 export default {
   path: '/spaces',
+  name: 'Spaces',
   component: () => import('@/layouts/spaces/Spaces.vue'),
   meta: {
     title: '空间',
