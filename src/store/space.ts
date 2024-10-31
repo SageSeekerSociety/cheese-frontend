@@ -45,14 +45,14 @@ export const useSpaceStore = defineStore('space', () => {
     }
   }
 
-  const updateSpace = async (spaceId: number, data: Partial<Space>) => {
+  const updateSpace = async (spaceId: number, data: Partial<Space>, shouldToast: boolean = true) => {
     try {
       const response = await SpacesApi.update(spaceId, data)
       currentSpace.value = response.data.space
-      toast.success('更新成功')
+      if (shouldToast) toast.success('更新成功')
     } catch (error) {
       console.error('更新空间信息失败:', error)
-      toast.error('更新空间信息失败')
+      if (shouldToast) toast.error('更新空间信息失败')
     }
   }
 
@@ -60,9 +60,13 @@ export const useSpaceStore = defineStore('space', () => {
     if (!currentSpace.value) return
 
     try {
-      await updateSpace(currentSpace.value.id, {
-        taskTemplates: JSON.stringify(templates),
-      })
+      await updateSpace(
+        currentSpace.value.id,
+        {
+          taskTemplates: JSON.stringify(templates),
+        },
+        false
+      )
     } catch (error) {
       console.error('更新模板失败:', error)
       toast.error('更新模板失败')
@@ -80,9 +84,13 @@ export const useSpaceStore = defineStore('space', () => {
     if (!currentSpace.value) return
 
     try {
-      await updateSpace(currentSpace.value.id, {
-        announcements: JSON.stringify(announcements),
-      })
+      await updateSpace(
+        currentSpace.value.id,
+        {
+          announcements: JSON.stringify(announcements),
+        },
+        false
+      )
     } catch (error) {
       console.error('更新公告失败:', error)
       toast.error('更新公告失败')
