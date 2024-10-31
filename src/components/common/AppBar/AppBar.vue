@@ -1,7 +1,9 @@
 <template>
   <v-app-bar app flat>
     <v-container class="mx-auto d-flex align-center justify-center">
-      <span class="text-h5 font-weight-bold me-4 app-bar-title">🧀知是</span>
+      <router-link :to="{ name: 'HomeDefault' }" class="text-decoration-none text-primary">
+        <span class="text-h5 font-weight-bold me-4 app-bar-title">🧀知是</span>
+      </router-link>
       <v-btn v-for="link in links" :key="link.key" :text="link.title" :to="link.path" variant="text"></v-btn>
       <v-spacer></v-spacer>
       <v-responsive max-width="240" class="me-4">
