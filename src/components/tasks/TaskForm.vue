@@ -16,6 +16,13 @@
       <v-radio :label="t('tasks.form.intermediate')" :value="2"></v-radio>
       <v-radio :label="t('tasks.form.advanced')" :value="3"></v-radio>
     </v-radio-group>
+    <v-date-input
+      v-model="formData.deadline"
+      :label="t('tasks.form.deadline')"
+      required
+      v-bind="deadlineProps"
+      :allowed-dates="isAllowedDates"
+    ></v-date-input>
     <v-text-field
       v-model.number="formData.defaultDeadline"
       :label="t('tasks.form.defaultDeadline')"
@@ -61,6 +68,7 @@ import type { TaskFormSubmitData } from '@/types'
 
 import { defineEmits, defineProps, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { VDateInput } from 'vuetify/labs/VDateInput'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import { z } from 'zod'
@@ -68,6 +76,14 @@ import { z } from 'zod'
 import { vuetifyConfig } from '@/utils/form'
 
 import TipTapEditor from '@/components/common/Editor/TipTapEditor.vue'
+
+const isAllowedDates = (date: unknown) => {
+  if (!(date instanceof Date)) return false
+  const now = new Date()
+  now.setHours(0, 0, 0, 0)
+  date.setHours(0, 0, 0, 0)
+  return date >= now
+}
 
 const props = defineProps({
   initialData: {
@@ -95,6 +111,7 @@ const { handleSubmit, defineField, isSubmitting } = useForm({
       name: z.string().max(25),
       submitterType: z.enum(['USER', 'TEAM']),
       rank: z.number().int().min(1).max(3),
+      deadline: z.date().default(new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)),
       defaultDeadline: z.number().int().min(1).default(30),
     })
   ),
@@ -104,23 +121,27 @@ const { handleSubmit, defineField, isSubmitting } = useForm({
 const [name, nameProps] = defineField('name', vuetifyConfig)
 const [submitterType, submitterTypeProps] = defineField('submitterType', vuetifyConfig)
 const [rank, rankProps] = defineField('rank', vuetifyConfig)
+const [deadline, deadlineProps] = defineField('deadline', vuetifyConfig)
 const [defaultDeadline, defaultDeadlineProps] = defineField('defaultDeadline', vuetifyConfig)
 
 const formData = reactive({
   name,
   submitterType,
   rank,
+  deadline,
   defaultDeadline,
   description: props.initialData.description || { type: 'doc', content: [] },
 })
 
 const submitForm = handleSubmit((values) => {
   const descriptionText = descriptionEditor.value?.editor?.getText()
+  const deadlineDate = new Date(values.deadline)
+  deadlineDate.setHours(23, 59, 59, 999)
   const submissionData: TaskFormSubmitData = {
     ...values,
     description: JSON.stringify(formData.description),
     intro: descriptionText || '',
-    deadline: null,
+    deadline: deadlineDate.getTime(),
     resubmittable: true,
     editable: true,
   }
