@@ -33,6 +33,11 @@
               <user-avatar :avatar="avatar" :size="48"></user-avatar>
             </template>
           </v-list-item>
+          <v-list-item>
+            <div class="d-flex ga-2">
+              <v-chip prepend-icon="mdi-account" color="text">UID: {{ currentUser?.id }}</v-chip>
+            </div>
+          </v-list-item>
           <!-- <v-list-item>
             <div class="d-flex ga-2">
               <v-chip prepend-icon="mdi-cheese" color="primary">50</v-chip>
