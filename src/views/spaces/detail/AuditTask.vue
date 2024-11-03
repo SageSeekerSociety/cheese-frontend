@@ -139,7 +139,7 @@ const {
     page_start: pageStart,
     sort_by: 'createdAt',
     sort_order: 'desc',
-    approved: false,
+    approved: 'NONE',
   })
   return { data: data.tasks, page: data.page }
 })
@@ -150,7 +150,7 @@ const toggleExpand = (taskId: number) => {
 
 const approveTask = async (taskId: number) => {
   try {
-    await TasksApi.update(taskId, { approved: true })
+    await TasksApi.update(taskId, { approved: 'APPROVED' })
     toast.success(t('spaces.detail.auditTasks.operationSuccess'))
   } catch (error) {
     console.error(error)
@@ -172,7 +172,7 @@ const rejectTask = async (taskId: number) => {
       toast.error(t('spaces.detail.auditTasks.rejectReasonRequired'))
       return
     }
-    await TasksApi.update(taskId, { approved: false, rejectReason })
+    await TasksApi.update(taskId, { approved: 'DISAPPROVED', rejectReason })
     toast.success(t('spaces.detail.auditTasks.operationSuccess'))
   } catch (error) {
     if (error instanceof CancelError) {

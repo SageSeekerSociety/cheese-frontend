@@ -73,9 +73,9 @@
             </v-list-item>
 
             <!-- 可提交的小队视角 -->
-            <v-list-subheader v-if="viewRoles.some((role) => role.type === 'team' && role.isSubmittable)"
-              >可提交的小队</v-list-subheader
-            >
+            <v-list-subheader v-if="viewRoles.some((role) => role.type === 'team' && role.isSubmittable)">
+              可提交的小队
+            </v-list-subheader>
             <v-list-item
               v-for="role in viewRoles.filter((role) => role.type === 'team' && role.isSubmittable)"
               :key="role.value"
@@ -218,13 +218,41 @@
               <v-list v-if="participants.length > 0">
                 <v-list-item v-for="participant in participants" :key="participant.id">
                   <template #prepend>
-                    <v-avatar color="primary" size="36">
-                      {{ participant.name.charAt(0) }}
-                    </v-avatar>
+                    <v-avatar color="primary" size="36" :image="getAvatarUrl(participant.avatarId)"></v-avatar>
                   </template>
-                  <v-list-item-title>{{ participant.name }}</v-list-item-title>
+                  <v-list-item-title>
+                    <div class="d-flex flex-row align-center gap-2">
+                      <span>{{ participant.name }}</span>
+                      <v-chip v-if="participant.approved === 'NONE'" variant="tonal" color="primary">待审核</v-chip>
+                      <v-chip v-else-if="participant.approved === 'DISAPPROVED'" variant="tonal" color="error">
+                        已驳回
+                      </v-chip>
+                    </div>
+                  </v-list-item-title>
                   <template #append>
-                    <v-btn variant="text" @click="showParticipantSubmissions(participant.id)"> 查看提交 </v-btn>
+                    <template v-if="participant.approved === 'APPROVED'">
+                      <v-btn variant="text" @click="showParticipantSubmissions(participant.id)"> 查看提交 </v-btn>
+                    </template>
+                    <template v-else-if="participant.approved === 'NONE'">
+                      <div class="d-flex flex-row align-center gap-2">
+                        <v-btn
+                          prepend-icon="mdi-check"
+                          variant="tonal"
+                          color="success"
+                          @click="approveParticipant(participant.id)"
+                        >
+                          通过
+                        </v-btn>
+                        <v-btn
+                          prepend-icon="mdi-close"
+                          variant="tonal"
+                          color="error"
+                          @click="rejectParticipant(participant.id)"
+                        >
+                          驳回
+                        </v-btn>
+                      </div>
+                    </template>
                   </template>
                 </v-list-item>
               </v-list>
@@ -649,8 +677,19 @@ const deleteTask = async () => {
     router.back()
   }
 }
-</script>
 
+const approveParticipant = async (participantId: number) => {
+  await TasksApi.updateParticipant(taskData.value!.id, participantId, { approved: 'APPROVED' })
+  toast.success('通过成功')
+  await fetchParticipants()
+}
+
+const rejectParticipant = async (participantId: number) => {
+  await TasksApi.updateParticipant(taskData.value!.id, participantId, { approved: 'DISAPPROVED' })
+  toast.success('驳回成功')
+  await fetchParticipants()
+}
+</script>
 <style scoped>
 .countdown-display {
   font-size: 1.2rem;

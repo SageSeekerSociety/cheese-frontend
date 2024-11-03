@@ -27,6 +27,7 @@ const fetchTeamTasks = async (teamId: number) => {
     team: teamId,
     sort_by: 'deadline',
     sort_order: 'asc',
+    approved: 'NONE',
   })
   tasks.value = data.tasks
 }

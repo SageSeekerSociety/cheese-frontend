@@ -21,13 +21,13 @@ export type PatchTaskRequestData = {
   editable?: boolean
   description?: string
   submissionSchema?: TaskSubmissionSchemaEntry[]
-  approved?: boolean
+  approved?: 'APPROVED' | 'DISAPPROVED' | 'NONE'
   rejectReason?: string
 }
 
 export type PatchTaskParticipantRequestData = {
   deadline?: number
-  approved?: boolean
+  approved?: 'APPROVED' | 'DISAPPROVED' | 'NONE'
 }
 
 export type PostTaskSubmissionRequestData = {

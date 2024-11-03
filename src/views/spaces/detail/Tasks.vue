@@ -135,7 +135,7 @@ const {
       sort_by: queryOptions?.by ?? 'createdAt',
       sort_order: queryOptions?.order ?? 'desc',
       keywords: queryOptions?.keywords,
-      approved: queryOptions.queryType === 'all' ? true : undefined,
+      approved: queryOptions.queryType === 'all' ? 'APPROVED' : undefined,
       owner: queryOptions.owner,
     })
     return { data: data.tasks, page: data.page }

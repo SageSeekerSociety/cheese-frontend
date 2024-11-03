@@ -30,7 +30,7 @@ export interface Task {
   createdAt: number
   updatedAt: number
   rank: number
-  approved: boolean
+  approved: 'APPROVED' | 'DISAPPROVED' | 'NONE'
   rejectReason?: string
 }
 
@@ -67,6 +67,7 @@ export interface TaskParticipantSummary {
   intro: string
   name: string
   avatarId: number
+  approved: 'APPROVED' | 'DISAPPROVED' | 'NONE'
 }
 
 export type TaskFormSubmitData = {

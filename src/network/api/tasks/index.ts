@@ -52,7 +52,7 @@ export namespace TasksApi {
     queryJoinability?: boolean
     querySubmittability?: boolean
     keywords?: string
-    approved?: boolean
+    approved?: 'APPROVED' | 'DISAPPROVED' | 'NONE'
   }) =>
     NewApiInstance.request<{ tasks: Task[]; page: Page }>({
       url: '/tasks',
@@ -60,11 +60,12 @@ export namespace TasksApi {
       params,
     })
 
-  export const addParticipant = (taskId: number, member: number) =>
+  export const addParticipant = (taskId: number, member: number, deadline: number | null = null) =>
     NewApiInstance.request<{ task: Task }>({
       url: `/tasks/${taskId}/participants`,
       method: 'POST',
       params: { member },
+      data: { deadline },
     })
 
   export const removeParticipant = (taskId: number, member: number) =>
