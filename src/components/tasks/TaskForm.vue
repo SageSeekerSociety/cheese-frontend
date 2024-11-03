@@ -117,7 +117,9 @@ const { handleSubmit, defineField, isSubmitting } = useForm({
   ),
   initialValues: {
     ...props.initialData,
-    deadline: new Date(props.initialData.deadline),
+    deadline: props.initialData.deadline
+      ? new Date(props.initialData.deadline)
+      : new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
   },
 })
 
