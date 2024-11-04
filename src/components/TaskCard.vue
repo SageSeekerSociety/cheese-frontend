@@ -21,7 +21,7 @@
       </div>
     </div>
 
-    <v-alert v-if="!task.approved && isSelfTask && task.rejectReason" type="error" class="mx-4 mb-4" title="审核未通过">
+    <v-alert v-if="task.approved === 'DISAPPROVED' && isSelfTask" type="error" class="mx-4 mb-4" title="审核未通过">
       理由：{{ task.rejectReason }}
     </v-alert>
   </v-card>

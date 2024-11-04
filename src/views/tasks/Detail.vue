@@ -151,6 +151,14 @@
               </template>
             </div>
           </div>
+          <v-alert
+            v-if="taskData?.approved === 'DISAPPROVED' && isSelfTask"
+            type="error"
+            class="mt-4"
+            title="审核未通过"
+          >
+            理由：{{ taskData.rejectReason }}
+          </v-alert>
           <v-divider class="my-4" />
           <div class="text-body-1">
             <collapsible-content :max-height="200">
@@ -378,6 +386,10 @@ const fetchTaskDetail = async (taskId: number, clearSubmissionContent = true) =>
 
 const taskStatusText = computed(() => getTaskStatusText(taskData.value))
 const taskStatusType = computed(() => getTaskStatusType(taskData.value))
+
+const isSelfTask = computed(() => {
+  return taskData.value?.creator.id === AccountService.user?.id
+})
 
 const currentMember = computed(() => {
   if (selectedViewRole.value === 'creator' || selectedViewRole.value === 'participant') {
