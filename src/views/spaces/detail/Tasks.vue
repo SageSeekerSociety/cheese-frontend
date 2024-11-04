@@ -53,7 +53,7 @@
         :has-more="hasMore"
         :initial-loading="refreshing"
         :is-empty="tasks.length === 0"
-        :on-load-more="loadMore"
+        @load-more="loadMore"
       >
         <template #empty>
           <v-empty-state icon="mdi-trophy" :title="t('spaces.detail.tasks.noTasks')"></v-empty-state>
