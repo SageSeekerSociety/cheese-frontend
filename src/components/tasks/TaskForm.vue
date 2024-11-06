@@ -108,7 +108,7 @@ const descriptionEditor = ref<InstanceType<typeof TipTapEditor> | null>(null)
 const { handleSubmit, defineField, isSubmitting } = useForm({
   validationSchema: toTypedSchema(
     z.object({
-      name: z.string().max(25),
+      name: z.string().max(128),
       submitterType: z.enum(['USER', 'TEAM']),
       rank: z.number().int().min(1).max(3),
       deadline: z.date().default(new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)),
