@@ -28,10 +28,10 @@
           style="min-width: auto"
           prepend-inner-icon="mdi-sort"
         ></v-select>
-        <!-- <v-select
-          v-model="selectedTag"
-          :items="tagOptions"
-          label="标签"
+        <v-select
+          v-model="selectedTopic"
+          :items="topicOptions"
+          :label="t('spaces.detail.tasks.topic')"
           density="compact"
           flat
           hide-details
@@ -40,7 +40,7 @@
           variant="solo-filled"
           style="min-width: auto"
           prepend-inner-icon="mdi-tag"
-        ></v-select> -->
+        ></v-select>
       </div>
       <v-btn variant="flat" @click="navigateToPublishTask">
         <v-icon left>mdi-plus</v-icon>
@@ -91,11 +91,13 @@ type QueryOptions = {
   keywords?: string
   owner?: number
   queryType: QueryType
+  topics?: number[]
 }
 const route = useRoute()
 const router = useRouter()
 const searchQueryInput = ref('')
 const searchQuery = ref<string>()
+const selectedTopic = ref<number | null>(null)
 
 const { t } = useI18n()
 
@@ -112,6 +114,7 @@ const queryOptions = computed<QueryOptions>(() => ({
   keywords: searchQuery.value ? searchQuery.value : undefined,
   queryType: (route.query.type as QueryType) ?? 'all',
   owner: route.query.type === 'published' ? currentUserId.value : undefined,
+  topics: selectedTopic.value !== null ? [selectedTopic.value] : undefined,
 }))
 
 const {
@@ -137,6 +140,9 @@ const {
       keywords: queryOptions?.keywords,
       approved: queryOptions.queryType === 'all' ? 'APPROVED' : undefined,
       owner: queryOptions.owner,
+      topics: queryOptions.topics,
+      queryTopics: true,
+      queryJoined: true,
     })
     return { data: data.tasks, page: data.page }
   },
@@ -149,7 +155,20 @@ const submitSearch = () => {
 }
 
 const spaceStore = useSpaceStore()
-const { currentSpace } = storeToRefs(spaceStore)
+const { currentSpace, classificationTopics } = storeToRefs(spaceStore)
+
+const topicOptions = computed<{ title: string; value: number | null }[]>(() => {
+  return [
+    {
+      title: t('spaces.detail.tasks.allTopics'),
+      value: null,
+    },
+    ...classificationTopics.value.map((topic) => ({
+      title: topic.name,
+      value: topic.id,
+    })),
+  ]
+})
 
 const navigateToPublishTask = async () => {
   try {

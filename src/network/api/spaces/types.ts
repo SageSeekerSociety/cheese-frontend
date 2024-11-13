@@ -14,6 +14,7 @@ export type PatchSpaceRequestData = {
   avatarId?: number
   announcements?: string
   taskTemplates?: string
+  classificationTopics?: number[]
 }
 
 export type PostSpaceAdminRequestData = {

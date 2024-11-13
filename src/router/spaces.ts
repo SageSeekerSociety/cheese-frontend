@@ -64,6 +64,11 @@ export default {
           name: 'SpacesDetailSelectTemplate',
           component: () => import('@/views/spaces/detail/SelectTemplate.vue'),
         },
+        {
+          path: 'manage/topics',
+          name: 'SpacesDetailManageTopics',
+          component: () => import('@/views/spaces/detail/ManageTopics.vue'),
+        },
       ],
       beforeEnter: (to, _, next) => {
         if (to.name === 'SpacesDetailDefault' || to.name === 'SpacesDetail') {

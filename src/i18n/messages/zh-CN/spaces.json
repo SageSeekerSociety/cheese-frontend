@@ -55,6 +55,15 @@
       "noTemplates": "暂无任务模板",
       "deleteConfirm": "确定要删除这个模板吗？"
     },
+    "manageTopics": {
+      "title": "管理分类话题",
+      "addTopics": "添加话题",
+      "noTopics": "暂无话题",
+      "add": "添加",
+      "cancel": "取消",
+      "addSuccess": "添加话题成功",
+      "addFailed": "添加话题失败"
+    },
     "publishTask": {
       "title": "发布赛题",
       "back": "返回",
@@ -90,7 +99,9 @@
       },
       "publishTask": "发布赛题",
       "noTasks": "暂无赛题",
-      "getSpaceDetailsFailed": "获取空间详情失败:"
+      "getSpaceDetailsFailed": "获取空间详情失败:",
+      "topic": "话题",
+      "allTopics": "全部话题"
     },
     "templateForm": {
       "editTitle": "编辑赛题模板",

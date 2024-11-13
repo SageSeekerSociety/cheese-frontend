@@ -1,10 +1,11 @@
-import type { Space, SpaceAnnouncement, SpaceTaskTemplate } from '@/types'
+import type { Space, SpaceAnnouncement, SpaceTaskTemplate, Topic } from '@/types'
 
 import { computed, ref } from 'vue'
 import { toast } from 'vuetify-sonner'
 import { defineStore } from 'pinia'
 
 import { SpacesApi } from '@/network/api/spaces'
+import { PatchSpaceRequestData } from '@/network/api/spaces/types'
 
 export const useSpaceStore = defineStore('space', () => {
   const currentSpace = ref<Space | null>(null)
@@ -29,6 +30,11 @@ export const useSpaceStore = defineStore('space', () => {
     }
   })
 
+  const classificationTopics = computed<Topic[]>(() => {
+    if (!currentSpace.value) return []
+    return currentSpace.value.classificationTopics || []
+  })
+
   const fetchSpace = async (spaceId: number) => {
     const isAnotherSpace = spaceId !== currentSpaceId.value
     if (isAnotherSpace) {
@@ -37,7 +43,7 @@ export const useSpaceStore = defineStore('space', () => {
     currentSpaceId.value = spaceId
 
     try {
-      const { data } = await SpacesApi.detail(spaceId)
+      const { data } = await SpacesApi.detail(spaceId, { queryClassificationTopics: true, queryMyRank: true })
       currentSpace.value = data.space
     } catch (error) {
       console.error('获取空间信息失败:', error)
@@ -45,7 +51,7 @@ export const useSpaceStore = defineStore('space', () => {
     }
   }
 
-  const updateSpace = async (spaceId: number, data: Partial<Space>, shouldToast: boolean = true) => {
+  const updateSpace = async (spaceId: number, data: PatchSpaceRequestData, shouldToast: boolean = true) => {
     try {
       const response = await SpacesApi.update(spaceId, data)
       currentSpace.value = response.data.space
@@ -113,11 +119,38 @@ export const useSpaceStore = defineStore('space', () => {
     await updateAnnouncements(updatedAnnouncements)
   }
 
+  const updateClassificationTopics = async (topicIds: number[]) => {
+    if (!currentSpace.value) return
+
+    try {
+      await updateSpace(currentSpace.value.id, { classificationTopics: topicIds }, false)
+    } catch (error) {
+      console.error('更新分类话题失败:', error)
+      toast.error('更新分类话题失败')
+    }
+  }
+
+  const addClassificationTopic = async (topicId: number) => {
+    const updatedTopicIds = [...classificationTopics.value.map((topic) => topic.id), topicId]
+    await updateClassificationTopics(updatedTopicIds)
+  }
+
+  const addClassificationTopics = async (topicIds: number[]) => {
+    const updatedTopicIds = [...classificationTopics.value.map((topic) => topic.id), ...topicIds]
+    await updateClassificationTopics(updatedTopicIds)
+  }
+
+  const deleteClassificationTopic = async (topicId: number) => {
+    const updatedTopicIds = classificationTopics.value.map((topic) => topic.id).filter((id) => id !== topicId)
+    await updateClassificationTopics(updatedTopicIds)
+  }
+
   return {
     currentSpace,
     currentSpaceId,
     templates,
     announcements,
+    classificationTopics,
     fetchSpace,
     updateSpace,
     updateTemplates,
@@ -126,5 +159,9 @@ export const useSpaceStore = defineStore('space', () => {
     addAnnouncement,
     updateAnnouncement,
     deleteAnnouncement,
+    updateClassificationTopics,
+    addClassificationTopic,
+    addClassificationTopics,
+    deleteClassificationTopic,
   }
 })

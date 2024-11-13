@@ -6,6 +6,7 @@
       :label="t('tasks.form.participantType')"
       required
       inline
+      :disabled="isEditing"
       v-bind="submitterTypeProps"
     >
       <v-radio :label="t('tasks.form.individual')" value="USER"></v-radio>
@@ -33,6 +34,14 @@
       min="1"
       v-bind="defaultDeadlineProps"
     ></v-text-field>
+    <v-select
+      v-model="formData.topics"
+      :items="topicItems"
+      :label="t('spaces.detail.tasks.topic')"
+      chips
+      multiple
+      v-bind="topicsProps"
+    ></v-select>
     <!-- <div class="d-flex align-center gap-4">
       <v-checkbox
         v-model="formData.resubmittable"
@@ -64,9 +73,9 @@
 </template>
 
 <script setup lang="ts">
-import type { TaskFormSubmitData } from '@/types'
+import type { TaskFormSubmitData, Topic } from '@/types'
 
-import { defineEmits, defineProps, reactive, ref } from 'vue'
+import { computed, defineEmits, defineProps, reactive, ref, toRefs } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { VDateInput } from 'vuetify/labs/VDateInput'
 import { toTypedSchema } from '@vee-validate/zod'
@@ -85,16 +94,24 @@ const isAllowedDates = (date: unknown) => {
   return date >= now
 }
 
-const props = defineProps({
-  initialData: {
-    type: Object,
-    default: () => ({}),
-  },
-  submitButtonText: {
-    type: String,
-    default: '提交',
-  },
-})
+const props = withDefaults(
+  defineProps<{
+    initialData?: Partial<TaskFormSubmitData> | null
+    submitButtonText: string
+    isEditing?: boolean
+    classificationTopics: Topic[]
+  }>(),
+  {
+    initialData: null,
+    submitButtonText: '提交',
+    isEditing: false,
+    classificationTopics: () => [],
+  }
+)
+
+const { classificationTopics } = toRefs(props)
+
+const topicItems = computed(() => classificationTopics.value.map((topic) => ({ title: topic.name, value: topic.id })))
 
 const emit = defineEmits<{
   submit: [data: TaskFormSubmitData]
@@ -113,11 +130,12 @@ const { handleSubmit, defineField, isSubmitting } = useForm({
       rank: z.number().int().min(1).max(3),
       deadline: z.date().default(new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)),
       defaultDeadline: z.number().int().min(1).default(30),
+      topics: z.number().int().array(),
     })
   ),
   initialValues: {
-    ...props.initialData,
-    deadline: props.initialData.deadline
+    ...(props.initialData ?? {}),
+    deadline: props.initialData?.deadline
       ? new Date(props.initialData.deadline)
       : new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
   },
@@ -128,6 +146,7 @@ const [submitterType, submitterTypeProps] = defineField('submitterType', vuetify
 const [rank, rankProps] = defineField('rank', vuetifyConfig)
 const [deadline, deadlineProps] = defineField('deadline', vuetifyConfig)
 const [defaultDeadline, defaultDeadlineProps] = defineField('defaultDeadline', vuetifyConfig)
+const [topics, topicsProps] = defineField('topics', vuetifyConfig)
 
 const formData = reactive({
   name,
@@ -135,7 +154,8 @@ const formData = reactive({
   rank,
   deadline,
   defaultDeadline,
-  description: props.initialData.description || { type: 'doc', content: [] },
+  topics,
+  description: props.initialData?.description || { type: 'doc', content: [] },
 })
 
 const submitForm = handleSubmit((values) => {

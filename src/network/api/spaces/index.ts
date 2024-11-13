@@ -30,10 +30,14 @@ export namespace SpacesApi {
       method: 'DELETE',
     })
 
-  export const detail = (spaceId: number) =>
+  export const detail = (
+    spaceId: number,
+    params: { queryClassificationTopics?: boolean; queryMyRank?: boolean } = {}
+  ) =>
     NewApiInstance.request<{ space: Space }>({
       url: `/spaces/${spaceId}`,
       method: 'GET',
+      params,
     })
 
   export const list = (params: { page_size?: number; page_start?: number; sort_by: string; sort_order: string }) =>

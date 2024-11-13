@@ -49,16 +49,31 @@ export namespace TasksApi {
     page_start?: number
     sort_by: 'createdAt' | 'updatedAt' | 'deadline'
     sort_order: 'asc' | 'desc'
+    querySpace?: boolean
     queryJoinability?: boolean
     querySubmittability?: boolean
+    queryJoined?: boolean
+    queryTopics?: boolean
     keywords?: string
     approved?: 'APPROVED' | 'DISAPPROVED' | 'NONE'
-  }) =>
-    NewApiInstance.request<{ tasks: Task[]; page: Page }>({
+    topics?: number[]
+  }) => {
+    const finalParams = new URLSearchParams()
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined) {
+        if (Array.isArray(value)) {
+          value.forEach((v) => finalParams.append(key, v.toString()))
+        } else {
+          finalParams.set(key, value.toString())
+        }
+      }
+    })
+    return NewApiInstance.request<{ tasks: Task[]; page: Page }>({
       url: '/tasks',
       method: 'GET',
-      params,
+      params: finalParams,
     })
+  }
 
   export const addParticipant = (taskId: number, member: number, deadline: number | null = null) =>
     NewApiInstance.request<{ task: Task }>({

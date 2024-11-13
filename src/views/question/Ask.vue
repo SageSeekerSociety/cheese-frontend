@@ -14,7 +14,7 @@
               v-bind="titleProps"
             ></v-text-field>
             <rich-editor holder="editor" :config="DEFAULT_CONFIG" @create="onCreate" />
-            <topic-selector v-model="topics" class="mt-4" v-bind="topicsProps" />
+            <topic-selector v-model="topics" class="mt-4" v-bind="topicsProps" :max="5" />
             <div class="d-flex align-center" style="gap: 16px">
               <v-btn
                 variant="text"
@@ -80,7 +80,7 @@ import { DEFAULT_CONFIG } from '@/utils/editor'
 import { vuetifyConfig } from '@/utils/form'
 
 import RichEditor from '@/components/common/Editor/Editor.vue'
-import TopicSelector from '@/components/questions/TopicSelector.vue'
+import TopicSelector from '@/components/common/TopicSelector.vue'
 import { QuestionApi } from '@/network/api/questions'
 
 let editor: EditorJS

@@ -1,4 +1,4 @@
-import type { User } from '.'
+import type { Topic, User } from '.'
 
 export type Space = {
   id: number
@@ -8,6 +8,7 @@ export type Space = {
   admins: SpaceAdmin[]
   announcements: string
   taskTemplates: string
+  classificationTopics: Topic[]
 }
 
 export type SpaceAnnouncement = {

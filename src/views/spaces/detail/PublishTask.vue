@@ -12,6 +12,7 @@
       class="ma-4 pb-4"
       :initial-data="initialTaskData"
       :submit-button-text="t('tasks.publish.submit')"
+      :classification-topics="classificationTopics"
       @submit="submitTask"
     />
   </v-sheet>
@@ -35,7 +36,7 @@ const route = useRoute()
 const { t } = useI18n()
 
 const spaceStore = useSpaceStore()
-const { currentSpaceId, templates } = storeToRefs(spaceStore)
+const { currentSpaceId, templates, classificationTopics } = storeToRefs(spaceStore)
 
 const loadedTemplate = ref(false)
 

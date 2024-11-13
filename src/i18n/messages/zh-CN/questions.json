@@ -1,7 +1,8 @@
 {
   "ask": {
     "buttons": {
-      "addTopic": "添加话题（至少一个） | 添加话题（1/5） | 添加话题（{count}/5）",
+      "addTopic": "添加话题（至少一个） | 添加话题（1/{max}） | 添加话题（{count}/{max}）",
+      "addTopicInfinite": "添加话题",
       "createTopic": "创建 {name} 话题"
     }
   },

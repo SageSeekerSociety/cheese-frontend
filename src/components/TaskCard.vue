@@ -7,6 +7,9 @@
         </div>
         <div class="text-h6">{{ task.name }}</div>
         <div class="text-subtitle-1 text-medium-emphasis task-description">{{ task.intro }}</div>
+        <div v-if="task.topics" class="d-flex flex-row flex-wrap gap-2 mt-1">
+          <v-chip v-for="topic in task.topics" :key="topic.id" size="small">{{ topic.name }}</v-chip>
+        </div>
       </div>
       <div class="d-flex flex-column align-end flex-shrink-0 gap-1">
         <v-chip :color="taskStatusType" size="small">{{ taskStatusText }}</v-chip>

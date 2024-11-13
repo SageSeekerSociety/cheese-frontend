@@ -160,6 +160,16 @@
                 </template>
                 <v-list-item-title>{{ t('spaces.detail.manageTemplates.title') }}</v-list-item-title>
               </v-list-item>
+              <v-list-item
+                rounded="lg"
+                :to="{ name: 'SpacesDetailManageTopics', params: { spaceId: space?.id } }"
+                color="primary"
+              >
+                <template #prepend>
+                  <v-icon>mdi-tag-multiple</v-icon>
+                </template>
+                <v-list-item-title>{{ t('spaces.detail.manageTopics.title') }}</v-list-item-title>
+              </v-list-item>
             </template>
           </v-list>
         </v-sheet>

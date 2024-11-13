@@ -1,4 +1,4 @@
-import type { Material, Team, User } from '.'
+import type { Material, Team, Topic, User } from '.'
 
 export type TaskSubmitterType = 'USER' | 'TEAM'
 export type TaskSubmissionEntryType = 'TEXT' | 'FILE'
@@ -15,6 +15,7 @@ export interface Task {
   submitterType: TaskSubmitterType
   creator: User
   deadline: number
+  defaultDeadline: number
   resubmittable: boolean
   editable: boolean
   description: string
@@ -32,6 +33,7 @@ export interface Task {
   rank: number
   approved: 'APPROVED' | 'DISAPPROVED' | 'NONE'
   rejectReason?: string
+  topics?: Topic[]
 }
 
 export interface TaskSubmissionReview {
