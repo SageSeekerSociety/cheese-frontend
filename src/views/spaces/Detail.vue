@@ -2,9 +2,9 @@
   <v-container>
     <v-row>
       <v-col cols="12">
-        <div class="d-flex align-center">
+        <div class="d-flex flex-column flex-md-row align-start align-md-center">
           <v-avatar size="96" :image="getAvatarUrl(space?.avatarId)" />
-          <div class="ml-8 flex-grow-1">
+          <div class="ml-0 ml-md-8 mt-4 mt-md-0 flex-grow-1">
             <div class="text-h5">{{ space?.name }}</div>
             <div class="text-body-2 mt-1 text-grey-darken-1">{{ space?.intro }}</div>
             <div class="mt-2 admin-info-container">
@@ -20,7 +20,7 @@
               <div class="text-body-2 text-medium-emphasis admin-text">{{ adminText }}</div>
             </div>
           </div>
-          <div class="flex-shrink-0">
+          <div class="flex-shrink-0 mt-4 mt-md-0">
             <v-btn-group color="primary" density="comfortable" variant="flat" rounded="lg" divided>
               <v-btn class="pe-2" prepend-icon="mdi-pencil">
                 <div class="text-none font-weight-regular">{{ t('spaces.detail.editInfo') }}</div>

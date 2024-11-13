@@ -2,108 +2,115 @@
   <v-container>
     <v-row>
       <v-col cols="12">
-        <v-menu v-if="viewRoles.length > 1">
-          <template #activator="{ props }">
-            <div class="d-flex flex-row align-center mb-4 text-medium-emphasis">
-              <v-icon left size="24" class="mr-1">mdi-eye</v-icon>
-              正在以
-              <v-btn v-bind="props" variant="text" color="text" density="comfortable">
-                {{ currentViewRoleTitle }}
-                <v-icon right size="24">mdi-chevron-down</v-icon>
-              </v-btn>
-              视角查看
-            </div>
-          </template>
-          <v-list color="primary">
-            <v-list-item
-              v-for="role in viewRoles.filter(
-                (role) => role.type === 'participant' || role.type === 'creator' || role.type === 'space-admin'
-              )"
-              :key="role.value"
-              :value="role.value"
-              :active="selectedViewRole === role.value"
-              @click="switchViewRole(role.value)"
-            >
-              <template #prepend>
-                <v-avatar size="32" class="position-relative">
-                  <v-img :src="getAvatarUrl(AccountService.user?.avatarId)" />
-                  <v-icon
-                    v-if="selectedViewRole === role.value"
-                    color="white"
-                    class="position-absolute selected-view-role-icon"
-                  >
-                    mdi-check-circle
-                  </v-icon>
-                </v-avatar>
-              </template>
-              <v-list-item-title>{{ role.title }}</v-list-item-title>
-              <template #append>
-                <v-icon>{{ role.icon }}</v-icon>
-              </template>
-            </v-list-item>
+        <div class="d-flex flex-column flex-md-row align-start align-md-center gap-4 mb-4">
+          <v-breadcrumbs v-if="breadcrumbItems" :items="breadcrumbItems" density="compact" class="pa-0">
+            <template #prepend>
+              <v-icon>mdi-cheese</v-icon>
+            </template>
+          </v-breadcrumbs>
+          <div class="flex-grow-1 d-none d-md-block"></div>
+          <v-menu v-if="viewRoles.length > 1">
+            <template #activator="{ props }">
+              <div class="d-flex flex-row align-center text-medium-emphasis">
+                <v-icon left size="24" class="mr-2">mdi-eye</v-icon>
+                <span>正在以</span>
+                <v-btn v-bind="props" variant="text" color="text" density="comfortable" class="px-2 mx-2">
+                  {{ currentViewRoleTitle }}
+                  <v-icon right size="24">mdi-chevron-down</v-icon>
+                </v-btn>
+                <span>视角查看</span>
+              </div>
+            </template>
+            <v-list color="primary">
+              <v-list-item
+                v-for="role in viewRoles.filter(
+                  (role) => role.type === 'participant' || role.type === 'creator' || role.type === 'space-admin'
+                )"
+                :key="role.value"
+                :value="role.value"
+                :active="selectedViewRole === role.value"
+                @click="switchViewRole(role.value)"
+              >
+                <template #prepend>
+                  <v-avatar size="32" class="position-relative">
+                    <v-img :src="getAvatarUrl(AccountService.user?.avatarId)" />
+                    <v-icon
+                      v-if="selectedViewRole === role.value"
+                      color="white"
+                      class="position-absolute selected-view-role-icon"
+                    >
+                      mdi-check-circle
+                    </v-icon>
+                  </v-avatar>
+                </template>
+                <v-list-item-title>{{ role.title }}</v-list-item-title>
+                <template #append>
+                  <v-icon>{{ role.icon }}</v-icon>
+                </template>
+              </v-list-item>
 
-            <v-list-subheader v-if="viewRoles.some((role) => role.type === 'team' && !role.isSubmittable)">
-              可参与的小队
-            </v-list-subheader>
-            <v-list-item
-              v-for="role in viewRoles.filter((role) => role.type === 'team' && !role.isSubmittable)"
-              :key="role.value"
-              :value="role.value"
-              :active="selectedViewRole === role.value"
-              @click="switchViewRole(role.value)"
-            >
-              <template #prepend>
-                <v-avatar size="32" class="position-relative">
-                  <v-img v-if="role.avatarId" :src="getAvatarUrl(role.avatarId)" />
-                  <v-icon v-else>{{ role.icon }}</v-icon>
-                  <v-icon
-                    v-if="selectedViewRole === role.value"
-                    color="white"
-                    class="position-absolute selected-view-role-icon"
-                  >
-                    mdi-check-circle
-                  </v-icon>
-                </v-avatar>
-              </template>
-              <v-list-item-title>{{ role.title }}</v-list-item-title>
-              <template #append>
-                <v-icon>mdi-lock-open</v-icon>
-              </template>
-            </v-list-item>
+              <v-list-subheader v-if="viewRoles.some((role) => role.type === 'team' && !role.isSubmittable)">
+                可参与的小队
+              </v-list-subheader>
+              <v-list-item
+                v-for="role in viewRoles.filter((role) => role.type === 'team' && !role.isSubmittable)"
+                :key="role.value"
+                :value="role.value"
+                :active="selectedViewRole === role.value"
+                @click="switchViewRole(role.value)"
+              >
+                <template #prepend>
+                  <v-avatar size="32" class="position-relative">
+                    <v-img v-if="role.avatarId" :src="getAvatarUrl(role.avatarId)" />
+                    <v-icon v-else>{{ role.icon }}</v-icon>
+                    <v-icon
+                      v-if="selectedViewRole === role.value"
+                      color="white"
+                      class="position-absolute selected-view-role-icon"
+                    >
+                      mdi-check-circle
+                    </v-icon>
+                  </v-avatar>
+                </template>
+                <v-list-item-title>{{ role.title }}</v-list-item-title>
+                <template #append>
+                  <v-icon>mdi-lock-open</v-icon>
+                </template>
+              </v-list-item>
 
-            <v-list-subheader v-if="viewRoles.some((role) => role.type === 'team' && role.isSubmittable)">
-              可提交的小队
-            </v-list-subheader>
-            <v-list-item
-              v-for="role in viewRoles.filter((role) => role.type === 'team' && role.isSubmittable)"
-              :key="role.value"
-              :value="role.value"
-              :active="selectedViewRole === role.value"
-              @click="switchViewRole(role.value)"
-            >
-              <template #prepend>
-                <v-avatar size="32" class="position-relative">
-                  <v-img v-if="role.avatarId" :src="getAvatarUrl(role.avatarId)" />
-                  <v-icon v-else>{{ role.icon }}</v-icon>
-                  <v-icon
-                    v-if="selectedViewRole === role.value"
-                    color="white"
-                    class="position-absolute selected-view-role-icon"
-                  >
-                    mdi-check-circle
-                  </v-icon>
-                </v-avatar>
-              </template>
-              <v-list-item-title>{{ role.title }}</v-list-item-title>
-              <template #append>
-                <v-icon>mdi-upload</v-icon>
-              </template>
-            </v-list-item>
-          </v-list>
-        </v-menu>
-
+              <v-list-subheader v-if="viewRoles.some((role) => role.type === 'team' && role.isSubmittable)">
+                可提交的小队
+              </v-list-subheader>
+              <v-list-item
+                v-for="role in viewRoles.filter((role) => role.type === 'team' && role.isSubmittable)"
+                :key="role.value"
+                :value="role.value"
+                :active="selectedViewRole === role.value"
+                @click="switchViewRole(role.value)"
+              >
+                <template #prepend>
+                  <v-avatar size="32" class="position-relative">
+                    <v-img v-if="role.avatarId" :src="getAvatarUrl(role.avatarId)" />
+                    <v-icon v-else>{{ role.icon }}</v-icon>
+                    <v-icon
+                      v-if="selectedViewRole === role.value"
+                      color="white"
+                      class="position-absolute selected-view-role-icon"
+                    >
+                      mdi-check-circle
+                    </v-icon>
+                  </v-avatar>
+                </template>
+                <v-list-item-title>{{ role.title }}</v-list-item-title>
+                <template #append>
+                  <v-icon>mdi-upload</v-icon>
+                </template>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+        </div>
         <v-sheet v-if="taskData" flat rounded="lg" class="pa-4">
-          <div class="d-flex flex-row align-center justify-space-between">
+          <div class="d-flex flex-column flex-md-row align-start align-md-center justify-space-between">
             <div>
               <div class="text-h6">
                 <v-icon left size="24" class="text-primary mr-1">mdi-trophy</v-icon>
@@ -120,14 +127,8 @@
                 <v-chip v-if="taskData?.resubmittable" variant="tonal">可重复提交</v-chip>
               </div>
             </div>
-            <div class="flex-shrink-0 d-flex flex-row align-center gap-4">
+            <div class="flex-shrink-0 d-flex flex-row align-center ga-4 mt-4 mt-md-0 flex-wrap flex-md-nowrap">
               <template v-if="currentJoinable">
-                <v-btn color="primary" variant="flat" @click="joinTask">领取赛题</v-btn>
-              </template>
-              <template v-else-if="currentJoined">
-                <v-btn color="error" variant="flat" @click="leaveTask">退出赛题</v-btn>
-              </template>
-              <template v-else-if="!isCreator">
                 <div v-if="countdown || isExpired" class="text-center">
                   <div v-if="countdown && !isExpired" class="countdown-display">
                     <span class="countdown-number text-primary">{{ countdown.days }}</span> 天
@@ -136,10 +137,14 @@
                     <span class="countdown-number text-primary">{{ countdown.seconds }}</span> 秒
                   </div>
                   <div v-else class="expired-text text-error">已截止</div>
-                  <div v-if="countdown" class="text-caption">剩余时间</div>
+                  <div v-if="countdown" class="text-caption">报名剩余时间</div>
                 </div>
+                <v-btn color="primary" variant="flat" @click="joinTask">领取赛题</v-btn>
               </template>
-              <template v-if="currentManageable">
+              <template v-else-if="currentJoined">
+                <v-btn color="error" variant="flat" @click="leaveTask">退出赛题</v-btn>
+              </template>
+              <template v-else-if="currentManageable">
                 <v-btn-group color="primary" density="compact" variant="flat" rounded="lg" divided>
                   <v-btn class="pe-2" prepend-icon="mdi-pencil" @click="openEditDialog">
                     <div class="text-none font-weight-regular">编辑赛题</div>
@@ -396,6 +401,20 @@ const taskStatusType = computed(() => getTaskStatusType(taskData.value))
 
 const isSelfTask = computed(() => {
   return taskData.value?.creator.id === AccountService.user?.id
+})
+
+const breadcrumbItems = computed(() => {
+  if (taskData.value?.space) {
+    return [
+      { title: '知是', to: { name: 'HomeDefault' } },
+      {
+        title: taskData.value?.space.name,
+        to: { name: 'SpacesDetail', params: { spaceId: taskData.value?.space.id } },
+      },
+      { title: taskData.value?.name, to: { name: 'TasksDetail', params: { taskId: taskData.value?.id } } },
+    ]
+  }
+  return null
 })
 
 const currentMember = computed(() => {

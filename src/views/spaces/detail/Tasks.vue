@@ -1,6 +1,6 @@
 <template>
   <v-sheet flat rounded="lg">
-    <div class="d-flex align-center pa-4 tasks-header">
+    <div class="d-flex flex-column flex-md-row align-stretch align-md-center flex-wrap flex-md-nowrap pa-4 ga-2">
       <v-form class="flex-grow-1" @submit.prevent="submitSearch">
         <v-text-field
           v-model="searchQueryInput"
@@ -14,9 +14,10 @@
           variant="solo-filled"
         ></v-text-field>
       </v-form>
-      <div class="d-flex align-center tasks-header-selects">
+      <div class="d-flex align-center ga-2">
         <v-select
           v-model="selectedSortOption"
+          class="flex-grow-1 flex-shrink-0"
           :items="sortOptions"
           :label="t('spaces.detail.tasks.sort')"
           density="compact"
@@ -30,6 +31,7 @@
         ></v-select>
         <v-select
           v-model="selectedTopic"
+          class="flex-grow-1 flex-shrink-0"
           :items="topicOptions"
           :label="t('spaces.detail.tasks.topic')"
           density="compact"
@@ -41,11 +43,20 @@
           style="min-width: auto"
           prepend-inner-icon="mdi-tag"
         ></v-select>
+        <v-btn variant="flat" class="flex-grow-1 d-none d-md-inline" rounded="lg" @click="navigateToPublishTask">
+          <v-icon left>mdi-plus</v-icon>
+          {{ t('spaces.detail.tasks.publishTask') }}
+        </v-btn>
+        <v-btn
+          variant="flat"
+          class="d-md-none px-0 flex-grow-1 flex-shrink-1"
+          style="min-width: 36px"
+          rounded="lg"
+          @click="navigateToPublishTask"
+        >
+          <v-icon>mdi-plus</v-icon>
+        </v-btn>
       </div>
-      <v-btn variant="flat" @click="navigateToPublishTask">
-        <v-icon left>mdi-plus</v-icon>
-        {{ t('spaces.detail.tasks.publishTask') }}
-      </v-btn>
     </div>
     <div class="tasks-list">
       <infinite-scroll
@@ -201,10 +212,6 @@ onMounted(async () => {
 </script>
 
 <style scoped lang="scss">
-.tasks-header {
-  gap: 8px;
-}
-
 .tasks-header-selects {
   gap: 8px;
 }
