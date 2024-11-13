@@ -34,11 +34,26 @@ export namespace TasksApi {
       method: 'DELETE',
     })
 
-  export const detail = (taskId: number, queryJoinability: boolean = true, querySubmittability: boolean = true) =>
+  export const detail = (
+    taskId: number,
+    params: {
+      querySpace?: boolean
+      queryJoinability?: boolean
+      querySubmittability?: boolean
+      queryTopics?: boolean
+      queryJoined?: boolean
+    } = {
+      querySpace: true,
+      queryJoinability: true,
+      querySubmittability: true,
+      queryTopics: true,
+      queryJoined: true,
+    }
+  ) =>
     NewApiInstance.request<{ task: Task }>({
       url: `/tasks/${taskId}`,
       method: 'GET',
-      params: { queryJoinability, querySubmittability },
+      params,
     })
 
   export const list = (params: {

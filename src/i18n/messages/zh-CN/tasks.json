@@ -30,6 +30,7 @@
     "pending": "审核中",
     "ongoing": "报名中",
     "ended": "已截止",
-    "rejected": "审核未通过"
+    "rejected": "审核未通过",
+    "joined": "已报名"
   }
 }

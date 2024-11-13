@@ -2,7 +2,6 @@
   <v-container>
     <v-row>
       <v-col cols="12">
-        <!-- 视角选择菜单 -->
         <v-menu v-if="viewRoles.length > 1">
           <template #activator="{ props }">
             <div class="d-flex flex-row align-center mb-4 text-medium-emphasis">
@@ -16,13 +15,14 @@
             </div>
           </template>
           <v-list color="primary">
-            <!-- 个人视角 -->
             <v-list-item
-              v-for="role in viewRoles.filter((role) => role.type === 'participant' || role.type === 'creator')"
+              v-for="role in viewRoles.filter(
+                (role) => role.type === 'participant' || role.type === 'creator' || role.type === 'space-admin'
+              )"
               :key="role.value"
               :value="role.value"
               :active="selectedViewRole === role.value"
-              @click="selectedViewRole = role.value"
+              @click="switchViewRole(role.value)"
             >
               <template #prepend>
                 <v-avatar size="32" class="position-relative">
@@ -38,11 +38,10 @@
               </template>
               <v-list-item-title>{{ role.title }}</v-list-item-title>
               <template #append>
-                <v-icon>{{ role.type === 'creator' ? 'mdi-crown' : 'mdi-account' }}</v-icon>
+                <v-icon>{{ role.icon }}</v-icon>
               </template>
             </v-list-item>
 
-            <!-- 可参与的小队视角 -->
             <v-list-subheader v-if="viewRoles.some((role) => role.type === 'team' && !role.isSubmittable)">
               可参与的小队
             </v-list-subheader>
@@ -51,7 +50,7 @@
               :key="role.value"
               :value="role.value"
               :active="selectedViewRole === role.value"
-              @click="selectedViewRole = role.value"
+              @click="switchViewRole(role.value)"
             >
               <template #prepend>
                 <v-avatar size="32" class="position-relative">
@@ -72,7 +71,6 @@
               </template>
             </v-list-item>
 
-            <!-- 可提交的小队视角 -->
             <v-list-subheader v-if="viewRoles.some((role) => role.type === 'team' && role.isSubmittable)">
               可提交的小队
             </v-list-subheader>
@@ -81,7 +79,7 @@
               :key="role.value"
               :value="role.value"
               :active="selectedViewRole === role.value"
-              @click="selectedViewRole = role.value"
+              @click="switchViewRole(role.value)"
             >
               <template #prepend>
                 <v-avatar size="32" class="position-relative">
@@ -125,6 +123,9 @@
             <div class="flex-shrink-0 d-flex flex-row align-center gap-4">
               <template v-if="currentJoinable">
                 <v-btn color="primary" variant="flat" @click="joinTask">领取赛题</v-btn>
+              </template>
+              <template v-else-if="currentJoined">
+                <v-btn color="error" variant="flat" @click="leaveTask">退出赛题</v-btn>
               </template>
               <template v-else-if="!isCreator">
                 <div v-if="countdown || isExpired" class="text-center">
@@ -212,6 +213,9 @@
           </v-card>
         </v-col>
       </v-row>
+    </template>
+    <template v-else-if="currentJoined">
+      <v-alert type="info" class="mt-4" rounded="lg" title="已报名"> 请耐心等待审核结果，审核通过后即可提交。 </v-alert>
     </template>
 
     <template v-if="currentManageable">
@@ -304,7 +308,6 @@
     </v-card>
   </v-dialog>
 
-  <!-- 添加编辑对话框 -->
   <v-dialog v-model="editDialogOpen" fullscreen scrollable>
     <v-card>
       <v-toolbar color="primary" dark>
@@ -319,6 +322,8 @@
           <TaskForm
             :initial-data="editTaskData"
             :submit-button-text="t('tasks.detail.save')"
+            is-editing
+            :classification-topics="taskData?.space?.classificationTopics || []"
             @submit="submitEditTask"
           />
         </v-container>
@@ -331,7 +336,7 @@
 import type { PatchTaskRequestData } from '@/network/api/tasks/types'
 import type { Task, TaskParticipantSummary, Team } from '@/types'
 
-import { computed, onMounted, onWatcherCleanup, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue'
+import { computed, nextTick, onMounted, onWatcherCleanup, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vuetify-sonner'
@@ -355,6 +360,7 @@ const dialogs = useDialog()
 
 const route = useRoute()
 const router = useRouter()
+
 const myTeams = ref<Team[]>([])
 const taskData = ref<Task | null>(null)
 const submissionContent = ref<{ contentText?: string; contentAttachment?: File }[]>([])
@@ -363,6 +369,11 @@ const isExpired = ref(false)
 const progressDialog = ref(false)
 const uploadProgress = ref(0)
 const submissionHistoryRef = useTemplateRef<typeof TaskSubmissionHistory>('submissionHistoryRef')
+const participants = ref<TaskParticipantSummary[]>([])
+const participantSubmissionsDialog = ref(false)
+const selectedParticipant = ref<TaskParticipantSummary | null>(null)
+const selectedViewRole = ref<'participant' | 'creator' | 'space-admin' | string>('participant')
+const initialLoaded = ref(false)
 
 const { t } = useI18n()
 const fetchTaskDetail = async (taskId: number, clearSubmissionContent = true) => {
@@ -373,17 +384,13 @@ const fetchTaskDetail = async (taskId: number, clearSubmissionContent = true) =>
   if (clearSubmissionContent) {
     submissionContent.value = reactive(task.submissionSchema.map(() => ({})))
   }
-  if (task) {
-    editTaskData.value.name = task.name
-    editTaskData.value.submitterType = task.submitterType
-    editTaskData.value.rank = task.rank
-    editTaskData.value.deadline = dayjs(task.deadline).format('YYYY-MM-DDTHH:mm')
-    editTaskData.value.resubmittable = task.resubmittable
-    editTaskData.value.editable = task.editable
-    editTaskData.value.description = JSON.parse(task.description)
-  }
 }
 
+const isCreator = computed(() => AccountService.user?.id === taskData.value?.creator.id)
+const isSpaceAdminOrOwner = computed(() => {
+  if (!taskData.value?.space) return false
+  return taskData.value.space.admins.some((admin) => admin.user.id === AccountService.user?.id)
+})
 const taskStatusText = computed(() => getTaskStatusText(taskData.value))
 const taskStatusType = computed(() => getTaskStatusType(taskData.value))
 
@@ -399,11 +406,6 @@ const currentMember = computed(() => {
   }
 })
 
-const isCreator = computed(() => AccountService.user?.id === taskData.value?.creator.id)
-const participants = ref<TaskParticipantSummary[]>([])
-const participantSubmissionsDialog = ref(false)
-const selectedParticipant = ref<TaskParticipantSummary | null>(null)
-
 const taskDescription = computed(() => {
   try {
     return JSON.parse(taskData.value?.description ?? '{}')
@@ -418,6 +420,11 @@ const fetchParticipants = async () => {
   participants.value = data.participants
 }
 
+const fetchMyTeams = async () => {
+  const { data } = await TeamsApi.getMyTeams()
+  myTeams.value = data.teams
+}
+
 const showParticipantSubmissions = async (participantId: number) => {
   selectedParticipant.value = participants.value.find((p) => p.id === participantId) || null
   if (selectedParticipant.value && taskData.value) {
@@ -425,22 +432,27 @@ const showParticipantSubmissions = async (participantId: number) => {
   }
 }
 
-const fetchMyTeams = async () => {
-  const { data } = await TeamsApi.getMyTeams()
-  myTeams.value = data.teams
+const refresh = async () => {
+  await Promise.all([fetchTaskDetail(Number(route.params.taskId)), fetchMyTeams()])
+  nextTick(() => {
+    if (isCreator.value) {
+      fetchParticipants()
+    }
+    setTitle(taskData.value?.name || '赛题', route)
+    if (taskData.value?.deadline) {
+      startCountdown()
+    }
+  })
 }
 
 onMounted(async () => {
-  await fetchMyTeams()
-  await fetchTaskDetail(Number(route.params.taskId))
-  setTitle(taskData.value?.name || '赛题', route)
-  if (taskData.value?.deadline) {
-    startCountdown()
-  }
-  if (isCreator.value) {
-    await fetchParticipants()
-  }
+  await refresh()
 })
+
+const switchViewRole = (role: string) => {
+  selectedViewRole.value = role
+  refresh()
+}
 
 const startCountdown = () => {
   watchEffect(() => {
@@ -524,42 +536,60 @@ const submitTask = async () => {
 }
 
 const joinTask = async () => {
+  if (!taskData.value) return
   if (!currentMember.value) {
     toast.error('无法获取成员信息')
     return
   }
   try {
-    await TasksApi.addParticipant(taskData.value!.id, currentMember.value)
+    await TasksApi.addParticipant(taskData.value.id, currentMember.value)
     toast.success('领取赛题成功')
-    await fetchTaskDetail(taskData.value!.id, false)
-    if (isCreator.value) {
-      await fetchParticipants()
-    }
-    // 更新视角选择
-    const updatedRole = viewRoles.value.find((role) => role.value === selectedViewRole.value)
-    if (updatedRole) {
-      updatedRole.isSubmittable = true
-    }
+    await fetchTaskDetail(taskData.value.id, false)
   } catch (error) {
     toast.error('领取赛题失败')
   }
 }
 
-const selectedViewRole = ref<'participant' | 'creator' | string>('participant')
+const leaveTask = async () => {
+  const confirm = await dialogs.confirm('确定要退出赛题吗？').wait()
+  if (!confirm) return
+  if (!taskData.value) return
+  if (!currentMember.value) {
+    toast.error('无法获取成员信息')
+    return
+  }
+  try {
+    await TasksApi.removeParticipant(taskData.value.id, currentMember.value)
+    toast.success('退出赛题成功')
+    await fetchTaskDetail(taskData.value.id, false)
+  } catch (error) {
+    toast.error('退出赛题失败')
+  }
+}
 
 const viewRoles = computed(() => {
   const roles = []
+  if (isCreator.value) {
+    roles.push({
+      value: 'creator',
+      title: '创建者',
+      type: 'creator',
+      isSubmittable: false,
+      avatarId: null,
+      icon: 'mdi-crown',
+    })
+  }
+  if (isSpaceAdminOrOwner.value) {
+    roles.push({
+      value: 'space-admin',
+      title: '空间管理员',
+      type: 'space-admin',
+      isSubmittable: false,
+      avatarId: null,
+      icon: 'mdi-shield-check',
+    })
+  }
   if (taskData.value?.submitterType === 'USER') {
-    if (isCreator.value) {
-      roles.push({
-        value: 'creator',
-        title: '创建者',
-        type: 'creator',
-        isSubmittable: false,
-        avatarId: null,
-        icon: 'mdi-crown',
-      })
-    }
     if (taskData.value?.approved) {
       roles.push({
         value: 'participant',
@@ -571,16 +601,6 @@ const viewRoles = computed(() => {
       })
     }
   } else if (taskData.value?.submitterType === 'TEAM') {
-    if (isCreator.value) {
-      roles.push({
-        value: 'creator',
-        title: '创建者',
-        type: 'creator',
-        isSubmittable: false,
-        avatarId: null,
-        icon: 'mdi-crown',
-      })
-    }
     if (taskData.value?.approved) {
       myTeams.value.forEach((team) => {
         const isSubmittable = taskData.value?.submittableAsTeam?.some(
@@ -604,9 +624,14 @@ const viewRoles = computed(() => {
 })
 
 watch(viewRoles, (newValue) => {
-  if (newValue.length > 0) {
+  if (newValue.length > 0 && !initialLoaded.value) {
     selectedViewRole.value = newValue[0].value
+    initialLoaded.value = true
   }
+})
+
+const currentViewRole = computed(() => {
+  return viewRoles.value.find((role) => role.value === selectedViewRole.value)
 })
 
 const currentJoinable = computed(() => {
@@ -614,8 +639,7 @@ const currentJoinable = computed(() => {
   if (taskData.value?.submitterType === 'USER') {
     return taskData.value.joinable && selectedViewRole.value === 'participant'
   } else {
-    const currentRole = viewRoles.value.find((role) => role.value === selectedViewRole.value)
-    return currentRole?.type === 'team' && !currentRole.isSubmittable
+    return currentViewRole.value?.type === 'team' && !currentViewRole.value.isSubmittable
   }
 })
 
@@ -623,13 +647,28 @@ const currentSubmittable = computed(() => {
   if (taskData.value?.submitterType === 'USER') {
     return taskData.value.submittable && selectedViewRole.value === 'participant'
   } else {
-    const currentRole = viewRoles.value.find((role) => role.value === selectedViewRole.value)
-    return currentRole?.type === 'team' && currentRole.isSubmittable
+    return currentViewRole.value?.type === 'team' && currentViewRole.value.isSubmittable
   }
 })
 
+const currentJoined = computed(() => {
+  if (taskData.value?.submitterType === 'USER' && currentViewRole.value?.type === 'participant')
+    return taskData.value?.joined
+  if (
+    taskData.value?.submitterType === 'TEAM' &&
+    taskData.value?.joinedAsTeam?.length &&
+    currentViewRole.value?.type === 'team'
+  ) {
+    return taskData.value.joinedAsTeam.some((team) => team.id === Number(currentViewRole.value?.value))
+  }
+  return false
+})
+
 const currentManageable = computed(() => {
-  return isCreator.value && selectedViewRole.value === 'creator'
+  return (
+    (isCreator.value && selectedViewRole.value === 'creator') ||
+    (isSpaceAdminOrOwner.value && selectedViewRole.value === 'space-admin')
+  )
 })
 
 const currentViewRoleTitle = computed(() => {
@@ -637,7 +676,6 @@ const currentViewRoleTitle = computed(() => {
   return currentRole ? currentRole.title : ''
 })
 
-// 添加新的响应式变量
 const editDialogOpen = ref(false)
 const editTaskData = computed(() => {
   if (!taskData.value) return {}
@@ -645,28 +683,18 @@ const editTaskData = computed(() => {
     name: taskData.value.name,
     submitterType: taskData.value.submitterType,
     rank: taskData.value.rank,
-    deadline: dayjs(taskData.value.deadline).format('YYYY-MM-DDTHH:mm'),
+    defaultDeadline: taskData.value.defaultDeadline,
+    deadline: new Date(taskData.value.deadline).getTime(),
     resubmittable: taskData.value.resubmittable,
     editable: taskData.value.editable,
     description: JSON.parse(taskData.value.description),
   }
 })
 
-// 添加打开编辑对话框的方法
 const openEditDialog = () => {
-  if (taskData.value) {
-    editTaskData.value.name = taskData.value.name
-    editTaskData.value.submitterType = taskData.value.submitterType
-    editTaskData.value.rank = taskData.value.rank
-    editTaskData.value.deadline = dayjs(taskData.value.deadline).format('YYYY-MM-DDTHH:mm')
-    editTaskData.value.resubmittable = taskData.value.resubmittable
-    editTaskData.value.editable = taskData.value.editable
-    editTaskData.value.description = JSON.parse(taskData.value.description)
-  }
   editDialogOpen.value = true
 }
 
-// 添加提交编辑的方法
 const submitEditTask = async (updatedTaskData: PatchTaskRequestData) => {
   if (!taskData.value) return
 

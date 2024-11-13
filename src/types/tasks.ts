@@ -1,4 +1,4 @@
-import type { Material, Team, Topic, User } from '.'
+import type { Material, Space, Team, Topic, User } from '.'
 
 export type TaskSubmitterType = 'USER' | 'TEAM'
 export type TaskSubmissionEntryType = 'TEXT' | 'FILE'
@@ -19,6 +19,7 @@ export interface Task {
   resubmittable: boolean
   editable: boolean
   description: string
+  space?: Space
   submissionSchema: TaskSubmissionSchemaEntry[]
   submitters: {
     total: number
@@ -33,6 +34,8 @@ export interface Task {
   rank: number
   approved: 'APPROVED' | 'DISAPPROVED' | 'NONE'
   rejectReason?: string
+  joined?: boolean
+  joinedAsTeam?: Team[]
   topics?: Topic[]
 }
 
