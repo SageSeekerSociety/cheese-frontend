@@ -20,7 +20,7 @@
               <div class="text-body-2 text-medium-emphasis admin-text">{{ adminText }}</div>
             </div>
           </div>
-          <div class="flex-shrink-0 mt-4 mt-md-0">
+          <div v-if="isCurrentUserAtLeastAdmin" class="flex-shrink-0 mt-4 mt-md-0">
             <v-btn-group color="primary" density="comfortable" variant="flat" rounded="lg" divided>
               <v-btn class="pe-2" prepend-icon="mdi-pencil">
                 <div class="text-none font-weight-regular">{{ t('spaces.detail.editInfo') }}</div>
