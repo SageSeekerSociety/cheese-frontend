@@ -32,7 +32,7 @@ const updateCountdown = () => {
   if (diff > 0) {
     const durationObj = dayjs.duration(diff)
     countdown.value = {
-      days: durationObj.days().toString().padStart(2, '0'),
+      days: (durationObj.days() + durationObj.months() * 30).toString().padStart(2, '0'),
       hours: durationObj.hours().toString().padStart(2, '0'),
       minutes: durationObj.minutes().toString().padStart(2, '0'),
       seconds: durationObj.seconds().toString().padStart(2, '0'),
