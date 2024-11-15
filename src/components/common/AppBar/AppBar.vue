@@ -3,9 +3,10 @@
     <div class="position-relative flex-1-0">
       <v-container class="mx-auto d-flex align-center justify-center">
         <router-link :to="{ name: 'HomeDefault' }" class="text-decoration-none text-primary">
-          <span class="text-h5 font-weight-bold me-4 app-bar-title"
-            >🧀<span class="d-none d-md-inline">知是</span></span
-          >
+          <span class="text-h5 font-weight-bold me-4 app-bar-title d-flex align-center flex-row ga-2">
+            <v-img :src="logo" width="32" height="32"></v-img>
+            <span class="d-none d-md-inline">知是</span>
+          </span>
         </router-link>
         <v-btn v-for="link in links" :key="link.key" :text="link.title" :to="link.path" variant="text"></v-btn>
         <v-spacer></v-spacer>
@@ -122,6 +123,7 @@ import { getAvatarUrl } from '@/utils/materials'
 
 import UserAvatar from '../UserAvatar.vue'
 
+import logo from '@/assets/logo.svg?url'
 import AccountService from '@/services/account'
 
 const appBarProps = withDefaults(defineProps<AppBarProps>(), {
