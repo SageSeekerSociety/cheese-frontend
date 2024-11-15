@@ -77,6 +77,7 @@ export namespace TasksApi {
     queryTopics?: boolean
     keywords?: string
     approved?: 'APPROVED' | 'DISAPPROVED' | 'NONE'
+    joined?: boolean
     topics?: number[]
   }) => {
     const finalParams = new URLSearchParams()

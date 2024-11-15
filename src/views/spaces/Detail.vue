@@ -136,6 +136,15 @@
               >
                 <v-list-item-title>{{ t('spaces.detail.myPublishedContests') }}</v-list-item-title>
               </v-list-item>
+
+              <v-list-item
+                rounded="lg"
+                :to="{ name: 'SpacesDetailTasks', params: { spaceId: space?.id }, query: { type: 'joined' } }"
+                color="primary"
+                exact
+              >
+                <v-list-item-title>{{ t('spaces.detail.myJoinedContests') }}</v-list-item-title>
+              </v-list-item>
             </v-list-group>
 
             <template v-if="isCurrentUserAtLeastAdmin">

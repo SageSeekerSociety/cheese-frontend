@@ -583,6 +583,7 @@ const showParticipantSubmissions = async (participantId: number) => {
 }
 
 const refresh = async () => {
+  participants.value = []
   await Promise.all([fetchTaskDetail(Number(route.params.taskId)), fetchMyTeams()])
   nextTick(() => {
     setTitle(taskData.value?.name || '赛题', route)

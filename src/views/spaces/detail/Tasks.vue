@@ -94,7 +94,7 @@ import { useSpaceStore } from '@/store/space'
 type SortBy = 'createdAt' | 'updatedAt' | 'deadline'
 type SortOrder = 'asc' | 'desc'
 
-type QueryType = 'all' | 'published'
+type QueryType = 'all' | 'published' | 'joined'
 type QueryOptions = {
   space: number
   by: SortBy
@@ -150,6 +150,7 @@ const {
       sort_order: queryOptions?.order ?? 'desc',
       keywords: queryOptions?.keywords,
       approved: queryOptions.queryType === 'all' ? 'APPROVED' : undefined,
+      joined: queryOptions.queryType === 'joined' ? true : undefined,
       owner: queryOptions.owner,
       topics: queryOptions.topics,
       queryTopics: true,
