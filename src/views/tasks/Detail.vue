@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-row>
+    <v-row dense>
       <v-col cols="12">
         <div class="d-flex flex-column flex-md-row align-start align-md-center gap-4 mb-4">
           <v-breadcrumbs v-if="breadcrumbItems" :items="breadcrumbItems" density="compact" class="pa-0">
@@ -129,15 +129,8 @@
             </div>
             <div class="flex-shrink-0 d-flex flex-row align-center ga-4 mt-4 mt-md-0 flex-wrap flex-md-nowrap">
               <template v-if="currentJoinable">
-                <div v-if="countdown || isExpired" class="text-center">
-                  <div v-if="countdown && !isExpired" class="countdown-display">
-                    <span class="countdown-number text-primary">{{ countdown.days }}</span> 天
-                    <span class="countdown-number text-primary">{{ countdown.hours }}</span> 时
-                    <span class="countdown-number text-primary">{{ countdown.minutes }}</span> 分
-                    <span class="countdown-number text-primary">{{ countdown.seconds }}</span> 秒
-                  </div>
-                  <div v-else class="expired-text text-error">已截止</div>
-                  <div v-if="countdown" class="text-caption">报名剩余时间</div>
+                <div v-if="taskData?.deadline" class="text-center">
+                  <CountdownTimer :deadline="taskData.deadline" label="报名剩余时间" />
                 </div>
                 <v-btn color="primary" variant="flat" @click="onJoinTaskClicked">领取赛题</v-btn>
               </template>
@@ -176,7 +169,7 @@
     </v-row>
 
     <template v-if="currentSubmittable">
-      <v-row>
+      <v-row dense>
         <v-col cols="12">
           <TaskSubmissionHistory
             v-if="currentMember"
@@ -193,6 +186,12 @@
             </template>
 
             <template #text>
+              <CountdownTimer
+                v-if="currentDeadline"
+                :deadline="currentDeadline"
+                label="提交剩余时间"
+                class="mx-auto mb-4"
+              />
               <v-form>
                 <template v-for="(entry, index) in taskData.submissionSchema" :key="index">
                   <template v-if="entry.type === 'TEXT'">
@@ -220,19 +219,22 @@
       </v-row>
     </template>
     <template v-else-if="currentJoined">
-      <v-alert
-        v-if="currentApproveStatus === 'NONE' || currentApproveStatus === 'REJECTED'"
-        :type="currentApproveStatusType"
-        class="mt-4"
-        rounded="lg"
-        :title="currentApproveStatusText"
-        :text="currentApproveStatusDescription"
-      >
-      </v-alert>
+      <v-row dense>
+        <v-col cols="12">
+          <v-alert
+            v-if="currentApproveStatus === 'NONE' || currentApproveStatus === 'REJECTED'"
+            :type="currentApproveStatusType"
+            rounded="lg"
+            :title="currentApproveStatusText"
+            :text="currentApproveStatusDescription"
+          >
+          </v-alert>
+        </v-col>
+      </v-row>
     </template>
 
     <template v-if="currentManageable">
-      <v-row>
+      <v-row dense>
         <v-col cols="12">
           <v-card flat rounded="lg">
             <template #title>
@@ -271,23 +273,31 @@
                     </div>
                   </v-list-item-title>
 
-                  <v-list-item-subtitle v-if="participant.realNameInfo?.realName" class="mt-1">
-                    <div class="d-flex align-center text-medium-emphasis">
-                      <v-icon size="16" class="me-1">mdi-school</v-icon>
-                      {{ participant.realNameInfo.grade }}级 {{ participant.realNameInfo.className }}
-                    </div>
-                    <div v-if="participant.realNameInfo.phone" class="d-flex align-center text-medium-emphasis">
-                      <v-icon size="16" class="me-1">mdi-phone</v-icon>
-                      {{ participant.realNameInfo.phone }}
-                    </div>
-                    <div v-if="participant.realNameInfo.email" class="d-flex align-center text-medium-emphasis">
-                      <v-icon size="16" class="me-1">mdi-email</v-icon>
-                      {{ participant.realNameInfo.email }}
-                    </div>
-                    <div v-if="participant.realNameInfo.applyReason" class="d-flex align-center text-medium-emphasis">
-                      <v-icon size="16" class="me-1">mdi-text-box</v-icon>
-                      申请理由：{{ participant.realNameInfo.applyReason }}
-                    </div>
+                  <v-list-item-subtitle>
+                    <template v-if="participant.realNameInfo?.realName">
+                      <div class="d-flex align-center">
+                        <v-icon size="16" class="me-1">mdi-school</v-icon>
+                        {{ participant.realNameInfo.grade }}级 {{ participant.realNameInfo.className }}
+                      </div>
+                      <div v-if="participant.realNameInfo.phone" class="d-flex align-center ga-1">
+                        <v-icon size="16">mdi-phone</v-icon>
+                        {{ participant.realNameInfo.phone }}
+                      </div>
+                      <div v-if="participant.realNameInfo.email" class="d-flex align-center ga-1">
+                        <v-icon size="16">mdi-email</v-icon>
+                        {{ participant.realNameInfo.email }}
+                      </div>
+                      <div v-if="participant.realNameInfo.applyReason" class="d-flex align-center ga-1">
+                        <v-icon size="16">mdi-text-box</v-icon>
+                        申请理由：{{ participant.realNameInfo.applyReason }}
+                      </div>
+                    </template>
+                    <template v-if="participant.deadline">
+                      <div class="d-flex align-center text-primary ga-1">
+                        <v-icon size="16">mdi-clock</v-icon>
+                        提交截止时间：{{ dayjs(participant.deadline).fromNow() }}
+                      </div>
+                    </template>
                   </v-list-item-subtitle>
 
                   <template #append>
@@ -417,6 +427,7 @@ import { getTaskStatusText, getTaskStatusType } from '@/utils/tasks'
 import { setTitle } from '@/utils/title'
 
 import CollapsibleContent from '@/components/common/CollapsibleContent.vue'
+import CountdownTimer from '@/components/common/CountdownTimer.vue'
 import TipTapViewer from '@/components/common/Editor/TipTapViewer.vue'
 import TaskForm from '@/components/tasks/TaskForm.vue'
 import TaskSubmissionHistory from '@/components/tasks/TaskSubmissionHistory.vue'
@@ -435,8 +446,6 @@ const router = useRouter()
 const myTeams = ref<Team[]>([])
 const taskData = ref<Task | null>(null)
 const submissionContent = ref<{ contentText?: string; contentAttachment?: File }[]>([])
-const countdown = ref<{ days: string; hours: string; minutes: string; seconds: string } | null>(null)
-const isExpired = ref(false)
 const progressDialog = ref(false)
 const uploadProgress = ref(0)
 const submissionHistoryRef = useTemplateRef<typeof TaskSubmissionHistory>('submissionHistoryRef')
@@ -527,6 +536,18 @@ const currentApproveStatusDescription = computed(() => {
   return undefined
 })
 
+const currentDeadline = computed(() => {
+  if (!taskData.value) return null
+  if (currentViewRole.value?.type === 'participant') {
+    if (taskData.value.submitterType === 'USER') {
+      return participants.value.find((p) => p.member.id === AccountService.user?.id)?.deadline
+    } else {
+      return participants.value.find((p) => p.member.id === Number(selectedViewRole.value))?.deadline
+    }
+  }
+  return null
+})
+
 const currentMember = computed(() => {
   if (selectedViewRole.value === 'creator' || selectedViewRole.value === 'participant') {
     return AccountService.user?.id
@@ -543,9 +564,9 @@ const taskDescription = computed(() => {
   }
 })
 
-const fetchParticipants = async () => {
+const fetchParticipants = async (queryRealNameInfo = false) => {
   if (!taskData.value) return
-  const { data } = await TasksApi.getParticipants(taskData.value.id)
+  const { data } = await TasksApi.getParticipants(taskData.value.id, { queryRealNameInfo })
   participants.value = data.participants
 }
 
@@ -564,13 +585,8 @@ const showParticipantSubmissions = async (participantId: number) => {
 const refresh = async () => {
   await Promise.all([fetchTaskDetail(Number(route.params.taskId)), fetchMyTeams()])
   nextTick(() => {
-    if (currentManageable.value) {
-      fetchParticipants()
-    }
     setTitle(taskData.value?.name || '赛题', route)
-    if (taskData.value?.deadline) {
-      startCountdown()
-    }
+    fetchParticipants(currentManageable.value)
   })
 }
 
@@ -581,35 +597,6 @@ onMounted(async () => {
 const switchViewRole = (role: string) => {
   selectedViewRole.value = role
   refresh()
-}
-
-const startCountdown = () => {
-  watchEffect(() => {
-    const updateCountdown = () => {
-      const now = dayjs()
-      const deadline = dayjs(taskData.value?.deadline)
-      const diff = deadline.diff(now)
-
-      if (diff > 0) {
-        const durationObj = dayjs.duration(diff)
-        countdown.value = {
-          days: durationObj.days().toString().padStart(2, '0'),
-          hours: durationObj.hours().toString().padStart(2, '0'),
-          minutes: durationObj.minutes().toString().padStart(2, '0'),
-          seconds: durationObj.seconds().toString().padStart(2, '0'),
-        }
-        isExpired.value = false
-      } else {
-        countdown.value = null
-        isExpired.value = true
-      }
-    }
-
-    updateCountdown()
-    const timer = setInterval(updateCountdown, 1000)
-
-    onWatcherCleanup(() => clearInterval(timer))
-  })
 }
 
 const submitTask = async () => {
@@ -868,15 +855,28 @@ const deleteTask = async () => {
 }
 
 const approveParticipant = async (memberId: number) => {
-  await TasksApi.updateParticipant(taskData.value!.id, memberId, { approved: 'APPROVED' })
-  toast.success('通过成功')
-  await fetchParticipants()
+  if (!taskData.value) return
+  const deadline = dayjs().add(taskData.value.defaultDeadline, 'day').toDate().getTime()
+  try {
+    await TasksApi.updateParticipant(taskData.value!.id, memberId, { approved: 'APPROVED', deadline })
+    toast.success('通过成功')
+  } catch (error) {
+    toast.error('通过失败')
+  } finally {
+    await fetchParticipants()
+  }
 }
 
 const rejectParticipant = async (memberId: number) => {
-  await TasksApi.updateParticipant(taskData.value!.id, memberId, { approved: 'DISAPPROVED' })
-  toast.success('驳回成功')
-  await fetchParticipants()
+  if (!taskData.value) return
+  try {
+    await TasksApi.updateParticipant(taskData.value!.id, memberId, { approved: 'DISAPPROVED' })
+    toast.success('驳回成功')
+  } catch (error) {
+    toast.error('驳回失败')
+  } finally {
+    await fetchParticipants()
+  }
 }
 
 const handleVerifyInfoSubmit = async (formData: TaskParticipantRealNameInfo) => {
@@ -891,22 +891,6 @@ const handleVerifyInfoSubmit = async (formData: TaskParticipantRealNameInfo) => 
 const verifyInfoFormRef = ref<InstanceType<typeof VerifyInfoForm> | null>(null)
 </script>
 <style scoped>
-.countdown-display {
-  font-size: 1.2rem;
-}
-.countdown-number {
-  font-weight: bold;
-  font-size: 1.4rem;
-}
-.expired-text {
-  font-weight: bold;
-  font-size: 1.2rem;
-}
-.file-card {
-  gap: 4px;
-  padding: 8px;
-}
-
 .selected-view-role-icon {
   width: 100%;
   height: 100%;
