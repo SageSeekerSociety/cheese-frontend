@@ -149,7 +149,7 @@ const {
       sort_by: queryOptions?.by ?? 'createdAt',
       sort_order: queryOptions?.order ?? 'desc',
       keywords: queryOptions?.keywords,
-      approved: queryOptions.queryType === 'all' ? 'APPROVED' : undefined,
+      approved: queryOptions.queryType !== 'published' ? 'APPROVED' : undefined,
       joined: queryOptions.queryType === 'joined' ? true : undefined,
       owner: queryOptions.owner,
       topics: queryOptions.topics,
