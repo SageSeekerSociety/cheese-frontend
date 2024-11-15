@@ -13,5 +13,5 @@ export const RULE_PASSWORD = z.string().min(8).regex(REGEX_PASSWORD, { message: 
 
 export const truncateString = (str: string, maxLength: number) => {
   if (str.length <= maxLength) return str
-  return str.slice(0, maxLength - 3) + '……'
+  return str.slice(0, maxLength - 2) + '……'
 }

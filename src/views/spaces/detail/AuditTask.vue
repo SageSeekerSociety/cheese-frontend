@@ -225,5 +225,6 @@ onMounted(async () => {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-overflow: ellipsis; /* 显示省略号 */
 }
 </style>

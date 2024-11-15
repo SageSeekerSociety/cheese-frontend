@@ -130,7 +130,7 @@ const { handleSubmit, defineField, isSubmitting } = useForm({
       rank: z.number().int().min(1).max(3),
       deadline: z.date().default(new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)),
       defaultDeadline: z.number().int().min(1).default(30),
-      topics: z.number().int().array(),
+      topics: z.number().int().array().optional(),
     })
   ),
   initialValues: {

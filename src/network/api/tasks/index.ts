@@ -1,6 +1,6 @@
 // src/api/tasks.ts
 
-import type { Page, TaskParticipantSummary, TaskSubmission } from '@/types'
+import type { Page, TaskMembership, TaskParticipantRealNameInfo, TaskParticipantSummary, TaskSubmission } from '@/types'
 import type { Task } from '@/types'
 import type {
   PatchTaskParticipantRequestData,
@@ -42,12 +42,18 @@ export namespace TasksApi {
       querySubmittability?: boolean
       queryTopics?: boolean
       queryJoined?: boolean
+      queryJoinedApproved?: boolean
+      queryJoinedDisapproved?: boolean
+      queryJoinedNotApprovedOrDisapproved?: boolean
     } = {
       querySpace: true,
       queryJoinability: true,
       querySubmittability: true,
       queryTopics: true,
       queryJoined: true,
+      queryJoinedApproved: true,
+      queryJoinedDisapproved: true,
+      queryJoinedNotApprovedOrDisapproved: true,
     }
   ) =>
     NewApiInstance.request<{ task: Task }>({
@@ -90,12 +96,16 @@ export namespace TasksApi {
     })
   }
 
-  export const addParticipant = (taskId: number, member: number, deadline: number | null = null) =>
+  export const addParticipant = (
+    taskId: number,
+    member: number,
+    data: { deadline: number | null; realNameInfo?: TaskParticipantRealNameInfo } = { deadline: null }
+  ) =>
     NewApiInstance.request<{ task: Task }>({
       url: `/tasks/${taskId}/participants`,
       method: 'POST',
       params: { member },
-      data: { deadline },
+      data,
     })
 
   export const removeParticipant = (taskId: number, member: number) =>
@@ -105,10 +115,14 @@ export namespace TasksApi {
       params: { member },
     })
 
-  export const getParticipants = (taskId: number) =>
-    NewApiInstance.request<{ participants: TaskParticipantSummary[] }>({
+  export const getParticipants = (
+    taskId: number,
+    params: { queryRealNameInfo?: boolean } = { queryRealNameInfo: true }
+  ) =>
+    NewApiInstance.request<{ participants: TaskMembership[] }>({
       url: `/tasks/${taskId}/participants`,
       method: 'GET',
+      params,
     })
 
   export const updateParticipant = (taskId: number, member: number, data: PatchTaskParticipantRequestData) =>

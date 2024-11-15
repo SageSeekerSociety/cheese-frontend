@@ -5,10 +5,7 @@
       <v-card border flat rounded="lg" class="pa-4">
         <div class="d-flex flex-row align-center mb-2">
           <v-chip color="primary" variant="tonal" size="small"> #{{ latestSubmission.version }} </v-chip>
-          <span class="ml-2">
-            {{ latestSubmission.submitter.nickname }} 提交于
-            {{ dayjs(latestSubmission.createdAt).format('YYYY-MM-DD HH:mm') }}
-          </span>
+          <span class="ml-2"> 提交于 {{ dayjs(latestSubmission.createdAt).format('YYYY-MM-DD HH:mm') }} </span>
           <div class="flex-grow-1"></div>
           <v-chip
             v-if="latestSubmission.review"

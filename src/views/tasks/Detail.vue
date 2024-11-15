@@ -11,7 +11,7 @@
           <div class="flex-grow-1 d-none d-md-block"></div>
           <v-menu v-if="viewRoles.length > 1">
             <template #activator="{ props }">
-              <div class="d-flex flex-row align-center text-medium-emphasis">
+              <div class="d-flex flex-row align-center text-medium-emphasis flex-shrink-0">
                 <v-icon left size="24" class="mr-2">mdi-eye</v-icon>
                 <span>正在以</span>
                 <v-btn v-bind="props" variant="text" color="text" density="comfortable" class="px-2 mx-2">
@@ -139,7 +139,7 @@
                   <div v-else class="expired-text text-error">已截止</div>
                   <div v-if="countdown" class="text-caption">报名剩余时间</div>
                 </div>
-                <v-btn color="primary" variant="flat" @click="joinTask">领取赛题</v-btn>
+                <v-btn color="primary" variant="flat" @click="onJoinTaskClicked">领取赛题</v-btn>
               </template>
               <template v-else-if="currentJoined">
                 <v-btn color="error" variant="flat" @click="leaveTask">退出赛题</v-btn>
@@ -220,7 +220,15 @@
       </v-row>
     </template>
     <template v-else-if="currentJoined">
-      <v-alert type="info" class="mt-4" rounded="lg" title="已报名"> 请耐心等待审核结果，审核通过后即可提交。 </v-alert>
+      <v-alert
+        v-if="currentApproveStatus === 'NONE' || currentApproveStatus === 'REJECTED'"
+        :type="currentApproveStatusType"
+        class="mt-4"
+        rounded="lg"
+        :title="currentApproveStatusText"
+        :text="currentApproveStatusDescription"
+      >
+      </v-alert>
     </template>
 
     <template v-if="currentManageable">
@@ -235,17 +243,53 @@
               <v-list v-if="participants.length > 0">
                 <v-list-item v-for="participant in participants" :key="participant.id">
                   <template #prepend>
-                    <v-avatar color="primary" size="36" :image="getAvatarUrl(participant.avatarId)"></v-avatar>
+                    <v-avatar
+                      v-if="!participant.realNameInfo?.realName"
+                      color="primary"
+                      size="36"
+                      :image="getAvatarUrl(participant.member.avatarId)"
+                    ></v-avatar>
+                    <v-avatar v-else>
+                      <v-icon size="24">mdi-account</v-icon>
+                    </v-avatar>
                   </template>
+
                   <v-list-item-title>
                     <div class="d-flex flex-row align-center gap-2">
-                      <span>{{ participant.name }}</span>
-                      <v-chip v-if="participant.approved === 'NONE'" variant="tonal" color="primary">待审核</v-chip>
-                      <v-chip v-else-if="participant.approved === 'DISAPPROVED'" variant="tonal" color="error">
+                      <span>{{ getParticipantName(participant) }}</span>
+                      <v-chip v-if="participant.approved === 'NONE'" variant="tonal" color="primary" density="compact">
+                        待审核
+                      </v-chip>
+                      <v-chip
+                        v-else-if="participant.approved === 'DISAPPROVED'"
+                        variant="tonal"
+                        color="error"
+                        density="compact"
+                      >
                         已驳回
                       </v-chip>
                     </div>
                   </v-list-item-title>
+
+                  <v-list-item-subtitle v-if="participant.realNameInfo?.realName" class="mt-1">
+                    <div class="d-flex align-center text-medium-emphasis">
+                      <v-icon size="16" class="me-1">mdi-school</v-icon>
+                      {{ participant.realNameInfo.grade }}级 {{ participant.realNameInfo.className }}
+                    </div>
+                    <div v-if="participant.realNameInfo.phone" class="d-flex align-center text-medium-emphasis">
+                      <v-icon size="16" class="me-1">mdi-phone</v-icon>
+                      {{ participant.realNameInfo.phone }}
+                    </div>
+                    <div v-if="participant.realNameInfo.email" class="d-flex align-center text-medium-emphasis">
+                      <v-icon size="16" class="me-1">mdi-email</v-icon>
+                      {{ participant.realNameInfo.email }}
+                    </div>
+                    <div v-if="participant.realNameInfo.applyReason" class="d-flex align-center text-medium-emphasis">
+                      <v-icon size="16" class="me-1">mdi-text-box</v-icon>
+                      申请理由：{{ participant.realNameInfo.applyReason }}
+                    </div>
+                  </v-list-item-subtitle>
+
                   <template #append>
                     <template v-if="participant.approved === 'APPROVED'">
                       <v-btn variant="text" @click="showParticipantSubmissions(participant.id)"> 查看提交 </v-btn>
@@ -256,7 +300,7 @@
                           prepend-icon="mdi-check"
                           variant="tonal"
                           color="success"
-                          @click="approveParticipant(participant.id)"
+                          @click="approveParticipant(participant.member.id)"
                         >
                           通过
                         </v-btn>
@@ -264,7 +308,7 @@
                           prepend-icon="mdi-close"
                           variant="tonal"
                           color="error"
-                          @click="rejectParticipant(participant.id)"
+                          @click="rejectParticipant(participant.member.id)"
                         >
                           驳回
                         </v-btn>
@@ -290,13 +334,13 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="participantSubmissionsDialog" fullscreen scrollable>
+  <v-dialog v-model="isSubmissionsDialogOpen" fullscreen scrollable>
     <v-card color="surface-light">
       <v-toolbar color="surface">
-        <v-btn icon="mdi-close" @click="participantSubmissionsDialog = false"></v-btn>
-
-        <v-toolbar-title>{{ selectedParticipant?.name }} 的提交记录</v-toolbar-title>
-
+        <v-btn icon="mdi-close" @click="isSubmissionsDialogOpen = false"></v-btn>
+        <v-toolbar-title v-if="selectedParticipant">
+          {{ getParticipantName(selectedParticipant) }} 的提交记录
+        </v-toolbar-title>
         <v-spacer></v-spacer>
       </v-toolbar>
       <v-card-text>
@@ -304,7 +348,7 @@
           <TaskSubmissionHistory
             v-if="selectedParticipant"
             :task-id="Number(route.params.taskId)"
-            :member-id="selectedParticipant?.id"
+            :member-id="selectedParticipant?.member.id"
             :show-title="false"
             :reviewable="currentManageable"
           />
@@ -335,11 +379,31 @@
       </v-card-text>
     </v-card>
   </v-dialog>
+
+  <v-dialog v-model="isVerifyInfoDialogOpen" persistent max-width="600">
+    <v-card>
+      <v-card-title>补充信息</v-card-title>
+      <v-card-text>
+        <div class="text-body-1 mb-4">
+          为确保赛题顺利进行，请补充您的基本信息。主办方将审核信息并在必要时与您取得联系。所填信息仅用于本次赛题参与。
+        </div>
+        <VerifyInfoForm ref="verifyInfoFormRef" @submit="handleVerifyInfoSubmit" />
+        <v-alert class="mt-4" type="info" color="primary" variant="tonal" title="隐私保护声明" icon="mdi-shield-check">
+          我们始终致力于保护用户隐私：您提供的信息仅供赛题创建者查看，不会展示在公开页面，也不会与您的账号关联。您在平台上的其他活动依然是匿名的。
+        </v-alert>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn @click="isVerifyInfoDialogOpen = false">取消</v-btn>
+        <v-btn @click="verifyInfoFormRef?.submit()"> 提交 </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script setup lang="ts">
 import type { PatchTaskRequestData } from '@/network/api/tasks/types'
-import type { Task, TaskParticipantSummary, Team } from '@/types'
+import type { Task, TaskMembership, TaskParticipantRealNameInfo, Team } from '@/types'
 
 import { computed, nextTick, onMounted, onWatcherCleanup, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -347,6 +411,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vuetify-sonner'
 import dayjs from 'dayjs'
 
+import { truncateString } from '@/utils/form'
 import { getAvatarUrl } from '@/utils/materials'
 import { getTaskStatusText, getTaskStatusType } from '@/utils/tasks'
 import { setTitle } from '@/utils/title'
@@ -355,6 +420,7 @@ import CollapsibleContent from '@/components/common/CollapsibleContent.vue'
 import TipTapViewer from '@/components/common/Editor/TipTapViewer.vue'
 import TaskForm from '@/components/tasks/TaskForm.vue'
 import TaskSubmissionHistory from '@/components/tasks/TaskSubmissionHistory.vue'
+import VerifyInfoForm from '@/components/tasks/VerifyInfoForm.vue'
 import { AttachmentsApi } from '@/network/api/attachments'
 import { TasksApi } from '@/network/api/tasks'
 import { TeamsApi } from '@/network/api/teams'
@@ -374,13 +440,22 @@ const isExpired = ref(false)
 const progressDialog = ref(false)
 const uploadProgress = ref(0)
 const submissionHistoryRef = useTemplateRef<typeof TaskSubmissionHistory>('submissionHistoryRef')
-const participants = ref<TaskParticipantSummary[]>([])
-const participantSubmissionsDialog = ref(false)
-const selectedParticipant = ref<TaskParticipantSummary | null>(null)
+const participants = ref<TaskMembership[]>([])
+const isSubmissionsDialogOpen = ref(false)
+const selectedParticipant = ref<TaskMembership | null>(null)
 const selectedViewRole = ref<'participant' | 'creator' | 'space-admin' | string>('participant')
 const initialLoaded = ref(false)
+const isVerifyInfoDialogOpen = ref(false)
 
 const { t } = useI18n()
+
+const getParticipantName = (participant: TaskMembership) => {
+  if (participant.realNameInfo?.realName) {
+    return `${participant.realNameInfo.realName} (${participant.realNameInfo.studentId})`
+  }
+  return participant.member.name
+}
+
 const fetchTaskDetail = async (taskId: number, clearSubmissionContent = true) => {
   const {
     data: { task },
@@ -408,13 +483,48 @@ const breadcrumbItems = computed(() => {
     return [
       { title: '知是', to: { name: 'HomeDefault' } },
       {
-        title: taskData.value?.space.name,
+        title: truncateString(taskData.value?.space.name, 12),
         to: { name: 'SpacesDetail', params: { spaceId: taskData.value?.space.id } },
       },
-      { title: taskData.value?.name, to: { name: 'TasksDetail', params: { taskId: taskData.value?.id } } },
+      {
+        title: truncateString(taskData.value?.name, 12),
+        to: { name: 'TasksDetail', params: { taskId: taskData.value?.id } },
+      },
     ]
   }
   return null
+})
+
+const currentApproveStatus = computed(() => {
+  if (!taskData.value) return 'NONE'
+  if (!currentJoined.value) return 'NOT_JOINED'
+  if (taskData.value.submitterType === 'USER') {
+    return taskData.value.joinedApproved ? 'APPROVED' : taskData.value.joinedDisapproved ? 'REJECTED' : 'NONE'
+  } else if (taskData.value.submitterType === 'TEAM') {
+    return taskData.value.joinedApprovedAsTeam?.some((team) => team.id === Number(selectedViewRole.value))
+      ? 'APPROVED'
+      : taskData.value.joinedDisapprovedAsTeam?.some((team) => team.id === Number(selectedViewRole.value))
+        ? 'REJECTED'
+        : 'NONE'
+  }
+  return 'NONE'
+})
+
+const currentApproveStatusType = computed(() => {
+  if (currentApproveStatus.value === 'APPROVED') return 'success'
+  if (currentApproveStatus.value === 'REJECTED') return 'error'
+  return 'info'
+})
+
+const currentApproveStatusText = computed(() => {
+  if (currentApproveStatus.value === 'APPROVED') return '审核通过'
+  if (currentApproveStatus.value === 'REJECTED') return '审核未通过'
+  return '审核中'
+})
+
+const currentApproveStatusDescription = computed(() => {
+  if (currentApproveStatus.value === 'NONE') return '请耐心等待审核结果，审核通过后即可提交。'
+  return undefined
 })
 
 const currentMember = computed(() => {
@@ -447,14 +557,14 @@ const fetchMyTeams = async () => {
 const showParticipantSubmissions = async (participantId: number) => {
   selectedParticipant.value = participants.value.find((p) => p.id === participantId) || null
   if (selectedParticipant.value && taskData.value) {
-    participantSubmissionsDialog.value = true
+    isSubmissionsDialogOpen.value = true
   }
 }
 
 const refresh = async () => {
   await Promise.all([fetchTaskDetail(Number(route.params.taskId)), fetchMyTeams()])
   nextTick(() => {
-    if (isCreator.value) {
+    if (currentManageable.value) {
       fetchParticipants()
     }
     setTitle(taskData.value?.name || '赛题', route)
@@ -554,14 +664,34 @@ const submitTask = async () => {
   await fetchTaskDetail(taskData.value!.id, true)
 }
 
-const joinTask = async () => {
+const onJoinTaskClicked = () => {
+  isVerifyInfoDialogOpen.value = true
+}
+
+// 补全 realNameInfo 中不存在的字段为空字符
+const fillRealNameInfo = (realNameInfo: TaskParticipantRealNameInfo) => {
+  return {
+    major: '',
+    email: '',
+    phone: '',
+    applyReason: '',
+    personalAdvantage: '',
+    remark: '',
+    ...realNameInfo,
+  }
+}
+
+const joinTask = async (realNameInfo?: TaskParticipantRealNameInfo) => {
   if (!taskData.value) return
   if (!currentMember.value) {
     toast.error('无法获取成员信息')
     return
   }
   try {
-    await TasksApi.addParticipant(taskData.value.id, currentMember.value)
+    await TasksApi.addParticipant(taskData.value.id, currentMember.value, {
+      deadline: null,
+      realNameInfo: realNameInfo ? fillRealNameInfo(realNameInfo) : undefined,
+    })
     toast.success('领取赛题成功')
     await fetchTaskDetail(taskData.value.id, false)
   } catch (error) {
@@ -737,17 +867,28 @@ const deleteTask = async () => {
   }
 }
 
-const approveParticipant = async (participantId: number) => {
-  await TasksApi.updateParticipant(taskData.value!.id, participantId, { approved: 'APPROVED' })
+const approveParticipant = async (memberId: number) => {
+  await TasksApi.updateParticipant(taskData.value!.id, memberId, { approved: 'APPROVED' })
   toast.success('通过成功')
   await fetchParticipants()
 }
 
-const rejectParticipant = async (participantId: number) => {
-  await TasksApi.updateParticipant(taskData.value!.id, participantId, { approved: 'DISAPPROVED' })
+const rejectParticipant = async (memberId: number) => {
+  await TasksApi.updateParticipant(taskData.value!.id, memberId, { approved: 'DISAPPROVED' })
   toast.success('驳回成功')
   await fetchParticipants()
 }
+
+const handleVerifyInfoSubmit = async (formData: TaskParticipantRealNameInfo) => {
+  try {
+    isVerifyInfoDialogOpen.value = false
+    await joinTask(formData)
+  } catch (error) {
+    toast.error('信息提交失败')
+  }
+}
+
+const verifyInfoFormRef = ref<InstanceType<typeof VerifyInfoForm> | null>(null)
 </script>
 <style scoped>
 .countdown-display {

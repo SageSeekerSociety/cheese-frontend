@@ -57,9 +57,10 @@ const isSelfTask = computed(() => {
 
 <style scoped lang="scss">
 .task-description {
-  display: flex;
-  flex-direction: column;
-  line-clamp: 2;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
+  text-overflow: ellipsis; /* 显示省略号 */
 }
 </style>

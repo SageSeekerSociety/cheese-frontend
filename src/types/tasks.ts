@@ -36,6 +36,12 @@ export interface Task {
   rejectReason?: string
   joined?: boolean
   joinedAsTeam?: Team[]
+  joinedApproved?: boolean
+  joinedApprovedAsTeam?: Team[]
+  joinedDisapproved?: boolean
+  joinedDisapprovedAsTeam?: Team[]
+  joinedNotApprovedOrDisapproved?: boolean
+  joinedNotApprovedOrDisapprovedAsTeam?: Team[]
   topics?: Topic[]
 }
 
@@ -72,7 +78,29 @@ export interface TaskParticipantSummary {
   intro: string
   name: string
   avatarId: number
+}
+
+export interface TaskParticipantRealNameInfo {
+  realName: string
+  studentId: string
+  grade: string
+  major?: string
+  className: string
+  email?: string
+  phone?: string
+  applyReason?: string
+  personalAdvantage?: string
+  remark?: string
+}
+
+export interface TaskMembership {
+  id: number
+  member: TaskParticipantSummary
+  createdAt: number
+  updatedAt: number
+  deadline: number | null
   approved: 'APPROVED' | 'DISAPPROVED' | 'NONE'
+  realNameInfo?: TaskParticipantRealNameInfo
 }
 
 export type TaskFormSubmitData = {
