@@ -1,10 +1,10 @@
-import { useRouter } from 'vue-router'
-
+import { SudoRequiredError } from '../../types/error'
 import { messageFailed } from '../../utils/showMessage'
-import { Local } from '../../utils/storage'
 
-const router = useRouter()
-
-export default function forbidden() {
+export default function forbidden(error: any) {
+  // 如果是 SudoRequiredError，不显示无权限消息
+  if (error instanceof SudoRequiredError) {
+    return
+  }
   messageFailed('用户无权限')
 }

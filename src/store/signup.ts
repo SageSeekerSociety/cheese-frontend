@@ -2,41 +2,56 @@ import { defineStore } from 'pinia'
 
 import { UserApi } from '@/network/api/users'
 
+interface SignupState {
+  username: string
+  nickname: string
+  email: string
+  srpSalt: string
+  srpVerifier: string
+}
+
 export const useSignupStore = defineStore('signup', {
-  state: () => ({
-    submitted: false,
+  state: (): SignupState => ({
     username: '',
     nickname: '',
     email: '',
-    password: '',
+    srpSalt: '',
+    srpVerifier: '',
   }),
+
   actions: {
-    async startSignup(data: { username: string; nickname: string; email: string; password: string }) {
-      this.submitted = true
+    async startSignup(data: {
+      username: string
+      nickname: string
+      email: string
+      srpSalt: string
+      srpVerifier: string
+    }) {
+      // 保存注册信息
       this.username = data.username
       this.nickname = data.nickname
       this.email = data.email
-      this.password = data.password
+      this.srpSalt = data.srpSalt
+      this.srpVerifier = data.srpVerifier
 
-      return await this.sendEmailCode()
+      // 发送验证邮件
+      await UserApi.sendEmailCode(data.email)
     },
-    async sendEmailCode() {
-      if (!this.submitted || !this.email) {
-        return
-      }
-      return await UserApi.sendEmailCode(this.email)
-    },
+
     async signup(emailCode: string) {
-      if (!this.submitted || !this.username || !this.password || !this.email || !emailCode || !this.nickname) {
-        return
-      }
-      return await UserApi.register({
+      const response = await UserApi.register({
         username: this.username,
         nickname: this.nickname,
-        password: this.password,
+        srpSalt: this.srpSalt,
+        srpVerifier: this.srpVerifier,
         email: this.email,
         emailCode,
       })
+
+      // 清空 store
+      this.$reset()
+
+      return response
     },
   },
 })

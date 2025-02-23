@@ -1,7 +1,7 @@
 import type { AxiosError } from 'axios'
 import type { ResponseDataType } from '../types/index'
 
-import { ServerError } from '../types/error'
+import { ServerError, SudoRequiredError } from '../types/error'
 
 import forbidden from './hooks/forbidden'
 import refreshToken from './hooks/refreshToken'
@@ -17,6 +17,13 @@ const handleError = (error: AxiosError<ResponseDataType>) => {
 export default (error: AxiosError<ResponseDataType>) => {
   const statusCode = error.response?.status
   const path = error.response?.config.url
+  const data = error.response?.data
+
+  // 处理403 Sudo Required的情况
+  if (statusCode === 403 && data?.message?.includes('SudoRequiredError')) {
+    return Promise.reject(new SudoRequiredError(data.message))
+  }
+
   switch (statusCode) {
     case 401:
       if (path?.startsWith('/users/auth')) {
@@ -26,7 +33,7 @@ export default (error: AxiosError<ResponseDataType>) => {
       console.log('401 token expired')
       return refreshToken(error)
     case 403:
-      return forbidden()
+      return forbidden(error)
     default:
       return handleError(error)
   }

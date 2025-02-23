@@ -52,5 +52,21 @@ export default {
         }
       },
     },
+    {
+      path: 'sudo-verify',
+      name: 'SudoVerify',
+      component: () => import('@/views/account/SudoVerify.vue'),
+      meta: {
+        title: '验证身份',
+      },
+    },
+    {
+      path: 'verify-2fa',
+      name: 'Verify2FA',
+      component: () => import('@/views/account/Verify2FA.vue'),
+      meta: {
+        title: '两步验证',
+      },
+    },
   ],
 } as RouteRecordRaw

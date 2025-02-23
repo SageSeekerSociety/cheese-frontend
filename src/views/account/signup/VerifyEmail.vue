@@ -1,16 +1,50 @@
 <template>
-  <v-card class="mx-auto" max-width="600" width="100%">
-    <v-card-title>验证你的邮箱</v-card-title>
-    <v-card-text>
-      我们已向你的邮箱发送了验证码，请输入验证码。
-      <v-form @submit.prevent="submit">
-        <v-otp-input v-model="otp" v-bind="otpProps" :disabled="isSubmitting"></v-otp-input>
-      </v-form>
+  <v-card class="mx-auto" max-width="500" rounded="lg">
+    <v-card-item
+      class="bg-primary text-white"
+      prepend-icon="mdi-email-check"
+      title="邮箱验证"
+      subtitle="验证码已发送至您的注册邮箱"
+    />
+
+    <v-card-text class="pa-6">
+      <v-fade-transition mode="out-in">
+        <div :key="String(isSubmitting)">
+          <div class="text-body-2 text-medium-emphasis mb-4">验证码已发送至 {{ signupStore.email }}，有效期15分钟</div>
+
+          <v-form @submit.prevent="submit">
+            <div class="text-center">
+              <v-otp-input
+                v-model="otp"
+                length="6"
+                type="number"
+                variant="outlined"
+                :loading="isSubmitting"
+                v-bind="otpProps"
+                @update:model-value="handleOtpInput"
+              />
+
+              <v-btn
+                block
+                color="primary"
+                size="large"
+                class="mt-6"
+                type="submit"
+                :loading="isSubmitting"
+                :disabled="otp?.length !== 6"
+              >
+                完成注册
+              </v-btn>
+
+              <div class="text-caption text-medium-emphasis mt-4">
+                未收到验证码？
+                <v-btn variant="text" color="primary" size="small" @click="handleResend"> 重新发送 </v-btn>
+              </div>
+            </div>
+          </v-form>
+        </div>
+      </v-fade-transition>
     </v-card-text>
-    <v-card-actions>
-      <v-spacer />
-      <v-btn color="primary" :loading="isSubmitting" @click="submit">注册</v-btn>
-    </v-card-actions>
   </v-card>
 </template>
 
@@ -40,11 +74,35 @@ const { handleSubmit, defineField, isSubmitting } = useForm({
 
 const [otp, otpProps] = defineField('otp', vuetifyConfig)
 const submit = handleSubmit(async ({ otp }) => {
-  const res = await signupStore.signup(otp)
-  if (res) {
-    toast.success('注册成功')
-    AccountService.login(res.data.accessToken, res.data.user)
-    router.push('/')
+  try {
+    const res = await signupStore.signup(otp)
+    if (res) {
+      toast.success('注册成功')
+      router.push({
+        name: 'SignIn',
+        query: {
+          username: signupStore.username,
+          message: '注册成功，请使用新账号登录',
+        },
+      })
+    }
+  } catch (error) {
+    toast.error(error instanceof Error ? error.message : '验证失败')
   }
 })
+
+const handleOtpInput = (value: string) => {
+  if (value.length === 6) {
+    submit()
+  }
+}
+
+const handleResend = async () => {
+  try {
+    // await signupStore.resendVerification()
+    toast.success('验证码已重新发送')
+  } catch (error) {
+    toast.error(error instanceof Error ? error.message : '发送失败')
+  }
+}
 </script>

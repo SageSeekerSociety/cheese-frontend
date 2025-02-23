@@ -24,6 +24,8 @@ export default createVuetify({
           primary: '#F57F17',
           secondary: '#5CBBF6',
           'page-background': '#EEEEEE',
+          'logo-primary': '#FF9500',
+          'logo-secondary': '#FFE600',
         },
       },
     },
@@ -33,6 +35,22 @@ export default createVuetify({
     aliases,
     sets: {
       mdi,
+    },
+  },
+  defaults: {
+    VTextField: {
+      varient: 'outlined',
+      density: 'comfortable',
+    },
+    VCheckbox: {
+      density: 'compact',
+      hideDetails: 'auto',
+    },
+    VAlert: {
+      variant: 'tonal',
+    },
+    VBtn: {
+      rounded: 'lg',
     },
   },
 })

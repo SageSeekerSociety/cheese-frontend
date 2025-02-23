@@ -1,71 +1,97 @@
 <template>
-  <v-card class="mx-auto" max-width="600" width="100%">
-    <v-card-title>注册</v-card-title>
-    <v-card-text>
-      <v-alert v-if="error" closable :text="error" type="error" class="mb-4"></v-alert>
+  <v-card class="mx-auto" max-width="500" rounded="lg">
+    <v-card-item
+      class="bg-primary text-white"
+      prepend-icon="mdi-account-plus"
+      title="加入知是社区"
+      subtitle="开启您的知识共享之旅"
+    />
 
-      <v-form ref="signupForm" @submit.prevent="submit">
-        <v-text-field
-          v-model="username"
-          label="用户名"
-          placeholder="请输入用户名"
-          prepend-inner-icon="mdi-account"
-          type="text"
-          hint="用户名是用于登录的唯一标识，只能使用英文字母、数字、下划线"
-          v-bind="usernameProps"
-          required
-        />
-        <v-text-field
-          v-model="nickname"
-          label="昵称"
-          placeholder="请输入昵称"
-          prepend-inner-icon="mdi-account"
-          type="text"
-          v-bind="nicknameProps"
-          required
-        />
-        <v-text-field
-          v-model="password"
-          label="密码"
-          placeholder="请输入密码"
-          prepend-inner-icon="mdi-lock"
-          type="password"
-          v-bind="passwordProps"
-          required
-        />
-        <v-text-field
-          v-model="confirmPassword"
-          label="确认密码"
-          placeholder="请再次输入密码"
-          prepend-inner-icon="mdi-lock"
-          type="password"
-          v-bind="confirmPasswordProps"
-          required
-        />
-        <v-text-field
-          v-model="email"
-          label="邮箱"
-          placeholder="请输入邮箱"
-          prepend-inner-icon="mdi-email"
-          type="email"
-          v-bind="emailProps"
-          required
-        />
-        <v-checkbox v-model="agree" density="compact" v-bind="agreeProps" required>
-          <template #label>
-            我已阅读并同意
-            <a href="#">用户协议</a>
-            和
-            <a href="#">隐私政策</a>
-          </template>
-        </v-checkbox>
-      </v-form>
+    <v-card-text class="pa-6">
+      <v-alert v-if="error" closable type="error" density="compact" class="mb-4">
+        {{ error }}
+      </v-alert>
+
+      <v-fade-transition>
+        <v-form ref="signupForm" @submit.prevent="submit">
+          <v-row dense>
+            <v-col cols="12" md="6">
+              <v-text-field
+                v-model="username"
+                label="用户名"
+                variant="outlined"
+                prepend-inner-icon="mdi-account"
+                :loading="isSubmitting"
+                v-bind="usernameProps"
+              />
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field
+                v-model="nickname"
+                label="显示名称"
+                variant="outlined"
+                prepend-inner-icon="mdi-card-account-details"
+                :loading="isSubmitting"
+                v-bind="nicknameProps"
+              />
+            </v-col>
+          </v-row>
+
+          <v-row dense>
+            <v-col cols="12" md="6">
+              <v-text-field
+                v-model="password"
+                label="密码"
+                type="password"
+                variant="outlined"
+                prepend-inner-icon="mdi-lock"
+                :loading="isSubmitting"
+                v-bind="passwordProps"
+              />
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field
+                v-model="confirmPassword"
+                label="确认密码"
+                type="password"
+                variant="outlined"
+                prepend-inner-icon="mdi-lock-check"
+                :loading="isSubmitting"
+                v-bind="confirmPasswordProps"
+              />
+            </v-col>
+          </v-row>
+
+          <v-row dense>
+            <v-col cols="12">
+              <v-text-field
+                v-model="email"
+                label="电子邮箱"
+                type="email"
+                variant="outlined"
+                prepend-inner-icon="mdi-email"
+                :loading="isSubmitting"
+                v-bind="emailProps"
+              />
+            </v-col>
+          </v-row>
+
+          <div class="d-flex justify-space-between align-center mb-4">
+            <v-checkbox v-model="agree" density="compact" class="flex-grow-0" v-bind="agreeProps">
+              <template #label>
+                <span class="text-caption"
+                  >同意 <a href="#" class="text-primary">用户协议</a>和
+                  <a href="#" class="text-primary">隐私政策</a>
+                </span>
+              </template>
+            </v-checkbox>
+            <v-btn variant="text" color="primary" to="/account/signin" size="small">已有账号</v-btn>
+          </div>
+
+          <v-btn block color="primary" size="large" type="submit" :loading="isSubmitting"> 立即注册 </v-btn>
+        </v-form>
+      </v-fade-transition>
     </v-card-text>
-    <v-card-actions>
-      <v-btn variant="text" color="primary" to="signin">已有账号</v-btn>
-      <v-spacer />
-      <v-btn color="primary" :loading="isSubmitting" @click="submit">注册</v-btn>
-    </v-card-actions>
   </v-card>
 </template>
 
@@ -74,6 +100,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vuetify-sonner'
 import { toTypedSchema } from '@vee-validate/zod'
+import * as srp from 'secure-remote-password/client'
 import { useForm } from 'vee-validate'
 import { z } from 'zod'
 
@@ -137,7 +164,18 @@ const router = useRouter()
 
 const submit = handleSubmit(async (value) => {
   try {
-    await signupStore.startSignup(value)
+    // 生成 SRP 盐值和验证器
+    const srpSalt = srp.generateSalt()
+    const privateKey = srp.derivePrivateKey(srpSalt, value.username, value.password)
+    const srpVerifier = srp.deriveVerifier(privateKey)
+
+    // 将 SRP 参数保存到 store 中，供后续注册使用
+    await signupStore.startSignup({
+      ...value,
+      srpSalt,
+      srpVerifier,
+    })
+
     router.push('/account/signup/verify-email')
   } catch (e) {
     if (e instanceof ServerError) {

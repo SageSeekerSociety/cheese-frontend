@@ -29,6 +29,11 @@ export class AccountService {
 
   public set accessToken(value) {
     this._accessToken = value
+    if (value) {
+      localStorage.setItem('accessToken', value)
+    } else {
+      localStorage.removeItem('accessToken')
+    }
   }
 
   public init() {
@@ -63,3 +68,5 @@ const accountService = new AccountService()
 export default accountService
 
 export const currentUserId = computed(() => accountService.user?.id)
+
+export const currentUserName = computed(() => accountService.user?.username)

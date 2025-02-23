@@ -124,6 +124,7 @@ import { getAvatarUrl } from '@/utils/materials'
 import UserAvatar from '../UserAvatar.vue'
 
 import logo from '@/assets/logo.svg?url'
+import { UserApi } from '@/network/api/users'
 import AccountService from '@/services/account'
 
 const appBarProps = withDefaults(defineProps<AppBarProps>(), {
@@ -154,7 +155,8 @@ const avatar = computed(() => getAvatarUrl(AccountService._user.value?.avatarId)
 const nickname = computed(() => AccountService._user.value?.nickname ?? '')
 const intro = computed(() => AccountService._user.value?.intro ?? '')
 
-const onLogout = () => {
+const onLogout = async () => {
+  await UserApi.logout()
   AccountService.logout()
   router.push('/')
 }

@@ -1,26 +1,42 @@
 <template>
-  <v-card class="mx-auto" max-width="600" width="100%">
-    <v-card-title>找回密码</v-card-title>
-    <v-card-text>
-      <v-alert v-if="myAlert.message" closable :text="myAlert.message" :type="myAlert.type" class="mb-4"></v-alert>
+  <v-card class="mx-auto" max-width="500" rounded="lg">
+    <v-card-item
+      class="bg-primary text-white"
+      prepend-icon="mdi-lock-reset"
+      title="重置账户密码"
+      subtitle="通过注册邮箱验证身份"
+    />
 
-      <v-form @submit.prevent="submit">
-        <v-text-field
-          v-model="email"
-          label="邮箱"
-          placeholder="请输入邮箱"
-          prepend-inner-icon="mdi-email"
-          type="email"
-          v-bind="emailProps"
-          required
-        />
-      </v-form>
+    <v-card-text class="pa-6">
+      <v-fade-transition mode="out-in">
+        <div :key="String(isSubmitting)">
+          <v-alert v-if="myAlert.message" :type="myAlert.type" density="compact" class="mb-4">
+            {{ myAlert.message }}
+          </v-alert>
+
+          <v-form @submit.prevent="submit">
+            <v-text-field
+              v-model="email"
+              label="注册邮箱"
+              variant="outlined"
+              prepend-inner-icon="mdi-email"
+              :loading="isSubmitting"
+              v-bind="emailProps"
+            />
+
+            <v-btn block color="primary" size="large" type="submit" :loading="isSubmitting" class="mt-4">
+              发送重置邮件
+            </v-btn>
+
+            <div class="text-center mt-4">
+              <v-btn variant="text" color="primary" to="/account/signin" size="small" prepend-icon="mdi-arrow-left">
+                返回登录
+              </v-btn>
+            </div>
+          </v-form>
+        </div>
+      </v-fade-transition>
     </v-card-text>
-    <v-card-actions>
-      <v-btn variant="text" color="primary" to="/account/signin">返回登录</v-btn>
-      <v-spacer />
-      <v-btn color="primary" :loading="isSubmitting" @click="submit">提交</v-btn>
-    </v-card-actions>
   </v-card>
 </template>
 

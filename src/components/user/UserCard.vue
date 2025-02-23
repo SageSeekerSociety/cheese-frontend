@@ -1,5 +1,5 @@
 <template>
-  <v-container class="pb-0">
+  <v-container class="pb-0 px-0">
     <v-sheet class="profile-background-base" height="30vh" rounded="lg">
       <v-img
         id="header-img"
@@ -30,63 +30,10 @@
                 </v-btn>
               </div>
               <div v-else>
-                <v-dialog width="800">
-                  <template #activator="{ props }">
-                    <v-btn v-bind="props" color="primary" variant="flat" @click="handleReset">
-                      <v-icon left>mdi-cog</v-icon>
-                      编辑资料
-                    </v-btn>
-                  </template>
-                  <template #default="{ isActive }">
-                    <v-card title="修改信息">
-                      <form class="pt-2 pl-5 pr-5" @submit.prevent="submit">
-                        <v-row>
-                          <v-col cols="4">
-                            <v-list-subheader inset>头像</v-list-subheader>
-                            <div class="avatar-upload">
-                              <v-img
-                                :src="previewUrl"
-                                aspect-ratio="1"
-                                class="rounded-lg avatar"
-                                rounded="0"
-                                size="180"
-                                color="grey-darken-1"
-                              />
-
-                              <file-select
-                                v-model="selectedAvatar"
-                                accept="image/*"
-                                :max="1"
-                                class="uploader"
-                                content-class="uploader-inner"
-                                @change="handleFileChange"
-                              >
-                                <div
-                                  class="rounded-lg d-flex flex-column align-center justify-center gap-4 pa-4 text-white uploader-inner"
-                                >
-                                  <v-icon size="32">mdi-camera</v-icon>
-                                  <div class="text-body-1 text-white">上传头像</div>
-                                </div>
-                              </file-select>
-                            </div>
-                          </v-col>
-                          <v-col cols="8">
-                            <v-list-subheader inset>昵称</v-list-subheader>
-                            <v-text-field v-model="selectedNickname" v-bind="nicknameProps"></v-text-field>
-                            <v-list-subheader inset>个人简介</v-list-subheader>
-                            <v-text-field v-model="selectedIntro" :counter="60" v-bind="introProps"></v-text-field>
-                          </v-col>
-                        </v-row>
-                      </form>
-                      <v-card-actions>
-                        <v-btn @click="isActive.value = false"> 关闭 </v-btn>
-                        <v-spacer />
-                        <v-btn @click="handleReset"> 重置 </v-btn>
-                        <v-btn @click="submit"> 提交 </v-btn>
-                      </v-card-actions>
-                    </v-card>
-                  </template>
-                </v-dialog>
+                <v-btn color="primary" variant="flat" :to="{ name: 'UserSettingsProfile' }">
+                  <v-icon left>mdi-cog</v-icon>
+                  编辑资料
+                </v-btn>
               </div>
             </v-col>
           </v-row>
