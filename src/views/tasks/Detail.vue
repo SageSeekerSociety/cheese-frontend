@@ -1,338 +1,392 @@
 <template>
   <v-container>
-    <v-row dense>
-      <v-col cols="12">
-        <div class="d-flex flex-column flex-md-row align-start align-md-center gap-4 mb-4">
-          <v-breadcrumbs v-if="breadcrumbItems" :items="breadcrumbItems" density="compact" class="pa-0">
-            <template #prepend>
-              <v-icon>mdi-cheese</v-icon>
-            </template>
-          </v-breadcrumbs>
-          <div class="flex-grow-1 d-none d-md-block"></div>
-          <v-menu v-if="viewRoles.length > 1">
-            <template #activator="{ props }">
-              <div class="d-flex flex-row align-center text-medium-emphasis flex-shrink-0">
-                <v-icon left size="24" class="mr-2">mdi-eye</v-icon>
-                <span>正在以</span>
-                <v-btn v-bind="props" variant="text" color="text" density="comfortable" class="px-2 mx-2">
-                  {{ currentViewRoleTitle }}
-                  <v-icon right size="24">mdi-chevron-down</v-icon>
-                </v-btn>
-                <span>视角查看</span>
-              </div>
-            </template>
-            <v-list color="primary">
-              <v-list-item
-                v-for="role in viewRoles.filter(
-                  (role) => role.type === 'participant' || role.type === 'creator' || role.type === 'space-admin'
-                )"
-                :key="role.value"
-                :value="role.value"
-                :active="selectedViewRole === role.value"
-                @click="switchViewRole(role.value)"
-              >
-                <template #prepend>
-                  <v-avatar size="32" class="position-relative">
-                    <v-img :src="getAvatarUrl(AccountService.user?.avatarId)" />
-                    <v-icon
-                      v-if="selectedViewRole === role.value"
-                      color="white"
-                      class="position-absolute selected-view-role-icon"
-                    >
-                      mdi-check-circle
-                    </v-icon>
-                  </v-avatar>
-                </template>
-                <v-list-item-title>{{ role.title }}</v-list-item-title>
-                <template #append>
-                  <v-icon>{{ role.icon }}</v-icon>
-                </template>
-              </v-list-item>
-
-              <v-list-subheader v-if="viewRoles.some((role) => role.type === 'team' && !role.isSubmittable)">
-                可参与的小队
-              </v-list-subheader>
-              <v-list-item
-                v-for="role in viewRoles.filter((role) => role.type === 'team' && !role.isSubmittable)"
-                :key="role.value"
-                :value="role.value"
-                :active="selectedViewRole === role.value"
-                @click="switchViewRole(role.value)"
-              >
-                <template #prepend>
-                  <v-avatar size="32" class="position-relative">
-                    <v-img v-if="role.avatarId" :src="getAvatarUrl(role.avatarId)" />
-                    <v-icon v-else>{{ role.icon }}</v-icon>
-                    <v-icon
-                      v-if="selectedViewRole === role.value"
-                      color="white"
-                      class="position-absolute selected-view-role-icon"
-                    >
-                      mdi-check-circle
-                    </v-icon>
-                  </v-avatar>
-                </template>
-                <v-list-item-title>{{ role.title }}</v-list-item-title>
-                <template #append>
-                  <v-icon>mdi-lock-open</v-icon>
-                </template>
-              </v-list-item>
-
-              <v-list-subheader v-if="viewRoles.some((role) => role.type === 'team' && role.isSubmittable)">
-                可提交的小队
-              </v-list-subheader>
-              <v-list-item
-                v-for="role in viewRoles.filter((role) => role.type === 'team' && role.isSubmittable)"
-                :key="role.value"
-                :value="role.value"
-                :active="selectedViewRole === role.value"
-                @click="switchViewRole(role.value)"
-              >
-                <template #prepend>
-                  <v-avatar size="32" class="position-relative">
-                    <v-img v-if="role.avatarId" :src="getAvatarUrl(role.avatarId)" />
-                    <v-icon v-else>{{ role.icon }}</v-icon>
-                    <v-icon
-                      v-if="selectedViewRole === role.value"
-                      color="white"
-                      class="position-absolute selected-view-role-icon"
-                    >
-                      mdi-check-circle
-                    </v-icon>
-                  </v-avatar>
-                </template>
-                <v-list-item-title>{{ role.title }}</v-list-item-title>
-                <template #append>
-                  <v-icon>mdi-upload</v-icon>
-                </template>
-              </v-list-item>
-            </v-list>
-          </v-menu>
-        </div>
-        <v-sheet v-if="taskData" flat rounded="lg" class="pa-4">
-          <div class="d-flex flex-column flex-md-row align-start align-md-center justify-space-between">
-            <div>
-              <div class="text-h6">
-                <v-icon left size="24" class="text-primary mr-1">mdi-trophy</v-icon>
-                {{ taskData?.name }}
-              </div>
-              <div class="text-subtitle-1 text-medium-emphasis">
-                {{ taskData?.creator.nickname }} 发布于 {{ dayjs(taskData?.createdAt).format('YYYY-MM-DD HH:mm') }}
-              </div>
-              <div class="d-flex flex-row align-center" style="gap: 4px">
-                <v-chip :color="taskStatusType">{{ taskStatusText }}</v-chip>
-                <v-chip color="primary" variant="tonal">{{
-                  taskData?.submitterType === 'USER' ? '个人任务' : '小队任务'
-                }}</v-chip>
-                <v-chip v-if="taskData?.resubmittable" variant="tonal">可重复提交</v-chip>
-              </div>
-            </div>
-            <div class="flex-shrink-0 d-flex flex-row align-center ga-4 mt-4 mt-md-0 flex-wrap flex-md-nowrap">
-              <template v-if="currentJoinable">
-                <div v-if="taskData?.deadline" class="text-center">
-                  <CountdownTimer :deadline="taskData.deadline" label="报名剩余时间" />
-                </div>
-                <v-btn color="primary" variant="flat" @click="onJoinTaskClicked">领取赛题</v-btn>
+    <div>
+      <v-row dense>
+        <v-col cols="12">
+          <div class="d-flex flex-column flex-md-row align-start align-md-center gap-4 mb-4">
+            <v-breadcrumbs v-if="breadcrumbItems" :items="breadcrumbItems" density="compact" class="pa-0">
+              <template #prepend>
+                <v-icon>mdi-cheese</v-icon>
               </template>
-              <template v-else-if="currentJoined">
-                <v-btn color="error" variant="flat" @click="leaveTask">退出赛题</v-btn>
-              </template>
-              <template v-else-if="currentManageable">
-                <v-btn-group color="primary" density="compact" variant="flat" rounded="lg" divided>
-                  <v-btn class="pe-2" prepend-icon="mdi-pencil" @click="openEditDialog">
-                    <div class="text-none font-weight-regular">编辑赛题</div>
+            </v-breadcrumbs>
+            <div class="flex-grow-1 d-none d-md-block"></div>
+            <v-menu v-if="viewRoles.length > 1">
+              <template #activator="{ props }">
+                <div class="d-flex flex-row align-center text-medium-emphasis flex-shrink-0">
+                  <v-icon left size="24" class="mr-2">mdi-eye</v-icon>
+                  <span>正在以</span>
+                  <v-btn v-bind="props" variant="text" color="text" density="comfortable" class="px-2 mx-2">
+                    {{ currentViewRoleTitle }}
+                    <v-icon right size="24">mdi-chevron-down</v-icon>
                   </v-btn>
-
-                  <v-btn icon @click="deleteTask">
-                    <v-icon icon="mdi-delete"></v-icon>
-                  </v-btn>
-                </v-btn-group>
-              </template>
-            </div>
-          </div>
-          <v-alert
-            v-if="taskData?.approved === 'DISAPPROVED' && isSelfTask"
-            type="error"
-            class="mt-4"
-            title="审核未通过"
-          >
-            理由：{{ taskData.rejectReason }}
-          </v-alert>
-          <v-divider class="my-4" />
-          <div class="text-body-1">
-            <collapsible-content :max-height="200">
-              <TipTapViewer :value="taskDescription" />
-            </collapsible-content>
-          </div>
-        </v-sheet>
-      </v-col>
-    </v-row>
-
-    <template v-if="currentSubmittable">
-      <v-row dense>
-        <v-col cols="12">
-          <TaskSubmissionHistory
-            v-if="currentMember"
-            ref="submissionHistoryRef"
-            :task-id="Number(route.params.taskId)"
-            :member-id="currentMember"
-          />
-        </v-col>
-        <v-col cols="12">
-          <v-card v-if="taskData" flat rounded="lg">
-            <template #title>
-              <v-icon left size="24">mdi-upload</v-icon>
-              提交
-            </template>
-
-            <template #text>
-              <CountdownTimer
-                v-if="currentDeadline"
-                :deadline="currentDeadline"
-                label="提交剩余时间"
-                class="mx-auto mb-4"
-              />
-              <v-form>
-                <template v-for="(entry, index) in taskData.submissionSchema" :key="index">
-                  <template v-if="entry.type === 'TEXT'">
-                    <v-text-field
-                      v-model="submissionContent[index].contentText"
-                      :label="entry.prompt"
-                      variant="outlined"
-                    ></v-text-field>
-                  </template>
-                  <template v-else-if="entry.type === 'FILE'">
-                    <v-file-input
-                      v-model="submissionContent[index].contentAttachment"
-                      :label="entry.prompt"
-                      variant="outlined"
-                    ></v-file-input>
-                  </template>
-                </template>
-                <div class="d-flex justify-end">
-                  <v-btn prepend-icon="mdi-check" color="primary" @click="submitTask">提交</v-btn>
+                  <span>视角查看</span>
                 </div>
-              </v-form>
-            </template>
-          </v-card>
-        </v-col>
-      </v-row>
-    </template>
-    <template v-else-if="currentJoined">
-      <v-row dense>
-        <v-col cols="12">
-          <v-alert
-            v-if="currentApproveStatus === 'NONE' || currentApproveStatus === 'REJECTED'"
-            :type="currentApproveStatusType"
-            rounded="lg"
-            :title="currentApproveStatusText"
-            :text="currentApproveStatusDescription"
-          >
-          </v-alert>
-        </v-col>
-      </v-row>
-    </template>
-
-    <template v-if="currentManageable">
-      <v-row dense>
-        <v-col cols="12">
-          <v-card flat rounded="lg">
-            <template #title>
-              <v-icon left size="24">mdi-account-group</v-icon>
-              参与者列表
-            </template>
-            <template #text>
-              <v-list v-if="participants.length > 0">
-                <v-list-item v-for="participant in participants" :key="participant.id">
+              </template>
+              <v-list color="primary">
+                <v-list-item
+                  v-for="role in viewRoles.filter(
+                    (role) => role.type === 'participant' || role.type === 'creator' || role.type === 'space-admin'
+                  )"
+                  :key="role.value"
+                  :value="role.value"
+                  :active="selectedViewRole === role.value"
+                  @click="switchViewRole(role.value)"
+                >
                   <template #prepend>
-                    <v-avatar
-                      v-if="!participant.realNameInfo?.realName"
-                      color="primary"
-                      size="36"
-                      :image="getAvatarUrl(participant.member.avatarId)"
-                    ></v-avatar>
-                    <v-avatar v-else>
-                      <v-icon size="24">mdi-account</v-icon>
+                    <v-avatar size="32" class="position-relative">
+                      <v-img :src="getAvatarUrl(AccountService.user?.avatarId)" />
+                      <v-icon
+                        v-if="selectedViewRole === role.value"
+                        color="white"
+                        class="position-absolute selected-view-role-icon"
+                      >
+                        mdi-check-circle
+                      </v-icon>
                     </v-avatar>
                   </template>
-
-                  <v-list-item-title>
-                    <div class="d-flex flex-row align-center gap-2">
-                      <span>{{ getParticipantName(participant) }}</span>
-                      <v-chip v-if="participant.approved === 'NONE'" variant="tonal" color="primary" density="compact">
-                        待审核
-                      </v-chip>
-                      <v-chip
-                        v-else-if="participant.approved === 'DISAPPROVED'"
-                        variant="tonal"
-                        color="error"
-                        density="compact"
-                      >
-                        已驳回
-                      </v-chip>
-                    </div>
-                  </v-list-item-title>
-
-                  <v-list-item-subtitle>
-                    <template v-if="participant.realNameInfo?.realName">
-                      <div class="d-flex align-center">
-                        <v-icon size="16" class="me-1">mdi-school</v-icon>
-                        {{ participant.realNameInfo.grade }}级 {{ participant.realNameInfo.className }}
-                      </div>
-                      <div v-if="participant.realNameInfo.phone" class="d-flex align-center ga-1">
-                        <v-icon size="16">mdi-phone</v-icon>
-                        {{ participant.realNameInfo.phone }}
-                      </div>
-                      <div v-if="participant.realNameInfo.email" class="d-flex align-center ga-1">
-                        <v-icon size="16">mdi-email</v-icon>
-                        {{ participant.realNameInfo.email }}
-                      </div>
-                      <div v-if="participant.realNameInfo.applyReason" class="d-flex align-center ga-1">
-                        <v-icon size="16">mdi-text-box</v-icon>
-                        申请理由：{{ participant.realNameInfo.applyReason }}
-                      </div>
-                    </template>
-                    <template v-if="participant.deadline">
-                      <div class="d-flex align-center text-primary ga-1">
-                        <v-icon size="16">mdi-clock</v-icon>
-                        提交截止时间：{{ dayjs(participant.deadline).fromNow() }}
-                      </div>
-                    </template>
-                  </v-list-item-subtitle>
-
+                  <v-list-item-title>{{ role.title }}</v-list-item-title>
                   <template #append>
-                    <template v-if="participant.approved === 'APPROVED'">
-                      <v-btn variant="text" @click="showParticipantSubmissions(participant.id)"> 查看提交 </v-btn>
-                    </template>
-                    <template v-else-if="participant.approved === 'NONE'">
-                      <div class="d-flex flex-row align-center gap-2">
-                        <v-btn
-                          prepend-icon="mdi-check"
-                          variant="tonal"
-                          color="success"
-                          @click="approveParticipant(participant.member.id)"
-                        >
-                          通过
-                        </v-btn>
-                        <v-btn
-                          prepend-icon="mdi-close"
-                          variant="tonal"
-                          color="error"
-                          @click="rejectParticipant(participant.member.id)"
-                        >
-                          驳回
-                        </v-btn>
-                      </div>
-                    </template>
+                    <v-icon>{{ role.icon }}</v-icon>
+                  </template>
+                </v-list-item>
+
+                <v-list-subheader v-if="viewRoles.some((role) => role.type === 'team' && !role.isSubmittable)">
+                  可参与的小队
+                </v-list-subheader>
+                <v-list-item
+                  v-for="role in viewRoles.filter((role) => role.type === 'team' && !role.isSubmittable)"
+                  :key="role.value"
+                  :value="role.value"
+                  :active="selectedViewRole === role.value"
+                  @click="switchViewRole(role.value)"
+                >
+                  <template #prepend>
+                    <v-avatar size="32" class="position-relative">
+                      <v-img v-if="role.avatarId" :src="getAvatarUrl(role.avatarId)" />
+                      <v-icon v-else>{{ role.icon }}</v-icon>
+                      <v-icon
+                        v-if="selectedViewRole === role.value"
+                        color="white"
+                        class="position-absolute selected-view-role-icon"
+                      >
+                        mdi-check-circle
+                      </v-icon>
+                    </v-avatar>
+                  </template>
+                  <v-list-item-title>{{ role.title }}</v-list-item-title>
+                  <template #append>
+                    <v-icon>mdi-lock-open</v-icon>
+                  </template>
+                </v-list-item>
+
+                <v-list-subheader v-if="viewRoles.some((role) => role.type === 'team' && role.isSubmittable)">
+                  可提交的小队
+                </v-list-subheader>
+                <v-list-item
+                  v-for="role in viewRoles.filter((role) => role.type === 'team' && role.isSubmittable)"
+                  :key="role.value"
+                  :value="role.value"
+                  :active="selectedViewRole === role.value"
+                  @click="switchViewRole(role.value)"
+                >
+                  <template #prepend>
+                    <v-avatar size="32" class="position-relative">
+                      <v-img v-if="role.avatarId" :src="getAvatarUrl(role.avatarId)" />
+                      <v-icon v-else>{{ role.icon }}</v-icon>
+                      <v-icon
+                        v-if="selectedViewRole === role.value"
+                        color="white"
+                        class="position-absolute selected-view-role-icon"
+                      >
+                        mdi-check-circle
+                      </v-icon>
+                    </v-avatar>
+                  </template>
+                  <v-list-item-title>{{ role.title }}</v-list-item-title>
+                  <template #append>
+                    <v-icon>mdi-upload</v-icon>
                   </template>
                 </v-list-item>
               </v-list>
-              <v-empty-state v-else title="暂无参与者"></v-empty-state>
-            </template>
-          </v-card>
+            </v-menu>
+          </div>
+          <v-sheet v-if="taskData" flat rounded="lg" class="pa-4">
+            <div class="d-flex flex-column flex-md-row align-start align-md-center justify-space-between">
+              <div>
+                <div class="text-h6">
+                  <v-icon left size="24" class="text-primary mr-1">mdi-trophy</v-icon>
+                  {{ taskData?.name }}
+                </div>
+                <div class="text-subtitle-1 text-medium-emphasis">
+                  {{ taskData?.creator.nickname }} 发布于 {{ dayjs(taskData?.createdAt).format('YYYY-MM-DD HH:mm') }}
+                </div>
+                <div class="d-flex flex-row align-center" style="gap: 4px">
+                  <v-chip :color="taskStatusType">{{ taskStatusText }}</v-chip>
+                  <v-chip color="primary" variant="tonal">{{
+                    taskData?.submitterType === 'USER' ? '个人任务' : '小队任务'
+                  }}</v-chip>
+                  <v-chip v-if="taskData?.resubmittable" variant="tonal">可重复提交</v-chip>
+                </div>
+              </div>
+              <div class="flex-shrink-0 d-flex flex-row align-center ga-4 mt-4 mt-md-0 flex-wrap flex-md-nowrap">
+                <template v-if="currentJoinable">
+                  <div v-if="taskData?.deadline" class="text-center">
+                    <CountdownTimer :deadline="taskData.deadline" label="报名剩余时间" />
+                  </div>
+                  <v-btn color="primary" variant="flat" @click="onJoinTaskClicked">领取赛题</v-btn>
+                </template>
+                <template v-else-if="currentJoined">
+                  <v-btn color="error" variant="flat" @click="leaveTask">退出赛题</v-btn>
+                </template>
+                <template v-else-if="currentManageable">
+                  <v-btn-group color="primary" density="compact" variant="flat" rounded="lg" divided>
+                    <v-btn class="pe-2" prepend-icon="mdi-pencil" @click="openEditDialog">
+                      <div class="text-none font-weight-regular">编辑赛题</div>
+                    </v-btn>
+
+                    <v-btn icon @click="deleteTask">
+                      <v-icon icon="mdi-delete"></v-icon>
+                    </v-btn>
+                  </v-btn-group>
+                </template>
+              </div>
+            </div>
+            <v-alert
+              v-if="taskData?.approved === 'DISAPPROVED' && isSelfTask"
+              type="error"
+              class="mt-4"
+              title="审核未通过"
+            >
+              理由：{{ taskData.rejectReason }}
+            </v-alert>
+            <v-divider class="my-4" />
+            <div class="text-body-1">
+              <collapsible-content :max-height="200">
+                <TipTapViewer :value="taskDescription" />
+              </collapsible-content>
+            </div>
+          </v-sheet>
         </v-col>
       </v-row>
-    </template>
+
+      <!-- AI建议入口 - 只在参与者视角显示 -->
+      <v-row v-if="currentSubmittable || currentJoined || currentJoinable" dense>
+        <v-col cols="12">
+          <v-card
+            :class="['cursor-pointer', aiAdviceExpanded ? 'bg-primary text-white' : 'bg-primary-lighten-4']"
+            rounded="lg"
+            @click="toggleAIAdvice"
+          >
+            <v-card-text>
+              <div class="d-flex align-center gap-4">
+                <v-avatar
+                  :color="aiAdviceExpanded ? 'white' : 'primary'"
+                  :class="aiAdviceExpanded ? 'text-primary' : 'text-white'"
+                  size="48"
+                >
+                  <v-icon size="32">mdi-creation</v-icon>
+                </v-avatar>
+                <div class="flex-grow-1">
+                  <div class="text-h6 font-weight-bold d-flex flex-row align-center gap-2">
+                    启星研导 Navigator AI
+                    <div class="text-caption text-disabled">Powered by 知启星 AI & DeepSeek-R1</div>
+                  </div>
+                  <div :class="aiAdviceExpanded ? 'text-white' : 'text-medium-emphasis'">
+                    为您解析赛题核心，推荐学习路径，助力科研探索
+                  </div>
+                </div>
+                <v-icon :color="aiAdviceExpanded ? 'white' : 'primary'" size="24">
+                  {{ aiAdviceExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+                </v-icon>
+              </div>
+            </v-card-text>
+          </v-card>
+          <v-expand-transition>
+            <div v-if="aiAdviceExpanded" class="mt-2">
+              <AIAdvicePanel
+                :task-id="Number(route.params.taskId)"
+                :submitter-type="taskData?.submitterType ?? 'USER'"
+                :loading="aiAdviceLoading"
+                :error="aiAdviceError"
+                :advice="aiAdvice"
+                @retry="fetchAIAdvice"
+              />
+            </div>
+          </v-expand-transition>
+        </v-col>
+      </v-row>
+
+      <template v-if="currentSubmittable">
+        <v-row dense>
+          <v-col cols="12">
+            <TaskSubmissionHistory
+              v-if="currentMember"
+              ref="submissionHistoryRef"
+              :task-id="Number(route.params.taskId)"
+              :member-id="currentMember"
+            />
+          </v-col>
+          <v-col cols="12">
+            <v-card v-if="taskData" flat rounded="lg">
+              <template #title>
+                <v-icon left size="24">mdi-upload</v-icon>
+                提交
+              </template>
+
+              <template #text>
+                <CountdownTimer
+                  v-if="currentDeadline"
+                  :deadline="currentDeadline"
+                  label="提交剩余时间"
+                  class="mx-auto mb-4"
+                />
+                <v-form>
+                  <template v-for="(entry, index) in taskData.submissionSchema" :key="index">
+                    <template v-if="entry.type === 'TEXT'">
+                      <v-text-field
+                        v-model="submissionContent[index].contentText"
+                        :label="entry.prompt"
+                        variant="outlined"
+                      ></v-text-field>
+                    </template>
+                    <template v-else-if="entry.type === 'FILE'">
+                      <v-file-input
+                        v-model="submissionContent[index].contentAttachment"
+                        :label="entry.prompt"
+                        variant="outlined"
+                      ></v-file-input>
+                    </template>
+                  </template>
+                  <div class="d-flex justify-end">
+                    <v-btn prepend-icon="mdi-check" color="primary" @click="submitTask">提交</v-btn>
+                  </div>
+                </v-form>
+              </template>
+            </v-card>
+          </v-col>
+        </v-row>
+      </template>
+      <template v-else-if="currentJoined">
+        <v-row dense>
+          <v-col cols="12">
+            <v-alert
+              v-if="currentApproveStatus === 'NONE' || currentApproveStatus === 'REJECTED'"
+              :type="currentApproveStatusType"
+              rounded="lg"
+              :title="currentApproveStatusText"
+              :text="currentApproveStatusDescription"
+            >
+            </v-alert>
+          </v-col>
+        </v-row>
+      </template>
+
+      <template v-if="currentManageable">
+        <v-row dense>
+          <v-col cols="12">
+            <v-card flat rounded="lg">
+              <template #title>
+                <v-icon left size="24">mdi-account-group</v-icon>
+                参与者列表
+              </template>
+              <template #text>
+                <v-list v-if="participants.length > 0">
+                  <v-list-item v-for="participant in participants" :key="participant.id">
+                    <template #prepend>
+                      <v-avatar
+                        v-if="!participant.realNameInfo?.realName"
+                        color="primary"
+                        size="36"
+                        :image="getAvatarUrl(participant.member.avatarId)"
+                      ></v-avatar>
+                      <v-avatar v-else>
+                        <v-icon size="24">mdi-account</v-icon>
+                      </v-avatar>
+                    </template>
+
+                    <v-list-item-title>
+                      <div class="d-flex flex-row align-center gap-2">
+                        <span>{{ getParticipantName(participant) }}</span>
+                        <v-chip
+                          v-if="participant.approved === 'NONE'"
+                          variant="tonal"
+                          color="primary"
+                          density="compact"
+                        >
+                          待审核
+                        </v-chip>
+                        <v-chip
+                          v-else-if="participant.approved === 'DISAPPROVED'"
+                          variant="tonal"
+                          color="error"
+                          density="compact"
+                        >
+                          已驳回
+                        </v-chip>
+                      </div>
+                    </v-list-item-title>
+
+                    <v-list-item-subtitle>
+                      <template v-if="participant.realNameInfo?.realName">
+                        <div class="d-flex align-center">
+                          <v-icon size="16" class="me-1">mdi-school</v-icon>
+                          {{ participant.realNameInfo.grade }}级 {{ participant.realNameInfo.className }}
+                        </div>
+                        <div v-if="participant.realNameInfo.phone" class="d-flex align-center ga-1">
+                          <v-icon size="16">mdi-phone</v-icon>
+                          {{ participant.realNameInfo.phone }}
+                        </div>
+                        <div v-if="participant.realNameInfo.email" class="d-flex align-center ga-1">
+                          <v-icon size="16">mdi-email</v-icon>
+                          {{ participant.realNameInfo.email }}
+                        </div>
+                        <div v-if="participant.realNameInfo.applyReason" class="d-flex align-center ga-1">
+                          <v-icon size="16">mdi-text-box</v-icon>
+                          申请理由：{{ participant.realNameInfo.applyReason }}
+                        </div>
+                      </template>
+                      <template v-if="participant.deadline">
+                        <div class="d-flex align-center text-primary ga-1">
+                          <v-icon size="16">mdi-clock</v-icon>
+                          提交截止时间：{{ dayjs(participant.deadline).fromNow() }}
+                        </div>
+                      </template>
+                    </v-list-item-subtitle>
+
+                    <template #append>
+                      <template v-if="participant.approved === 'APPROVED'">
+                        <v-btn variant="text" @click="showParticipantSubmissions(participant.id)"> 查看提交 </v-btn>
+                      </template>
+                      <template v-else-if="participant.approved === 'NONE'">
+                        <div class="d-flex flex-row align-center gap-2">
+                          <v-btn
+                            prepend-icon="mdi-check"
+                            variant="tonal"
+                            color="success"
+                            @click="approveParticipant(participant.member.id)"
+                          >
+                            通过
+                          </v-btn>
+                          <v-btn
+                            prepend-icon="mdi-close"
+                            variant="tonal"
+                            color="error"
+                            @click="rejectParticipant(participant.member.id)"
+                          >
+                            驳回
+                          </v-btn>
+                        </div>
+                      </template>
+                    </template>
+                  </v-list-item>
+                </v-list>
+                <v-empty-state v-else title="暂无参与者"></v-empty-state>
+              </template>
+            </v-card>
+          </v-col>
+        </v-row>
+      </template>
+    </div>
   </v-container>
   <v-dialog v-model="progressDialog" persistent max-width="300">
     <v-card>
@@ -412,10 +466,10 @@
 </template>
 
 <script setup lang="ts">
-import type { PatchTaskRequestData } from '@/network/api/tasks/types'
+import type { PatchTaskRequestData, TaskAIAdvice } from '@/network/api/tasks/types'
 import type { Task, TaskMembership, TaskParticipantRealNameInfo, Team } from '@/types'
 
-import { computed, nextTick, onMounted, onWatcherCleanup, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, reactive, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vuetify-sonner'
@@ -429,6 +483,7 @@ import { setTitle } from '@/utils/title'
 import CollapsibleContent from '@/components/common/CollapsibleContent.vue'
 import CountdownTimer from '@/components/common/CountdownTimer.vue'
 import TipTapViewer from '@/components/common/Editor/TipTapViewer.vue'
+import AIAdvicePanel from '@/components/tasks/AIAdvicePanel.vue'
 import TaskForm from '@/components/tasks/TaskForm.vue'
 import TaskSubmissionHistory from '@/components/tasks/TaskSubmissionHistory.vue'
 import VerifyInfoForm from '@/components/tasks/VerifyInfoForm.vue'
@@ -455,6 +510,12 @@ const selectedParticipant = ref<TaskMembership | null>(null)
 const selectedViewRole = ref<'participant' | 'creator' | 'space-admin' | string>('participant')
 const initialLoaded = ref(false)
 const isVerifyInfoDialogOpen = ref(false)
+const aiDrawerOpen = ref(false)
+const aiAdviceExpanded = ref(false)
+const aiAdvice = ref<TaskAIAdvice | null>(null)
+const aiAdviceLoading = ref(false)
+const aiAdviceError = ref<string | null>(null)
+const aiAdvicePollingTimer = ref<number | null>(null)
 
 const { t } = useI18n()
 
@@ -656,7 +717,6 @@ const onJoinTaskClicked = () => {
   isVerifyInfoDialogOpen.value = true
 }
 
-// 补全 realNameInfo 中不存在的字段为空字符
 const fillRealNameInfo = (realNameInfo: TaskParticipantRealNameInfo) => {
   return {
     major: '',
@@ -890,12 +950,104 @@ const handleVerifyInfoSubmit = async (formData: TaskParticipantRealNameInfo) => 
 }
 
 const verifyInfoFormRef = ref<InstanceType<typeof VerifyInfoForm> | null>(null)
+
+const toggleAIAdvice = async () => {
+  aiAdviceExpanded.value = !aiAdviceExpanded.value
+  if (aiAdviceExpanded.value && !aiAdvice.value) {
+    await fetchAIAdvice()
+  }
+}
+
+const startPolling = () => {
+  if (aiAdvicePollingTimer.value) return
+  aiAdvicePollingTimer.value = window.setInterval(async () => {
+    try {
+      const { data: statusData } = await TasksApi.getAIAdviceStatus(Number(route.params.taskId))
+      if (statusData.status === 'COMPLETED') {
+        // 状态完成后，获取建议内容
+        const { data: adviceData } = await TasksApi.getAIAdvice(Number(route.params.taskId))
+        aiAdvice.value = adviceData
+        aiAdviceLoading.value = false
+        stopPolling()
+      } else if (statusData.status === 'FAILED') {
+        // 生成失败
+        aiAdviceError.value = '生成建议失败，请重试'
+        aiAdviceLoading.value = false
+        stopPolling()
+      }
+    } catch (error: any) {
+      aiAdviceError.value = error instanceof Error ? error.message : '获取建议失败'
+      aiAdviceLoading.value = false
+      stopPolling()
+    }
+  }, 2000) // 每2秒轮询一次
+}
+
+const stopPolling = () => {
+  if (aiAdvicePollingTimer.value) {
+    clearInterval(aiAdvicePollingTimer.value)
+    aiAdvicePollingTimer.value = null
+  }
+}
+
+const fetchAIAdvice = async () => {
+  aiAdviceLoading.value = true
+  aiAdviceError.value = null
+  try {
+    // 先请求生成
+    const { data: requestData } = await TasksApi.requestAIAdvice(Number(route.params.taskId))
+    if (requestData.status === 'FAILED') {
+      aiAdviceError.value = '生成建议失败，请重试'
+      aiAdviceLoading.value = false
+    } else if (requestData.status === 'COMPLETED') {
+      // 如果已经生成完成，直接获取结果
+      const { data: adviceData } = await TasksApi.getAIAdvice(Number(route.params.taskId))
+      aiAdvice.value = adviceData
+      aiAdviceLoading.value = false
+    } else {
+      // 开始轮询
+      startPolling()
+    }
+  } catch (error) {
+    aiAdviceError.value = error instanceof Error ? error.message : '获取建议失败'
+    aiAdviceLoading.value = false
+  }
+}
+
+// 组件卸载时清理轮询定时器
+onUnmounted(() => {
+  stopPolling()
+})
 </script>
 <style scoped>
+.cursor-pointer {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cursor-pointer:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(var(--v-theme-primary), 0.2) !important;
+}
+
 .selected-view-role-icon {
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.3);
   font-size: 16px;
+}
+
+.ai-advice-drawer {
+  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.1) !important;
+}
+
+.ai-advice-card {
+  transition: all 0.3s ease;
+  border-left: 3px solid rgba(var(--v-theme-primary), 0.3);
+}
+
+.ai-advice-card:hover {
+  transform: translateY(-2px);
+  border-left-color: rgb(var(--v-theme-primary));
 }
 </style>

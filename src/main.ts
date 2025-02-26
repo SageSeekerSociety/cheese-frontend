@@ -6,6 +6,7 @@
 
 import 'editorjs-latex/dist/editorjs-latex.bundle.css'
 import 'katex/dist/katex.min.css'
+import 'highlight.js/styles/atom-one-light.css'
 import '@/styles/content.scss'
 import '@/styles/fonts.css'
 
