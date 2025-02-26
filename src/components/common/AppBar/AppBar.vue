@@ -44,7 +44,7 @@
             <user-avatar :avatar="avatar" :size="32" v-bind="props"></user-avatar>
           </template>
 
-          <v-list max-width="300px">
+          <v-list max-width="300px" rounded="lg">
             <v-list-item :title="nickname" :subtitle="intro">
               <template #prepend>
                 <user-avatar :avatar="avatar" :size="48"></user-avatar>
@@ -55,15 +55,30 @@
                 <v-chip prepend-icon="mdi-account" color="text">UID: {{ currentUser?.id }}</v-chip>
               </div>
             </v-list-item>
-            <!-- <v-list-item>
-            <div class="d-flex ga-2">
-              <v-chip prepend-icon="mdi-cheese" color="primary">50</v-chip>
-            </div>
-          </v-list-item>
-          <v-list-item>
-            <v-progress-linear model-value="50" color="primary" rounded></v-progress-linear>
-            <div class="text-caption text-medium-emphasis">还差 50 声望值升级到下一级</div>
-          </v-list-item> -->
+            <v-list-item>
+              <v-card variant="tonal" color="primary" class="rounded-lg">
+                <v-card-item prepend-icon="mdi-creation">
+                  <v-card-title>知启星 AI</v-card-title>
+                </v-card-item>
+                <v-card-text>
+                  <div class="d-flex justify-space-between align-center text-body-2 mb-1">
+                    <span>今日剩余额度</span>
+                    <span class="text-primary font-weight-medium">
+                      {{ aiQuota?.remaining ?? '-' }}/{{ aiQuota?.total ?? '-' }}
+                    </span>
+                  </div>
+                  <v-progress-linear
+                    :model-value="aiQuota ? (aiQuota.remaining / aiQuota.total) * 100 : 0"
+                    color="primary"
+                    height="8"
+                    rounded
+                  ></v-progress-linear>
+                  <div class="text-caption text-medium-emphasis mt-1">
+                    将在 {{ aiQuota ? dayjs(aiQuota.reset_time).fromNow() : '-' }}重置
+                  </div>
+                </v-card-text>
+              </v-card>
+            </v-list-item>
             <v-divider class="mt-2"></v-divider>
             <v-list-item :to="{ name: 'UserDefault', params: { id: currentUser?.id } }">
               <template #prepend>
@@ -114,16 +129,19 @@
 </template>
 
 <script setup lang="ts">
+import type { QuotaInfo } from '@/network/api/ai/types'
 import type { AppBarProps } from './types'
 
-import { computed, ref, toRefs } from 'vue'
+import { computed, onMounted, ref, toRefs, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import dayjs from 'dayjs'
 
 import { getAvatarUrl } from '@/utils/materials'
 
 import UserAvatar from '../UserAvatar.vue'
 
 import logo from '@/assets/logo.svg?url'
+import { AIApi } from '@/network/api/ai'
 import { UserApi } from '@/network/api/users'
 import AccountService from '@/services/account'
 
@@ -154,6 +172,32 @@ const currentUser = computed(() => AccountService._user.value)
 const avatar = computed(() => getAvatarUrl(AccountService._user.value?.avatarId))
 const nickname = computed(() => AccountService._user.value?.nickname ?? '')
 const intro = computed(() => AccountService._user.value?.intro ?? '')
+
+const aiQuota = ref<QuotaInfo | null>(null)
+
+const fetchAIQuota = async () => {
+  if (!loggedIn.value) return
+  try {
+    const { data } = await AIApi.getQuota()
+    aiQuota.value = data
+  } catch (error) {
+    console.error('Failed to fetch AI quota:', error)
+  }
+}
+
+watch(loggedIn, (newValue) => {
+  if (newValue) {
+    fetchAIQuota()
+  } else {
+    aiQuota.value = null
+  }
+})
+
+onMounted(() => {
+  if (loggedIn.value) {
+    fetchAIQuota()
+  }
+})
 
 const onLogout = async () => {
   await UserApi.logout()
