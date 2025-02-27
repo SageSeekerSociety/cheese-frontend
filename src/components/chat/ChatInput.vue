@@ -1,14 +1,13 @@
 <template>
   <div class="chat-input-container d-flex flex-column">
     <!-- 新增上下文标签区域 -->
-    <div v-if="contextChips && contextChips.length > 0" class="context-chips-container px-2 pb-2">
+    <div v-if="contextChips && contextChips.length > 0" class="d-flex align-center flex-row flex-wrap gap-1 mb-1">
       <v-chip
         v-for="(chip, index) in contextChips"
         :key="index"
         :color="chip.color || 'default'"
         :variant="chip.variant || 'tonal'"
         size="small"
-        class="mr-2 my-1"
         :prepend-icon="chip.icon"
       >
         {{ chip.label }}
@@ -17,7 +16,7 @@
 
     <div class="d-flex align-center">
       <v-textarea
-        v-model="inputText"
+        v-model="userInput"
         rows="1"
         max-rows="5"
         auto-grow
@@ -63,7 +62,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed } from 'vue'
 
 import { ContextChip } from './types'
 
@@ -71,54 +70,18 @@ import { ContextChip } from './types'
 const props = defineProps<{
   disabled?: boolean
   showModelOptions?: boolean
-  modelValue?: string
-  modelType?: 'standard' | 'reasoning'
   contextChips?: ContextChip[] // 使用导入的接口类型
 }>()
 
+const userInput = defineModel<string>({ required: true })
+const selectedModel = defineModel<'standard' | 'reasoning'>('modelType', { required: true })
+
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: string): void
-  (e: 'update:modelType', value: 'standard' | 'reasoning'): void
   (e: 'submit'): void
 }>()
 
-const inputText = ref('')
-const selectedModel = ref<'standard' | 'reasoning'>(props.modelType || 'standard')
-
-// 监听输入框的值
-watch(
-  () => props.modelValue,
-  (newValue) => {
-    if (newValue !== undefined && newValue !== inputText.value) {
-      inputText.value = newValue
-    }
-  }
-)
-
-// 监听输入框的变化并发出更新事件
-watch(inputText, (newValue) => {
-  if (newValue !== props.modelValue) {
-    emit('update:modelValue', newValue)
-  }
-})
-
-// 监听模型类型的变化
-watch(selectedModel, (newValue) => {
-  emit('update:modelType', newValue)
-})
-
-// 监听props中的modelType变化
-watch(
-  () => props.modelType,
-  (newValue) => {
-    if (newValue && newValue !== selectedModel.value) {
-      selectedModel.value = newValue
-    }
-  }
-)
-
 // 计算是否可以提交
-const canSubmit = computed(() => inputText.value.trim().length > 0)
+const canSubmit = computed(() => userInput.value.trim().length > 0)
 
 // 切换模型类型
 const toggleModelType = () => {
@@ -145,7 +108,7 @@ const onKeyDown = (e: KeyboardEvent) => {
 const onSubmit = () => {
   if (!canSubmit.value || props.disabled) return
   emit('submit')
-  inputText.value = ''
+  userInput.value = ''
 }
 </script>
 
@@ -167,12 +130,5 @@ const onSubmit = () => {
 
 .model-selector-chip:hover {
   opacity: 0.9;
-}
-
-/* 上下文标签容器样式 */
-.context-chips-container {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
 }
 </style>

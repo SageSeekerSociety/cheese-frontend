@@ -1,3 +1,10 @@
+export interface ChatReference {
+  url: string
+  logo_url: string
+  title: string
+  summary: string
+}
+
 // 定义聊天消息的类型
 export interface ChatMessage {
   id: number
@@ -10,6 +17,9 @@ export interface ChatMessage {
   conversationId?: string
   parentId?: number
   createdAt: string
+  references?: ChatReference[]
+  tokensUsed?: string
+  seuConsumed?: string
 }
 
 // 对话树节点类型
@@ -70,6 +80,9 @@ export interface ChatStreamOptions<T extends ChatContext = ChatContext> {
     onReasoningComplete?: (fullReasoning: string) => void
     onReasoningTime?: (timeMs: number) => void
     onTitle?: (title: string) => void
+    onReferences?: (references: ChatReference[]) => void
+    onTokensUsed?: (tokensUsed: string) => void
+    onSeuConsumed?: (seuConsumed: string) => void
   }
 }
 
@@ -78,6 +91,7 @@ export interface ChatService<T extends ChatContext = ChatContext> {
   streamConversation: (options: ChatStreamOptions<T>) => { close: () => void }
   getConversations: (contextId: number | string) => Promise<ConversationSummary[]>
   getConversationById: (contextId: number | string, conversationId: string) => Promise<ChatMessage[]>
+  deleteConversation: (contextId: number | string, conversationId: string) => Promise<void>
 
   // 新增：获取上下文标签
   getContextChips?: (context?: T) => ContextChip[]

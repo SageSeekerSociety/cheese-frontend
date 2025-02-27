@@ -6,9 +6,11 @@
 
 // Styles
 import '@mdi/font/css/materialdesignicons.css'
+import 'material-symbols/rounded.css'
 
 import 'vuetify/styles'
 
+import { h } from 'vue'
 // Composables
 import { createVuetify } from 'vuetify'
 import { md2 } from 'vuetify/blueprints'
@@ -35,6 +37,14 @@ export default createVuetify({
     aliases,
     sets: {
       mdi,
+      mds: {
+        component: (props) =>
+          h(
+            props.tag,
+            { class: ['material-symbols-rounded'], style: { fontSize: 'calc(var(--v-icon-size-multiplier) * 1em)' } },
+            props.icon as string
+          ),
+      },
     },
   },
   defaults: {

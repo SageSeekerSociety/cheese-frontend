@@ -36,7 +36,7 @@ export default defineConfig({
       // 配置行号插件
       plugins: ['line-numbers', 'copy-to-clipboard'],
       // 主题名
-      theme: 'okaidia',
+      theme: 'solarizedlight',
       css: true,
     }),
   ],

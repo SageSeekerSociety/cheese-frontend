@@ -17,7 +17,7 @@ function inlineKatex(options: KatexOptions): TokenizerAndRendererExtension {
       return src.indexOf('$')
     },
     tokenizer(src: string, _tokens) {
-      const match = src.match(/^\$+([^$\n]+?)\$+/)
+      const match = src.match(/^\$([^$\n]+?)\$/)
       if (match) {
         return {
           type: 'inlineKatex',
@@ -40,7 +40,7 @@ function blockKatex(options: KatexOptions): TokenizerAndRendererExtension {
       return src.indexOf('$$')
     },
     tokenizer(src: string, _tokens) {
-      const match = src.match(/^\$\$+\n([^$]+?)\n\$\$/)
+      const match = src.match(/^\$\$\n*([^$]+?)\n*\$\$/)
       if (match) {
         return {
           type: 'blockKatex',

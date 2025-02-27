@@ -3,6 +3,7 @@
 import type { Page, TaskMembership, TaskParticipantRealNameInfo, TaskParticipantSummary, TaskSubmission } from '@/types'
 import type { Task } from '@/types'
 import type {
+  ChatReference,
   ConversationGroupSummary,
   CreateTaskAIAdviceConversationRequest,
   PatchTaskParticipantRequestData,
@@ -20,6 +21,7 @@ import { EventSource } from 'eventsource'
 
 import { NewApiInstance } from '../index'
 
+import { refreshTokenForEventSource } from '@/network/Interceptors/hooks/refreshToken'
 import { NEW_API_BASE_URL } from '@/network/utils'
 import AccountService from '@/services/account'
 
@@ -254,7 +256,7 @@ export namespace TasksApi {
     taskId: number
     question: string
     modelType: 'standard' | 'reasoning'
-    context?: TaskAIAdviceConversationContext
+    context?: Partial<TaskAIAdviceConversationContext>
     conversationId?: string
     parentId?: number
     callbacks: {
@@ -271,8 +273,17 @@ export namespace TasksApi {
       onReasoningComplete?: (fullReasoning: string) => void
       onReasoningTime?: (timeMs: number) => void
       onTitle?: (title: string) => void
+      onReferences?: (references: ChatReference[]) => void
+      onTokensUsed?: (tokensUsed: string) => void
+      onSeuConsumed?: (seuConsumed: string) => void
     }
   }
+
+  export const deleteAIAdviceConversation = (taskId: number, conversationId: string) =>
+    NewApiInstance.request({
+      url: `/tasks/${taskId}/ai-advice/conversations/${conversationId}`,
+      method: 'DELETE',
+    })
 
   export const streamAIAdviceConversation = (options: StreamAIAdviceOptions) => {
     const { taskId, question, context, conversationId, parentId, callbacks } = options
@@ -298,121 +309,160 @@ export namespace TasksApi {
       )
     )
 
-    const es = new EventSource(`${NEW_API_BASE_URL}/tasks/${taskId}/ai-advice/conversations/stream?${params}`, {
-      fetch: (input, init) =>
-        fetch(input, {
-          ...init,
-          headers: {
-            ...(init?.headers ?? {}),
-            Authorization: `Bearer ${AccountService.accessToken}`,
-          },
-        }),
-    })
+    // 创建一个函数来初始化 EventSource 连接
+    const createEventSource = (token: string) => {
+      const es = new EventSource(`${NEW_API_BASE_URL}/tasks/${taskId}/ai-advice/conversations/stream?${params}`, {
+        fetch: (input, init) =>
+          fetch(input, {
+            ...init,
+            headers: {
+              ...(init?.headers ?? {}),
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+      })
 
-    let partialResponseCount = 0
-    let reasoningContent = '' // 存储累积的推理内容
+      let partialResponseCount = 0
+      let reasoningContent = '' // 存储累积的推理内容
+      let hasError401 = false // 标记是否遇到了 401 错误
 
-    es.addEventListener('message', (event) => {
-      if (event.data === '[DONE]') {
-        console.log('[AI Stream] 流式响应完成')
-        es.close()
-        callbacks.onClose?.()
-      } else if (event.data.startsWith('[REASONING_START]')) {
-        // 模型开始推理
-        console.log('[AI Stream] 模型开始推理')
-        reasoningContent = '' // 重置推理内容
-        callbacks.onReasoningStart?.()
-      } else if (event.data.startsWith('[REASONING_PARTIAL]')) {
-        // 收到部分推理内容
-        const reasoning = event.data.substring(19) // 去掉[REASONING_PARTIAL]前缀
-        reasoningContent += reasoning // 累积推理内容
-        console.log(
-          '[AI Stream] 收到推理部分内容:',
-          reasoning.length > 50 ? `${reasoning.substring(0, 50)}...` : reasoning
-        )
-        callbacks.onReasoningPartial?.(reasoning)
-      } else if (event.data.startsWith('[REASONING_TIME]')) {
-        // 收到推理用时
-        try {
-          const timeMs = parseInt(event.data.substring(16)) // 去掉[REASONING_TIME]前缀
-          console.log('[AI Stream] 收到推理用时:', timeMs, 'ms', event.data.substring(16))
-          callbacks.onReasoningTime?.(timeMs)
-        } catch (error) {
-          console.error('[AI Stream] 解析推理用时失败', error)
-        }
-      } else if (event.data.startsWith('[REASONING_END]')) {
-        // 推理结束，可能包含完整的推理结果
-        let completeReasoning = reasoningContent
-        if (event.data.length > 15) {
-          // 如果包含完整内容
-          completeReasoning = event.data.substring(15) // 去掉[REASONING_END]前缀
-        }
-        console.log(
-          '[AI Stream] 推理结束，完整内容:',
-          completeReasoning.length > 100 ? `${completeReasoning.substring(0, 100)}...` : completeReasoning
-        )
-        callbacks.onReasoningComplete?.(completeReasoning)
-      } else if (event.data.startsWith('[PARTIAL]')) {
-        partialResponseCount++
-        const message = event.data.substring(9) // 去掉[PARTIAL]前缀
-        if (partialResponseCount % 10 === 0 || partialResponseCount <= 3) {
-          console.log(
-            `[AI Stream] 收到部分响应 #${partialResponseCount} (增量内容):`,
-            message.length > 50 ? `${message.substring(0, 50)}...` : message
+      es.addEventListener('message', (event) => {
+        if (event.data === '[DONE]') {
+          console.log('[AI Stream] 流式响应完成')
+          es.close()
+          callbacks.onClose?.()
+        } else if (event.data.startsWith('[REASONING_START]')) {
+          // 模型开始推理
+          console.debug('[AI Stream] 模型开始推理')
+          reasoningContent = '' // 重置推理内容
+          callbacks.onReasoningStart?.()
+        } else if (event.data.startsWith('[REASONING_PARTIAL]')) {
+          // 收到部分推理内容
+          const reasoning = event.data.substring(19) // 去掉[REASONING_PARTIAL]前缀
+          reasoningContent += reasoning // 累积推理内容
+          console.debug(
+            '[AI Stream] 收到推理部分内容:',
+            reasoning.length > 50 ? `${reasoning.substring(0, 50)}...` : reasoning
           )
+          callbacks.onReasoningPartial?.(reasoning)
+        } else if (event.data.startsWith('[REASONING_TIME]')) {
+          // 收到推理用时
+          try {
+            const timeMs = parseInt(event.data.substring(16)) // 去掉[REASONING_TIME]前缀
+            console.debug('[AI Stream] 收到推理用时:', timeMs, 'ms', event.data.substring(16))
+            callbacks.onReasoningTime?.(timeMs)
+          } catch (error) {
+            console.error('[AI Stream] 解析推理用时失败', error)
+          }
+        } else if (event.data.startsWith('[REASONING_END]')) {
+          // 推理结束，可能包含完整的推理结果
+          let completeReasoning = reasoningContent
+          if (event.data.length > 15) {
+            // 如果包含完整内容
+            completeReasoning = event.data.substring(15) // 去掉[REASONING_END]前缀
+          }
+          console.debug('[AI Stream] 推理结束，完整内容:', completeReasoning)
+          callbacks.onReasoningComplete?.(completeReasoning)
+        } else if (event.data.startsWith('[PARTIAL]')) {
+          partialResponseCount++
+          const message = event.data.substring(9) // 去掉[PARTIAL]前缀
+          console.debug(`[AI Stream] 收到部分响应 #${partialResponseCount}:`, message)
+          callbacks.onPartialResponse?.(message)
+        } else if (event.data.startsWith('[RESPONSE]')) {
+          const message = event.data.substring(10) // 去掉[RESPONSE]前缀
+          console.debug('[AI Stream] 收到完整响应（共${message.length}字符）：', message)
+          callbacks.onCompleteResponse?.(message)
+        } else if (event.data.startsWith('[FOLLOWUPQUESTIONS]')) {
+          try {
+            const questionsJson = event.data.substring(19) // 去掉[FOLLOWUPQUESTIONS]前缀
+            const questions = JSON.parse(questionsJson)
+            console.debug('[AI Stream] 收到后续问题:', questions)
+            callbacks.onFollowupQuestions?.(questions)
+          } catch (error) {
+            console.error('[AI Stream] 解析后续问题失败', error)
+          }
+        } else if (event.data.startsWith('[CONVERSATION_ID]')) {
+          const convId = event.data.substring(17) // 去掉[CONVERSATION_ID]前缀
+          console.debug('[AI Stream] 收到会话ID:', convId)
+          callbacks.onConversationId?.(convId)
+        } else if (event.data.startsWith('[MESSAGE_ID]')) {
+          try {
+            const messageId = parseInt(event.data.substring(12)) // 去掉[MESSAGE_ID]前缀
+            console.debug('[AI Stream] 收到消息ID:', messageId)
+            callbacks.onMessageId?.(messageId)
+          } catch (error) {
+            console.error('[AI Stream] 解析消息ID失败', error)
+          }
+        } else if (event.data.startsWith('[TITLE]')) {
+          const title = event.data.substring(7) // 去掉[TITLE]前缀
+          console.debug('[AI Stream] 收到标题:', title)
+          callbacks.onTitle?.(title)
+        } else if (event.data.startsWith('[REFERENCES]')) {
+          const referencesJson = event.data.substring(12) // 去掉[REFERENCES]前缀
+          const references = JSON.parse(referencesJson)
+          console.debug('[AI Stream] 收到参考文献:', references)
+          callbacks.onReferences?.(references)
+        } else if (event.data.startsWith('[TOKENS_USED]')) {
+          const tokensUsed = event.data.substring(13) // 去掉[TOKENS_USED]前缀
+          console.debug('[AI Stream] 收到令牌用量:', tokensUsed)
+          callbacks.onTokensUsed?.(tokensUsed)
+        } else if (event.data.startsWith('[SEU_CONSUMED]')) {
+          const seuConsumed = event.data.substring(14) // 去掉[SEU_CONSUMED]前缀
+          console.debug('[AI Stream] 收到SEU消耗:', seuConsumed)
+          callbacks.onSeuConsumed?.(seuConsumed)
+        } else if (event.data.startsWith('[ERROR]')) {
+          const error = event.data.substring(7) // 去掉[ERROR]前缀
+          console.error('[AI Stream] 收到错误:', error)
+          callbacks.onError?.(error)
+        } else {
+          console.debug('[AI Stream] 收到未知格式消息:', event.data)
         }
-        callbacks.onPartialResponse?.(message)
-      } else if (event.data.startsWith('[RESPONSE]')) {
-        const message = event.data.substring(10) // 去掉[RESPONSE]前缀
-        console.log(
-          '[AI Stream] 收到完整响应 (替换全部内容):',
-          message.length > 100 ? `${message.substring(0, 100)}...（共${message.length}字符）` : message
-        )
-        callbacks.onCompleteResponse?.(message)
-      } else if (event.data.startsWith('[FOLLOWUPQUESTIONS]')) {
-        try {
-          const questionsJson = event.data.substring(19) // 去掉[FOLLOWUPQUESTIONS]前缀
-          console.log('[AI Stream] 收到后续问题:', questionsJson)
-          const questions = JSON.parse(questionsJson)
-          console.log('[AI Stream] 收到后续问题:', questions)
-          callbacks.onFollowupQuestions?.(questions)
-        } catch (error) {
-          console.error('[AI Stream] 解析后续问题失败', error)
-        }
-      } else if (event.data.startsWith('[CONVERSATION_ID]')) {
-        const convId = event.data.substring(17) // 去掉[CONVERSATION_ID]前缀
-        console.log('[AI Stream] 收到会话ID:', convId)
-        callbacks.onConversationId?.(convId)
-      } else if (event.data.startsWith('[MESSAGE_ID]')) {
-        try {
-          const messageId = parseInt(event.data.substring(12)) // 去掉[MESSAGE_ID]前缀
-          console.log('[AI Stream] 收到消息ID:', messageId)
-          callbacks.onMessageId?.(messageId)
-        } catch (error) {
-          console.error('[AI Stream] 解析消息ID失败', error)
-        }
-      } else if (event.data.startsWith('[TITLE]')) {
-        const title = event.data.substring(7) // 去掉[TITLE]前缀
-        console.log('[AI Stream] 收到标题:', title)
-        callbacks.onTitle?.(title)
-      } else if (event.data.startsWith('[ERROR]')) {
-        const error = event.data.substring(7) // 去掉[ERROR]前缀
-        console.error('[AI Stream] 收到错误:', error)
-        callbacks.onError?.(error)
-      } else {
-        console.log('[AI Stream] 收到未知格式消息:', event.data)
-      }
-    })
+      })
 
-    es.addEventListener('error', (event) => {
-      console.error('[AI Stream] 流式响应错误:', event)
-      if (event.message) callbacks.onError?.(event.message)
-    })
+      es.addEventListener('error', (event: any) => {
+        console.error('[AI Stream] 流式响应错误:', event)
+
+        // 检查是否为 401 错误（根据状态码或响应内容）
+        if (
+          (event.code === 401 || event.message?.includes('401') || event.message?.includes('unauthorized')) &&
+          !hasError401
+        ) {
+          console.debug('[AI Stream] 检测到 401 错误，尝试刷新 token')
+          hasError401 = true
+
+          // 关闭当前连接
+          es.close()
+
+          // 刷新 token 并重新连接
+          refreshTokenForEventSource((newToken) => {
+            console.debug('[AI Stream] Token 已刷新，重新建立连接')
+            // 重新创建 EventSource 连接
+            const newEs = createEventSource(newToken)
+            // 返回新连接的关闭函数
+            currentClose = newEs.close
+          })
+        } else if (event.message) {
+          callbacks.onError?.(event.message)
+        }
+      })
+
+      return {
+        close: () => {
+          console.debug('[AI Stream] 手动关闭流')
+          es.close()
+        },
+      }
+    }
+
+    // 初始化第一个 EventSource 连接
+    const initialEs = createEventSource(AccountService.accessToken || '')
+    // 用于存储当前活动的关闭函数
+    let currentClose = initialEs.close
 
     return {
       close: () => {
-        console.log('[AI Stream] 手动关闭流')
-        es.close()
+        console.debug('[AI Stream] 手动关闭流')
+        currentClose()
       },
     }
   }

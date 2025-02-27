@@ -34,6 +34,7 @@
         </v-btn>
         <v-menu
           v-if="loggedIn"
+          v-model="menuOpen"
           open-on-hover
           open-on-click
           location="bottom center"
@@ -152,6 +153,14 @@ const appBarProps = withDefaults(defineProps<AppBarProps>(), {
 const { links } = toRefs(appBarProps)
 
 const router = useRouter()
+
+const menuOpen = ref(false)
+
+watch(menuOpen, (newValue) => {
+  if (newValue) {
+    fetchAIQuota()
+  }
+})
 
 const searchInput = defineModel<string>('search')
 const onSearchSubmit = () => {

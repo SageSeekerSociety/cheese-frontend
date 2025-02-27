@@ -19,32 +19,41 @@
         variant="tonal"
         color="primary"
         prepend-icon="mdi-plus-circle"
-        class="text-start"
-        @click="$emit('new-conversation')"
-      >
-        开始新对话
-      </v-btn>
+        text="开始新对话"
+        @click="$emit('newConversation')"
+      ></v-btn>
     </div>
     <div class="conversation-list px-2">
       <v-list lines="one" density="compact" select-strategy="single-independent" :selected="[activeConversationId]">
-        <v-list-item
-          v-for="conversation in filteredConversations"
-          :key="conversation.conversationId"
-          :value="conversation.conversationId"
-          :active="conversation.conversationId === activeConversationId"
-          class="conversation-list-item"
-          rounded="lg"
-          @click="selectConversation(conversation.conversationId)"
-        >
-          <v-list-item-title class="text-truncate">
-            {{ formatConversationTitle(conversation) }}
-          </v-list-item-title>
-          <template #append>
-            <div class="text-caption text-medium-emphasis">
-              {{ formatTime(conversation.updatedAt) }}
-            </div>
-          </template>
-        </v-list-item>
+        <template v-for="(group, index) in groupedConversations" :key="index">
+          <!-- 时间分组标题 -->
+          <v-list-subheader>{{ group.title }}</v-list-subheader>
+
+          <v-list-item
+            v-for="conversation in group.conversations"
+            :key="conversation.conversationId"
+            :value="conversation.conversationId"
+            :active="conversation.conversationId === activeConversationId"
+            class="conversation-list-item"
+            rounded="lg"
+            @click="selectConversation(conversation.conversationId)"
+          >
+            <v-list-item-title class="text-truncate">
+              {{ formatConversationTitle(conversation) }}
+            </v-list-item-title>
+            <template #append>
+              <v-btn
+                icon
+                variant="plain"
+                density="compact"
+                class="delete-btn"
+                @click.stop="deleteConversation(conversation.conversationId)"
+              >
+                <v-icon size="small">mdi-delete</v-icon>
+              </v-btn>
+            </template>
+          </v-list-item>
+        </template>
       </v-list>
     </div>
   </div>
@@ -62,8 +71,9 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'select', conversationId: string): void
-  (e: 'new-conversation'): void
+  select: [conversationId: string]
+  newConversation: []
+  delete: [conversationId: string]
 }>()
 
 const searchQuery = ref('')
@@ -81,6 +91,49 @@ const filteredConversations = computed(() => {
   )
 })
 
+// 将对话按时间分组
+const groupedConversations = computed(() => {
+  const now = dayjs()
+  const today = now.startOf('day')
+  const yesterday = today.subtract(1, 'day')
+  const lastWeek = today.subtract(7, 'day')
+  const lastMonth = today.subtract(30, 'day')
+
+  // 创建分组
+  const groups = [
+    { title: '今天', conversations: [] as ConversationSummary[] },
+    { title: '昨天', conversations: [] as ConversationSummary[] },
+    { title: '过去7天', conversations: [] as ConversationSummary[] },
+    { title: '过去30天', conversations: [] as ConversationSummary[] },
+    { title: '更早', conversations: [] as ConversationSummary[] },
+  ]
+
+  // 对对话进行分组
+  filteredConversations.value.forEach((conversation) => {
+    const date = conversation.latestMessage?.createdAt ? dayjs(conversation.latestMessage.createdAt) : null
+
+    if (!date) {
+      groups[0].conversations.push(conversation) // 如果没有日期，默认放在今天
+      return
+    }
+
+    if (date.isAfter(today) || date.isSame(today, 'day')) {
+      groups[0].conversations.push(conversation)
+    } else if (date.isAfter(yesterday) || date.isSame(yesterday, 'day')) {
+      groups[1].conversations.push(conversation)
+    } else if (date.isAfter(lastWeek)) {
+      groups[2].conversations.push(conversation)
+    } else if (date.isAfter(lastMonth)) {
+      groups[3].conversations.push(conversation)
+    } else {
+      groups[4].conversations.push(conversation)
+    }
+  })
+
+  // 只返回有对话的分组
+  return groups.filter((group) => group.conversations.length > 0)
+})
+
 // 格式化时间
 const formatTime = (dateStr: string) => {
   try {
@@ -88,6 +141,11 @@ const formatTime = (dateStr: string) => {
   } catch (e) {
     return '未知时间'
   }
+}
+
+const deleteConversation = (conversationId: string) => {
+  console.log('deleteConversation', conversationId)
+  emit('delete', conversationId)
 }
 
 // 截断文本函数
@@ -136,5 +194,18 @@ const selectConversation = (conversationId: string) => {
 .conversation-list::-webkit-scrollbar-thumb {
   background-color: rgba(var(--v-theme-primary), 0.3);
   border-radius: 4px;
+}
+
+/* 删除按钮样式 */
+.delete-btn {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  position: absolute;
+  right: 4px;
+}
+
+/* 鼠标悬浮时显示删除按钮 */
+.conversation-list-item:hover .delete-btn {
+  opacity: 1;
 }
 </style>

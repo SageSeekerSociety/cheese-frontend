@@ -26,6 +26,9 @@ export class TaskAIAdviceChatService implements ChatService<TaskAIAdviceConversa
       conversationId: msg.conversationId,
       parentId: msg.parentId,
       createdAt: msg.createdAt,
+      references: msg.references,
+      tokensUsed: msg.tokensUsed,
+      seuConsumed: msg.seuConsumed,
     }
   }
 
@@ -70,6 +73,18 @@ export class TaskAIAdviceChatService implements ChatService<TaskAIAdviceConversa
   }
 
   /**
+   * 删除特定对话
+   */
+  async deleteConversation(contextId: number | string, conversationId: string): Promise<void> {
+    try {
+      await TasksApi.deleteAIAdviceConversation(Number(contextId), conversationId)
+    } catch (error) {
+      console.error('删除对话失败:', error)
+      throw error
+    }
+  }
+
+  /**
    * 流式对话请求
    */
   streamConversation(options: ChatStreamOptions<TaskAIAdviceConversationContext>) {
@@ -79,7 +94,7 @@ export class TaskAIAdviceChatService implements ChatService<TaskAIAdviceConversa
       taskId: Number(contextId),
       question,
       modelType,
-      context,
+      context: context?.section ? { section: context.section, index: context.index } : undefined,
       conversationId,
       parentId,
       callbacks,
@@ -101,42 +116,32 @@ export class TaskAIAdviceChatService implements ChatService<TaskAIAdviceConversa
       switch (context.section) {
         case 'knowledge_fields':
           chips.push({
-            label: '知识领域',
+            label: context.displayName ? `知识领域：${context.displayName}` : '知识领域',
             icon: 'mdi-lightbulb-on',
             color: 'warning',
           })
           break
         case 'learning_paths':
           chips.push({
-            label: '学习路径',
+            label: context.displayName ? `学习路径：${context.displayName}` : '学习路径',
             icon: 'mdi-map-marker-path',
             color: 'success',
           })
           break
         case 'methodology':
           chips.push({
-            label: '实践方法论',
+            label: context.displayName ? `实践方法论：${context.displayName}` : '实践方法论',
             icon: 'mdi-puzzle',
             color: 'secondary',
           })
           break
         case 'team_tips':
           chips.push({
-            label: '团队协作建议',
+            label: context.displayName ? `团队协作建议：${context.displayName}` : '团队协作建议',
             icon: 'mdi-account-group',
             color: 'info',
           })
           break
-      }
-
-      // 如果有索引，可以添加更具体的信息
-      if (typeof context.index === 'number') {
-        chips.push({
-          label: `步骤 ${context.index + 1}`,
-          icon: 'mdi-numeric',
-          variant: 'tonal',
-          color: 'grey',
-        })
       }
     }
 

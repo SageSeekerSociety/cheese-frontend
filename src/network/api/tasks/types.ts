@@ -82,6 +82,14 @@ export type TaskAIAdvice = {
 export type TaskAIAdviceConversationContext = ChatContext & {
   section: 'knowledge_fields' | 'learning_paths' | 'methodology' | 'team_tips'
   index: number
+  displayName?: string | null
+}
+
+export interface ChatReference {
+  url: string
+  logo_url: string
+  title: string
+  summary: string
 }
 
 export interface TaskAIAdviceConversation {
@@ -96,6 +104,9 @@ export interface TaskAIAdviceConversation {
   conversationId?: string
   parentId?: number
   createdAt: string
+  references?: ChatReference[]
+  tokensUsed?: string
+  seuConsumed?: string
 }
 
 export interface ConversationGroupSummary {

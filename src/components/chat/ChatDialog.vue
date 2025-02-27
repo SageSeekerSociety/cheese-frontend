@@ -58,6 +58,7 @@
             :active-conversation-id="activeConversationId"
             @select="loadConversation"
             @new-conversation="createNewConversation(true)"
+            @delete="deleteConversation"
           />
         </div>
 
@@ -80,14 +81,11 @@
                   :streaming-reasoning-time-ms="
                     index === currentConversationMessages.length - 1 ? streamingReasoningTimeMs : null
                   "
-                  :is-branch-point="
-                    msg.parentId ? currentBranch.branchPoints.includes(msg.parentId) : isRootBranchPoint
-                  "
+                  :streaming-references="index === currentConversationMessages.length - 1 ? streamingReferences : []"
+                  :is-branch-point="isBranchPoint(msg)"
                   :parent-branch-children="msg.parentId ? getBranchChildren(msg.parentId) : rootNodes"
-                  :current-branch-index="
-                    msg.parentId ? getCurrentBranchIndexForMessage(msg) : getCurrentRootBranchIndex()
-                  "
-                  :branch-count="msg.parentId ? getBranchCountForParent(msg.parentId) : rootNodes.length"
+                  :current-branch-index="getBranchIndex(msg)"
+                  :branch-count="getBranchCount(msg)"
                   @followup-question="sendMessage"
                   @branch-from-message="handleBranchFromMessage"
                   @switch-branch="switchBranchFor"
@@ -106,15 +104,10 @@
           <!-- 聊天输入框 -->
           <ChatInput
             v-model="inputMessage"
+            v-model:model-type="modelType"
             :disabled="streaming || isProcessingMessage"
-            :model-type="modelType"
             :show-model-options="true"
             :context-chips="contextChips"
-            @update:model-type="
-              (val: 'standard' | 'reasoning') => {
-                modelType = val
-              }
-            "
             @submit="handleSubmit"
           />
         </div>
@@ -127,6 +120,7 @@
 import type {
   ChatMessage,
   ChatMessageNode,
+  ChatReference,
   ChatService,
   ContextChip,
   ConversationBranch,
@@ -142,8 +136,11 @@ import ChatInput from './ChatInput.vue'
 import ChatMessageComponent from './ChatMessage.vue'
 import { ReasoningStatus } from './types'
 
+import { useDialog } from '@/plugins/dialog'
+
 // 获取屏幕尺寸
 const { mdAndUp } = useDisplay()
+const dialogs = useDialog()
 
 const dialogOpen = defineModel<boolean>({ required: true })
 
@@ -179,6 +176,7 @@ const activeTitle = computed(() => {
 const inputMessage = ref('')
 const streaming = ref(false)
 const streamingResponse = ref('')
+const streamingReferences = ref<ChatReference[]>([])
 const reasoningStatus = ref<ReasoningStatus>(ReasoningStatus.NONE)
 const streamingReasoning = ref('')
 const streamingReasoningTimeMs = ref<number | null>(null)
@@ -199,20 +197,153 @@ const isAtBottom = ref(true)
 
 // 对话树相关状态
 const messageTree = ref<ChatMessageNode | null>(null)
+const rootNodes = ref<ChatMessageNode[]>([])
 const currentBranch = ref<ConversationBranch>({
   pathIds: [],
   messages: [],
   branchPoints: [],
 })
 
-// 计算属性：是否显示根节点分支选择器
-const rootNodes = ref<ChatMessageNode[]>([])
+// 分支状态管理
+// 跟踪已创建的分支，用于分支显示，不依赖于currentBranch.branchPoints
+const createdBranches = ref<Map<number, Set<number>>>(new Map())
+// 临时消息ID到未来真实ID的映射 (用于更新引用)
+const tempIdMapping = ref<Map<number, number>>(new Map())
 
-// 计算属性：是否是根分支点
-const isRootBranchPoint = computed(() => rootNodes.value.length > 1)
+// 分支管理函数
+// =======================================
+
+// 检查消息是否为分支点
+function isBranchPoint(message: ChatMessage): boolean {
+  // 根节点分支点检查
+  if (!message.parentId) {
+    return rootNodes.value.length > 1
+  }
+
+  // 普通节点分支点检查
+  // 1. 当前分支点列表中已标记的
+  // 2. 或者我们知道这个节点有多个子分支
+  return (
+    currentBranch.value.branchPoints.includes(message.parentId) ||
+    (createdBranches.value.has(message.parentId) && (createdBranches.value.get(message.parentId)?.size || 0) > 1)
+  )
+}
+
+// 获取分支计数
+function getBranchCount(message: ChatMessage): number {
+  // 根节点分支
+  if (!message.parentId) {
+    return rootNodes.value.length
+  }
+
+  // 如果是分支点，计算分支数
+  if (currentBranch.value.branchPoints.includes(message.parentId)) {
+    const children = getBranchChildren(message.parentId)
+    // 已知的子分支数量
+    const branchSet = createdBranches.value.get(message.parentId)
+    const knownBranchCount = branchSet ? branchSet.size : 0
+
+    // 取已知子节点数和已知分支数的较大值，确保至少为2
+    return Math.max(children.length, knownBranchCount, 2)
+  }
+
+  return 1
+}
+
+// 获取分支索引
+function getBranchIndex(message: ChatMessage): number {
+  // 根节点分支
+  if (!message.parentId) {
+    if (rootNodes.value.length <= 1) return 1
+
+    const currentRootId = messageTree.value?.id
+    const index = rootNodes.value.findIndex((node) => node.id === currentRootId)
+    return index === -1 ? 1 : index + 1
+  }
+
+  // 普通节点分支
+  const children = getBranchChildren(message.parentId)
+  if (children.length === 0) {
+    // 新创建的分支可能还没有在children中
+    return 1
+  }
+
+  const index = children.findIndex((child) => child.id === message.id)
+  if (index === -1) {
+    // 如果找不到，可能是新创建的分支
+    return children.length + 1
+  }
+
+  return index + 1
+}
+
+// 记录创建的分支
+function recordBranch(parentId: number, childId: number): void {
+  if (!createdBranches.value.has(parentId)) {
+    createdBranches.value.set(parentId, new Set())
+  }
+  createdBranches.value.get(parentId)?.add(childId)
+
+  // 同时确保父节点在branchPoints中
+  if (parentId && !currentBranch.value.branchPoints.includes(parentId)) {
+    currentBranch.value.branchPoints.push(parentId)
+  }
+}
+
+// 更新临时ID到真实ID的映射
+function updateIdMapping(tempId: number, realId: number): void {
+  tempIdMapping.value.set(tempId, realId)
+
+  // 同时更新createdBranches中的引用
+  createdBranches.value.forEach((children, parentId) => {
+    if (children.has(tempId)) {
+      children.delete(tempId)
+      children.add(realId)
+    }
+
+    // 如果父ID也是临时ID
+    if (tempIdMapping.value.has(parentId)) {
+      const realParentId = tempIdMapping.value.get(parentId)!
+      if (parentId !== realParentId) {
+        // 复制集合到新的父ID
+        if (!createdBranches.value.has(realParentId)) {
+          createdBranches.value.set(realParentId, new Set())
+        }
+        children.forEach((childId) => {
+          createdBranches.value.get(realParentId)?.add(childId)
+        })
+        // 可以稍后清理旧的临时父ID条目
+      }
+    }
+  })
+}
+
+// 基于消息树查找该ID下所有子节点
+function getBranchChildren(messageId: number): ChatMessageNode[] {
+  if (!messageTree.value) return []
+
+  // 映射临时ID到真实ID
+  const targetId = tempIdMapping.value.get(messageId) || messageId
+
+  // 在树中查找对应节点
+  const findNode = (node: ChatMessageNode, id: number): ChatMessageNode | null => {
+    if (node.id === id) return node
+    for (const child of node.children) {
+      const result = findNode(child, id)
+      if (result) return result
+    }
+    return null
+  }
+
+  const node = findNode(messageTree.value, targetId)
+  if (!node?.children?.length) return []
+
+  // 按创建时间排序(从旧到新)
+  return [...node.children].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+}
 
 // 构建消息树
-const buildMessageTree = (messages: ChatMessage[]): ChatMessageNode | null => {
+function buildMessageTree(messages: ChatMessage[]): ChatMessageNode | null {
   if (!messages.length) return null
 
   // 创建ID到消息的映射
@@ -222,46 +353,66 @@ const buildMessageTree = (messages: ChatMessage[]): ChatMessageNode | null => {
   })
 
   // 找到所有根节点（parentId 为 null 的节点）
-  const rootNodes: ChatMessageNode[] = []
+  rootNodes.value = []
 
   // 构建树结构
   messages.forEach((msg) => {
     const node = messageMap.get(msg.id)!
     if (!msg.parentId) {
-      rootNodes.push(node) // 收集所有根节点
+      rootNodes.value.push(node) // 收集所有根节点
     } else {
       const parent = messageMap.get(msg.parentId)
       if (parent) {
         parent.children.push(node)
+
+        // 记录所有已知的父子关系到createdBranches
+        recordBranch(msg.parentId, msg.id)
       }
     }
   })
 
   // 如果有多个根节点，按创建时间排序，取最新的一个作为默认根节点
-  if (rootNodes.length > 0) {
+  if (rootNodes.value.length > 0) {
     // 按创建时间排序(从旧到新)
-    rootNodes.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-    return rootNodes[rootNodes.length - 1] // 返回最新的根节点
+    rootNodes.value.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+    return rootNodes.value[rootNodes.value.length - 1] // 返回最新的根节点
   }
 
   return null
 }
 
-// 获取分支点（有多个子节点的节点）
-const findBranchPoints = (messages: ChatMessage[]): number[] => {
+// 查找分支点（有多个子节点的节点）
+function findBranchPoints(messages: ChatMessage[]): number[] {
+  // 从树结构和createdBranches中找出所有分支点
+  const branchPoints: Set<number> = new Set()
+
+  // 1. 从messages中计算子节点数
   const childCount = new Map<number, number>()
   messages.forEach((msg) => {
     if (msg.parentId) {
       childCount.set(msg.parentId, (childCount.get(msg.parentId) || 0) + 1)
     }
   })
-  return Array.from(childCount.entries())
-    .filter(([_, count]) => count > 1)
-    .map(([id]) => id)
+
+  // 添加有多个子节点的节点作为分支点
+  childCount.forEach((count, parentId) => {
+    if (count > 1) {
+      branchPoints.add(parentId)
+    }
+  })
+
+  // 2. 从createdBranches中添加已知的分支点
+  createdBranches.value.forEach((children, parentId) => {
+    if (children.size > 1) {
+      branchPoints.add(parentId)
+    }
+  })
+
+  return Array.from(branchPoints)
 }
 
 // 查找从根节点到最深叶子节点的路径
-const findDeepestPath = (root: ChatMessageNode): ChatMessage[] => {
+function findDeepestPath(root: ChatMessageNode): ChatMessage[] {
   const traverse = (node: ChatMessageNode, currentPath: ChatMessage[] = []): ChatMessage[] => {
     // 深复制节点以确保不会丢失响应内容
     const nodeCopy = { ...node }
@@ -287,129 +438,139 @@ const handleBranchFromMessage = async (messageId: number, question: string) => {
   // 防止重复发送
   if (isProcessingMessage.value || streaming.value) return
 
-  // 查找目标消息在当前显示消息列表中的索引
+  // 检查消息是否为顶级消息（无父消息）
   const targetMessage = currentConversationMessages.value.find((msg) => msg.id === messageId)
   if (!targetMessage) return
 
-  // 查找父消息在当前显示消息列表中的索引
-  const parentId = targetMessage.parentId
-  if (parentId) {
-    // 非根节点的编辑处理
-    const parentIndex = currentConversationMessages.value.findIndex((msg) => msg.id === parentId)
-    if (parentIndex !== -1) {
-      // 只保留到父消息的部分，丢弃该父消息之后的所有消息
-      currentConversationMessages.value = currentConversationMessages.value.slice(0, parentIndex + 1)
-    }
-
-    // 更新当前消息ID为父消息ID
-    currentMessageId.value = parentId
-
-    // 更新当前分支路径，只保留到父消息的部分
-    const parentPathIndex = currentBranch.value.pathIds.indexOf(parentId)
-    if (parentPathIndex !== -1) {
-      const newPathIds = currentBranch.value.pathIds.slice(0, parentPathIndex + 1)
-      currentBranch.value = {
-        ...currentBranch.value,
-        pathIds: newPathIds,
-        messages: currentConversationMessages.value,
-      }
-    }
-
-    // 生成临时ID，以便在树中添加新节点
-    const tempId = -Date.now()
-
-    // 创建一个新的临时消息节点
-    const newTempMessage: ChatMessage = {
-      id: tempId,
-      parentId: parentId,
-      question,
-      response: '',
-      modelType: modelType.value,
-      followupQuestions: [],
-      createdAt: new Date().toISOString(),
-      conversationId: activeConversationId.value,
-    }
-
-    // 如果消息树存在，在树中添加新节点
-    if (messageTree.value) {
-      // 查找父节点
-      const findParentNode = (node: ChatMessageNode, id: number): ChatMessageNode | null => {
-        if (node.id === id) return node
-        for (const child of node.children) {
-          const found = findParentNode(child, id)
-          if (found) return found
-        }
-        return null
-      }
-
-      const parentNode = findParentNode(messageTree.value, parentId)
-      if (parentNode) {
-        // 添加新节点到父节点的子节点列表
-        parentNode.children.push({
-          ...newTempMessage,
-          children: [],
-        })
-      }
-    }
-
-    // 发送新消息，使用父消息ID作为父ID，关键是保留当前的消息列表
-    await sendMessage(question, parentId, tempId, false)
+  if (!targetMessage.parentId) {
+    // 顶级消息（根节点）的分支处理
+    await handleRootBranching(messageId, question)
   } else {
-    // 顶级消息（没有父消息）的分支处理
-    currentMessageId.value = null
-
-    // 生成临时ID
-    const tempId = -Date.now()
-
-    // 保存旧的根节点
-    let oldRootNode: ChatMessageNode | null = null
-    if (messageTree.value && messageTree.value.id === messageId) {
-      oldRootNode = messageTree.value
-
-      // 先确保原有根节点存在于根节点列表中
-      const existingRootIndex = rootNodes.value.findIndex((node) => node.id === oldRootNode!.id)
-      if (existingRootIndex === -1) {
-        rootNodes.value.push(oldRootNode)
-      }
-    }
-
-    // 创建一个新的临时根消息
-    const newTempMessage: ChatMessage = {
-      id: tempId,
-      question,
-      response: '',
-      modelType: modelType.value,
-      followupQuestions: [],
-      createdAt: new Date().toISOString(),
-      conversationId: activeConversationId.value,
-    }
-
-    // 创建新的根节点对象
-    const newRootNode: ChatMessageNode = {
-      ...newTempMessage,
-      children: [],
-    }
-
-    // 更新消息树的根节点为新消息
-    messageTree.value = newRootNode
-
-    // 将新的根节点添加到根节点列表
-    rootNodes.value.push(newRootNode)
-
-    // 按创建时间排序(从旧到新)
-    rootNodes.value.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-
-    // 更新当前分支路径
-    currentBranch.value = {
-      pathIds: [tempId],
-      messages: [newTempMessage],
-      branchPoints: [...currentBranch.value.branchPoints],
-    }
-
-    // 关键修改：不要在这里更新currentConversationMessages，让sendMessage来处理
-    // 而是直接传递tempId作为parentMessageId，表示这是一个新的根消息
-    await sendMessage(question, undefined, tempId, true)
+    // 非根节点的分支处理
+    await handleNonRootBranching(messageId, question)
   }
+}
+
+// 处理根节点分支创建
+async function handleRootBranching(messageId: number, question: string) {
+  currentMessageId.value = null
+
+  // 生成临时ID
+  const tempId = -Date.now()
+
+  // 创建一个新的临时根消息
+  const newTempMessage: ChatMessage = {
+    id: tempId,
+    question,
+    response: '',
+    modelType: modelType.value,
+    followupQuestions: [],
+    createdAt: new Date().toISOString(),
+    conversationId: activeConversationId.value,
+  }
+
+  // 创建新的根节点对象
+  const newRootNode: ChatMessageNode = {
+    ...newTempMessage,
+    children: [],
+  }
+
+  // 确保原有根节点存在于rootNodes中
+  if (messageTree.value && !rootNodes.value.some((node) => node.id === messageTree.value!.id)) {
+    rootNodes.value.push(messageTree.value)
+  }
+
+  // 更新消息树的根节点为新消息
+  messageTree.value = newRootNode
+
+  // 将新的根节点添加到根节点列表
+  rootNodes.value.push(newRootNode)
+
+  // 按创建时间排序(从旧到新)
+  rootNodes.value.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+
+  // 更新当前分支路径
+  currentBranch.value = {
+    pathIds: [tempId],
+    messages: [newTempMessage],
+    branchPoints: [...currentBranch.value.branchPoints],
+  }
+
+  // 发送消息，传递tempId表示这是一个新的根消息
+  await sendMessage(question, undefined, tempId, true)
+}
+
+// 处理非根节点分支创建
+async function handleNonRootBranching(messageId: number, question: string) {
+  // 查找目标消息
+  const targetMessage = currentConversationMessages.value.find((msg) => msg.id === messageId)
+  if (!targetMessage || !targetMessage.parentId) return
+
+  const parentId = targetMessage.parentId
+
+  // 查找父消息在当前显示消息列表中的索引
+  const parentIndex = currentConversationMessages.value.findIndex((msg) => msg.id === parentId)
+  if (parentIndex !== -1) {
+    // 只保留到父消息的部分
+    currentConversationMessages.value = currentConversationMessages.value.slice(0, parentIndex + 1)
+  }
+
+  // 更新当前消息ID为父消息ID
+  currentMessageId.value = parentId
+
+  // 更新当前分支路径，只保留到父消息的部分
+  const parentPathIndex = currentBranch.value.pathIds.indexOf(parentId)
+  if (parentPathIndex !== -1) {
+    const newPathIds = currentBranch.value.pathIds.slice(0, parentPathIndex + 1)
+    currentBranch.value = {
+      ...currentBranch.value,
+      pathIds: newPathIds,
+      messages: currentConversationMessages.value,
+    }
+  }
+
+  // 生成临时ID
+  const tempId = -Date.now()
+
+  // 创建一个新的临时消息节点
+  const newTempMessage: ChatMessage = {
+    id: tempId,
+    parentId: parentId,
+    question,
+    response: '',
+    modelType: modelType.value,
+    followupQuestions: [],
+    createdAt: new Date().toISOString(),
+    conversationId: activeConversationId.value,
+  }
+
+  // 记录新的分支关系
+  recordBranch(parentId, tempId)
+
+  // 如果消息树存在，在树中添加新节点
+  if (messageTree.value) {
+    // 查找父节点
+    const findParentNode = (node: ChatMessageNode, id: number): ChatMessageNode | null => {
+      if (node.id === id) return node
+      for (const child of node.children) {
+        const found = findParentNode(child, id)
+        if (found) return found
+      }
+      return null
+    }
+
+    const parentNode = findParentNode(messageTree.value, parentId)
+    if (parentNode) {
+      // 添加新节点到父节点的子节点列表
+      parentNode.children.push({
+        ...newTempMessage,
+        children: [],
+      })
+    }
+  }
+
+  // 发送新消息
+  await sendMessage(question, parentId, tempId, false)
 }
 
 // 监听对话框开关
@@ -491,42 +652,15 @@ const loadConversation = async (conversationId: string) => {
     const messages = await chatService.value.getConversationById(contextId.value, conversationId)
     activeConversationId.value = conversationId
 
+    // 清空分支跟踪状态
+    createdBranches.value = new Map()
+    tempIdMapping.value = new Map()
+
     // 构建消息树
     messageTree.value = buildMessageTree(messages)
 
     // 计算分支点
     const branchPoints = findBranchPoints(messages)
-
-    console.log('messageTree', messageTree.value, branchPoints)
-
-    // 找到所有根节点（顶级消息）
-    if (messageTree.value) {
-      // 查找所有根消息（没有parentId的消息）
-      const rootMessagesMap = new Map<number, ChatMessageNode>()
-      messages.forEach((msg) => {
-        if (!msg.parentId) {
-          const node = { ...msg, children: [] } as ChatMessageNode
-          rootMessagesMap.set(msg.id, node)
-        }
-      })
-
-      // 构建子节点关系
-      messages.forEach((msg) => {
-        if (msg.parentId && rootMessagesMap.has(msg.parentId)) {
-          const parent = rootMessagesMap.get(msg.parentId)!
-          if (!parent.children.some((child) => child.id === msg.id)) {
-            parent.children.push({ ...msg, children: [] } as ChatMessageNode)
-          }
-        }
-      })
-
-      // 以时间顺序收集根节点（parentId 为 null 的消息）
-      rootNodes.value = Array.from(rootMessagesMap.values()).sort(
-        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-      )
-    } else {
-      rootNodes.value = []
-    }
 
     // 找到最新的叶子节点
     const latestMessage = messages[messages.length - 1]
@@ -561,6 +695,15 @@ const loadConversation = async (conversationId: string) => {
   }
 }
 
+// 删除对话
+const deleteConversation = async (conversationId: string) => {
+  const confirmed = await dialogs.confirm('确定要删除这个对话吗？').wait()
+  if (confirmed) {
+    await chatService.value.deleteConversation(contextId.value, conversationId)
+    await loadGroupedConversations()
+  }
+}
+
 // 创建新对话
 const createNewConversation = (clearContext: boolean = false) => {
   activeConversationId.value = ''
@@ -575,6 +718,10 @@ const createNewConversation = (clearContext: boolean = false) => {
     messages: [],
     branchPoints: [],
   }
+  // 清空分支跟踪状态
+  createdBranches.value = new Map()
+  tempIdMapping.value = new Map()
+
   if (clearContext) {
     emit('clearContext')
   }
@@ -598,11 +745,12 @@ const sendMessage = async (
   reasoningStatus.value = ReasoningStatus.NONE
   streamingReasoning.value = ''
   streamingReasoningTimeMs.value = null
+  streamingReferences.value = []
 
   try {
     // 创建临时消息对象
     const newMessage: ChatMessage = {
-      id: tempMessageId || Date.now(),
+      id: tempMessageId || -Date.now(), // 使用负数作为临时ID
       question,
       response: '',
       modelType: modelType.value,
@@ -615,6 +763,11 @@ const sendMessage = async (
       newMessage.conversationId = activeConversationId.value
       // 如果指定了parentMessageId，优先使用它
       newMessage.parentId = parentMessageId !== undefined ? parentMessageId : currentMessageId.value || undefined
+    }
+
+    // 如果有父消息，记录分支关系
+    if (newMessage.parentId) {
+      recordBranch(newMessage.parentId, newMessage.id)
     }
 
     // 如果提供了临时消息ID并且需要重置消息列表
@@ -636,8 +789,6 @@ const sendMessage = async (
 
     // 根据用户选择的模型类型设置modelType
     const selectedModelType = modelType.value
-
-    console.log('sendMessage', question, context.value)
 
     // 使用聊天服务发送请求
     currentStream = chatService.value.streamConversation({
@@ -672,7 +823,6 @@ const sendMessage = async (
           smartScrollToBottom()
         },
         onReasoningTime: (timeMs) => {
-          console.log('onReasoningTime', timeMs)
           streamingReasoningTimeMs.value = timeMs
           newMessage.reasoningTimeMs = timeMs
           smartScrollToBottom()
@@ -706,8 +856,11 @@ const sendMessage = async (
         },
         // 处理消息ID
         onMessageId: (msgId) => {
-          // 更新临时ID为服务器返回的真实ID
+          // 获取临时ID
           const tempId = newMessage.id
+
+          // 更新ID映射
+          updateIdMapping(tempId, msgId)
 
           // 更新当前消息列表中的ID
           const index = currentConversationMessages.value.findIndex((m) => m.id === tempId)
@@ -715,7 +868,7 @@ const sendMessage = async (
             currentConversationMessages.value[index].id = msgId
           }
 
-          // 如果存在消息树，更新树中的临时节点ID
+          // 如果存在消息树，更新树中的节点ID
           if (messageTree.value) {
             const updateNodeId = (node: ChatMessageNode, oldId: number, newId: number): boolean => {
               if (node.id === oldId) {
@@ -731,15 +884,22 @@ const sendMessage = async (
             updateNodeId(messageTree.value, tempId, msgId)
           }
 
-          // 更新根节点列表中的临时ID
+          // 更新根节点列表中的ID
           const rootNodeIndex = rootNodes.value.findIndex((node) => node.id === tempId)
           if (rootNodeIndex !== -1) {
             rootNodes.value[rootNodeIndex].id = msgId
           }
+
           // 更新当前分支路径中的ID
           const pathIndex = currentBranch.value.pathIds.indexOf(tempId)
           if (pathIndex !== -1) {
             currentBranch.value.pathIds[pathIndex] = msgId
+          }
+
+          // 更新分支点数组中的ID
+          const branchPointIndex = currentBranch.value.branchPoints.indexOf(tempId)
+          if (branchPointIndex !== -1) {
+            currentBranch.value.branchPoints[branchPointIndex] = msgId
           }
 
           currentMessageId.value = msgId
@@ -755,6 +915,19 @@ const sendMessage = async (
               conversations.value[convIndex].title = title
             }
           }
+        },
+        // 处理参考资料
+        onReferences: (references) => {
+          streamingReferences.value = references
+          newMessage.references = references
+        },
+        // 处理令牌用量
+        onTokensUsed: (tokensUsed) => {
+          newMessage.tokensUsed = tokensUsed
+        },
+        // 处理SEU消耗
+        onSeuConsumed: (seuConsumed) => {
+          newMessage.seuConsumed = seuConsumed
         },
         // 处理错误
         onError: (err) => {
@@ -794,6 +967,152 @@ const formatConversationTitle = (question?: string | null) => {
   return question.substring(0, 30) + '...'
 }
 
+// 为特定消息切换分支
+const switchBranchFor = async (parentId: number, direction: 'prev' | 'next') => {
+  // 如果是顶级分支切换（parentId === 0 表示切换根节点）
+  if (parentId === 0) {
+    await handleRootBranchSwitch(direction)
+    return
+  }
+
+  // 子分支切换逻辑
+  await handleChildBranchSwitch(parentId, direction)
+}
+
+// 处理根节点分支切换
+async function handleRootBranchSwitch(direction: 'prev' | 'next') {
+  const rootCount = rootNodes.value.length
+  if (rootCount <= 1) return
+
+  // 找到当前根节点在根节点列表中的索引
+  const currentRootId = messageTree.value?.id
+  const currentIndex = rootNodes.value.findIndex((node) => node.id === currentRootId)
+  if (currentIndex === -1) return
+
+  // 计算新的索引
+  let newIndex = currentIndex
+  if (direction === 'prev') {
+    newIndex = (currentIndex - 1 + rootCount) % rootCount
+  } else {
+    newIndex = (currentIndex + 1) % rootCount
+  }
+
+  // 切换到新的根节点
+  const newRootNode = rootNodes.value[newIndex]
+
+  // 更新当前消息树根节点
+  messageTree.value = newRootNode
+
+  // 找到从新根节点到叶子节点的路径
+  const path = findDeepestPath(newRootNode)
+
+  // 更新当前分支和消息列表
+  currentBranch.value = {
+    pathIds: path.map((msg) => msg.id),
+    messages: path,
+    branchPoints: currentBranch.value.branchPoints,
+  }
+  currentConversationMessages.value = path
+
+  // 更新当前消息ID
+  if (path.length > 0) {
+    currentMessageId.value = path[path.length - 1].id
+  }
+
+  // 滚动到底部
+  await nextTick()
+  await scrollToBottom()
+}
+
+// 处理子节点分支切换
+async function handleChildBranchSwitch(parentId: number, direction: 'prev' | 'next') {
+  const children = getBranchChildren(parentId)
+  if (children.length <= 1) return
+
+  // 查找当前显示的分支
+  const currentChild = currentConversationMessages.value.find(
+    (m) => m.parentId === parentId && currentBranch.value.pathIds.includes(m.id)
+  )
+  if (!currentChild) return
+
+  // 找到该消息在子节点列表中的索引
+  const currentIndex = children.findIndex((child) => child.id === currentChild.id)
+  if (currentIndex === -1) return
+
+  let newIndex = currentIndex
+  if (direction === 'prev') {
+    newIndex = (currentIndex - 1 + children.length) % children.length
+  } else {
+    newIndex = (currentIndex + 1) % children.length
+  }
+
+  // 切换到新分支
+  await switchToBranchByChild(parentId, children[newIndex].id)
+}
+
+// 根据子节点切换分支
+async function switchToBranchByChild(parentId: number, childId: number) {
+  // 查找父节点在当前消息列表中的索引
+  const parentIndex = currentConversationMessages.value.findIndex((msg) => msg.id === parentId)
+  if (parentIndex === -1) return
+
+  // 保留到父节点的部分
+  currentConversationMessages.value = currentConversationMessages.value.slice(0, parentIndex + 1)
+
+  // 构建从子节点开始的新路径
+  if (!messageTree.value) return
+
+  // 在树中查找子节点
+  const findNode = (node: ChatMessageNode, id: number): ChatMessageNode | null => {
+    if (node.id === id) return node
+    for (const child of node.children) {
+      const result = findNode(child, id)
+      if (result) return result
+    }
+    return null
+  }
+
+  const childNode = findNode(messageTree.value, childId)
+  if (!childNode) return
+
+  // 构建新路径
+  const buildPath = (node: ChatMessageNode, path: ChatMessage[] = []): ChatMessage[] => {
+    path.push(node)
+    if (node.children.length === 0) return path
+
+    // 选择第一个子节点继续路径
+    return buildPath(node.children[0], path)
+  }
+
+  const newPath = buildPath(childNode)
+  currentConversationMessages.value = [...currentConversationMessages.value, ...newPath]
+
+  // 更新当前分支路径
+  const parentPathIndex = currentBranch.value.pathIds.indexOf(parentId)
+  if (parentPathIndex !== -1) {
+    // 保留到父节点的部分，再加上新路径
+    const updatedPathIds = [
+      ...currentBranch.value.pathIds.slice(0, parentPathIndex + 1),
+      ...newPath.map((msg) => msg.id),
+    ]
+
+    // 更新当前分支信息
+    currentBranch.value = {
+      ...currentBranch.value,
+      pathIds: updatedPathIds,
+      messages: currentConversationMessages.value,
+    }
+  }
+
+  // 更新当前消息ID为新路径的最后一条消息
+  if (newPath.length > 0) {
+    currentMessageId.value = newPath[newPath.length - 1].id
+  }
+
+  // 滚动到底部
+  await nextTick()
+}
+
 // 组件卸载时清理
 onUnmounted(() => {
   if (currentStream) {
@@ -816,233 +1135,7 @@ onMounted(() => {
   })
 })
 
-// 暴露方法给父组件使用
-defineExpose({
-  sendMessage,
-})
-
-// 获取某个节点的所有子节点
-const getBranchChildren = (messageId: number): ChatMessageNode[] => {
-  if (!messageTree.value) return []
-
-  // 在树中查找对应节点
-  const findNode = (node: ChatMessageNode, id: number): ChatMessageNode | null => {
-    if (node.id === id) return node
-    for (const child of node.children) {
-      const result = findNode(child, id)
-      if (result) return result
-    }
-    return null
-  }
-
-  const node = findNode(messageTree.value, messageId)
-  if (!node?.children?.length) return []
-
-  // 按创建时间排序(从旧到新)，与根节点保持相同的排序逻辑
-  return [...node.children].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-}
-
-// 获取消息的父节点所有子节点数量
-const getBranchCountForParent = (parentId: number): number => {
-  const children = getBranchChildren(parentId)
-  return children.length
-}
-
-// 获取当前消息在其父节点的子节点中的索引
-const getCurrentBranchIndexForMessage = (message: ChatMessage): number => {
-  if (!message.parentId) return 0
-
-  const children = getBranchChildren(message.parentId)
-  if (children.length === 0) return 0
-
-  // 查找当前消息在子节点列表中的索引
-  const index = children.findIndex((child) => child.id === message.id)
-  return index === -1 ? 0 : index + 1
-}
-
-// 为特定消息切换分支
-const switchBranchFor = (parentId: number, direction: 'prev' | 'next') => {
-  // 如果是顶级分支切换（parentId === 0 表示切换根节点）
-  if (parentId === 0) {
-    const rootCount = rootNodes.value.length
-    if (rootCount <= 1) return
-
-    // 保存当前分支的完整消息状态，包括响应内容
-    if (messageTree.value) {
-      const currentRootIndex = rootNodes.value.findIndex((node) => node.id === messageTree.value!.id)
-      if (currentRootIndex !== -1) {
-        // 使用当前显示的消息更新根节点中的对应消息
-        currentConversationMessages.value.forEach((displayedMsg) => {
-          const updateNodeContent = (node: ChatMessageNode) => {
-            if (node.id === displayedMsg.id) {
-              // 更新节点内容，保留响应和其他内容
-              node.response = displayedMsg.response
-              node.followupQuestions = displayedMsg.followupQuestions
-              node.reasoningContent = displayedMsg.reasoningContent
-              node.reasoningTimeMs = displayedMsg.reasoningTimeMs
-              return true
-            }
-
-            for (const child of node.children) {
-              if (updateNodeContent(child)) return true
-            }
-            return false
-          }
-
-          // 更新根节点中的消息内容
-          updateNodeContent(rootNodes.value[currentRootIndex])
-        })
-      }
-    }
-
-    // 找到当前根节点在根节点列表中的索引
-    const currentRootId = messageTree.value?.id
-    const currentIndex = rootNodes.value.findIndex((node) => node.id === currentRootId)
-    if (currentIndex === -1) return
-
-    // 计算新的索引
-    let newIndex = currentIndex
-    if (direction === 'prev') {
-      newIndex = (currentIndex - 1 + rootCount) % rootCount
-    } else {
-      newIndex = (currentIndex + 1) % rootCount
-    }
-
-    // 切换到新的根节点
-    const newRootNode = rootNodes.value[newIndex]
-
-    // 更新当前消息树根节点
-    messageTree.value = newRootNode
-
-    // 找到从新根节点到叶子节点的路径
-    const path = findDeepestPath(newRootNode)
-
-    // 更新当前分支和消息列表
-    currentBranch.value = {
-      pathIds: path.map((msg) => msg.id),
-      messages: path,
-      branchPoints: currentBranch.value.branchPoints,
-    }
-    currentConversationMessages.value = path
-
-    // 更新当前消息ID
-    if (path.length > 0) {
-      currentMessageId.value = path[path.length - 1].id
-    }
-
-    // 滚动到底部
-    nextTick(() => {
-      scrollToBottom()
-    })
-
-    return
-  }
-
-  // 子分支切换逻辑
-  const children = getBranchChildren(parentId)
-
-  console.log('switchBranchFor', parentId, direction, children)
-  if (children.length <= 1) return
-
-  // 查找当前显示的分支
-  const currentChild = currentConversationMessages.value.find(
-    (m) => m.parentId === parentId && currentBranch.value.pathIds.includes(m.id)
-  )
-
-  console.log('currentChild', currentChild)
-  if (!currentChild) return
-
-  // 找到该消息在子节点列表中的索引
-  const currentIndex = children.findIndex((child) => child.id === currentChild.id)
-  console.log('currentIndex', currentIndex)
-  if (currentIndex === -1) return
-
-  let newIndex = currentIndex
-  if (direction === 'prev') {
-    newIndex = (currentIndex - 1 + children.length) % children.length
-  } else {
-    newIndex = (currentIndex + 1) % children.length
-  }
-
-  // 切换到新分支
-  switchToBranchByChild(parentId, children[newIndex].id)
-}
-
-// 根据子节点切换分支
-const switchToBranchByChild = async (parentId: number, childId: number) => {
-  // 查找父节点在当前消息列表中的索引
-  const parentIndex = currentConversationMessages.value.findIndex((msg) => msg.id === parentId)
-  if (parentIndex === -1) return
-
-  // 保留到父节点的部分
-  currentConversationMessages.value = currentConversationMessages.value.slice(0, parentIndex + 1)
-
-  // 构建从子节点开始的新路径
-  const buildNewPath = (
-    node: ChatMessageNode,
-    messages: ChatMessage[] = [],
-    pathIds: number[] = []
-  ): { messages: ChatMessage[]; pathIds: number[] } => {
-    messages.push(node)
-    pathIds.push(node.id)
-    if (node.children.length === 0) return { messages, pathIds }
-
-    // 默认选择第一个子节点继续路径
-    return buildNewPath(node.children[0], messages, pathIds)
-  }
-
-  // 在树中查找子节点
-  const findChildNode = (node: ChatMessageNode, id: number): ChatMessageNode | null => {
-    if (node.id === id) return node
-    for (const child of node.children) {
-      const result = findChildNode(child, id)
-      if (result) return result
-    }
-    return null
-  }
-
-  if (!messageTree.value) return
-  const childNode = findChildNode(messageTree.value, childId)
-  if (!childNode) return
-
-  // 构建并添加新路径
-  const { messages: newPathMessages, pathIds: newPathIds } = buildNewPath(childNode)
-  currentConversationMessages.value = [...currentConversationMessages.value, ...newPathMessages]
-
-  // 更新当前分支路径
-  const parentPathIndex = currentBranch.value.pathIds.indexOf(parentId)
-  if (parentPathIndex !== -1) {
-    // 保留到父节点的部分，再加上新路径
-    const updatedPathIds = [...currentBranch.value.pathIds.slice(0, parentPathIndex + 1), ...newPathIds]
-
-    // 更新当前分支信息
-    currentBranch.value = {
-      ...currentBranch.value,
-      pathIds: updatedPathIds,
-      messages: currentConversationMessages.value,
-    }
-
-    console.log('Updated branch path IDs:', updatedPathIds)
-  }
-
-  // 更新当前消息ID为新路径的最后一条消息
-  if (newPathMessages.length > 0) {
-    currentMessageId.value = newPathMessages[newPathMessages.length - 1].id
-  }
-
-  // 不再自动滚动到底部，保持当前滚动位置
-  await nextTick()
-}
-
-// 获取当前根分支索引
-const getCurrentRootBranchIndex = (): number => {
-  if (!messageTree.value || rootNodes.value.length <= 1) return 1
-
-  const currentRootId = messageTree.value.id
-  const index = rootNodes.value.findIndex((node) => node.id === currentRootId)
-  return index === -1 ? 1 : index + 1
-}
-
+// 计算上下文芯片
 const contextChips = computed(() => {
   const chips: ContextChip[] = []
 
@@ -1052,6 +1145,11 @@ const contextChips = computed(() => {
     chips.push(...serviceChips)
   }
   return chips
+})
+
+// 暴露方法给父组件使用
+defineExpose({
+  sendMessage,
 })
 </script>
 

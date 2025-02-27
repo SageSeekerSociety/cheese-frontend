@@ -301,7 +301,7 @@ import AIAdviceChatDialog from './AIAdviceChatDialog.vue'
 
 import { TaskSubmitterType } from '@/types'
 
-defineProps<{
+const props = defineProps<{
   taskId: number
   submitterType: TaskSubmitterType
   loading: boolean
@@ -334,8 +334,24 @@ const clearContext = () => {
   console.trace('clearContext', selectedContext.value)
 }
 
+const getDisplayName = (section: TaskAIAdviceConversationContext['section'], index: number) => {
+  if (section === 'knowledge_fields') {
+    return props.advice?.knowledge_fields?.[index]?.name
+  }
+  if (section === 'learning_paths') {
+    return props.advice?.learning_paths?.[index]?.stage
+  }
+  if (section === 'methodology') {
+    return props.advice?.methodology?.[index]?.step
+  }
+  if (section === 'team_tips') {
+    return props.advice?.team_tips?.[index]?.role
+  }
+  return null
+}
+
 const openChat = (section: TaskAIAdviceConversationContext['section'], index: number, question?: string) => {
-  selectedContext.value = { section, index }
+  selectedContext.value = { section, index, displayName: getDisplayName(section, index) }
 
   // 如果传入了问题，使用nextTick确保对话框已打开后再发送
   nextTick(() => {

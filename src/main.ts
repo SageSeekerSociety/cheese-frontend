@@ -6,7 +6,6 @@
 
 import 'editorjs-latex/dist/editorjs-latex.bundle.css'
 import 'katex/dist/katex.min.css'
-import 'highlight.js/styles/atom-one-light.css'
 import '@/styles/content.scss'
 import '@/styles/fonts.css'
 
@@ -17,10 +16,10 @@ import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
+dayjs.locale('zh-cn')
 dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.extend(duration)
-dayjs.locale('zh-cn')
 dayjs.extend(relativeTime)
 
 // Components

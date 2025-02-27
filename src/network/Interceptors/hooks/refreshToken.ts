@@ -12,6 +12,7 @@ import AccountService from '@/services/account'
 const MAX_ERROR_COUNT = 5
 
 const queue: ((t: string) => any)[] = []
+const eventSourceQueue: ((t: string) => any)[] = []
 let currentCount = 0
 let isRefreshing = false
 /*
@@ -42,12 +43,18 @@ export default async function refreshToken(error: AxiosError<ResponseDataType>) 
         data: { accessToken, user },
       } = await UserApi.refreshAccessToken()
       console.log('refresh token success', accessToken, user)
+      if (!accessToken || !user) {
+        throw new Error('Failed to refresh token: missing accessToken or user')
+      }
       Local.set('accessToken', accessToken)
       AccountService.login(accessToken, user)
       currentCount = 0
       // 重新请求
       queue.forEach((cb) => cb(accessToken))
       queue.splice(0)
+      // 处理 EventSource 请求队列
+      eventSourceQueue.forEach((cb) => cb(accessToken))
+      eventSourceQueue.splice(0)
       console.log('re-request', config)
       return ApiInstance.request<any>(config)
     } catch {
@@ -67,5 +74,50 @@ export default async function refreshToken(error: AxiosError<ResponseDataType>) 
         resolve(ApiInstance.request<any>(config))
       })
     })
+  }
+}
+
+// 添加专门用于 EventSource 的刷新 token 函数
+export async function refreshTokenForEventSource(onTokenRefreshed: (token: string) => void): Promise<void> {
+  if (!isRefreshing) {
+    isRefreshing = true
+    if (currentCount > MAX_ERROR_COUNT) {
+      messageFailed('身份过期，请重新登录')
+      router.replace('/account/signin')
+      Local.clear()
+      return
+    }
+    currentCount += 1
+    console.log(`[EventSource] refresh token ${currentCount}`)
+
+    try {
+      const {
+        data: { accessToken, user },
+      } = await UserApi.refreshAccessToken()
+      console.log('[EventSource] refresh token success', accessToken, user)
+      if (!accessToken || !user) {
+        throw new Error('Failed to refresh token: missing accessToken or user')
+      }
+      Local.set('accessToken', accessToken)
+      AccountService.login(accessToken, user)
+      currentCount = 0
+      // 重新请求
+      queue.forEach((cb) => cb(accessToken))
+      queue.splice(0)
+      // 处理 EventSource 请求队列
+      eventSourceQueue.forEach((cb) => cb(accessToken))
+      eventSourceQueue.splice(0)
+      // 回调当前请求
+      onTokenRefreshed(accessToken)
+    } catch (err) {
+      messageFailed('请重新登录')
+      Local.clear()
+      router.replace('/account/signin')
+    } finally {
+      isRefreshing = false
+    }
+  } else {
+    // 已经在刷新中，加入队列
+    eventSourceQueue.push(onTokenRefreshed)
   }
 }
