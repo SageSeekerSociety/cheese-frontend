@@ -7,12 +7,13 @@ RUN corepack enable
 FROM base as dev
 COPY . ./
 RUN pnpm install --frozen-lockfile
-CMD ["pnpm", "dev"]
+CMD ["pnpm", "dev", "--host"]
 
 FROM base as build
+ARG API_BASE_URL=localhost:8000
 COPY . ./
 RUN pnpm install --frozen-lockfile
-RUN pnpm build
+RUN VITE_API_BASE_URL=${API_BASE_URL} pnpm build
 
 FROM nginx:1.25.4 as prod
 COPY nginx.conf /etc/nginx/nginx.conf
