@@ -75,7 +75,9 @@
             <v-icon start icon="mdi-key-chain" />
             使用通行密钥登录
           </v-btn>
-          <div v-if="!webAuthnSupported" class="text-caption text-medium-emphasis mt-2">当前浏览器不支持通行密钥</div>
+          <div v-if="!webAuthnSupported" class="text-caption text-medium-emphasis mt-2 text-center">
+            当前环境暂不支持通行密钥
+          </div>
         </div>
       </v-fade-transition>
     </v-card-text>
