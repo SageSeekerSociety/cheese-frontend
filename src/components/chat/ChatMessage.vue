@@ -52,7 +52,7 @@
 
     <!-- 分支切换器（在用户消息时显示，条件：是分支点的子消息或者是顶级分支点） -->
     <div
-      v-if="isBranchPoint || (isLastMessage && !finalMessage.parentId && branchCount > 1)"
+      v-if="isBranchPoint || (isLastMessage && !finalMessage.parentId && parentBranchChildren.length > 1)"
       class="d-flex justify-end mb-3"
     >
       <v-btn-group variant="plain" density="comfortable" size="small" class="branch-switcher">
@@ -246,6 +246,7 @@ const {
   currentBranchIndex,
   branchCount,
   isMobile,
+  parentBranchChildren,
 } = toRefs(props)
 
 const finalMessage = computed(() => {
