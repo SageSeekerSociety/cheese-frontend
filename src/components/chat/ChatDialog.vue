@@ -1,49 +1,65 @@
 <template>
-  <v-navigation-drawer
+  <v-overlay
     v-model="dialogOpen"
-    :location="mdAndUp ? 'right' : 'bottom'"
-    :width="mdAndUp ? '700' : '100%'"
-    temporary
+    :class="{
+      'chat-drawer-mobile flex-column': !mdAndUp,
+      'flex-row justify-end': mdAndUp,
+      'chat-drawer-full-screen': isFullScreen,
+    }"
+    width="100%"
+    height="100%"
     class="chat-drawer"
-    :class="!mdAndUp ? 'chat-drawer-radius-top' : ''"
-    color="background"
-    elevation="4"
+    :transition="mdAndUp ? 'slide-x-reverse-transition' : 'slide-y-reverse-transition'"
   >
     <div
-      class="d-flex flex-column"
-      :class="{ 'h-100': mdAndUp }"
-      :style="!mdAndUp ? 'height: calc(90vh - var(--v-layout-top));' : ''"
+      v-click-outside="{
+        handler: () => (dialogOpen = false),
+        include: outsideInclude,
+      }"
+      class="d-flex flex-column bg-surface chat-drawer-content"
     >
-      <v-toolbar color="surface" flat class="flex-grow-0 flex-shrink-0">
-        <v-btn icon variant="text" @click="dialogOpen = false">
-          <v-icon>mdi-close</v-icon>
-        </v-btn>
-        <v-toolbar-title class="font-weight-medium text-truncate">{{ activeTitle }}</v-toolbar-title>
-
-        <!-- 移动端会话选择器 -->
-        <v-menu v-if="!mdAndUp && conversations.length > 0" offset-y>
+      <!-- Chat header toolbar -->
+      <v-toolbar color="transparent" flat class="flex-grow-0 flex-shrink-0">
+        <!-- Mobile conversation selector -->
+        <v-menu v-if="!mdAndUp && conversations.length > 0" class="mobile-conversation-selector">
           <template #activator="{ props }">
             <v-btn icon variant="text" class="ml-2" v-bind="props">
               <v-icon>mdi-format-list-bulleted</v-icon>
               <v-tooltip activator="parent" location="bottom">切换对话</v-tooltip>
             </v-btn>
           </template>
-          <v-list density="compact" max-height="300px" class="overflow-y-auto">
-            <v-list-item
-              v-for="conv in conversations"
-              :key="conv.conversationId"
-              :active="conv.conversationId === activeConversationId"
-              @click="loadConversation(conv.conversationId)"
-            >
-              <v-list-item-title>{{ formatConversationTitle(conv.latestMessage?.question) }}</v-list-item-title>
-              <v-list-item-subtitle class="text-caption">{{
-                new Date(conv.updatedAt).toLocaleString()
-              }}</v-list-item-subtitle>
-            </v-list-item>
-          </v-list>
+          <ConversationGroupList
+            :conversations="conversations"
+            :active-conversation-id="activeConversationId"
+            @select="loadConversation"
+          >
+            <template #prepend>
+              <v-list-item color="primary" rounded="lg" @click="createNewConversation(true)">
+                <template #prepend>
+                  <v-icon>mdi-plus</v-icon>
+                </template>
+                <v-list-item-title>创建新对话</v-list-item-title>
+              </v-list-item>
+            </template>
+          </ConversationGroupList>
         </v-menu>
+        <v-btn v-if="mdAndUp" icon variant="text" @click="dialogOpen = false">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+        <v-btn v-if="mdAndUp" icon variant="text" @click="toggleFullScreen">
+          <v-icon>
+            {{ isFullScreen ? 'mdi-unfold-less-vertical' : 'mdi-unfold-more-vertical' }}
+          </v-icon>
+        </v-btn>
 
-        <v-spacer></v-spacer>
+        <v-toolbar-title class="font-weight-medium text-truncate">{{ activeTitle }}</v-toolbar-title>
+
+        <v-btn v-if="!mdAndUp" icon variant="text" @click="toggleFullScreen">
+          <v-icon>
+            {{ isFullScreen ? 'mdi-unfold-less-horizontal' : 'mdi-unfold-more-horizontal' }}
+          </v-icon>
+        </v-btn>
+
         <v-btn v-if="!mdAndUp" icon variant="text" @click="createNewConversation(true)">
           <v-icon>mdi-plus</v-icon>
           <v-tooltip activator="parent" location="bottom">创建新对话</v-tooltip>
@@ -51,7 +67,7 @@
       </v-toolbar>
 
       <div class="d-flex flex-grow-1 overflow-hidden">
-        <!-- 会话列表侧边栏 - 仅桌面端显示 -->
+        <!-- Sidebar - desktop only -->
         <div v-if="mdAndUp" class="conversation-sidebar">
           <ChatConversationsList
             :conversations="conversations"
@@ -101,7 +117,7 @@
               </div>
             </template>
 
-            <!-- 空状态 -->
+            <!-- Empty state -->
             <div v-else class="d-flex flex-column align-center justify-center h-100">
               <v-icon size="48" color="primary" class="mb-3">mdi-robot</v-icon>
               <div class="text-h6">有什么可以帮你？</div>
@@ -121,19 +137,11 @@
         </div>
       </div>
     </div>
-  </v-navigation-drawer>
+  </v-overlay>
 </template>
 
 <script setup lang="ts">
-import type {
-  ChatMessage,
-  ChatMessageNode,
-  ChatReference,
-  ChatService,
-  ContextChip,
-  ConversationBranch,
-  ConversationSummary,
-} from './types'
+import type { ChatMessage, ChatReference, ChatService, ContextChip, ConversationSummary } from './types'
 
 import { computed, nextTick, onMounted, onUnmounted, ref, toRefs, watch } from 'vue'
 import { useDisplay } from 'vuetify'
@@ -145,13 +153,16 @@ import { useScrollManager } from './composables/scrollManager'
 import ChatConversationsList from './ChatConversationsList.vue'
 import ChatInput from './ChatInput.vue'
 import ChatMessageComponent from './ChatMessage.vue'
+import ConversationGroupList from './ConversationGroupList.vue'
 import { ReasoningStatus } from './types'
 
 import { useDialog } from '@/plugins/dialog'
 
-// 获取屏幕尺寸
+// Get screen size
 const { mdAndUp } = useDisplay()
 const dialogs = useDialog()
+
+const isFullScreen = ref(false)
 
 const dialogOpen = defineModel<boolean>({ required: true })
 
@@ -169,6 +180,12 @@ const { contextId, context, chatService } = toRefs(props)
 const emit = defineEmits<{
   clearContext: []
 }>()
+
+const toggleFullScreen = () => {
+  isFullScreen.value = !isFullScreen.value
+}
+
+const outsideInclude = () => [document.querySelector('.mobile-conversation-selector')]
 
 // Initialize composables
 const treeManager = useConversationTree()
@@ -459,12 +476,6 @@ const handleSubmit = () => {
   }
 }
 
-const formatConversationTitle = (question?: string | null) => {
-  if (!question) return '新对话'
-  if (question.length <= 30) return question
-  return question.substring(0, 30) + '...'
-}
-
 // Handle branch from message
 const handleBranchFromMessage = (messageId: number, question: string) => {
   branchManager.handleBranchFromMessage(messageId, question, sendMessage)
@@ -510,9 +521,36 @@ defineExpose({
 </script>
 
 <style scoped>
-.chat-drawer-radius-top {
-  border-top-left-radius: 12px;
-  border-top-right-radius: 12px;
+.chat-drawer {
+  .chat-drawer-content {
+    position: absolute;
+    right: 0;
+    height: 100%;
+    width: 60vw;
+    transition: all 0.3s ease-in-out;
+  }
+
+  &.chat-drawer-full-screen {
+    .chat-drawer-content {
+      width: 100%;
+    }
+  }
+
+  &.chat-drawer-mobile {
+    .chat-drawer-content {
+      position: absolute;
+      bottom: 0;
+      border-radius: 12px 12px 0 0;
+      width: 100%;
+      height: 80vh;
+    }
+
+    &.chat-drawer-full-screen {
+      .chat-drawer-content {
+        height: 100%;
+      }
+    }
+  }
 }
 
 .conversation-sidebar {
