@@ -217,7 +217,7 @@
 </template>
 
 <script lang="tsx" setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, defineAsyncComponent, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { onBeforeRouteUpdate, useRoute } from 'vue-router'
 import { toast } from 'vuetify-sonner'
@@ -232,14 +232,15 @@ import { getAvatarUrl } from '@/utils/materials'
 import { setTitle } from '@/utils/title'
 
 import AvatarUploader from '@/components/common/AvatarUploader.vue'
-import TipTapEditor from '@/components/common/Editor/TipTapEditor.vue'
-import TipTapViewer from '@/components/common/Editor/TipTapViewer.vue'
 import { AvatarsApi } from '@/network/api/avatars'
 import { SpacesApi } from '@/network/api/spaces'
 import { useDialog } from '@/plugins/dialog'
 import AccountService from '@/services/account'
 import { useSpaceStore } from '@/store/space'
 import { SpaceAnnouncement } from '@/types'
+
+const TipTapEditor = defineAsyncComponent(() => import('@/components/common/Editor/TipTapEditor.vue'))
+const TipTapViewer = defineAsyncComponent(() => import('@/components/common/Editor/TipTapViewer.vue'))
 
 const route = useRoute()
 const dialog = useDialog()

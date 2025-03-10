@@ -1,5 +1,3 @@
-import 'katex/dist/katex.css'
-
 import katex, { type KatexOptions } from 'katex'
 import { MarkedExtension, TokenizerAndRendererExtension } from 'marked'
 

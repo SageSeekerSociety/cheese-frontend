@@ -21,15 +21,16 @@
 <script setup lang="ts">
 import type { TaskFormSubmitData, TaskSubmissionSchemaEntry } from '@/types'
 
-import { onMounted, ref } from 'vue'
+import { defineAsyncComponent, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vuetify-sonner'
 import { storeToRefs } from 'pinia'
 
-import TaskForm from '@/components/tasks/TaskForm.vue'
 import { TasksApi } from '@/network/api/tasks'
 import { useSpaceStore } from '@/store/space'
+
+const TaskForm = defineAsyncComponent(() => import('@/components/tasks/TaskForm.vue'))
 
 const router = useRouter()
 const route = useRoute()

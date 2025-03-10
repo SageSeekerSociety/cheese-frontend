@@ -295,11 +295,11 @@
 <script setup lang="ts">
 import type { TaskAIAdvice, TaskAIAdviceConversationContext } from '@/network/api/tasks/types'
 
-import { nextTick, ref } from 'vue'
-
-import AIAdviceChatDialog from './AIAdviceChatDialog.vue'
+import { defineAsyncComponent, nextTick, ref } from 'vue'
 
 import { TaskSubmitterType } from '@/types'
+
+const AIAdviceChatDialog = defineAsyncComponent(() => import('./AIAdviceChatDialog.vue'))
 
 const props = defineProps<{
   taskId: number

@@ -106,7 +106,7 @@
                   "
                   :is-branch-point="treeManager.isBranchPoint(msg)"
                   :parent-branch-children="
-                    msg.parentId ? treeManager.getBranchChildren(msg.parentId) : treeManager.rootNodes
+                    msg.parentId ? treeManager.getBranchChildren(msg.parentId) : treeManager.rootNodes.value
                   "
                   :current-branch-index="treeManager.getBranchIndex(msg)"
                   :branch-count="treeManager.getBranchCount(msg)"

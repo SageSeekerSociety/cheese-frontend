@@ -2,7 +2,7 @@ import 'resize-observer-polyfill'
 
 import type { App } from 'vue'
 
-import { debounce } from 'lodash'
+import { debounce } from 'lodash-es'
 
 export function registerDirectives(app: App) {
   app.directive('observe-height', {

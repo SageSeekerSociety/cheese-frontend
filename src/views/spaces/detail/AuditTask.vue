@@ -100,7 +100,7 @@
 <script setup lang="ts">
 import type { Task } from '@/types'
 
-import { onMounted, ref } from 'vue'
+import { defineAsyncComponent, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vuetify-sonner'
 import dayjs from 'dayjs'
@@ -108,11 +108,12 @@ import { storeToRefs } from 'pinia'
 
 import { createEmptyResult, usePaging } from '@/utils/paging'
 
-import TipTapViewer from '@/components/common/Editor/TipTapViewer.vue'
 import InfiniteScroll from '@/components/common/InfiniteScroll.vue'
 import { TasksApi } from '@/network/api/tasks'
 import { CancelError, useDialog } from '@/plugins/dialog'
 import { useSpaceStore } from '@/store/space'
+
+const TipTapViewer = defineAsyncComponent(() => import('@/components/common/Editor/TipTapViewer.vue'))
 
 const spaceStore = useSpaceStore()
 const { currentSpaceId } = storeToRefs(spaceStore)
