@@ -89,7 +89,6 @@ import { startAuthentication } from '@simplewebauthn/browser'
 import { browserSupportsWebAuthn } from '@simplewebauthn/browser'
 import { toTypedSchema } from '@vee-validate/zod'
 import * as srp from 'secure-remote-password/client'
-import * as srpParams from 'secure-remote-password/lib/params'
 import { useForm } from 'vee-validate'
 import { z } from 'zod'
 
