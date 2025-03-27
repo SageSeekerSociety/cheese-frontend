@@ -1,18 +1,6 @@
 <template>
   <div class="d-flex flex-column gap-3">
-    <!-- 添加浮动的 AI 对话按钮 -->
-    <v-fade-transition>
-      <v-fab
-        class="ai-chat-fab"
-        app
-        color="primary"
-        extended
-        prepend-icon="mdi-creation"
-        text="与 AI 助手对话"
-        :active="!chatDialogOpen"
-        @click="openGeneralChat"
-      ></v-fab>
-    </v-fade-transition>
+    <!-- 移除浮动的 AI 对话按钮，已移至Detail.vue -->
 
     <v-alert
       type="warning"
@@ -86,7 +74,7 @@
                         variant="text"
                         density="comfortable"
                         color="primary"
-                        @click="openChat('knowledge_fields', index)"
+                        @click="handleOpenChat('knowledge_fields', index)"
                       >
                       </v-btn>
                     </div>
@@ -100,7 +88,7 @@
                           color="primary"
                           variant="flat"
                           class="text-caption"
-                          @click="openChat('knowledge_fields', index, q)"
+                          @click="handleOpenChat('knowledge_fields', index, q)"
                         >
                           {{ q }}
                         </v-chip>
@@ -161,7 +149,7 @@
                             color="primary"
                             variant="flat"
                             class="text-caption"
-                            @click="openChat('learning_paths', index, q)"
+                            @click="handleOpenChat('learning_paths', index, q)"
                           >
                             {{ q }}
                           </v-chip>
@@ -211,7 +199,7 @@
                             color="primary"
                             variant="flat"
                             class="text-caption"
-                            @click="openChat('methodology', index, q)"
+                            @click="handleOpenChat('methodology', index, q)"
                           >
                             {{ q }}
                           </v-chip>
@@ -255,7 +243,7 @@
                                 color="primary"
                                 variant="flat"
                                 class="text-caption"
-                                @click="openChat('team_tips', index, q)"
+                                @click="handleOpenChat('team_tips', index, q)"
                               >
                                 {{ q }}
                               </v-chip>
@@ -281,25 +269,16 @@
       </v-container>
     </template>
 
-    <!-- 对话框组件 -->
-    <AIAdviceChatDialog
-      ref="chatDialogRef"
-      v-model="chatDialogOpen"
-      :task-id="taskId"
-      :context="selectedContext"
-      @clear-context="clearContext"
-    />
+    <!-- 移除对话框组件，已移至Detail.vue -->
   </div>
 </template>
 
 <script setup lang="ts">
 import type { TaskAIAdvice, TaskAIAdviceConversationContext } from '@/network/api/tasks/types'
 
-import { defineAsyncComponent, nextTick, ref } from 'vue'
+import { inject } from 'vue'
 
 import { TaskSubmitterType } from '@/types'
-
-const AIAdviceChatDialog = defineAsyncComponent(() => import('./AIAdviceChatDialog.vue'))
 
 const props = defineProps<{
   taskId: number
@@ -313,9 +292,15 @@ defineEmits<{
   (e: 'retry'): void
 }>()
 
-const chatDialogRef = ref<InstanceType<typeof AIAdviceChatDialog> | null>(null)
-const chatDialogOpen = ref(false)
-const selectedContext = ref<TaskAIAdviceConversationContext | undefined>()
+const aiChat = inject('aiChat') as {
+  openChat: (
+    section: TaskAIAdviceConversationContext['section'],
+    index: number,
+    question?: string,
+    displayName?: string
+  ) => void
+  openGeneralChat: () => void
+}
 
 const getResourceIcon = (type: string) => {
   const icons: Record<string, string> = {
@@ -327,11 +312,6 @@ const getResourceIcon = (type: string) => {
     website: 'mdi-web',
   }
   return icons[type.toLowerCase()] || 'mdi-link'
-}
-
-const clearContext = () => {
-  selectedContext.value = undefined
-  console.trace('clearContext', selectedContext.value)
 }
 
 const getDisplayName = (section: TaskAIAdviceConversationContext['section'], index: number) => {
@@ -347,27 +327,12 @@ const getDisplayName = (section: TaskAIAdviceConversationContext['section'], ind
   if (section === 'team_tips') {
     return props.advice?.team_tips?.[index]?.role
   }
-  return null
+  return undefined
 }
 
-const openChat = (section: TaskAIAdviceConversationContext['section'], index: number, question?: string) => {
-  selectedContext.value = { section, index, displayName: getDisplayName(section, index) }
-
-  // 如果传入了问题，使用nextTick确保对话框已打开后再发送
-  nextTick(() => {
-    chatDialogOpen.value = true
-    nextTick(() => {
-      if (question && chatDialogRef.value) {
-        console.log('openChat', selectedContext.value)
-        chatDialogRef.value.sendMessage(question)
-      }
-    })
-  })
-}
-
-const openGeneralChat = () => {
-  clearContext()
-  chatDialogOpen.value = true
+const handleOpenChat = (section: TaskAIAdviceConversationContext['section'], index: number, question?: string) => {
+  const displayName = getDisplayName(section, index)
+  aiChat.openChat(section, index, question, displayName)
 }
 </script>
 
@@ -432,19 +397,5 @@ const openGeneralChat = () => {
 
 .team-role-number {
   box-shadow: 0 0 0 2px white;
-}
-
-.ai-chat-fab {
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  z-index: 100;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.ai-chat-fab:hover {
-  transform: scale(1.05);
 }
 </style>

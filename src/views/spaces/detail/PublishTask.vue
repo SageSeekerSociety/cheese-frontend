@@ -19,7 +19,13 @@
 </template>
 
 <script setup lang="ts">
-import type { TaskFormSubmitData, TaskSubmissionSchemaEntry } from '@/types'
+import type { TaskSubmissionSchemaEntry } from '@/types'
+import type { TaskFormSubmitData as BaseTaskFormSubmitData } from '@/types'
+
+// Extended interface that includes requireRealName
+interface TaskFormSubmitData extends BaseTaskFormSubmitData {
+  requireRealName?: boolean
+}
 
 import { defineAsyncComponent, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -28,7 +34,7 @@ import { toast } from 'vuetify-sonner'
 import { storeToRefs } from 'pinia'
 
 import { TasksApi } from '@/network/api/tasks'
-import { useSpaceStore } from '@/store/space'
+import { useSpaceStore } from '@/stores/space'
 
 const TaskForm = defineAsyncComponent(() => import('@/components/tasks/TaskForm.vue'))
 
@@ -73,7 +79,12 @@ const submitTask = async (taskData: TaskFormSubmitData) => {
       data: {
         task: { approved },
       },
-    } = await TasksApi.create({ ...taskData, submissionSchema: taskSubmissionSchema.value, space: spaceId })
+    } = await TasksApi.create({
+      ...taskData,
+      submissionSchema: taskSubmissionSchema.value,
+      space: spaceId,
+      requireRealName: taskData.requireRealName || false,
+    })
     if (!approved) {
       toast.success(t('spaces.detail.publishTask.createSuccessAndWaitingAudit'))
     } else {

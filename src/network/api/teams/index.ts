@@ -17,7 +17,7 @@ export namespace TeamsApi {
   }
 
   export type PostTeamMemberRequestData = {
-    userId: number
+    user_id: number
     role: 'OWNER' | 'ADMIN' | 'MEMBER'
   }
 

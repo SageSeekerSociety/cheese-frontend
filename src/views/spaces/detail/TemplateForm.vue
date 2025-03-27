@@ -53,7 +53,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vuetify-sonner'
 import { storeToRefs } from 'pinia'
 
-import { useSpaceStore } from '@/store/space'
+import { useSpaceStore } from '@/stores/space'
 
 const TipTapEditor = defineAsyncComponent(() => import('@/components/common/Editor/TipTapEditor.vue'))
 

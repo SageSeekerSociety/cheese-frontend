@@ -7,16 +7,10 @@ import { computed } from 'vue'
 
 import { API_BASE_URL } from '@/network/utils'
 
-const { avatar, size } = withDefaults(
-  defineProps<{
-    avatar: string
-    size?: string | number
-  }>(),
-  {
-    avatar: () => '',
-    size: () => 48,
-  }
-)
+const { avatar = '', size = 48 } = defineProps<{
+  avatar: string
+  size?: string | number
+}>()
 
 const hasAvatar = computed(() => !!avatar)
 

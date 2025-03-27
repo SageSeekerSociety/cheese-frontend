@@ -1,5 +1,7 @@
 import type { Answer, Page, Question, User } from '@/types'
 
+export type { Page }
+
 export type GetAnswerListResponse = {
   answers: Answer[]
   page: Page
@@ -73,4 +75,48 @@ export interface TokenPayload {
     signedAt: number
     validUntil: number
   }
+}
+
+// 实名信息类型
+export interface RealNameInfo {
+  realName: string
+  studentId: string
+  grade: string
+  major: string
+  className: string
+  phone?: string
+  email?: string
+  isEncrypted?: boolean
+}
+
+// 实名信息访问模块类型
+export enum UserIdentityAccessModuleType {
+  TASK = 'TASK',
+}
+
+// 实名信息访问类型
+export enum UserIdentityAccessType {
+  VIEW = 'VIEW',
+  EXPORT = 'EXPORT',
+}
+
+// 实名信息访问日志
+export interface UserIdentityAccessLog {
+  accessor: User
+  accessModuleType?: UserIdentityAccessModuleType
+  accessEntityId?: number
+  accessEntityName?: string
+  accessTime: number
+  accessType: UserIdentityAccessType
+  ipAddress: string
+}
+
+export type GetRealNameInfoResponse = {
+  hasIdentity: boolean
+  identity?: RealNameInfo
+}
+
+export type UpdateRealNameInfoResponse = {
+  success: boolean
+  realNameInfo: RealNameInfo
 }

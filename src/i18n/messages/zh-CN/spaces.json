@@ -7,6 +7,10 @@
     "cancel": "取消",
     "update": "更新",
     "publishAnnouncement": "发布公告",
+    "announcements": "公告板",
+    "noAnnouncements": "暂无公告",
+    "showMore": "查看更多",
+    "showLess": "收起",
     "allCategories": "全部分类",
     "contests": "赛题",
     "allContests": "全部赛题",
@@ -15,6 +19,7 @@
     "adminOperations": "管理员操作",
     "auditContests": "审核赛题",
     "editAnnouncement": "编辑公告",
+    "deleteAnnouncement": "删除公告",
     "announcementTitle": "公告标题",
     "announcementContent": "公告内容",
     "publish": "发布",
@@ -102,7 +107,8 @@
       "noTasks": "暂无赛题",
       "getSpaceDetailsFailed": "获取空间详情失败:",
       "topic": "话题",
-      "allTopics": "全部话题"
+      "allTopics": "全部话题",
+      "moreTopics": "更多话题"
     },
     "templateForm": {
       "editTitle": "编辑赛题模板",

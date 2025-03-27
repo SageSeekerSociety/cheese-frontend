@@ -9,7 +9,7 @@ import refreshToken from './hooks/refreshToken'
 const handleError = (error: AxiosError<ResponseDataType>) => {
   const response = error.response?.data
   if (response && response.message) {
-    return Promise.reject(new ServerError(response.message))
+    return Promise.reject(new ServerError(response.message, response.code))
   }
   return Promise.reject(error)
 }

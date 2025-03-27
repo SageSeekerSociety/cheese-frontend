@@ -1,6 +1,22 @@
-import type { TaskSubmissionSchemaEntry } from '@/types'
+import type { TaskSubmissionSchemaEntry, TaskSubmitterType } from '@/types'
 
 import { ChatContext } from '@/components/chat'
+
+// 添加参与者身份类型
+export interface TaskParticipationIdentity {
+  id: number
+  type: TaskSubmitterType
+  memberId: number
+  teamName?: string
+  canSubmit: boolean
+  approved: 'NONE' | 'APPROVED' | 'DISAPPROVED'
+}
+
+// 添加参与信息类型
+export interface TaskParticipationInfo {
+  hasParticipation: boolean
+  identities: TaskParticipationIdentity[]
+}
 
 export type PostTaskRequestData = {
   name: string
@@ -13,6 +29,7 @@ export type PostTaskRequestData = {
   submissionSchema: TaskSubmissionSchemaEntry[]
   team?: number
   space?: number
+  requireRealName?: boolean
 }
 
 export type PatchTaskRequestData = {
@@ -25,16 +42,32 @@ export type PatchTaskRequestData = {
   submissionSchema?: TaskSubmissionSchemaEntry[]
   approved?: 'APPROVED' | 'DISAPPROVED' | 'NONE'
   rejectReason?: string
+  requireRealName?: boolean
+}
+
+export type AddTaskParticipantRequestData = {
+  deadline: number | null
+  email?: string
+  phone?: string
+  applyReason?: string
+  personalAdvantage?: string
+  remark?: string
 }
 
 export type PatchTaskParticipantRequestData = {
   deadline?: number
   approved?: 'APPROVED' | 'DISAPPROVED' | 'NONE'
+  rejectReason?: string
+  email?: string
+  phone?: string
+  applyReason?: string
+  personalAdvantage?: string
+  remark?: string
 }
 
 export type PostTaskSubmissionRequestData = {
-  contentText?: string
-  contentAttachmentId?: number
+  text?: string
+  attachmentId?: number
 }
 
 export type PostTaskSubmissionReviewRequestData = {
@@ -145,4 +178,23 @@ export enum ReasoningStatus {
   NONE = 'none',
   REASONING = 'reasoning',
   COMPLETED = 'completed',
+}
+
+// 队伍成员实名状态
+export interface TeamMemberRealNameStatus {
+  memberId: number
+  hasRealNameInfo: boolean
+  userName: string
+}
+
+// 队伍摘要信息
+export interface TeamSummary {
+  id: number
+  name: string
+  intro: string
+  avatarId: number
+  allMembersVerified: boolean
+  memberRealNameStatus?: TeamMemberRealNameStatus[]
+  updatedAt: number
+  createdAt: number
 }

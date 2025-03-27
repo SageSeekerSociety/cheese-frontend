@@ -36,7 +36,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 
-import { useSpaceStore } from '@/store/space'
+import { useSpaceStore } from '@/stores/space'
 
 const router = useRouter()
 const route = useRoute()

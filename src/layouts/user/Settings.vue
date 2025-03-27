@@ -87,6 +87,20 @@ const tabs = [
     icon: 'mdi-account',
   },
   {
+    label: '实名信息',
+    route: {
+      name: 'UserSettingsRealName',
+    },
+    icon: 'mdi-account-card',
+  },
+  {
+    label: '隐私中心',
+    route: {
+      name: 'UserPrivacyCenter',
+    },
+    icon: 'mdi-shield-lock',
+  },
+  {
     label: '密码与安全',
     route: {
       name: 'UserSettingsSecurity',

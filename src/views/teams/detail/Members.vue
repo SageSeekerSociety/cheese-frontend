@@ -1,11 +1,17 @@
 <template>
-  <v-card flat rounded="lg">
-    <template #title>
-      <v-icon left size="24">mdi-account-group</v-icon>
-      全部成员
+  <v-container class="px-6 py-4">
+    <!-- 操作区 -->
+    <div class="d-flex align-center mb-4">
+      <v-spacer></v-spacer>
       <v-dialog v-model="isInviteDialogActive" max-width="500">
         <template #activator="{ props: activatorProps }">
-          <v-btn v-if="isSelfOwner" v-bind="activatorProps" color="primary" variant="tonal" size="small">
+          <v-btn
+            v-if="isSelfOwner"
+            v-bind="activatorProps"
+            color="primary"
+            prepend-icon="mdi-account-plus"
+            size="small"
+          >
             邀请成员
           </v-btn>
         </template>
@@ -14,79 +20,93 @@
           <v-form @submit.prevent="confirmInvite">
             <v-card title="邀请成员">
               <v-card-text>
-                <div class="text-caption">当前只支持通过 UID 邀请成员</div>
-                <v-text-field v-model.number="inviteUidInput" label="UID" />
+                <div class="text-caption mb-2">当前只支持通过 UID 邀请成员</div>
+                <v-text-field v-model.number="inviteUidInput" label="UID" variant="outlined" hide-details />
               </v-card-text>
 
               <v-card-actions>
                 <v-spacer></v-spacer>
-
-                <v-btn type="button" @click="isActive.value = false">取消</v-btn>
-                <v-btn type="submit">邀请</v-btn>
+                <v-btn type="button" variant="text" @click="isActive.value = false">取消</v-btn>
+                <v-btn type="submit" color="primary" variant="tonal">邀请</v-btn>
               </v-card-actions>
             </v-card>
           </v-form>
         </template>
       </v-dialog>
-    </template>
-    <template #text>
+    </div>
+
+    <!-- 成员列表 -->
+    <v-card flat rounded="lg">
       <v-list>
-        <v-list-item v-for="member in teamMembers" :key="member.user.id">
+        <v-list-item v-for="member in teamMembers" :key="member.user.id" class="member-item">
           <template #prepend>
-            <v-avatar size="32" color="grey-lighten-2">
+            <v-avatar size="40" color="grey-lighten-2" class="mr-3">
               <v-img :src="getAvatarUrl(member.user.avatarId)" />
             </v-avatar>
           </template>
-          <template #title>
+          <v-list-item-title class="font-weight-medium">
             {{ member.user.nickname }}
-            <v-chip v-if="member.role === 'OWNER'" color="primary" size="small" variant="tonal">队长</v-chip>
-            <v-chip v-else-if="member.role === 'ADMIN'" color="secondary" size="small" variant="tonal">管理员</v-chip>
-          </template>
+            <v-chip v-if="member.role === 'OWNER'" color="primary" size="small" variant="tonal" class="ml-2"
+              >队长</v-chip
+            >
+            <v-chip v-else-if="member.role === 'ADMIN'" color="secondary" size="small" variant="tonal" class="ml-2"
+              >管理员</v-chip
+            >
+          </v-list-item-title>
           <template #append>
-            <v-tooltip v-if="isSelfOwner && member.role === 'MEMBER'">
-              <template #activator="{ props: activatorProps }">
-                <v-btn
-                  v-bind="activatorProps"
-                  icon="mdi-account-arrow-up"
-                  variant="text"
-                  color="primary"
-                  size="small"
-                  @click="promoteToAdmin(member.user.id)"
-                ></v-btn>
-              </template>
-              <span>提升为管理员</span>
-            </v-tooltip>
-            <v-tooltip v-if="isSelfOwner && member.role === 'ADMIN'">
-              <template #activator="{ props: activatorProps }">
-                <v-btn
-                  v-bind="activatorProps"
-                  icon="mdi-account-arrow-down"
-                  variant="text"
-                  color="primary"
-                  size="small"
-                  @click="demoteToMember(member.user.id)"
-                ></v-btn>
-              </template>
-              <span>降级为成员</span>
-            </v-tooltip>
-            <v-tooltip v-if="isSelfOwner && member.role !== 'OWNER'">
-              <template #activator="{ props: activatorProps }">
-                <v-btn
-                  v-bind="activatorProps"
-                  icon="mdi-delete"
-                  variant="text"
-                  color="primary"
-                  size="small"
-                  @click="removeMember(member.user.id)"
-                ></v-btn>
-              </template>
-              <span>移除成员</span>
-            </v-tooltip>
+            <div class="d-flex align-center">
+              <v-tooltip v-if="isSelfOwner && member.role === 'MEMBER'" location="bottom">
+                <template #activator="{ props: activatorProps }">
+                  <v-btn
+                    v-bind="activatorProps"
+                    icon="mdi-account-arrow-up"
+                    variant="text"
+                    color="primary"
+                    size="small"
+                    @click="promoteToAdmin(member.user.id)"
+                  ></v-btn>
+                </template>
+                <span>提升为管理员</span>
+              </v-tooltip>
+              <v-tooltip v-if="isSelfOwner && member.role === 'ADMIN'" location="bottom">
+                <template #activator="{ props: activatorProps }">
+                  <v-btn
+                    v-bind="activatorProps"
+                    icon="mdi-account-arrow-down"
+                    variant="text"
+                    color="primary"
+                    size="small"
+                    @click="demoteToMember(member.user.id)"
+                  ></v-btn>
+                </template>
+                <span>降级为成员</span>
+              </v-tooltip>
+              <v-tooltip v-if="isSelfOwner && member.role !== 'OWNER'" location="bottom">
+                <template #activator="{ props: activatorProps }">
+                  <v-btn
+                    v-bind="activatorProps"
+                    icon="mdi-delete"
+                    variant="text"
+                    color="error"
+                    size="small"
+                    @click="removeMember(member.user.id)"
+                  ></v-btn>
+                </template>
+                <span>移除成员</span>
+              </v-tooltip>
+            </div>
           </template>
         </v-list-item>
       </v-list>
-    </template>
-  </v-card>
+    </v-card>
+
+    <!-- 无成员时的提示 -->
+    <div v-if="teamMembers.length === 0" class="text-center py-12">
+      <v-icon icon="mdi-account-group" size="64" color="grey-lighten-2" class="mb-4"></v-icon>
+      <h3 class="text-h6 font-weight-medium mb-2">暂无成员</h3>
+      <p class="text-body-2 text-medium-emphasis mb-6">邀请成员加入小队，开始协作</p>
+    </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -127,9 +147,9 @@ const confirmInvite = async () => {
     return
   }
   try {
-    const { data } = await TeamsApi.addMember(teamData.value.id, {
+    await TeamsApi.addMember(teamData.value.id, {
       role: 'MEMBER',
-      userId: inviteUidInput.value,
+      user_id: inviteUidInput.value,
     })
     toast.success('邀请成功')
   } catch (error) {
@@ -191,3 +211,15 @@ onMounted(async () => {
   await fetchTeamMembers(Number(route.params.teamId))
 })
 </script>
+
+<style scoped lang="scss">
+.member-item {
+  transition: background-color 0.2s ease;
+  border-radius: 8px;
+  margin-bottom: 2px;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+  }
+}
+</style>

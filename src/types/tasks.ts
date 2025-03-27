@@ -34,14 +34,9 @@ export interface Task {
   rank: number
   approved: 'APPROVED' | 'DISAPPROVED' | 'NONE'
   rejectReason?: string
+  requireRealName: boolean
   joined?: boolean
-  joinedAsTeam?: Team[]
-  joinedApproved?: boolean
-  joinedApprovedAsTeam?: Team[]
-  joinedDisapproved?: boolean
-  joinedDisapprovedAsTeam?: Team[]
-  joinedNotApprovedOrDisapproved?: boolean
-  joinedNotApprovedOrDisapprovedAsTeam?: Team[]
+  joinedTeams?: Team[]
   topics?: Topic[]
 }
 

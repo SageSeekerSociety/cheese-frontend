@@ -62,6 +62,9 @@ dependencies:
   '@tiptap/extension-document':
     specifier: ^2.11.5
     version: 2.11.5(@tiptap/core@2.11.5)
+  '@tiptap/extension-hard-break':
+    specifier: ^2.11.5
+    version: 2.11.5(@tiptap/core@2.11.5)
   '@tiptap/extension-link':
     specifier: ^2.11.5
     version: 2.11.5(@tiptap/core@2.11.5)(@tiptap/pm@2.11.5)

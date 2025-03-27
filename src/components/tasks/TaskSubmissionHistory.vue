@@ -1,9 +1,9 @@
 <template>
   <div class="d-flex flex-column ga-2 w-100 align-stretch">
-    <v-card v-if="submissions.length" flat rounded="lg">
-      <template #title> 最新提交 </template>
+    <v-card v-if="submissions.length" flat rounded="lg" :class="{ border: outlined, 'mb-4': !isDialog }">
+      <template v-if="!hideTitle" #title> {{ title || '最新提交' }} </template>
       <template #text>
-        <v-card border flat rounded="lg" class="pa-4">
+        <v-card border flat rounded="lg" class="pa-4" :class="{ 'gradient-card': highlightLatest }">
           <div class="d-flex flex-row align-center mb-2">
             <v-chip color="primary" variant="tonal" size="small"> #{{ latestSubmission.version }} </v-chip>
             <span class="ml-2"> 提交于 {{ dayjs(latestSubmission.createdAt).format('YYYY-MM-DD HH:mm') }} </span>
@@ -56,8 +56,8 @@
       </template>
     </v-card>
 
-    <v-card flat rounded="lg">
-      <template v-if="submissions.length" #title> 历史提交 </template>
+    <v-card v-if="showHistory" flat rounded="lg" :class="{ border: outlined }">
+      <template v-if="submissions.length && !hideHistoryTitle" #title> {{ historyTitle || '历史提交' }} </template>
       <infinite-scroll
         :has-more="hasMore"
         :loading="loadingMore"
@@ -67,7 +67,7 @@
         @load-more="loadMore"
       >
         <template #empty>
-          <v-empty-state title="暂无历史提交记录" />
+          <v-empty-state :title="emptyText" />
         </template>
         <v-expansion-panels>
           <template v-for="submission in submissions.slice(1)" :key="submission.id">
@@ -126,27 +126,43 @@ import SubmissionReviewStatus from './SubmissionReviewStatus.vue'
 import InfiniteScroll from '@/components/common/InfiniteScroll.vue'
 import { TasksApi } from '@/network/api/tasks'
 
-const {
-  taskId,
-  memberId,
-  reviewable = false,
-} = defineProps<{
+interface Props {
   taskId: number
-  memberId: number
+  participantId: number
   reviewable?: boolean
-}>()
+  showHistory?: boolean
+  hideTitle?: boolean
+  hideHistoryTitle?: boolean
+  title?: string
+  historyTitle?: string
+  emptyText?: string
+  outlined?: boolean
+  highlightLatest?: boolean
+  isDialog?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  reviewable: false,
+  showHistory: true,
+  hideTitle: false,
+  hideHistoryTitle: false,
+  title: '',
+  historyTitle: '',
+  emptyText: '暂无历史提交记录',
+  outlined: false,
+  highlightLatest: false,
+  isDialog: false,
+})
 
 const {
   data: submissions,
-  error,
   refresh,
   loadMore,
   hasMore,
   refreshing,
   loadingMore,
 } = usePaging(async (pageStart) => {
-  const { data } = await TasksApi.listSubmissions(taskId, {
-    member: memberId,
+  const { data } = await TasksApi.listSubmissions(props.taskId, props.participantId, {
     allVersions: true,
     sort_by: 'createdAt',
     sort_order: 'desc',
@@ -158,7 +174,6 @@ const {
 })
 
 const latestSubmission = computed(() => submissions.value[0])
-const historySubmissions = computed(() => submissions.value.slice(1))
 
 const calcSubmissionReviewColor = (review: TaskSubmissionReview) => {
   if (!review) {
@@ -197,7 +212,7 @@ const [comment, commentProps] = defineField('comment', vuetifyConfig)
 const submitReview = handleSubmit(async (values) => {
   if (latestSubmission.value.review && latestSubmission.value.review.reviewed) {
     try {
-      await TasksApi.patchSubmissionReview(latestSubmission.value.id, values)
+      await TasksApi.patchSubmissionReview(props.taskId, props.participantId, latestSubmission.value.id, values)
       toast.success('修改评审成功')
     } catch (error) {
       toast.error('修改评审失败')
@@ -207,7 +222,7 @@ const submitReview = handleSubmit(async (values) => {
     }
   } else {
     try {
-      await TasksApi.postSubmissionReview(latestSubmission.value.id, values)
+      await TasksApi.postSubmissionReview(props.taskId, props.participantId, latestSubmission.value.id, values)
       toast.success('评审成功')
     } catch (error) {
       toast.error('评审失败')
@@ -221,7 +236,7 @@ const submitReview = handleSubmit(async (values) => {
 const cancelReview = async () => {
   if (latestSubmission.value.review) {
     try {
-      await TasksApi.deleteSubmissionReview(latestSubmission.value.id)
+      await TasksApi.deleteSubmissionReview(props.taskId, props.participantId, latestSubmission.value.id)
       toast.success('取消评审成功')
     } catch (error) {
       toast.error('取消评审失败')
@@ -234,10 +249,10 @@ const cancelReview = async () => {
 
 onMounted(refresh)
 
-watch(() => [taskId, memberId], refresh)
+watch(() => [props.taskId, props.participantId], refresh)
 
 watch(latestSubmission, (newVal) => {
-  if (reviewable && newVal.review) {
+  if (props.reviewable && newVal.review) {
     if (newVal.review.reviewed) {
       accepted.value = newVal.review.detail.accepted
       score.value = newVal.review.detail.score
@@ -254,5 +269,12 @@ defineExpose({
 </script>
 
 <style scoped>
-/* 移除了 .file-card 样式,因为它现在在 SubmissionContentCard 组件中 */
+.gradient-card {
+  background: linear-gradient(to right bottom, rgba(var(--v-theme-primary), 0.05), rgba(var(--v-theme-primary), 0.01));
+  border: 1px solid rgba(var(--v-theme-primary), 0.1);
+}
+
+.border {
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
 </style>

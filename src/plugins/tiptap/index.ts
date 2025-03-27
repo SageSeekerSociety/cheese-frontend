@@ -28,6 +28,7 @@ import {
   TextAlign,
   Underline,
 } from 'vuetify-pro-tiptap'
+import HardBreak from '@tiptap/extension-hard-break'
 
 import { AttachmentImage } from './extensions/image'
 
@@ -43,6 +44,7 @@ export const vuetifyProTipTap = createVuetifyProTipTap({
         placeholder: '输入内容...',
       },
     }),
+    HardBreak,
     Bold,
     Italic,
     Underline,

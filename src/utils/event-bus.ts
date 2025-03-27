@@ -66,4 +66,6 @@ export class EventBus<Events extends Record<string, any>> {
   }
 }
 
-export const eventBus = new EventBus<{ 'question:refresh': never }>()
+export const eventBus = new EventBus<{
+  'question:refresh': never
+}>()
