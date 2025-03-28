@@ -22,7 +22,6 @@
               label="用户名"
               variant="outlined"
               prepend-inner-icon="mdi-account"
-              :loading="isSubmitting"
               v-bind="usernameProps"
             />
 
@@ -32,16 +31,14 @@
               type="password"
               variant="outlined"
               prepend-inner-icon="mdi-lock"
-              :loading="isSubmitting"
               v-bind="passwordProps"
             />
 
             <div class="d-flex justify-space-between align-center mb-4">
               <v-checkbox v-model="agree" density="compact" class="flex-grow-0" hide-details="auto" v-bind="agreeProps">
                 <template #label>
-                  <span class="text-caption"
-                    >同意 <a href="#" class="text-primary">用户协议</a>和
-                    <a href="#" class="text-primary">隐私政策</a>
+                  <span class="text-caption">
+                    同意<a href="#" class="text-primary">用户协议</a>和<a href="#" class="text-primary">隐私政策</a>
                   </span>
                 </template>
               </v-checkbox>
@@ -75,7 +72,9 @@
             <v-icon start icon="mdi-key-chain" />
             使用通行密钥登录
           </v-btn>
-          <div v-if="!webAuthnSupported" class="text-caption text-medium-emphasis mt-2">当前浏览器不支持通行密钥</div>
+          <div v-if="!webAuthnSupported" class="text-caption text-medium-emphasis mt-2 text-center">
+            当前环境暂不支持通行密钥
+          </div>
         </div>
       </v-fade-transition>
     </v-card-text>
@@ -158,6 +157,7 @@ const login = handleSubmit(async (value) => {
       // 4. 发送客户端证明到服务器
       const srpVerifyResponse = await UserApi.srpVerify({
         username: value.username,
+        clientPublicEphemeral: clientEphemeral.public,
         clientProof: clientSession.proof,
       })
       const { serverProof, accessToken, requires2FA, tempToken, user } = srpVerifyResponse.data

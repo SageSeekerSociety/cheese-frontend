@@ -72,7 +72,7 @@ import type { Topic } from '@/types'
 
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { debounce } from 'lodash'
+import { debounce } from 'lodash-es'
 
 import { TopicsApi } from '@/network/api/topics'
 

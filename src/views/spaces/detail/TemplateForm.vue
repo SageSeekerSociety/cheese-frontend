@@ -47,14 +47,15 @@
 <script setup lang="ts">
 import type { JSONContent } from 'vuetify-pro-tiptap'
 
-import { computed, onMounted, ref } from 'vue'
+import { computed, defineAsyncComponent, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vuetify-sonner'
 import { storeToRefs } from 'pinia'
 
-import TipTapEditor from '@/components/common/Editor/TipTapEditor.vue'
 import { useSpaceStore } from '@/store/space'
+
+const TipTapEditor = defineAsyncComponent(() => import('@/components/common/Editor/TipTapEditor.vue'))
 
 const router = useRouter()
 const route = useRoute()

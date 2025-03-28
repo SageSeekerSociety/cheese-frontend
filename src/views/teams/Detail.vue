@@ -43,6 +43,12 @@
               </template>
               <v-list-item-title>赛题</v-list-item-title>
             </v-list-item> -->
+            <v-list-item rounded="lg" color="primary" :to="{ name: 'TeamsDetailProjects', params: route.params }">
+              <template #prepend>
+                <v-icon>mdi-briefcase-outline</v-icon>
+              </template>
+              <v-list-item-title>项目</v-list-item-title>
+            </v-list-item>
             <v-list-item rounded="lg" color="primary" :to="{ name: 'TeamsDetailMembers', params: route.params }">
               <template #prepend>
                 <v-icon>mdi-account-group</v-icon>

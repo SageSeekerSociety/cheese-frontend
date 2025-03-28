@@ -100,17 +100,19 @@
 import type { JSONContent } from 'vuetify-pro-tiptap'
 import type { Team } from '@/types'
 
-import { onMounted, ref } from 'vue'
+import { defineAsyncComponent, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vuetify-sonner'
 
 import { getAvatarUrl } from '@/utils/materials'
 
 import AvatarUploader from '@/components/common/AvatarUploader.vue'
-import TipTapEditor from '@/components/common/Editor/TipTapEditor.vue'
 import { AvatarsApi } from '@/network/api/avatars'
 import { TeamsApi } from '@/network/api/teams'
 import AccountService from '@/services/account'
+
+const TipTapEditor = defineAsyncComponent(() => import('@/components/common/Editor/TipTapEditor.vue'))
+
 const createTeamDialog = ref(false)
 const searchQuery = ref('')
 const searchTeamsData = ref<Team[]>([])

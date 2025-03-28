@@ -469,7 +469,17 @@
 import type { PatchTaskRequestData, TaskAIAdvice } from '@/network/api/tasks/types'
 import type { Task, TaskMembership, TaskParticipantRealNameInfo, Team } from '@/types'
 
-import { computed, nextTick, onMounted, onUnmounted, reactive, ref, useTemplateRef, watch } from 'vue'
+import {
+  computed,
+  defineAsyncComponent,
+  nextTick,
+  onMounted,
+  onUnmounted,
+  reactive,
+  ref,
+  useTemplateRef,
+  watch,
+} from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vuetify-sonner'
@@ -480,18 +490,19 @@ import { getAvatarUrl } from '@/utils/materials'
 import { getTaskStatusText, getTaskStatusType } from '@/utils/tasks'
 import { setTitle } from '@/utils/title'
 
-import CollapsibleContent from '@/components/common/CollapsibleContent.vue'
-import CountdownTimer from '@/components/common/CountdownTimer.vue'
-import TipTapViewer from '@/components/common/Editor/TipTapViewer.vue'
-import AIAdvicePanel from '@/components/tasks/AIAdvicePanel.vue'
-import TaskForm from '@/components/tasks/TaskForm.vue'
-import TaskSubmissionHistory from '@/components/tasks/TaskSubmissionHistory.vue'
-import VerifyInfoForm from '@/components/tasks/VerifyInfoForm.vue'
 import { AttachmentsApi } from '@/network/api/attachments'
 import { TasksApi } from '@/network/api/tasks'
 import { TeamsApi } from '@/network/api/teams'
 import { useDialog } from '@/plugins/dialog'
 import AccountService from '@/services/account'
+
+const CollapsibleContent = defineAsyncComponent(() => import('@/components/common/CollapsibleContent.vue'))
+const CountdownTimer = defineAsyncComponent(() => import('@/components/common/CountdownTimer.vue'))
+const TipTapViewer = defineAsyncComponent(() => import('@/components/common/Editor/TipTapViewer.vue'))
+const AIAdvicePanel = defineAsyncComponent(() => import('@/components/tasks/AIAdvicePanel.vue'))
+const TaskSubmissionHistory = defineAsyncComponent(() => import('@/components/tasks/TaskSubmissionHistory.vue'))
+const VerifyInfoForm = defineAsyncComponent(() => import('@/components/tasks/VerifyInfoForm.vue'))
+const TaskForm = defineAsyncComponent(() => import('@/components/tasks/TaskForm.vue'))
 
 const dialogs = useDialog()
 
@@ -510,7 +521,6 @@ const selectedParticipant = ref<TaskMembership | null>(null)
 const selectedViewRole = ref<'participant' | 'creator' | 'space-admin' | string>('participant')
 const initialLoaded = ref(false)
 const isVerifyInfoDialogOpen = ref(false)
-const aiDrawerOpen = ref(false)
 const aiAdviceExpanded = ref(false)
 const aiAdvice = ref<TaskAIAdvice | null>(null)
 const aiAdviceLoading = ref(false)

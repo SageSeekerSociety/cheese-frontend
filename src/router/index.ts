@@ -7,6 +7,7 @@ import { refreshTitle } from '@/utils/title'
 import AccountRoutes from './account'
 import GroupRoutes from './group'
 import HomeRoutes from './home'
+import ProjectsRoutes from './projects'
 import QuestionRoutes from './question'
 import SpacesRoutes from './spaces'
 import TasksRoutes from './tasks'
@@ -18,6 +19,7 @@ const routes: RouteRecordRaw[] = [
   GroupRoutes,
   HomeRoutes,
   UserRoutes,
+  ProjectsRoutes,
   QuestionRoutes,
   SpacesRoutes,
   TasksRoutes,

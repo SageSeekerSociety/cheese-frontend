@@ -1,11 +1,13 @@
 // Plugins
 import { fileURLToPath, URL } from 'node:url'
 
+import legacy from '@vitejs/plugin-legacy'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import ViteFonts from 'unplugin-fonts/vite'
 // Utilities
 import { defineConfig } from 'vite'
+import viteCompression from 'vite-plugin-compression'
 import { prismjsPlugin } from 'vite-plugin-prismjs'
 import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 
@@ -31,7 +33,6 @@ export default defineConfig({
       },
     }),
     prismjsPlugin({
-      // ['json', 'css'] 按需引入，'all' 所有语言
       languages: 'all',
       // 配置行号插件
       plugins: ['line-numbers', 'copy-to-clipboard'],
@@ -39,6 +40,10 @@ export default defineConfig({
       theme: 'solarizedlight',
       css: true,
     }),
+    legacy({
+      targets: ['defaults', 'not IE 11'],
+    }),
+    viteCompression(),
   ],
   define: { 'process.env': {} },
   resolve: {
@@ -51,34 +56,73 @@ export default defineConfig({
     port: 3000,
   },
   build: {
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+    },
+    sourcemap: false,
     rollupOptions: {
       output: {
-        manualChunks: {
-          vue: ['vue', 'vue-router'],
-          lodash: ['lodash'],
-          editorjs: ['@editorjs/editorjs'],
-          editorjsPlugins: [
-            '@editorjs/paragraph',
-            '@editorjs/header',
-            '@editorjs/quote',
-            '@editorjs/delimiter',
-            '@editorjs/warning',
-            '@editorjs/table',
-            '@editorjs/text-variant-tune',
-            '@editorjs/inline-code',
-            '@editorjs/underline',
-            '@editorjs/checklist',
-            '@editorjs/nested-list',
-          ],
-          editorjsLatex: ['editorjs-latex'],
-          editorjsCodecup: ['@calumk/editorjs-codecup'],
-          dayjs: ['dayjs'],
-          // prismjs: ['prismjs'],
-          katex: ['katex'],
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('prosemirror')) {
+              return 'prosemirror'
+            }
+            if (id.includes('dompurify')) {
+              return 'dompurify'
+            }
+            if (id.includes('marked')) {
+              return 'marked'
+            }
+            if (id.includes('zod')) {
+              return 'zod'
+            }
+            if (id.includes('viewerjs')) {
+              return 'viewerjs'
+            }
+            if (id.includes('vuetify-pro-tiptap')) {
+              return 'vuetify-pro-tiptap'
+            }
+            if (id.includes('tiptap')) {
+              return 'tiptap'
+            }
+            if (id.includes('vuetify')) {
+              return 'vuetify'
+            }
+            // Vue 及其相关
+            if (id.match(/(vue|vue-router)/)) {
+              return 'vue'
+            }
+            // lodash 单独一个 chunk
+            if (id.includes('lodash')) {
+              return 'lodash'
+            }
+            // Editor.js 相关依赖归为一组
+            if (id.includes('@editorjs')) {
+              return 'editorjs'
+            }
+            // katex 单独一个 chunk
+            if (id.includes('katex')) {
+              return 'katex'
+            }
+            // dayjs 单独一个 chunk
+            if (id.includes('dayjs')) {
+              return 'dayjs'
+            }
+            // prismjs 单独一个 chunk
+            if (id.includes('prismjs')) {
+              return 'prismjs'
+            }
+            // axios 如果使用量较大，也可单独拆分
+            if (id.includes('axios')) {
+              return 'axios'
+            }
+            // 其他 node_modules 内的包统一归到 vendor
+            return 'vendor'
+          }
         },
-        // manualChunks(id) {
-        //   console.log(id)
-        // },
       },
     },
   },

@@ -78,7 +78,7 @@
 <script setup lang="ts">
 import type { Task } from '@/types'
 
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
@@ -86,10 +86,11 @@ import { storeToRefs } from 'pinia'
 import { usePaging } from '@/utils/paging'
 
 import InfiniteScroll from '@/components/common/InfiniteScroll.vue'
-import TaskCard from '@/components/TaskCard.vue'
 import { TasksApi } from '@/network/api/tasks'
 import { currentUserId } from '@/services/account'
 import { useSpaceStore } from '@/store/space'
+
+const TaskCard = defineAsyncComponent(() => import('@/components/TaskCard.vue'))
 
 type SortBy = 'createdAt' | 'updatedAt' | 'deadline'
 type SortOrder = 'asc' | 'desc'

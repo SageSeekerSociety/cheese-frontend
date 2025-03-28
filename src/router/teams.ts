@@ -27,6 +27,11 @@ export default {
           component: () => import('@/views/teams/detail/Tasks.vue'),
         },
         {
+          path: 'projects',
+          name: 'TeamsDetailProjects',
+          component: () => import('@/views/teams/detail/Projects.vue'),
+        },
+        {
           path: 'members',
           name: 'TeamsDetailMembers',
           component: () => import('@/views/teams/detail/Members.vue'),
@@ -35,7 +40,7 @@ export default {
       beforeEnter: (to, _, next) => {
         console.log('to', to)
         if (to.name === 'TeamsDetailDefault' || to.name === 'TeamsDetail') {
-          next({ name: 'TeamsDetailMembers', params: to.params })
+          next({ name: 'TeamsDetailProjects', params: to.params })
         } else {
           next()
         }

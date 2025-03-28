@@ -322,7 +322,7 @@ export namespace UserApi {
     })
 
   // SRP 初始化
-  export const srpInit = (data: { username: string; clientPublicEphemeral: string }) =>
+  export const srpInit = (data: { username: string; clientPublicEphemeral?: string }) =>
     ApiInstance.request<SrpInitResponse>({
       url: '/users/auth/srp/init',
       method: 'POST',
@@ -331,7 +331,7 @@ export namespace UserApi {
     })
 
   // SRP 验证
-  export const srpVerify = (data: { username: string; clientProof: string }) =>
+  export const srpVerify = (data: { username: string; clientPublicEphemeral: string; clientProof: string }) =>
     ApiInstance.request<SrpVerifyResponse>({
       url: '/users/auth/srp/verify',
       method: 'POST',
