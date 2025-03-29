@@ -1,6 +1,6 @@
 // src/api/tasks.ts
 
-import type { Page, TaskMembership, TaskParticipantRealNameInfo, TaskSubmission } from '@/types'
+import type { Page, TaskMembership, TaskSubmission } from '@/types'
 import type { Task } from '@/types'
 import type {
   AddTaskParticipantRequestData,
@@ -128,8 +128,8 @@ export namespace TasksApi {
   export const getTaskTeams = (
     taskId: number,
     params: {
-      filter?: 'eligible' | 'all'
-    } = { filter: 'eligible' }
+      filter?: 'all' | 'eligible'
+    } = { filter: 'all' }
   ) =>
     NewApiInstance.request<{ teams: TeamSummary[] }>({
       url: `/tasks/${taskId}/teams`,

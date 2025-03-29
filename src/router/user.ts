@@ -69,16 +69,7 @@ export default {
         {
           path: '',
           name: 'UserDefault',
-        },
-        {
-          path: 'question',
-          name: 'UserQuestion',
-          component: () => import('@/views/user/Question.vue'),
-        },
-        {
-          path: 'answer',
-          name: 'UserAnswer',
-          component: () => import('@/views/user/Answer.vue'),
+          redirect: { name: 'UserFollowing' },
         },
         {
           path: 'following',
@@ -93,11 +84,4 @@ export default {
       ],
     },
   ],
-  beforeEnter: (to, _, next) => {
-    if (to.name === 'UserDefault' || to.name === 'UserQuestion' || to.name === 'UserAnswer' || to.name === 'User') {
-      next({ name: 'UserFollowing', params: to.params })
-    } else {
-      next()
-    }
-  },
 } as RouteRecordRaw

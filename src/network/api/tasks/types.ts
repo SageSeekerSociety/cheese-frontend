@@ -30,6 +30,8 @@ export type PostTaskRequestData = {
   team?: number
   space?: number
   requireRealName?: boolean
+  minTeamSize?: number
+  maxTeamSize?: number
 }
 
 export type PatchTaskRequestData = {
@@ -195,6 +197,7 @@ export interface TeamSummary {
   avatarId: number
   allMembersVerified: boolean
   memberRealNameStatus?: TeamMemberRealNameStatus[]
+  joinRejectReason?: string
   updatedAt: number
   createdAt: number
 }

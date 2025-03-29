@@ -5,18 +5,18 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vuetify-sonner'
 
+import { useEvents } from '../events'
+
 import { TasksApi } from '@/network/api/tasks'
 import { useDialog } from '@/plugins/dialog'
-
 export function useTaskManagement(taskDataModule: ReturnType<typeof useTaskData>) {
   const { taskData, loadTaskData } = taskDataModule
   const router = useRouter()
   const dialogs = useDialog()
-
-  const editDialogOpen = ref(false)
+  const events = useEvents()
 
   const openEditDialog = () => {
-    editDialogOpen.value = true
+    events.emit('edit-dialog-open', true)
   }
 
   const submitEditTask = async (updatedTaskData: PatchTaskRequestData) => {
@@ -25,7 +25,7 @@ export function useTaskManagement(taskDataModule: ReturnType<typeof useTaskData>
     try {
       await TasksApi.update(taskData.value.id, updatedTaskData)
       toast.success('赛题更新成功')
-      editDialogOpen.value = false
+      events.emit('edit-dialog-open', false)
       await loadTaskData()
     } catch (error) {
       toast.error('更新失败')
@@ -54,7 +54,6 @@ export function useTaskManagement(taskDataModule: ReturnType<typeof useTaskData>
   }
 
   return {
-    editDialogOpen,
     openEditDialog,
     submitEditTask,
     confirmDeleteTask,

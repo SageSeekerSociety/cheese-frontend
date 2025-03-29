@@ -62,7 +62,6 @@
           open-on-click
           location="bottom center"
           :offset="16"
-          :close-on-content-click="false"
           transition="scale-transition"
         >
           <template #activator="{ props }">
@@ -135,14 +134,14 @@
                   :to="{ name: 'UserDefault', params: { id: currentUser?.id } }"
                   rounded="lg"
                   class="mb-1"
-                  active-color="primary"
+                  color="primary"
                 >
                   <template #prepend>
                     <v-icon icon="mdi-account" class="me-2"></v-icon>
                   </template>
                   <v-list-item-title>个人中心</v-list-item-title>
                 </v-list-item>
-                <v-list-item rounded="lg" active-color="error" @click="onLogout">
+                <v-list-item rounded="lg" color="error" @click="onLogout">
                   <template #prepend>
                     <v-icon icon="mdi-exit-to-app" class="me-2"></v-icon>
                   </template>

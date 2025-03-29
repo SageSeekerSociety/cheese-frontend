@@ -86,7 +86,7 @@
                 <!-- 子频道 -->
                 <div v-if="hasChildren(project) && expandedChannels[project.id]" class="child-channels ml-4">
                   <v-list-item
-                    v-for="child in project.children.filter((child) => !child.archived)"
+                    v-for="child in (project.children ?? []).filter((child) => !child.archived)"
                     :key="child.id"
                     :value="child.id"
                     :to="{ name: 'TeamsDetailChannels', params: { ...route.params, channelId: child.id } }"
@@ -528,10 +528,13 @@ const saveChannel = async (formData: any) => {
       leaderId: formData.leaderId || AccountService.user.id,
     }
 
+    let savedProject: Project
     if (editingChannel.value) {
-      await ProjectsApi.update(editingChannel.value.id, finalFormData)
+      const response = await ProjectsApi.update(editingChannel.value.id, finalFormData)
+      savedProject = response.data.project
     } else {
-      await ProjectsApi.create(finalFormData)
+      const response = await ProjectsApi.create(finalFormData)
+      savedProject = response.data.project
     }
 
     // 刷新项目列表
@@ -540,10 +543,17 @@ const saveChannel = async (formData: any) => {
     // 重置父频道ID
     parentChannelId.value = null
 
-    // 如果创建的是子频道，确保父频道展开显示
+    // 如果创建的是子频道，确保父频道展开
     if (formData.parentId) {
       expandedChannels.value[formData.parentId] = true
     }
+
+    // 导航到新创建或编辑的频道
+    router.replace({
+      name: 'TeamsDetailChannels',
+      params: { ...route.params },
+      query: { ...route.query, channelId: String(savedProject.id) },
+    })
   } catch (error) {
     console.error('保存频道失败', error)
   } finally {
@@ -697,8 +707,16 @@ const handleCreateSubChannel = (parentId: number) => {
   openCreateChannelDialog(parentId)
 }
 
-// 提供当前频道信息给子组件
-provide('currentChannel', currentChannel)
+// 为讨论组件提供必要的数据
+provide('discussionData', {
+  currentMessage: computed(() => discussionStore.currentDiscussion),
+  isCurrentUserMessage: computed(() => {
+    const currentMessage = discussionStore.currentDiscussion
+    return currentMessage && currentMessage.sender.id === AccountService.user?.id
+  }),
+  channelName: computed(() => (route.query.channelName as string) || '讨论详情'),
+  goBack: () => router.back(),
+})
 
 // 判断当前是否为讨论详情页面
 const isDiscussionDetailRoute = computed(() => {

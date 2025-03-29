@@ -54,18 +54,23 @@
             <v-card
               v-for="team in availableTeams"
               :key="team.id"
-              :disabled="taskData?.requireRealName && !team.allMembersVerified"
+              :disabled="isTeamDisabled(team)"
               class="team-card mb-3"
-              :class="{ 'team-card-disabled': taskData?.requireRealName && !team.allMembersVerified }"
+              :class="{ 'team-card-disabled': isTeamDisabled(team) }"
               flat
               rounded="lg"
               variant="outlined"
-              @click="!taskData?.requireRealName || team.allMembersVerified ? $emit('select', team.id) : null"
+              @click="!isTeamDisabled(team) ? $emit('select', team.id) : null"
             >
-              <div v-if="taskData?.requireRealName && !team.allMembersVerified" class="team-card-overlay">
+              <div v-if="isTeamDisabled(team)" class="team-card-overlay">
                 <div class="certification-required">
-                  <v-icon icon="mdi-account-alert" color="error" size="22" class="mr-2"></v-icon>
-                  <span>需要完成认证</span>
+                  <v-icon
+                    :icon="getTeamDisabledIcon(team)"
+                    :color="getTeamDisabledColor(team)"
+                    size="22"
+                    class="mr-2"
+                  ></v-icon>
+                  <span>{{ getTeamDisabledText(team) }}</span>
                 </div>
               </div>
               <div class="d-flex pa-3">
@@ -141,9 +146,11 @@
 import type { TeamSummary } from '@/network/api/tasks/types'
 import type { Task } from '@/types'
 
+import { computed } from 'vue'
+
 import { getAvatarUrl } from '@/utils/materials'
 
-defineProps<{
+const props = defineProps<{
   open: boolean
   taskData: Task | null
   availableTeams: TeamSummary[]
@@ -160,6 +167,51 @@ const getTeamVerificationStatus = (team: TeamSummary): { status: string; color: 
     return { status: '未全部认证', color: 'error' }
   } else {
     return { status: '全部已认证', color: 'success' }
+  }
+}
+
+const isTeamDisabled = (team: TeamSummary): boolean => {
+  return (props.taskData?.requireRealName && !team.allMembersVerified) || !!team.joinRejectReason
+}
+
+const getTeamDisabledIcon = (team: TeamSummary): string => {
+  if (props.taskData?.requireRealName && !team.allMembersVerified) {
+    return 'mdi-account-alert'
+  }
+
+  switch (team.joinRejectReason) {
+    case 'YourTeamMemberRankIsNotHighEnoughError':
+      return 'mdi-star-off'
+    case 'TeamSizeNotEnoughError':
+      return 'mdi-account-group-remove'
+    case 'TeamSizeTooLargeError':
+      return 'mdi-account-group-alert'
+    default:
+      return 'mdi-alert-circle'
+  }
+}
+
+const getTeamDisabledColor = (team: TeamSummary): string => {
+  if (props.taskData?.requireRealName && !team.allMembersVerified) {
+    return 'error'
+  }
+  return 'warning'
+}
+
+const getTeamDisabledText = (team: TeamSummary): string => {
+  if (props.taskData?.requireRealName && !team.allMembersVerified) {
+    return '需要完成认证'
+  }
+
+  switch (team.joinRejectReason) {
+    case 'YourTeamMemberRankIsNotHighEnoughError':
+      return '小队成员等级不足'
+    case 'TeamSizeNotEnoughError':
+      return '小队人数不足'
+    case 'TeamSizeTooLargeError':
+      return '小队人数超限'
+    default:
+      return '不满足参与条件'
   }
 }
 </script>

@@ -16,7 +16,24 @@
         </div>
       </template>
     </v-alert>
-
+    <!-- 不可加入原因提示 -->
+    <v-alert
+      v-if="!taskData?.joinable && !taskData?.joined && taskData?.joinRejectReason && !isDeadlinePassed"
+      type="warning"
+      class="mb-4"
+      rounded="lg"
+      title="暂时无法参与"
+    >
+      <template #text>
+        <div class="mt-2">
+          <div class="font-weight-medium">{{ joinRejectReasonText }}</div>
+          <div v-if="taskData?.joinRejectReason === 'YourRankIsNotHighEnoughError'" class="mt-2 text-medium-emphasis">
+            完成更多基础题目来提升您的等级，解锁更高难度的挑战。
+          </div>
+        </div>
+      </template>
+    </v-alert>
+    <!-- 
     <v-alert
       v-else-if="taskData?.joined && (taskData?.joinedApproved === false || taskData?.joinedDisapproved)"
       type="info"
@@ -25,7 +42,7 @@
       :title="taskData.joinedDisapproved ? '审核未通过' : '等待审核'"
       :text="taskData.joinedDisapproved ? '您的参与申请未通过审核' : '您的参与申请正在审核中'"
     >
-    </v-alert>
+    </v-alert> -->
 
     <!-- AI建议入口卡片 -->
     <v-card
@@ -202,6 +219,7 @@ import { useRouter } from 'vue-router'
 import dayjs from 'dayjs'
 
 import { TasksApi } from '@/network/api/tasks'
+import { TaskParticipationInfo } from '@/network/api/tasks/types'
 import AccountService from '@/services/account'
 
 const TipTapViewer = defineAsyncComponent(() => import('@/components/common/Editor/TipTapViewer.vue'))
@@ -209,8 +227,8 @@ const CountdownTimer = defineAsyncComponent(() => import('@/components/common/Co
 
 const props = defineProps<{
   taskData: Task | null
+  participationInfo: TaskParticipationInfo | null
 }>()
-const participants = ref<TaskMembership[]>([])
 
 const router = useRouter()
 
@@ -243,26 +261,28 @@ const rankStars = computed(() => {
   return props.taskData?.rank ? props.taskData.rank : 0
 })
 
-const fetchParticipants = async (queryRealNameInfo = false) => {
-  if (!props.taskData) return
-  const { data } = await TasksApi.getParticipants(props.taskData.id, { queryRealNameInfo })
-  participants.value = data.participants
-}
-
 const taskUserDeadline = computed(() => {
-  if (!props.taskData) return null
-
-  const userId = AccountService.user?.id
-  if (!userId) return null
-
-  // 查找用户的截止时间
-  const userParticipant = participants.value.find((p) => p.member.id === userId)
-
-  return userParticipant?.deadline || null
+  return props.taskData?.userDeadline
 })
 
-onMounted(() => {
-  fetchParticipants()
+const isDeadlinePassed = computed(() => {
+  if (!props.taskData?.deadline) return false
+  return dayjs(props.taskData.deadline).isBefore(dayjs())
+})
+
+const joinRejectReasonText = computed(() => {
+  switch (props.taskData?.joinRejectReason) {
+    case 'YourRankIsNotHighEnoughError':
+      return '您当前的等级不足以参与此题目'
+    case 'AlreadyBeTaskParticipantError':
+      return '您已经参与了此题目'
+    case 'RealNameInfoRequiredError':
+      return '此题目需要实名认证后才能参与'
+    case 'TaskParticipantsReachedLimitError':
+      return '该题目参与人数已达到上限'
+    default:
+      return '暂时无法参与此题目'
+  }
 })
 
 const goToAIAdvice = () => {

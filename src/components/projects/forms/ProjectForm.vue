@@ -1,34 +1,6 @@
 <template>
   <v-form ref="formRef" @submit.prevent="submit">
     <v-row dense>
-      <!-- 父频道选择（如果提供了可用父频道） -->
-      <v-col v-if="parentChannels && parentChannels.length > 0 && !isEditing" cols="12" class="mb-2">
-        <v-select
-          v-model="selectedParentId"
-          label="父频道"
-          variant="outlined"
-          density="comfortable"
-          :items="parentChannelsOptions"
-          item-title="text"
-          item-value="value"
-          :hint="parentIdHint"
-          persistent-hint
-          clearable
-        >
-          <template #prepend>
-            <v-icon icon="mdi-folder-outline" class="mr-1"></v-icon>
-          </template>
-          <template #item="{ item, props }">
-            <v-list-item v-bind="props">
-              <template #prepend>
-                <div class="channel-dot mr-2" :style="{ backgroundColor: item.raw.colorCode }"></div>
-              </template>
-              <v-list-item-title>{{ item.raw.text }}</v-list-item-title>
-            </v-list-item>
-          </template>
-        </v-select>
-      </v-col>
-
       <!-- 频道名称 -->
       <v-col cols="12">
         <v-text-field

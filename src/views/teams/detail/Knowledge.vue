@@ -711,7 +711,7 @@ const viewMode = ref('grid')
 const searchQuery = ref('')
 const knowledges = ref<Knowledge[]>([])
 const page = ref({
-  page_start: 0,
+  page_start: undefined as number | undefined,
   page_size: 20,
   has_more: false,
   next_start: 0,
@@ -806,7 +806,6 @@ const loadKnowledges = async () => {
 
     const params: any = {
       teamId: teamId.value,
-      page_start: 0,
       page_size: 20,
       sort_by: 'createdAt',
       sort_order: 'desc',

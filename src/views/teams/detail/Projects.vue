@@ -395,11 +395,25 @@ const sendReply = async () => {
     isSending.value = true
 
     // 使用 store 发送回复
-    await discussionStore.replyToDiscussion(
+    const reply = await discussionStore.replyToDiscussion(
       replyingToMessage.value.id,
       newMessage.value as JSONContent,
       currentChannel.value.id
     )
+
+    // 更新父消息的子讨论列表
+    const parentMessage = messages.value.find((m) => m.id === replyingToMessage.value.id)
+    if (parentMessage) {
+      if (!parentMessage.subDiscussions) {
+        parentMessage.subDiscussions = {
+          count: 1,
+          examples: [reply],
+        }
+      } else {
+        parentMessage.subDiscussions.examples.push(reply)
+        parentMessage.subDiscussions.count += 1
+      }
+    }
 
     // 清空输入和状态
     newMessage.value = null
@@ -608,21 +622,6 @@ const handleDeleteReply = async ({ parentDiscussion, reply }: { parentDiscussion
     // 目前先模拟删除
     parentDiscussion.replies = parentDiscussion.replies.filter((r: any) => r.id !== reply.id)
   }
-}
-
-// 导航到讨论详情
-const navigateToDiscussionDetail = (messageId: number) => {
-  router.push({
-    name: 'TeamsDetailDiscussionDetail',
-    params: {
-      teamId: teamId.value,
-      discussionId: messageId,
-    },
-    query: {
-      channelId: currentChannel.value?.id,
-      channelName: currentChannel.value?.name,
-    },
-  })
 }
 </script>
 

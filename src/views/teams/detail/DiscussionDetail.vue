@@ -165,7 +165,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, provide, ref, watch } from 'vue'
+import type { ComputedRef } from 'vue'
+import type { Discussion } from '@/types'
+
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { inject } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { JSONContent } from 'vuetify-pro-tiptap'
 
@@ -283,6 +287,7 @@ const toggleReaction = async (discussionId: number, reactionTypeId: number) => {
 
 // 返回上一页
 const goBack = () => {
+  console.log('goBack', teamId.value, channelId.value)
   router.push({
     name: 'TeamsDetailChannels',
     params: {
@@ -399,6 +404,21 @@ watch(
   }
 )
 
+interface DiscussionData {
+  currentMessage: ComputedRef<Discussion | null>
+  isCurrentUserMessage: ComputedRef<boolean>
+  channelName: ComputedRef<string>
+  goBack: () => void
+}
+
+// 注入共享数据
+const discussionData = inject<DiscussionData>('discussionData', {
+  currentMessage: computed(() => null),
+  isCurrentUserMessage: computed(() => false),
+  channelName: computed(() => '讨论详情'),
+  goBack: () => {},
+})
+
 // 页面加载时获取数据
 onMounted(async () => {
   await discussionStore.loadReactionTypes()
@@ -417,15 +437,6 @@ onMounted(async () => {
 // 离开组件时清除当前讨论
 onUnmounted(() => {
   discussionStore.clearCurrentDiscussion()
-})
-
-// 为头部组件提供必要的数据
-provide('discussionData', {
-  channelName: computed(() => channelName.value || '讨论详情'),
-  channelId: channelId,
-  isCurrentUserMessage: isCurrentUserMessage,
-  deleteMessage: deleteMessage,
-  goBack: goBack,
 })
 </script>
 
