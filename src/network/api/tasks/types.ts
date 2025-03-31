@@ -29,6 +29,7 @@ export type PostTaskRequestData = {
   submissionSchema: TaskSubmissionSchemaEntry[]
   team?: number
   space?: number
+  categoryId?: number
   requireRealName?: boolean
   minTeamSize?: number
   maxTeamSize?: number

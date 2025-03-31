@@ -94,6 +94,7 @@ export namespace TasksApi {
     approved?: 'APPROVED' | 'DISAPPROVED' | 'NONE'
     joined?: boolean
     topics?: number[]
+    categoryId?: number
   }) => {
     const finalParams = new URLSearchParams()
     Object.entries(params).forEach(([key, value]) => {

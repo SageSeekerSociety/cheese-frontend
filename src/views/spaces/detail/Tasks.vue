@@ -2,20 +2,16 @@
   <v-sheet flat rounded="lg" class="task-container">
     <!-- 顶部导航和筛选区 -->
     <div class="filter-section pa-4 pb-0">
-      <!-- 主分类选项 -->
-      <div class="category-nav mb-4">
-        <div class="category-scroll">
-          <div
-            v-for="(category, index) in categories"
-            :key="index"
-            class="category-item"
-            :class="{ active: selectedCategory === index }"
-            @click="onCategoryChange(category.value)"
-          >
-            {{ category.title }}
-            <div v-if="selectedCategory === index" class="category-indicator"></div>
-          </div>
-        </div>
+      <!-- 主分类选项按钮在移动端显示 -->
+      <div class="d-md-none category-nav-mobile mb-4">
+        <v-select
+          v-model="selectedCategoryOrType"
+          :items="allFilterOptions"
+          density="comfortable"
+          variant="outlined"
+          hide-details
+          class="category-select"
+        ></v-select>
       </div>
 
       <!-- 过滤和搜索选项 -->
@@ -191,6 +187,7 @@ type QueryOptions = {
   owner?: number
   queryType: QueryType
   topics?: number[]
+  categoryId?: number
 }
 const route = useRoute()
 const router = useRouter()
@@ -200,34 +197,78 @@ const selectedTopic = ref<number | null>(null)
 
 const { t } = useI18n()
 
-// 赛题分类选项
-const categories = ref([
-  { title: t('spaces.detail.allContests'), value: 'all' },
-  { title: t('spaces.detail.myPublishedContests'), value: 'published' },
-  { title: t('spaces.detail.myJoinedContests'), value: 'joined' },
-])
+const spaceStore = useSpaceStore()
+const { currentSpace, classificationTopics, categories } = storeToRefs(spaceStore)
 
-const selectedCategory = ref(0)
+// 获取活跃分类列表
+const activeCategories = computed(() => {
+  return categories.value.filter((category) => !category.archivedAt).sort((a, b) => a.displayOrder - b.displayOrder)
+})
 
-// 根据URL参数设置默认选中的分类
-const initCategory = () => {
-  const typeFromQuery = route.query.type as QueryType
-  if (typeFromQuery) {
-    const index = categories.value.findIndex((c) => c.value === typeFromQuery)
-    if (index !== -1) {
-      selectedCategory.value = index
+// 获取当前选中的分类ID（从URL参数）
+const selectedCategoryId = computed<number | null>(() => {
+  const categoryParam = route.query.category
+  if (!categoryParam) return null
+
+  const categoryId = Number(categoryParam)
+  // 确保分类在活跃分类列表中
+  return activeCategories.value.some((cat) => cat.id === categoryId) ? categoryId : null
+})
+
+// 获取当前查询类型（全部、我发布的、我参与的）
+const currentQueryType = computed<QueryType>(() => {
+  const typeParam = route.query.type as QueryType
+  return ['all', 'published', 'joined'].includes(typeParam) ? typeParam : 'all'
+})
+
+// 用于移动端的组合选择器选项
+const allFilterOptions = computed(() => {
+  const typeOptions = [
+    { title: t('spaces.detail.allContests'), value: 'all-tasks' },
+    { title: t('spaces.detail.myPublishedContests'), value: 'published' },
+    { title: t('spaces.detail.myJoinedContests'), value: 'joined' },
+  ]
+
+  const categoryOptions = activeCategories.value.map((category) => ({
+    title: category.name,
+    value: `category-${category.id}`,
+  }))
+
+  return [...typeOptions, ...categoryOptions]
+})
+
+// 移动端组合选择器的值
+const selectedCategoryOrType = computed({
+  get() {
+    if (selectedCategoryId.value) {
+      return `category-${selectedCategoryId.value}`
     }
-  }
-}
-
-// 切换分类时更新路由
-const onCategoryChange = (categoryValue: string) => {
-  router.push({
-    name: 'SpacesDetailTasks',
-    params: { spaceId: route.params.spaceId },
-    query: { type: categoryValue },
-  })
-}
+    return currentQueryType.value === 'all' ? 'all-tasks' : currentQueryType.value
+  },
+  set(value: string) {
+    if (value.startsWith('category-')) {
+      const categoryId = value.replace('category-', '')
+      router.push({
+        name: 'SpacesDetailTasks',
+        params: { spaceId: route.params.spaceId },
+        query: { category: categoryId },
+      })
+    } else if (['published', 'joined'].includes(value)) {
+      router.push({
+        name: 'SpacesDetailTasks',
+        params: { spaceId: route.params.spaceId },
+        query: { type: value },
+      })
+    } else {
+      // 默认全部
+      router.push({
+        name: 'SpacesDetailTasks',
+        params: { spaceId: route.params.spaceId },
+        query: { type: 'all' },
+      })
+    }
+  },
+})
 
 const sortOptions = ref<{ title: string; value: { by: SortBy; order: SortOrder } }[]>([
   { title: t('spaces.detail.tasks.sortOptions.latestPublished'), value: { by: 'createdAt', order: 'desc' } },
@@ -240,9 +281,10 @@ const queryOptions = computed<QueryOptions>(() => ({
   space: Number(route.params.spaceId),
   ...selectedSortOption.value,
   keywords: searchQuery.value ? searchQuery.value : undefined,
-  queryType: (route.query.type as QueryType) ?? 'all',
-  owner: route.query.type === 'published' ? currentUserId.value : undefined,
+  queryType: currentQueryType.value,
+  owner: currentQueryType.value === 'published' ? currentUserId.value : undefined,
   topics: selectedTopic.value !== null ? [selectedTopic.value] : undefined,
+  categoryId: selectedCategoryId.value || undefined,
 }))
 
 const {
@@ -270,6 +312,7 @@ const {
       joined: queryOptions.queryType === 'joined' ? true : undefined,
       owner: queryOptions.owner,
       topics: queryOptions.topics,
+      categoryId: queryOptions.categoryId,
       queryTopics: true,
       queryJoined: true,
     })
@@ -282,9 +325,6 @@ const {
 const submitSearch = () => {
   searchQuery.value = searchQueryInput.value
 }
-
-const spaceStore = useSpaceStore()
-const { currentSpace, classificationTopics } = storeToRefs(spaceStore)
 
 const topicOptions = computed<{ title: string; value: number | null }[]>(() => {
   return [
@@ -303,10 +343,24 @@ const navigateToPublishTask = async () => {
   try {
     if (currentSpace.value) {
       const taskTemplates = JSON.parse(currentSpace.value.taskTemplates || '[]')
+      // 如果当前有选中的分类，将它作为查询参数传递（用于预选分类）
+      const query: Record<string, string> = {}
+      if (selectedCategoryId.value) {
+        query.categoryId = String(selectedCategoryId.value)
+      }
+
       if (taskTemplates.length > 0) {
-        router.push({ name: 'SpacesDetailSelectTemplate', params: { spaceId: route.params.spaceId } })
+        router.push({
+          name: 'SpacesDetailSelectTemplate',
+          params: { spaceId: route.params.spaceId },
+          query,
+        })
       } else {
-        router.push({ name: 'SpacesDetailPublishTask', params: { spaceId: route.params.spaceId } })
+        router.push({
+          name: 'SpacesDetailPublishTask',
+          params: { spaceId: route.params.spaceId },
+          query,
+        })
       }
     }
   } catch (error) {
@@ -322,14 +376,6 @@ watch(
     reset(undefined, newVal)
   },
   { deep: true }
-)
-
-// 监听路由变化，更新选中的分类
-watch(
-  () => route.query.type,
-  () => {
-    initCategory()
-  }
 )
 
 // 限制直接显示的话题数量
@@ -378,7 +424,7 @@ const hasMoreHiddenTopics = computed(() => {
 })
 
 onMounted(async () => {
-  initCategory()
+  await spaceStore.fetchCategories() // 获取分类列表
   await refresh()
 })
 </script>
@@ -392,53 +438,9 @@ onMounted(async () => {
   transition: all 0.3s ease;
 }
 
-.category-nav {
-  position: relative;
-  overflow: hidden;
-
-  .category-scroll {
-    display: flex;
-    overflow-x: auto;
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE and Edge */
-    padding-bottom: 4px; /* 为滚动条预留空间 */
-
-    &::-webkit-scrollbar {
-      display: none; /* Chrome, Safari, Opera */
-    }
-  }
-
-  .category-item {
-    position: relative;
-    cursor: pointer;
-    padding: 0 12px 12px;
-    margin-right: 24px;
-    font-size: 16px;
-    transition: all 0.2s ease;
-    color: rgba(var(--v-theme-on-surface), 0.7);
-    white-space: nowrap;
-
-    &.active {
-      color: rgb(var(--v-theme-primary));
-      font-weight: 500;
-    }
-
-    .category-indicator {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background-color: rgb(var(--v-theme-primary));
-    }
-
-    &:hover:not(.active) {
-      color: rgba(var(--v-theme-primary), 0.7);
-    }
-
-    &:last-child {
-      margin-right: 0;
-    }
+.category-nav-mobile {
+  .category-select {
+    border-radius: 8px;
   }
 }
 
@@ -497,12 +499,6 @@ onMounted(async () => {
 }
 
 @media (max-width: 600px) {
-  .category-item {
-    font-size: 14px;
-    padding: 0 8px 10px;
-    margin-right: 16px;
-  }
-
   .filter-options {
     .filter-groups {
       flex-direction: column;

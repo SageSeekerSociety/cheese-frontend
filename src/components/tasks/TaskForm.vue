@@ -149,14 +149,34 @@
       </v-card-item>
 
       <v-card-text class="pt-2">
-        <v-select
-          v-model="formData.topics"
-          :items="topicItems"
-          :label="t('spaces.detail.tasks.topic')"
-          chips
-          multiple
-          v-bind="topicsProps"
-        ></v-select>
+        <v-row>
+          <v-col cols="12" md="6">
+            <v-select
+              v-if="categories.length > 0"
+              v-model="formData.categoryId"
+              :items="categoryItems"
+              :label="t('spaces.detail.tasks.category')"
+              item-title="title"
+              item-value="value"
+              v-bind="categoryIdProps"
+            >
+              <template #prepend-inner>
+                <v-icon size="small">mdi-shape</v-icon>
+              </template>
+            </v-select>
+          </v-col>
+
+          <v-col cols="12" md="6">
+            <v-select
+              v-model="formData.topics"
+              :items="topicItems"
+              :label="t('spaces.detail.tasks.topic')"
+              chips
+              multiple
+              v-bind="topicsProps"
+            ></v-select>
+          </v-col>
+        </v-row>
       </v-card-text>
     </v-card>
 
@@ -405,6 +425,7 @@
 
 <script setup lang="ts">
 import type { TaskFormSubmitData as BaseTaskFormSubmitData, Topic } from '@/types'
+import type { SpaceCategory } from '@/types'
 
 import { computed, defineEmits, defineProps, nextTick, reactive, ref, toRefs } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -439,19 +460,27 @@ const props = withDefaults(
     submitButtonText: string
     isEditing?: boolean
     classificationTopics: Topic[]
+    categories?: SpaceCategory[]
+    selectedCategoryId?: number
   }>(),
   {
     initialData: null,
     submitButtonText: '提交',
     isEditing: false,
     classificationTopics: () => [],
+    categories: () => [],
+    selectedCategoryId: undefined,
   }
 )
 
-const { classificationTopics } = toRefs(props)
+const { classificationTopics, categories, selectedCategoryId } = toRefs(props)
 const display = useDisplay()
 
 const topicItems = computed(() => classificationTopics.value.map((topic) => ({ title: topic.name, value: topic.id })))
+const categoryItems = computed(() => [
+  { title: '无分类', value: null },
+  ...categories.value.map((category) => ({ title: category.name, value: category.id })),
+])
 
 const emit = defineEmits<{
   submit: [data: TaskFormSubmitData]
@@ -465,15 +494,16 @@ const descriptionEditor = ref<InstanceType<typeof TipTapEditor> | null>(null)
 const { handleSubmit, defineField, isSubmitting } = useForm({
   validationSchema: toTypedSchema(
     z.object({
-      name: z.string().max(128),
+      name: z.string().min(1).max(100),
       submitterType: z.enum(['USER', 'TEAM']),
+      deadline: z.date(),
+      defaultDeadline: z.number().int().default(30),
       rank: z.number().int().min(1).max(3),
-      deadline: z.date().default(new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)),
-      defaultDeadline: z.number().int().min(1).default(30),
-      topics: z.number().int().array().optional(),
-      requireRealName: z.boolean().default(false),
-      minTeamSize: z.number().int().min(1).optional(),
-      maxTeamSize: z.number().int().min(1).optional(),
+      topics: z.array(z.number()).optional(),
+      categoryId: z.number().optional().nullable(),
+      minTeamSize: z.number().int().min(2).max(10).optional(),
+      maxTeamSize: z.number().int().min(2).max(10).optional(),
+      requireRealName: z.boolean().optional().default(false),
     })
   ),
   initialValues: {
@@ -495,6 +525,7 @@ const [defaultDeadline, defaultDeadlineProps] = defineField('defaultDeadline', v
 const [topics, topicsProps] = defineField('topics', vuetifyConfig)
 const [minTeamSize, minTeamSizeProps] = defineField('minTeamSize', vuetifyConfig)
 const [maxTeamSize, maxTeamSizeProps] = defineField('maxTeamSize', vuetifyConfig)
+const [categoryId, categoryIdProps] = defineField('categoryId', vuetifyConfig)
 
 const formData = reactive({
   name,
@@ -503,10 +534,11 @@ const formData = reactive({
   deadline,
   defaultDeadline,
   topics,
-  description: props.initialData?.description || { type: 'doc', content: [] },
-  requireRealName: false,
-  minTeamSize: props.initialData?.minTeamSize || 1,
-  maxTeamSize: props.initialData?.maxTeamSize || 10,
+  description: props.initialData?.description || [],
+  requireRealName: !!props.initialData?.requireRealName,
+  minTeamSize,
+  maxTeamSize,
+  categoryId: props.selectedCategoryId || null,
 })
 
 const pendingSubmissionData = ref<{ descriptionText: string | undefined; values: any } | null>(null)
@@ -535,6 +567,7 @@ const submitFormData = (values: any) => {
     resubmittable: true,
     editable: true,
     requireRealName: formData.requireRealName,
+    categoryId: formData.categoryId || undefined,
     minTeamSize: formData.submitterType === 'TEAM' ? formData.minTeamSize : undefined,
     maxTeamSize: formData.submitterType === 'TEAM' ? formData.maxTeamSize : undefined,
   }

@@ -180,58 +180,238 @@
     </v-row>
 
     <v-row class="mt-2">
-      <v-col cols="12" md="3">
-        <v-sheet rounded="lg">
-          <v-list nav bg-color="transparent">
-            <v-list-subheader>{{ t('spaces.detail.allCategories') }}</v-list-subheader>
-            <v-list-item
-              rounded="lg"
-              :to="{ name: 'SpacesDetailTasks', params: { spaceId: space?.id } }"
-              color="primary"
+      <v-col :cols="12" :md="sidebarExpanded ? 3 : 1" class="transition-smooth pb-0">
+        <v-sheet rounded="lg" class="sidebar-container">
+          <div class="d-flex justify-space-between align-center px-3 pt-2">
+            <v-slide-x-transition>
+              <v-list-subheader v-show="sidebarExpanded" class="ps-0">{{
+                t('spaces.detail.allCategories')
+              }}</v-list-subheader>
+            </v-slide-x-transition>
+            <v-btn
+              icon
+              size="small"
+              variant="text"
+              :title="sidebarExpanded ? t('spaces.detail.collapseSidebar') : t('spaces.detail.expandSidebar')"
+              @click="toggleSidebar"
             >
-              <template #prepend>
-                <v-icon>mdi-trophy</v-icon>
-              </template>
-              <v-list-item-title>{{ t('spaces.detail.contests') }}</v-list-item-title>
-            </v-list-item>
+              <v-icon>{{ sidebarExpanded ? 'mdi-chevron-left' : 'mdi-chevron-right' }}</v-icon>
+            </v-btn>
+          </div>
 
+          <v-list nav bg-color="transparent" density="compact" class="sidebar-list">
+            <v-tooltip :disabled="sidebarExpanded" location="end">
+              <template #activator="{ props }">
+                <v-list-item
+                  v-bind="sidebarExpanded ? {} : props"
+                  rounded="lg"
+                  :to="{ name: 'SpacesDetailTasks', params: { spaceId: space?.id } }"
+                  color="primary"
+                  :exact="true"
+                  class="sidebar-item"
+                >
+                  <template #prepend>
+                    <v-icon>mdi-view-grid</v-icon>
+                  </template>
+                  <v-slide-x-transition>
+                    <v-list-item-title v-show="sidebarExpanded">{{ t('spaces.detail.allContests') }}</v-list-item-title>
+                  </v-slide-x-transition>
+                </v-list-item>
+              </template>
+              <span>{{ t('spaces.detail.allContests') }}</span>
+            </v-tooltip>
+
+            <!-- 显示分类列表 -->
+            <template v-if="categories.length > 0">
+              <v-tooltip
+                v-for="category in activeCategories"
+                :key="`category-${category.id}`"
+                :disabled="sidebarExpanded"
+                location="end"
+              >
+                <template #activator="{ props }">
+                  <v-list-item
+                    v-bind="sidebarExpanded ? {} : props"
+                    rounded="lg"
+                    :to="{
+                      name: 'SpacesDetailTasks',
+                      params: { spaceId: space?.id },
+                      query: { category: category.id },
+                    }"
+                    color="primary"
+                    :exact="true"
+                    class="sidebar-item"
+                  >
+                    <template #prepend>
+                      <v-icon>mdi-shape</v-icon>
+                    </template>
+                    <v-slide-x-transition>
+                      <v-list-item-title v-show="sidebarExpanded">{{ category.name }}</v-list-item-title>
+                    </v-slide-x-transition>
+                    <template v-if="space?.defaultCategoryId === category.id" #append>
+                      <v-tooltip location="end">
+                        <template #activator="{ props }">
+                          <v-icon v-bind="props" size="small" color="warning">mdi-star</v-icon>
+                        </template>
+                        {{ t('spaces.detail.manageCategories.defaultCategory') }}
+                      </v-tooltip>
+                    </template>
+                  </v-list-item>
+                </template>
+                <span>{{ category.name }}</span>
+              </v-tooltip>
+            </template>
+
+            <v-divider class="my-2"></v-divider>
+
+            <!-- 个人分组 -->
+            <v-tooltip :disabled="sidebarExpanded" location="end">
+              <template #activator="{ props }">
+                <v-list-item
+                  v-bind="sidebarExpanded ? {} : props"
+                  rounded="lg"
+                  :to="{ name: 'SpacesDetailTasks', params: { spaceId: space?.id }, query: { type: 'published' } }"
+                  color="primary"
+                  :exact="true"
+                  class="sidebar-item"
+                >
+                  <template #prepend>
+                    <v-icon>mdi-pencil-box-multiple</v-icon>
+                  </template>
+                  <v-slide-x-transition>
+                    <v-list-item-title v-show="sidebarExpanded">{{
+                      t('spaces.detail.myPublishedContests')
+                    }}</v-list-item-title>
+                  </v-slide-x-transition>
+                </v-list-item>
+              </template>
+              <span>{{ t('spaces.detail.myPublishedContests') }}</span>
+            </v-tooltip>
+
+            <v-tooltip :disabled="sidebarExpanded" location="end">
+              <template #activator="{ props }">
+                <v-list-item
+                  v-bind="sidebarExpanded ? {} : props"
+                  rounded="lg"
+                  :to="{ name: 'SpacesDetailTasks', params: { spaceId: space?.id }, query: { type: 'joined' } }"
+                  color="primary"
+                  :exact="true"
+                  class="sidebar-item"
+                >
+                  <template #prepend>
+                    <v-icon>mdi-account-check</v-icon>
+                  </template>
+                  <v-slide-x-transition>
+                    <v-list-item-title v-show="sidebarExpanded">{{
+                      t('spaces.detail.myJoinedContests')
+                    }}</v-list-item-title>
+                  </v-slide-x-transition>
+                </v-list-item>
+              </template>
+              <span>{{ t('spaces.detail.myJoinedContests') }}</span>
+            </v-tooltip>
+
+            <!-- 管理员操作 -->
             <template v-if="isCurrentUserAtLeastAdmin">
-              <v-list-subheader>{{ t('spaces.detail.adminOperations') }}</v-list-subheader>
-              <v-list-item
-                rounded="lg"
-                :to="{ name: 'SpacesDetailAuditTasks', params: { spaceId: space?.id } }"
-                color="primary"
-              >
-                <template #prepend>
-                  <v-icon>mdi-check</v-icon>
+              <v-divider class="my-2"></v-divider>
+              <v-slide-x-transition>
+                <v-list-subheader v-show="sidebarExpanded" class="ps-3">{{
+                  t('spaces.detail.adminOperations')
+                }}</v-list-subheader>
+              </v-slide-x-transition>
+
+              <v-tooltip :disabled="sidebarExpanded" location="end">
+                <template #activator="{ props }">
+                  <v-list-item
+                    v-bind="sidebarExpanded ? {} : props"
+                    rounded="lg"
+                    :to="{ name: 'SpacesDetailAuditTasks', params: { spaceId: space?.id } }"
+                    color="primary"
+                    class="sidebar-item"
+                  >
+                    <template #prepend>
+                      <v-icon>mdi-check</v-icon>
+                    </template>
+                    <v-slide-x-transition>
+                      <v-list-item-title v-show="sidebarExpanded">{{
+                        t('spaces.detail.auditContests')
+                      }}</v-list-item-title>
+                    </v-slide-x-transition>
+                  </v-list-item>
                 </template>
-                <v-list-item-title>{{ t('spaces.detail.auditContests') }}</v-list-item-title>
-              </v-list-item>
-              <v-list-item
-                rounded="lg"
-                :to="{ name: 'SpacesDetailManageTemplates', params: { spaceId: space?.id } }"
-                color="primary"
-              >
-                <template #prepend>
-                  <v-icon>mdi-file-document-edit</v-icon>
+                <span>{{ t('spaces.detail.auditContests') }}</span>
+              </v-tooltip>
+
+              <v-tooltip :disabled="sidebarExpanded" location="end">
+                <template #activator="{ props }">
+                  <v-list-item
+                    v-bind="sidebarExpanded ? {} : props"
+                    rounded="lg"
+                    :to="{ name: 'SpacesDetailManageTemplates', params: { spaceId: space?.id } }"
+                    color="primary"
+                    class="sidebar-item"
+                  >
+                    <template #prepend>
+                      <v-icon>mdi-file-document-edit</v-icon>
+                    </template>
+                    <v-slide-x-transition>
+                      <v-list-item-title v-show="sidebarExpanded">{{
+                        t('spaces.detail.manageTemplates.title')
+                      }}</v-list-item-title>
+                    </v-slide-x-transition>
+                  </v-list-item>
                 </template>
-                <v-list-item-title>{{ t('spaces.detail.manageTemplates.title') }}</v-list-item-title>
-              </v-list-item>
-              <v-list-item
-                rounded="lg"
-                :to="{ name: 'SpacesDetailManageTopics', params: { spaceId: space?.id } }"
-                color="primary"
-              >
-                <template #prepend>
-                  <v-icon>mdi-tag-multiple</v-icon>
+                <span>{{ t('spaces.detail.manageTemplates.title') }}</span>
+              </v-tooltip>
+
+              <v-tooltip :disabled="sidebarExpanded" location="end">
+                <template #activator="{ props }">
+                  <v-list-item
+                    v-bind="sidebarExpanded ? {} : props"
+                    rounded="lg"
+                    :to="{ name: 'SpacesDetailManageTopics', params: { spaceId: space?.id } }"
+                    color="primary"
+                    class="sidebar-item"
+                  >
+                    <template #prepend>
+                      <v-icon>mdi-tag-multiple</v-icon>
+                    </template>
+                    <v-slide-x-transition>
+                      <v-list-item-title v-show="sidebarExpanded">{{
+                        t('spaces.detail.manageTopics.title')
+                      }}</v-list-item-title>
+                    </v-slide-x-transition>
+                  </v-list-item>
                 </template>
-                <v-list-item-title>{{ t('spaces.detail.manageTopics.title') }}</v-list-item-title>
-              </v-list-item>
+                <span>{{ t('spaces.detail.manageTopics.title') }}</span>
+              </v-tooltip>
+
+              <v-tooltip :disabled="sidebarExpanded" location="end">
+                <template #activator="{ props }">
+                  <v-list-item
+                    v-bind="sidebarExpanded ? {} : props"
+                    rounded="lg"
+                    :to="{ name: 'SpacesDetailManageCategories', params: { spaceId: space?.id } }"
+                    color="primary"
+                    class="sidebar-item"
+                  >
+                    <template #prepend>
+                      <v-icon>mdi-shape</v-icon>
+                    </template>
+                    <v-slide-x-transition>
+                      <v-list-item-title v-show="sidebarExpanded">{{
+                        t('spaces.detail.manageCategories.title')
+                      }}</v-list-item-title>
+                    </v-slide-x-transition>
+                  </v-list-item>
+                </template>
+                <span>{{ t('spaces.detail.manageCategories.title') }}</span>
+              </v-tooltip>
             </template>
           </v-list>
         </v-sheet>
       </v-col>
-      <v-col cols="12" md="9">
+      <v-col :cols="12" :md="sidebarExpanded ? 9 : 11" class="transition-smooth">
         <router-view />
       </v-col>
     </v-row>
@@ -295,7 +475,7 @@ const dialog = useDialog()
 const { t } = useI18n()
 
 const spaceStore = useSpaceStore()
-const { currentSpace: space, announcements } = storeToRefs(spaceStore)
+const { currentSpace: space, announcements, categories } = storeToRefs(spaceStore)
 
 const isAnnouncementCreatingOrUpdating = ref(false)
 const updatingAnnouncementIndex = ref<number>()
@@ -398,6 +578,11 @@ const adminText = computed(() => {
   }
 })
 
+// 获取未归档的分类列表用于侧边栏展示
+const activeCategories = computed(() => {
+  return categories.value.filter((category) => !category.archivedAt).sort((a, b) => a.displayOrder - b.displayOrder)
+})
+
 const getSpace = async (spaceId: number) => {
   await spaceStore.fetchSpace(spaceId)
   resetForm({
@@ -469,6 +654,7 @@ const isCurrentUserAtLeastAdmin = computed(() => {
 
 onMounted(async () => {
   await getSpace(Number(route.params.spaceId))
+  await spaceStore.fetchCategories() // 加载分类列表
   setTitle(space.value?.name || '空间', route)
 })
 
@@ -508,6 +694,20 @@ const getAnnouncementPreview = (content: string, length = 120) => {
   const textContent = content.replace(/<[^>]*>/g, '')
   return textContent.length > length ? textContent.substring(0, length) + '...' : textContent
 }
+
+const sidebarExpanded = ref(true)
+
+const toggleSidebar = () => {
+  sidebarExpanded.value = !sidebarExpanded.value
+}
+
+// 添加响应式断点检测
+watchEffect(() => {
+  // 在小屏幕上默认收起侧边栏
+  if (windowWidth.value < 960 && sidebarExpanded.value) {
+    sidebarExpanded.value = false
+  }
+})
 </script>
 
 <style scoped lang="scss">
@@ -745,5 +945,56 @@ const getAnnouncementPreview = (content: string, length = 120) => {
 .announcement-empty-btn {
   transition: all 0.2s ease;
   font-weight: 500;
+}
+
+.sidebar-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sidebar-list {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 16px;
+}
+
+.sidebar-item {
+  transition: all 0.3s ease;
+  white-space: nowrap;
+
+  &:hover {
+    background-color: rgba(var(--v-theme-primary), 0.05);
+  }
+}
+
+.transition-smooth {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// 移动端适配
+@media (max-width: 960px) {
+  .sidebar-container {
+    max-height: calc(100vh - 220px);
+  }
+}
+
+// 隐藏滚动条但保持功能
+.sidebar-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-list::-webkit-scrollbar-thumb {
+  background-color: rgba(var(--v-theme-primary), 0.2);
+  border-radius: 4px;
+}
+
+.sidebar-list:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(var(--v-theme-primary), 0.4);
 }
 </style>
