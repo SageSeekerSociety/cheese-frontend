@@ -700,14 +700,6 @@ const sidebarExpanded = ref(true)
 const toggleSidebar = () => {
   sidebarExpanded.value = !sidebarExpanded.value
 }
-
-// 添加响应式断点检测
-watchEffect(() => {
-  // 在小屏幕上默认收起侧边栏
-  if (windowWidth.value < 960 && sidebarExpanded.value) {
-    sidebarExpanded.value = false
-  }
-})
 </script>
 
 <style scoped lang="scss">
