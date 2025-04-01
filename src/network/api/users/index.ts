@@ -5,16 +5,18 @@ import type {
   GetAnswerListResponse,
   GetPasskeysResponse,
   GetQuestionListResponse,
+  GetRealNameInfoResponse,
   GetUserInfoResponse,
-  PasskeyAuthenticationOptionsResponse,
-  PasskeyInfo,
-  PasskeyRegistrationOptionsResponse,
+  Page,
+  RealNameInfo,
   SrpInitResponse,
   SrpVerifyResponse,
+  UpdateRealNameInfoResponse,
+  UserIdentityAccessLog,
   UserList,
 } from './types'
 
-import ApiInstance from '../index'
+import ApiInstance, { NewApiInstance } from '../index'
 
 export namespace UserApi {
   export interface AuthResponseDataType {
@@ -378,5 +380,43 @@ export namespace UserApi {
         credentials: data,
       },
       withCredentials: true,
+    })
+
+  // 实名信息 API
+  export const getRealNameInfo = (userId: number, precise: boolean = false) =>
+    NewApiInstance.request<GetRealNameInfoResponse>({
+      url: `/users/${userId}/identity`,
+      method: 'GET',
+      params: {
+        precise,
+      },
+    })
+
+  export const updateRealNameInfo = (userId: number, data: RealNameInfo) =>
+    NewApiInstance.request<UpdateRealNameInfoResponse>({
+      url: `/users/${userId}/identity`,
+      method: 'PUT',
+      data,
+    })
+
+  export const patchRealNameInfo = (userId: number, data: Partial<RealNameInfo>) =>
+    NewApiInstance.request<UpdateRealNameInfoResponse>({
+      url: `/users/${userId}/identity`,
+      method: 'PATCH',
+      data,
+    })
+
+  // 获取实名信息访问日志
+  export const getRealNameAccessLogs = (userId: number, pageStart?: number, pageSize: number = 20) =>
+    NewApiInstance.request<{
+      logs: UserIdentityAccessLog[]
+      page: Page
+    }>({
+      url: `/users/${userId}/identity/access-logs`,
+      method: 'GET',
+      params: {
+        page_start: pageStart,
+        page_size: pageSize,
+      },
     })
 }

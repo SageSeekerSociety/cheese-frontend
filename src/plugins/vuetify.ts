@@ -59,8 +59,5 @@ export default createVuetify({
     VAlert: {
       variant: 'tonal',
     },
-    VBtn: {
-      rounded: 'lg',
-    },
   },
 })

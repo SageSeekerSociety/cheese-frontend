@@ -1,11 +1,11 @@
 <template>
   <v-dialog
     :model-value="modelValue"
-    max-width="600"
+    max-width="500"
     persistent
     @update:model-value="$emit('update:modelValue', $event)"
   >
-    <v-card rounded="lg">
+    <v-card rounded="lg" class="channel-dialog">
       <v-card-title class="px-4 pt-4 pb-2">
         <span class="text-h6">
           {{ getDialogTitle() }}
@@ -16,9 +16,11 @@
           ref="formRef"
           :initial-data="initialData"
           :is-subproject="isSubproject"
+          :is-editing="isEditing"
           :team-members="teamMembers"
           :team-id="teamId"
-          :parent-id="parentId"
+          :parent-id="computedParentId"
+          :parent-channels="availableParentChannels"
           @submit="handleSubmit"
           @cancel="$emit('update:modelValue', false)"
         />
@@ -27,7 +29,7 @@
         <v-spacer></v-spacer>
         <v-btn variant="text" :disabled="loading" @click="$emit('update:modelValue', false)">取消</v-btn>
         <v-btn color="primary" :loading="loading" @click="triggerSubmit">
-          {{ loading ? '保存中...' : isEditing ? '保存修改' : '创建' }}
+          {{ loading ? '保存中...' : isEditing ? '保存修改' : '创建频道' }}
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -37,7 +39,7 @@
 <script setup lang="ts">
 import type { Project, User } from '@/types'
 
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 import ProjectForm from './ProjectForm.vue'
 
@@ -50,31 +52,48 @@ const props = defineProps<{
   teamId?: number
   parentId?: number
   loading?: boolean
+  parentChannelId?: number | null
+  availableParentChannels?: Project[]
 }>()
+
+const computedParentId = computed<number | undefined>(() => {
+  const parentId =
+    props.parentChannelId !== undefined && props.parentChannelId !== null ? props.parentChannelId : props.parentId
+  console.log('Dialog computedParentId:', parentId)
+  return parentId
+})
 
 const emit = defineEmits(['update:modelValue', 'submit'])
 
 const formRef = ref<InstanceType<typeof ProjectForm> | null>(null)
 
-// 获取对话框标题
 const getDialogTitle = () => {
   if (props.isEditing) {
-    return props.isSubproject ? '编辑子项目' : '编辑项目'
+    return '编辑频道'
   }
-  return props.isSubproject ? '创建子项目' : '创建项目'
+  return computedParentId.value ? '创建子频道' : '创建新频道'
 }
 
-// 触发表单提交
 const triggerSubmit = () => {
   formRef.value?.submit()
 }
 
-// 处理表单提交
 const handleSubmit = (formData: any) => {
-  emit('submit', formData)
+  console.log('Dialog - 接收到表单数据，parentId =', formData.parentId)
+  // 确保数据完整传递给上级组件
+  emit('submit', {
+    ...formData,
+  })
 }
+
+onMounted(() => {
+  console.log('Dialog - computed parentId:', computedParentId.value)
+  console.log('Dialog - parentChannelId:', props.parentChannelId)
+})
 </script>
 
 <style scoped>
-/* 样式已在各自组件中定义 */
+.channel-dialog {
+  overflow: visible;
+}
 </style>

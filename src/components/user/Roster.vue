@@ -29,7 +29,7 @@
 <script setup lang="ts">
 import type { User } from '@/types/users'
 
-import { defineProps, onMounted, withDefaults } from 'vue'
+import { defineProps, withDefaults } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { getAvatarUrl } from '@/utils/materials'

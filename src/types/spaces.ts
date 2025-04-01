@@ -9,6 +9,17 @@ export type Space = {
   announcements: string
   taskTemplates: string
   classificationTopics: Topic[]
+  defaultCategoryId?: number
+}
+
+export type SpaceCategory = {
+  id: number
+  name: string
+  description: string | null
+  displayOrder: number
+  createdAt: number
+  updatedAt: number
+  archivedAt: number | null
 }
 
 export type SpaceAnnouncement = {

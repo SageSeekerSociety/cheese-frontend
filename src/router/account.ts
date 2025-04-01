@@ -4,6 +4,9 @@ export default {
   path: '/account',
   name: 'Account',
   component: () => import('@/layouts/account/Account.vue'),
+  meta: {
+    hideAppBar: true,
+  },
   children: [
     {
       path: 'signin',

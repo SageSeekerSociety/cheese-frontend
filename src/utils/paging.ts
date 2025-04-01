@@ -13,9 +13,7 @@ export const createEmptyResult = <T>(): FetchResult<T> => {
     page: {
       page_start: 0,
       page_size: 0,
-      prev_start: 0,
       next_start: 0,
-      has_prev: false,
       has_more: false,
     },
   }

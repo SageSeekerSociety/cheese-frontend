@@ -29,6 +29,5 @@ const newOption: ApiType = {
     responseInterceptorErr,
   },
 }
-
 export default new Api(option)
 export const NewApiInstance = new Api(newOption)

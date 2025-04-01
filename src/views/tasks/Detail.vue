@@ -1,1063 +1,482 @@
 <template>
-  <v-container>
-    <div>
-      <v-row dense>
-        <v-col cols="12">
-          <div class="d-flex flex-column flex-md-row align-start align-md-center gap-4 mb-4">
-            <v-breadcrumbs v-if="breadcrumbItems" :items="breadcrumbItems" density="compact" class="pa-0">
-              <template #prepend>
-                <v-icon>mdi-cheese</v-icon>
-              </template>
-            </v-breadcrumbs>
-            <div class="flex-grow-1 d-none d-md-block"></div>
-            <v-menu v-if="viewRoles.length > 1">
-              <template #activator="{ props }">
-                <div class="d-flex flex-row align-center text-medium-emphasis flex-shrink-0">
-                  <v-icon left size="24" class="mr-2">mdi-eye</v-icon>
-                  <span>正在以</span>
-                  <v-btn v-bind="props" variant="text" color="text" density="comfortable" class="px-2 mx-2">
-                    {{ currentViewRoleTitle }}
-                    <v-icon right size="24">mdi-chevron-down</v-icon>
-                  </v-btn>
-                  <span>视角查看</span>
-                </div>
-              </template>
-              <v-list color="primary">
-                <v-list-item
-                  v-for="role in viewRoles.filter(
-                    (role) => role.type === 'participant' || role.type === 'creator' || role.type === 'space-admin'
-                  )"
-                  :key="role.value"
-                  :value="role.value"
-                  :active="selectedViewRole === role.value"
-                  @click="switchViewRole(role.value)"
-                >
-                  <template #prepend>
-                    <v-avatar size="32" class="position-relative">
-                      <v-img :src="getAvatarUrl(AccountService.user?.avatarId)" />
-                      <v-icon
-                        v-if="selectedViewRole === role.value"
-                        color="white"
-                        class="position-absolute selected-view-role-icon"
-                      >
-                        mdi-check-circle
-                      </v-icon>
-                    </v-avatar>
-                  </template>
-                  <v-list-item-title>{{ role.title }}</v-list-item-title>
-                  <template #append>
-                    <v-icon>{{ role.icon }}</v-icon>
-                  </template>
-                </v-list-item>
+  <!-- 加载和错误状态 -->
+  <LoadingErrorContainer v-if="loading || error" :loading="loading" :error="error" @retry="loadTaskData" />
 
-                <v-list-subheader v-if="viewRoles.some((role) => role.type === 'team' && !role.isSubmittable)">
-                  可参与的小队
-                </v-list-subheader>
-                <v-list-item
-                  v-for="role in viewRoles.filter((role) => role.type === 'team' && !role.isSubmittable)"
-                  :key="role.value"
-                  :value="role.value"
-                  :active="selectedViewRole === role.value"
-                  @click="switchViewRole(role.value)"
-                >
-                  <template #prepend>
-                    <v-avatar size="32" class="position-relative">
-                      <v-img v-if="role.avatarId" :src="getAvatarUrl(role.avatarId)" />
-                      <v-icon v-else>{{ role.icon }}</v-icon>
-                      <v-icon
-                        v-if="selectedViewRole === role.value"
-                        color="white"
-                        class="position-absolute selected-view-role-icon"
-                      >
-                        mdi-check-circle
-                      </v-icon>
-                    </v-avatar>
-                  </template>
-                  <v-list-item-title>{{ role.title }}</v-list-item-title>
-                  <template #append>
-                    <v-icon>mdi-lock-open</v-icon>
-                  </template>
-                </v-list-item>
+  <v-container v-else-if="taskData" class="pa-4">
+    <!-- AI对话按钮 -->
+    <AIChatButton :open="!chatDialogOpen" @click="openGeneralChat" />
 
-                <v-list-subheader v-if="viewRoles.some((role) => role.type === 'team' && role.isSubmittable)">
-                  可提交的小队
-                </v-list-subheader>
-                <v-list-item
-                  v-for="role in viewRoles.filter((role) => role.type === 'team' && role.isSubmittable)"
-                  :key="role.value"
-                  :value="role.value"
-                  :active="selectedViewRole === role.value"
-                  @click="switchViewRole(role.value)"
-                >
-                  <template #prepend>
-                    <v-avatar size="32" class="position-relative">
-                      <v-img v-if="role.avatarId" :src="getAvatarUrl(role.avatarId)" />
-                      <v-icon v-else>{{ role.icon }}</v-icon>
-                      <v-icon
-                        v-if="selectedViewRole === role.value"
-                        color="white"
-                        class="position-absolute selected-view-role-icon"
-                      >
-                        mdi-check-circle
-                      </v-icon>
-                    </v-avatar>
-                  </template>
-                  <v-list-item-title>{{ role.title }}</v-list-item-title>
-                  <template #append>
-                    <v-icon>mdi-upload</v-icon>
-                  </template>
-                </v-list-item>
-              </v-list>
-            </v-menu>
-          </div>
-          <v-sheet v-if="taskData" flat rounded="lg" class="pa-4">
-            <div class="d-flex flex-column flex-md-row align-start align-md-center justify-space-between">
-              <div>
-                <div class="text-h6">
-                  <v-icon left size="24" class="text-primary mr-1">mdi-trophy</v-icon>
-                  {{ taskData?.name }}
-                </div>
-                <div class="text-subtitle-1 text-medium-emphasis">
-                  {{ taskData?.creator.nickname }} 发布于 {{ dayjs(taskData?.createdAt).format('YYYY-MM-DD HH:mm') }}
-                </div>
-                <div class="d-flex flex-row align-center" style="gap: 4px">
-                  <v-chip :color="taskStatusType">{{ taskStatusText }}</v-chip>
-                  <v-chip color="primary" variant="tonal">{{
-                    taskData?.submitterType === 'USER' ? '个人任务' : '小队任务'
-                  }}</v-chip>
-                  <v-chip v-if="taskData?.resubmittable" variant="tonal">可重复提交</v-chip>
-                </div>
-              </div>
-              <div class="flex-shrink-0 d-flex flex-row align-center ga-4 mt-4 mt-md-0 flex-wrap flex-md-nowrap">
-                <template v-if="currentJoinable">
-                  <div v-if="taskData?.deadline" class="text-center">
-                    <CountdownTimer :deadline="taskData.deadline" label="报名剩余时间" />
-                  </div>
-                  <v-btn color="primary" variant="flat" @click="onJoinTaskClicked">领取赛题</v-btn>
-                </template>
-                <template v-else-if="currentJoined">
-                  <v-btn color="error" variant="flat" @click="leaveTask">退出赛题</v-btn>
-                </template>
-                <template v-else-if="currentManageable">
-                  <v-btn-group color="primary" density="compact" variant="flat" rounded="lg" divided>
-                    <v-btn class="pe-2" prepend-icon="mdi-pencil" @click="openEditDialog">
-                      <div class="text-none font-weight-regular">编辑赛题</div>
-                    </v-btn>
+    <!-- 任务头部区域 -->
+    <TaskHeader
+      :task-data="taskData"
+      :breadcrumb-items="breadcrumbItems"
+      :is-creator="isTaskCreator"
+      :is-admin="isSpaceAdmin"
+      :task-status-text="taskStatusText"
+      :task-status-type="taskStatusType"
+      :title-with-punctuation="titleStartsWithChinesePunctuation"
+      :participation-info="participationInfo"
+      @edit="openEditDialog"
+      @delete="confirmDeleteTask"
+      @join="events.emit('join-clicked')"
+      @leave="events.emit('leave-clicked')"
+    />
 
-                    <v-btn icon @click="deleteTask">
-                      <v-icon icon="mdi-delete"></v-icon>
-                    </v-btn>
-                  </v-btn-group>
-                </template>
-              </div>
-            </div>
-            <v-alert
-              v-if="taskData?.approved === 'DISAPPROVED' && isSelfTask"
-              type="error"
-              class="mt-4"
-              title="审核未通过"
-            >
-              理由：{{ taskData.rejectReason }}
-            </v-alert>
-            <v-divider class="my-4" />
-            <div class="text-body-1">
-              <collapsible-content :max-height="200">
-                <TipTapViewer :value="taskDescription" />
-              </collapsible-content>
-            </div>
-          </v-sheet>
-        </v-col>
-      </v-row>
+    <!-- 导航标签页 -->
+    <TaskNavigationTabs
+      v-model="activeTab"
+      :task-data="taskData"
+      :is-creator="isTaskCreator"
+      :is-admin="isSpaceAdmin"
+      :participation-info="participationInfo"
+    />
 
-      <!-- AI建议入口 - 只在参与者视角显示 -->
-      <v-row v-if="currentSubmittable || currentJoined || currentJoinable" dense>
-        <v-col cols="12">
-          <v-card
-            :class="['cursor-pointer', aiAdviceExpanded ? 'bg-primary text-white' : 'bg-primary-lighten-4']"
-            rounded="lg"
-            @click="toggleAIAdvice"
-          >
-            <v-card-text>
-              <div class="d-flex align-center gap-4">
-                <v-avatar
-                  :color="aiAdviceExpanded ? 'white' : 'primary'"
-                  :class="aiAdviceExpanded ? 'text-primary' : 'text-white'"
-                  size="48"
-                >
-                  <v-icon size="32">mdi-creation</v-icon>
-                </v-avatar>
-                <div class="flex-grow-1">
-                  <div class="text-h6 font-weight-bold d-flex flex-row align-center gap-2">
-                    启星研导 Navigator AI
-                    <div class="text-caption text-disabled">Powered by 知启星 AI & DeepSeek-R1</div>
-                  </div>
-                  <div :class="aiAdviceExpanded ? 'text-white' : 'text-medium-emphasis'">
-                    为您解析赛题核心，推荐学习路径，助力科研探索
-                  </div>
-                </div>
-                <v-icon :color="aiAdviceExpanded ? 'white' : 'primary'" size="24">
-                  {{ aiAdviceExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
-                </v-icon>
-              </div>
-            </v-card-text>
-          </v-card>
-          <v-expand-transition>
-            <div v-if="aiAdviceExpanded" class="mt-2">
-              <AIAdvicePanel
-                :task-id="Number(route.params.taskId)"
-                :submitter-type="taskData?.submitterType ?? 'USER'"
-                :loading="aiAdviceLoading"
-                :error="aiAdviceError"
-                :advice="aiAdvice"
-                @retry="fetchAIAdvice"
-              />
-            </div>
-          </v-expand-transition>
-        </v-col>
-      </v-row>
-
-      <template v-if="currentSubmittable">
-        <v-row dense>
-          <v-col cols="12">
-            <TaskSubmissionHistory
-              v-if="currentMember"
-              ref="submissionHistoryRef"
-              :task-id="Number(route.params.taskId)"
-              :member-id="currentMember"
-            />
-          </v-col>
-          <v-col cols="12">
-            <v-card v-if="taskData" flat rounded="lg">
-              <template #title>
-                <v-icon left size="24">mdi-upload</v-icon>
-                提交
-              </template>
-
-              <template #text>
-                <CountdownTimer
-                  v-if="currentDeadline"
-                  :deadline="currentDeadline"
-                  label="提交剩余时间"
-                  class="mx-auto mb-4"
-                />
-                <v-form>
-                  <template v-for="(entry, index) in taskData.submissionSchema" :key="index">
-                    <template v-if="entry.type === 'TEXT'">
-                      <v-text-field
-                        v-model="submissionContent[index].contentText"
-                        :label="entry.prompt"
-                        variant="outlined"
-                      ></v-text-field>
-                    </template>
-                    <template v-else-if="entry.type === 'FILE'">
-                      <v-file-input
-                        v-model="submissionContent[index].contentAttachment"
-                        :label="entry.prompt"
-                        variant="outlined"
-                      ></v-file-input>
-                    </template>
-                  </template>
-                  <div class="d-flex justify-end">
-                    <v-btn prepend-icon="mdi-check" color="primary" @click="submitTask">提交</v-btn>
-                  </div>
-                </v-form>
-              </template>
-            </v-card>
-          </v-col>
-        </v-row>
-      </template>
-      <template v-else-if="currentJoined">
-        <v-row dense>
-          <v-col cols="12">
-            <v-alert
-              v-if="currentApproveStatus === 'NONE' || currentApproveStatus === 'REJECTED'"
-              :type="currentApproveStatusType"
-              rounded="lg"
-              :title="currentApproveStatusText"
-              :text="currentApproveStatusDescription"
-            >
-            </v-alert>
-          </v-col>
-        </v-row>
-      </template>
-
-      <template v-if="currentManageable">
-        <v-row dense>
-          <v-col cols="12">
-            <v-card flat rounded="lg">
-              <template #title>
-                <v-icon left size="24">mdi-account-group</v-icon>
-                参与者列表
-              </template>
-              <template #text>
-                <v-list v-if="participants.length > 0">
-                  <v-list-item v-for="participant in participants" :key="participant.id">
-                    <template #prepend>
-                      <v-avatar
-                        v-if="!participant.realNameInfo?.realName"
-                        color="primary"
-                        size="36"
-                        :image="getAvatarUrl(participant.member.avatarId)"
-                      ></v-avatar>
-                      <v-avatar v-else>
-                        <v-icon size="24">mdi-account</v-icon>
-                      </v-avatar>
-                    </template>
-
-                    <v-list-item-title>
-                      <div class="d-flex flex-row align-center gap-2">
-                        <span>{{ getParticipantName(participant) }}</span>
-                        <v-chip
-                          v-if="participant.approved === 'NONE'"
-                          variant="tonal"
-                          color="primary"
-                          density="compact"
-                        >
-                          待审核
-                        </v-chip>
-                        <v-chip
-                          v-else-if="participant.approved === 'DISAPPROVED'"
-                          variant="tonal"
-                          color="error"
-                          density="compact"
-                        >
-                          已驳回
-                        </v-chip>
-                      </div>
-                    </v-list-item-title>
-
-                    <v-list-item-subtitle>
-                      <template v-if="participant.realNameInfo?.realName">
-                        <div class="d-flex align-center">
-                          <v-icon size="16" class="me-1">mdi-school</v-icon>
-                          {{ participant.realNameInfo.grade }}级 {{ participant.realNameInfo.className }}
-                        </div>
-                        <div v-if="participant.realNameInfo.phone" class="d-flex align-center ga-1">
-                          <v-icon size="16">mdi-phone</v-icon>
-                          {{ participant.realNameInfo.phone }}
-                        </div>
-                        <div v-if="participant.realNameInfo.email" class="d-flex align-center ga-1">
-                          <v-icon size="16">mdi-email</v-icon>
-                          {{ participant.realNameInfo.email }}
-                        </div>
-                        <div v-if="participant.realNameInfo.applyReason" class="d-flex align-center ga-1">
-                          <v-icon size="16">mdi-text-box</v-icon>
-                          申请理由：{{ participant.realNameInfo.applyReason }}
-                        </div>
-                      </template>
-                      <template v-if="participant.deadline">
-                        <div class="d-flex align-center text-primary ga-1">
-                          <v-icon size="16">mdi-clock</v-icon>
-                          提交截止时间：{{ dayjs(participant.deadline).fromNow() }}
-                        </div>
-                      </template>
-                    </v-list-item-subtitle>
-
-                    <template #append>
-                      <template v-if="participant.approved === 'APPROVED'">
-                        <v-btn variant="text" @click="showParticipantSubmissions(participant.id)"> 查看提交 </v-btn>
-                      </template>
-                      <template v-else-if="participant.approved === 'NONE'">
-                        <div class="d-flex flex-row align-center gap-2">
-                          <v-btn
-                            prepend-icon="mdi-check"
-                            variant="tonal"
-                            color="success"
-                            @click="approveParticipant(participant.member.id)"
-                          >
-                            通过
-                          </v-btn>
-                          <v-btn
-                            prepend-icon="mdi-close"
-                            variant="tonal"
-                            color="error"
-                            @click="rejectParticipant(participant.member.id)"
-                          >
-                            驳回
-                          </v-btn>
-                        </div>
-                      </template>
-                    </template>
-                  </v-list-item>
-                </v-list>
-                <v-empty-state v-else title="暂无参与者"></v-empty-state>
-              </template>
-            </v-card>
-          </v-col>
-        </v-row>
-      </template>
-    </div>
+    <!-- 路由视图 -->
+    <router-view
+      v-slot="{ Component }"
+      :task-data="taskData"
+      :is-creator="isTaskCreator"
+      :is-admin="isSpaceAdmin"
+      :participation-info="participationInfo"
+    >
+      <transition name="fade" mode="out-in">
+        <component :is="Component" :task-data="taskData" :participation-info="participationInfo" />
+      </transition>
+    </router-view>
   </v-container>
-  <v-dialog v-model="progressDialog" persistent max-width="300">
-    <v-card>
-      <v-card-title class="headline">上传进度</v-card-title>
-      <v-card-text>
-        <v-progress-linear :value="uploadProgress" height="10" color="primary"></v-progress-linear>
-        <div class="text-center">{{ uploadProgress }}%</div>
-      </v-card-text>
-    </v-card>
-  </v-dialog>
 
-  <v-dialog v-model="isSubmissionsDialogOpen" fullscreen scrollable>
-    <v-card color="surface-light">
-      <v-toolbar color="surface">
-        <v-btn icon="mdi-close" @click="isSubmissionsDialogOpen = false"></v-btn>
-        <v-toolbar-title v-if="selectedParticipant">
-          {{ getParticipantName(selectedParticipant) }} 的提交记录
-        </v-toolbar-title>
-        <v-spacer></v-spacer>
-      </v-toolbar>
-      <v-card-text>
-        <v-container>
-          <TaskSubmissionHistory
-            v-if="selectedParticipant"
-            :task-id="Number(route.params.taskId)"
-            :member-id="selectedParticipant?.member.id"
-            :show-title="false"
-            :reviewable="currentManageable"
-          />
-        </v-container>
-      </v-card-text>
-    </v-card>
-  </v-dialog>
-
-  <v-dialog v-model="editDialogOpen" fullscreen scrollable>
-    <v-card>
-      <v-toolbar color="primary" dark>
-        <v-btn icon @click="editDialogOpen = false">
-          <v-icon>mdi-close</v-icon>
-        </v-btn>
-        <v-toolbar-title>{{ t('tasks.detail.editTask') }}</v-toolbar-title>
-        <v-spacer></v-spacer>
-      </v-toolbar>
-      <v-card-text>
-        <v-container>
-          <TaskForm
-            :initial-data="editTaskData"
-            :submit-button-text="t('tasks.detail.save')"
-            is-editing
-            :classification-topics="taskData?.space?.classificationTopics || []"
-            @submit="submitEditTask"
-          />
-        </v-container>
-      </v-card-text>
-    </v-card>
-  </v-dialog>
-
-  <v-dialog v-model="isVerifyInfoDialogOpen" persistent max-width="600">
-    <v-card>
-      <v-card-title>补充信息</v-card-title>
-      <v-card-text>
-        <div class="text-body-1 mb-4">
-          为确保赛题顺利进行，请补充您的基本信息。主办方将审核信息并在必要时与您取得联系。所填信息仅用于本次赛题参与。
-        </div>
-        <VerifyInfoForm ref="verifyInfoFormRef" @submit="handleVerifyInfoSubmit" />
-        <v-alert class="mt-4" type="info" color="primary" variant="tonal" title="隐私保护声明" icon="mdi-shield-check">
-          我们始终致力于保护用户隐私：您提供的信息仅供赛题创建者查看，不会展示在公开页面，也不会与您的账号关联。您在平台上的其他活动依然是匿名的。
-        </v-alert>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn @click="isVerifyInfoDialogOpen = false">取消</v-btn>
-        <v-btn @click="verifyInfoFormRef?.submit()"> 提交 </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+  <!-- 对话框组件集合，通过事件总线通信 -->
+  <TaskDialogs
+    :task-data="taskData"
+    :edit-task-data="editTaskData"
+    :available-teams="availableTeams"
+    :loading-teams="loadingTeams"
+    :joined-teams="joinedTeams"
+    :selected-leave-team-id="selectedLeaveTeamId"
+    :selected-context="selectedContext"
+    :participation-info="participationInfo"
+  />
 </template>
 
 <script setup lang="ts">
-import type { PatchTaskRequestData, TaskAIAdvice } from '@/network/api/tasks/types'
-import type { Task, TaskMembership, TaskParticipantRealNameInfo, Team } from '@/types'
+import { onMounted, ref } from 'vue'
 
-import {
-  computed,
-  defineAsyncComponent,
-  nextTick,
-  onMounted,
-  onUnmounted,
-  reactive,
-  ref,
-  useTemplateRef,
-  watch,
-} from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
-import { toast } from 'vuetify-sonner'
-import dayjs from 'dayjs'
+import { AIChatButton, LoadingErrorContainer, TaskDialogs, TaskHeader, TaskNavigationTabs } from './components'
+import { useAIChat, useTaskData, useTaskManagement, useTaskParticipation, useTeamParticipation } from './composables'
+import { useEvents } from './events'
 
-import { truncateString } from '@/utils/form'
-import { getAvatarUrl } from '@/utils/materials'
-import { getTaskStatusText, getTaskStatusType } from '@/utils/tasks'
-import { setTitle } from '@/utils/title'
+const activeTab = ref(null)
 
-import { AttachmentsApi } from '@/network/api/attachments'
-import { TasksApi } from '@/network/api/tasks'
-import { TeamsApi } from '@/network/api/teams'
-import { useDialog } from '@/plugins/dialog'
-import AccountService from '@/services/account'
+// 使用任务模块的事件总线
+const events = useEvents()
 
-const CollapsibleContent = defineAsyncComponent(() => import('@/components/common/CollapsibleContent.vue'))
-const CountdownTimer = defineAsyncComponent(() => import('@/components/common/CountdownTimer.vue'))
-const TipTapViewer = defineAsyncComponent(() => import('@/components/common/Editor/TipTapViewer.vue'))
-const AIAdvicePanel = defineAsyncComponent(() => import('@/components/tasks/AIAdvicePanel.vue'))
-const TaskSubmissionHistory = defineAsyncComponent(() => import('@/components/tasks/TaskSubmissionHistory.vue'))
-const VerifyInfoForm = defineAsyncComponent(() => import('@/components/tasks/VerifyInfoForm.vue'))
-const TaskForm = defineAsyncComponent(() => import('@/components/tasks/TaskForm.vue'))
+// 初始化各个模块
+const taskDataModule = useTaskData()
+const {
+  taskData,
+  loading,
+  error,
+  isTaskCreator,
+  isSpaceAdmin,
+  taskStatusText,
+  taskStatusType,
+  titleStartsWithChinesePunctuation,
+  breadcrumbItems,
+  editTaskData,
+  loadTaskData,
+  participationInfo,
+} = taskDataModule
 
-const dialogs = useDialog()
+const taskManagementModule = useTaskManagement(taskDataModule)
+const { openEditDialog, confirmDeleteTask } = taskManagementModule
 
-const route = useRoute()
-const router = useRouter()
+const aiChatModule = useAIChat()
+const { chatDialogOpen, selectedContext, openGeneralChat } = aiChatModule
 
-const myTeams = ref<Team[]>([])
-const taskData = ref<Task | null>(null)
-const submissionContent = ref<{ contentText?: string; contentAttachment?: File }[]>([])
-const progressDialog = ref(false)
-const uploadProgress = ref(0)
-const submissionHistoryRef = useTemplateRef<typeof TaskSubmissionHistory>('submissionHistoryRef')
-const participants = ref<TaskMembership[]>([])
-const isSubmissionsDialogOpen = ref(false)
-const selectedParticipant = ref<TaskMembership | null>(null)
-const selectedViewRole = ref<'participant' | 'creator' | 'space-admin' | string>('participant')
-const initialLoaded = ref(false)
-const isVerifyInfoDialogOpen = ref(false)
-const aiAdviceExpanded = ref(false)
-const aiAdvice = ref<TaskAIAdvice | null>(null)
-const aiAdviceLoading = ref(false)
-const aiAdviceError = ref<string | null>(null)
-const aiAdvicePollingTimer = ref<number | null>(null)
+const teamParticipationModule = useTeamParticipation(taskDataModule)
+const { availableTeams, loadingTeams, joinedTeams, loadJoinedTeams, selectedLeaveTeamId } = teamParticipationModule
 
-const { t } = useI18n()
+const taskParticipationModule = useTaskParticipation(taskDataModule)
+const { onJoinTaskClicked, confirmLeaveTask } = taskParticipationModule
 
-const getParticipantName = (participant: TaskMembership) => {
-  if (participant.realNameInfo?.realName) {
-    return `${participant.realNameInfo.realName} (${participant.realNameInfo.studentId})`
-  }
-  return participant.member.name
-}
+onMounted(() => {
+  events.on('join-clicked', onJoinTaskClicked)
+  events.on('leave-clicked', confirmLeaveTask)
 
-const fetchTaskDetail = async (taskId: number, clearSubmissionContent = true) => {
-  const {
-    data: { task },
-  } = await TasksApi.detail(taskId)
-  taskData.value = task
-  if (clearSubmissionContent) {
-    submissionContent.value = reactive(task.submissionSchema.map(() => ({})))
-  }
-}
-
-const isCreator = computed(() => AccountService.user?.id === taskData.value?.creator.id)
-const isSpaceAdminOrOwner = computed(() => {
-  if (!taskData.value?.space) return false
-  return taskData.value.space.admins.some((admin) => admin.user.id === AccountService.user?.id)
-})
-const taskStatusText = computed(() => getTaskStatusText(taskData.value))
-const taskStatusType = computed(() => getTaskStatusType(taskData.value))
-
-const isSelfTask = computed(() => {
-  return taskData.value?.creator.id === AccountService.user?.id
-})
-
-const breadcrumbItems = computed(() => {
-  if (taskData.value?.space) {
-    return [
-      { title: '知是', to: { name: 'HomeDefault' } },
-      {
-        title: truncateString(taskData.value?.space.name, 12),
-        to: { name: 'SpacesDetail', params: { spaceId: taskData.value?.space.id } },
-      },
-      {
-        title: truncateString(taskData.value?.name, 12),
-        to: { name: 'TasksDetail', params: { taskId: taskData.value?.id } },
-      },
-    ]
-  }
-  return null
-})
-
-const currentApproveStatus = computed(() => {
-  if (!taskData.value) return 'NONE'
-  if (!currentJoined.value) return 'NOT_JOINED'
-  if (taskData.value.submitterType === 'USER') {
-    return taskData.value.joinedApproved ? 'APPROVED' : taskData.value.joinedDisapproved ? 'REJECTED' : 'NONE'
-  } else if (taskData.value.submitterType === 'TEAM') {
-    return taskData.value.joinedApprovedAsTeam?.some((team) => team.id === Number(selectedViewRole.value))
-      ? 'APPROVED'
-      : taskData.value.joinedDisapprovedAsTeam?.some((team) => team.id === Number(selectedViewRole.value))
-        ? 'REJECTED'
-        : 'NONE'
-  }
-  return 'NONE'
-})
-
-const currentApproveStatusType = computed(() => {
-  if (currentApproveStatus.value === 'APPROVED') return 'success'
-  if (currentApproveStatus.value === 'REJECTED') return 'error'
-  return 'info'
-})
-
-const currentApproveStatusText = computed(() => {
-  if (currentApproveStatus.value === 'APPROVED') return '审核通过'
-  if (currentApproveStatus.value === 'REJECTED') return '审核未通过'
-  return '审核中'
-})
-
-const currentApproveStatusDescription = computed(() => {
-  if (currentApproveStatus.value === 'NONE') return '请耐心等待审核结果，审核通过后即可提交。'
-  return undefined
-})
-
-const currentDeadline = computed(() => {
-  if (!taskData.value) return null
-  if (currentViewRole.value?.type === 'participant') {
-    if (taskData.value.submitterType === 'USER') {
-      return participants.value.find((p) => p.member.id === AccountService.user?.id)?.deadline
-    } else {
-      return participants.value.find((p) => p.member.id === Number(selectedViewRole.value))?.deadline
-    }
-  }
-  return null
-})
-
-const currentMember = computed(() => {
-  if (selectedViewRole.value === 'creator' || selectedViewRole.value === 'participant') {
-    return AccountService.user?.id
-  } else {
-    return Number(selectedViewRole.value)
-  }
-})
-
-const taskDescription = computed(() => {
-  try {
-    return JSON.parse(taskData.value?.description ?? '{}')
-  } catch (error) {
-    return taskData.value?.description
-  }
-})
-
-const fetchParticipants = async (queryRealNameInfo = false) => {
-  if (!taskData.value) return
-  const { data } = await TasksApi.getParticipants(taskData.value.id, { queryRealNameInfo })
-  participants.value = data.participants
-}
-
-const fetchMyTeams = async () => {
-  const { data } = await TeamsApi.getMyTeams()
-  myTeams.value = data.teams
-}
-
-const showParticipantSubmissions = async (participantId: number) => {
-  selectedParticipant.value = participants.value.find((p) => p.id === participantId) || null
-  if (selectedParticipant.value && taskData.value) {
-    isSubmissionsDialogOpen.value = true
-  }
-}
-
-const refresh = async () => {
-  participants.value = []
-  await Promise.all([fetchTaskDetail(Number(route.params.taskId)), fetchMyTeams()])
-  nextTick(() => {
-    setTitle(taskData.value?.name || '赛题', route)
-    fetchParticipants(currentManageable.value)
-  })
-}
-
-onMounted(async () => {
-  await refresh()
-})
-
-const switchViewRole = (role: string) => {
-  selectedViewRole.value = role
-  refresh()
-}
-
-const submitTask = async () => {
-  if (!currentMember.value) {
-    toast.error('请选择提交小队')
-    return
-  }
-  const member = currentMember.value
-
-  progressDialog.value = true
-  uploadProgress.value = 0
-
-  const totalFiles = submissionContent.value.filter((item) => item.contentAttachment).length
-  let uploadedFiles = 0
-  const finalSubmissionContent = submissionContent.value.map((item) => {
-    if (item.contentAttachment) {
-      return {} as { contentText?: string; contentAttachmentId?: number }
-    }
-    return {
-      contentText: item.contentText,
-    } as { contentText?: string; contentAttachmentId?: number }
+  events.on('submit-verify', (data) => {
+    taskParticipationModule.handleVerifyInfoSubmit(data).catch((error: Error) => {
+      console.error('提交验证信息失败', error)
+    })
   })
 
-  for (const [index, entry] of submissionContent.value.entries()) {
-    if (entry.contentAttachment) {
-      try {
-        const { data } = await AttachmentsApi.upload({
-          type: 'file',
-          file: entry.contentAttachment,
-        })
-        finalSubmissionContent[index].contentAttachmentId = data.id
-        uploadedFiles++
-        uploadProgress.value = Math.round((uploadedFiles / totalFiles) * 100)
-      } catch (error) {
-        toast.error('上传附件失败')
-        progressDialog.value = false
-        return
-      }
-    }
-  }
-
-  try {
-    await TasksApi.createSubmission(taskData.value!.id, member, finalSubmissionContent)
-    toast.success('提交成功')
-    submissionHistoryRef.value?.refresh()
-  } catch (error) {
-    toast.error(`提交失败: ${error instanceof Error ? error.message : '未知错误'}`)
-  } finally {
-    progressDialog.value = false
-  }
-
-  await fetchTaskDetail(taskData.value!.id, true)
-}
-
-const onJoinTaskClicked = () => {
-  isVerifyInfoDialogOpen.value = true
-}
-
-const fillRealNameInfo = (realNameInfo: TaskParticipantRealNameInfo) => {
-  return {
-    major: '',
-    email: '',
-    phone: '',
-    applyReason: '',
-    personalAdvantage: '',
-    remark: '',
-    ...realNameInfo,
-  }
-}
-
-const joinTask = async (realNameInfo?: TaskParticipantRealNameInfo) => {
-  if (!taskData.value) return
-  if (!currentMember.value) {
-    toast.error('无法获取成员信息')
-    return
-  }
-  try {
-    await TasksApi.addParticipant(taskData.value.id, currentMember.value, {
-      deadline: null,
-      realNameInfo: realNameInfo ? fillRealNameInfo(realNameInfo) : undefined,
+  events.on('submit-edit', (data) => {
+    taskManagementModule.submitEditTask(data).catch((error: Error) => {
+      console.error('编辑任务失败', error)
     })
-    toast.success('领取赛题成功')
-    await fetchTaskDetail(taskData.value.id, false)
-  } catch (error) {
-    toast.error('领取赛题失败')
-  }
-}
+  })
 
-const leaveTask = async () => {
-  const confirm = await dialogs.confirm('确定要退出赛题吗？').wait()
-  if (!confirm) return
-  if (!taskData.value) return
-  if (!currentMember.value) {
-    toast.error('无法获取成员信息')
-    return
-  }
-  try {
-    await TasksApi.removeParticipant(taskData.value.id, currentMember.value)
-    toast.success('退出赛题成功')
-    await fetchTaskDetail(taskData.value.id, false)
-  } catch (error) {
-    toast.error('退出赛题失败')
-  }
-}
+  events.on('select-team', (teamId) => {
+    teamParticipationModule.selectTeam(teamId)
+  })
 
-const viewRoles = computed(() => {
-  const roles = []
-  if (isCreator.value) {
-    roles.push({
-      value: 'creator',
-      title: '创建者',
-      type: 'creator',
-      isSubmittable: false,
-      avatarId: null,
-      icon: 'mdi-crown',
+  events.on('select-leave-team', (teamId) => {
+    teamParticipationModule.selectLeaveTeam(teamId)
+  })
+
+  events.on('confirm-leave-team', () => {
+    teamParticipationModule.confirmLeaveSelectedTeam().catch((error: Error) => {
+      console.error('离开队伍失败', error)
     })
-  }
-  if (isSpaceAdminOrOwner.value) {
-    roles.push({
-      value: 'space-admin',
-      title: '空间管理员',
-      type: 'space-admin',
-      isSubmittable: false,
-      avatarId: null,
-      icon: 'mdi-shield-check',
-    })
-  }
-  if (taskData.value?.submitterType === 'USER') {
-    if (taskData.value?.approved) {
-      roles.push({
-        value: 'participant',
-        title: '参与者',
-        type: 'participant',
-        isSubmittable: taskData.value.submittable,
-        avatarId: null,
-        icon: 'mdi-account',
-      })
+  })
+
+  // 添加退出团队的事件处理
+  events.on('leave-team', (teamId) => {
+    taskParticipationModule.leaveTaskWithTeam(teamId)
+  })
+
+  // 加载任务数据
+  loadTaskData().then(() => {
+    // 如果是小队赛题，加载已参与的小队
+    if (taskData.value?.submitterType === 'TEAM') {
+      loadJoinedTeams()
     }
-  } else if (taskData.value?.submitterType === 'TEAM') {
-    if (taskData.value?.approved) {
-      myTeams.value.forEach((team) => {
-        const isSubmittable = taskData.value?.submittableAsTeam?.some(
-          (submittableTeam) => submittableTeam.id === team.id
-        )
-        const isJoinable = taskData.value?.joinableAsTeam?.some((joinableTeam) => joinableTeam.id === team.id)
-        if (isSubmittable || isJoinable) {
-          roles.push({
-            value: team.id.toString(),
-            title: team.name,
-            type: 'team',
-            avatarId: team.avatarId,
-            isSubmittable: isSubmittable,
-            icon: null,
-          })
-        }
-      })
-    }
-  }
-  return roles
-})
-
-watch(viewRoles, (newValue) => {
-  if (newValue.length > 0 && !initialLoaded.value) {
-    selectedViewRole.value = newValue[0].value
-    initialLoaded.value = true
-  }
-})
-
-const currentViewRole = computed(() => {
-  return viewRoles.value.find((role) => role.value === selectedViewRole.value)
-})
-
-const currentJoinable = computed(() => {
-  if (!taskData.value?.approved) return false
-  if (taskData.value?.submitterType === 'USER') {
-    return taskData.value.joinable && selectedViewRole.value === 'participant'
-  } else {
-    return currentViewRole.value?.type === 'team' && !currentViewRole.value.isSubmittable
-  }
-})
-
-const currentSubmittable = computed(() => {
-  if (taskData.value?.submitterType === 'USER') {
-    return taskData.value.submittable && selectedViewRole.value === 'participant'
-  } else {
-    return currentViewRole.value?.type === 'team' && currentViewRole.value.isSubmittable
-  }
-})
-
-const currentJoined = computed(() => {
-  if (taskData.value?.submitterType === 'USER' && currentViewRole.value?.type === 'participant')
-    return taskData.value?.joined
-  if (
-    taskData.value?.submitterType === 'TEAM' &&
-    taskData.value?.joinedAsTeam?.length &&
-    currentViewRole.value?.type === 'team'
-  ) {
-    return taskData.value.joinedAsTeam.some((team) => team.id === Number(currentViewRole.value?.value))
-  }
-  return false
-})
-
-const currentManageable = computed(() => {
-  return (
-    (isCreator.value && selectedViewRole.value === 'creator') ||
-    (isSpaceAdminOrOwner.value && selectedViewRole.value === 'space-admin')
-  )
-})
-
-const currentViewRoleTitle = computed(() => {
-  const currentRole = viewRoles.value.find((role) => role.value === selectedViewRole.value)
-  return currentRole ? currentRole.title : ''
-})
-
-const editDialogOpen = ref(false)
-const editTaskData = computed(() => {
-  if (!taskData.value) return {}
-  return {
-    name: taskData.value.name,
-    submitterType: taskData.value.submitterType,
-    rank: taskData.value.rank,
-    defaultDeadline: taskData.value.defaultDeadline,
-    deadline: new Date(taskData.value.deadline).getTime(),
-    resubmittable: taskData.value.resubmittable,
-    editable: taskData.value.editable,
-    description: JSON.parse(taskData.value.description),
-  }
-})
-
-const openEditDialog = () => {
-  editDialogOpen.value = true
-}
-
-const submitEditTask = async (updatedTaskData: PatchTaskRequestData) => {
-  if (!taskData.value) return
-
-  try {
-    await TasksApi.update(taskData.value.id, updatedTaskData)
-    toast.success(t('tasks.detail.updateSuccess'))
-    editDialogOpen.value = false
-    await fetchTaskDetail(taskData.value.id, false)
-  } catch (error) {
-    toast.error(t('tasks.detail.updateFailed'))
-    console.error(t('tasks.detail.updateFailed'), error)
-  }
-}
-
-const deleteTask = async () => {
-  if (!taskData.value) return
-  if (await dialogs.confirm('确定要删除赛题吗？').wait()) {
-    await TasksApi.del(taskData.value.id)
-    toast.success('删除成功')
-    router.back()
-  }
-}
-
-const approveParticipant = async (memberId: number) => {
-  if (!taskData.value) return
-  const deadline = dayjs().add(taskData.value.defaultDeadline, 'day').toDate().getTime()
-  try {
-    await TasksApi.updateParticipant(taskData.value!.id, memberId, { approved: 'APPROVED', deadline })
-    toast.success('通过成功')
-  } catch (error) {
-    toast.error('通过失败')
-  } finally {
-    await fetchParticipants()
-  }
-}
-
-const rejectParticipant = async (memberId: number) => {
-  if (!taskData.value) return
-  try {
-    await TasksApi.updateParticipant(taskData.value!.id, memberId, { approved: 'DISAPPROVED' })
-    toast.success('驳回成功')
-  } catch (error) {
-    toast.error('驳回失败')
-  } finally {
-    await fetchParticipants()
-  }
-}
-
-const handleVerifyInfoSubmit = async (formData: TaskParticipantRealNameInfo) => {
-  try {
-    isVerifyInfoDialogOpen.value = false
-    await joinTask(formData)
-  } catch (error) {
-    toast.error('信息提交失败')
-  }
-}
-
-const verifyInfoFormRef = ref<InstanceType<typeof VerifyInfoForm> | null>(null)
-
-const toggleAIAdvice = async () => {
-  aiAdviceExpanded.value = !aiAdviceExpanded.value
-  if (aiAdviceExpanded.value && !aiAdvice.value) {
-    await fetchAIAdvice()
-  }
-}
-
-const startPolling = () => {
-  if (aiAdvicePollingTimer.value) return
-  aiAdvicePollingTimer.value = window.setInterval(async () => {
-    try {
-      const { data: statusData } = await TasksApi.getAIAdviceStatus(Number(route.params.taskId))
-      if (statusData.status === 'COMPLETED') {
-        // 状态完成后，获取建议内容
-        const { data: adviceData } = await TasksApi.getAIAdvice(Number(route.params.taskId))
-        aiAdvice.value = adviceData
-        aiAdviceLoading.value = false
-        stopPolling()
-      } else if (statusData.status === 'FAILED') {
-        // 生成失败
-        aiAdviceError.value = '生成建议失败，请重试'
-        aiAdviceLoading.value = false
-        stopPolling()
-      }
-    } catch (error: any) {
-      aiAdviceError.value = error instanceof Error ? error.message : '获取建议失败'
-      aiAdviceLoading.value = false
-      stopPolling()
-    }
-  }, 2000) // 每2秒轮询一次
-}
-
-const stopPolling = () => {
-  if (aiAdvicePollingTimer.value) {
-    clearInterval(aiAdvicePollingTimer.value)
-    aiAdvicePollingTimer.value = null
-  }
-}
-
-const fetchAIAdvice = async () => {
-  aiAdviceLoading.value = true
-  aiAdviceError.value = null
-  try {
-    // 先请求生成
-    const { data: requestData } = await TasksApi.requestAIAdvice(Number(route.params.taskId))
-    if (requestData.status === 'FAILED') {
-      aiAdviceError.value = '生成建议失败，请重试'
-      aiAdviceLoading.value = false
-    } else if (requestData.status === 'COMPLETED') {
-      // 如果已经生成完成，直接获取结果
-      const { data: adviceData } = await TasksApi.getAIAdvice(Number(route.params.taskId))
-      aiAdvice.value = adviceData
-      aiAdviceLoading.value = false
-    } else {
-      // 开始轮询
-      startPolling()
-    }
-  } catch (error) {
-    aiAdviceError.value = error instanceof Error ? error.message : '获取建议失败'
-    aiAdviceLoading.value = false
-  }
-}
-
-// 组件卸载时清理轮询定时器
-onUnmounted(() => {
-  stopPolling()
+  })
 })
 </script>
+
 <style scoped>
-.cursor-pointer {
-  cursor: pointer;
+.task-header-card {
+  background: linear-gradient(to right, rgb(var(--v-theme-surface)), rgb(var(--v-theme-background)));
+  position: relative;
+  overflow: hidden;
   transition: all 0.3s ease;
+  border-radius: 8px;
+  color: rgb(var(--v-theme-on-surface));
 }
 
-.cursor-pointer:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(var(--v-theme-primary), 0.2) !important;
+.task-header-title {
+  display: inline-block;
+  font-size: 2rem !important;
 }
 
-.selected-view-role-icon {
-  width: 100%;
+.title-with-punctuation {
+  text-indent: -0.5em;
+}
+
+.task-header-inner {
+  position: relative;
+  z-index: 2;
+}
+
+.task-header-inner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 30%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.3);
-  font-size: 16px;
+  background: radial-gradient(circle at top right, rgba(var(--v-theme-primary), 0.1), transparent 70%);
+  opacity: 0.6;
+  z-index: -1;
 }
 
-.ai-advice-drawer {
-  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.1) !important;
+.task-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, rgba(var(--v-theme-primary), 0.08), rgba(var(--v-theme-primary), 0.15));
+  border-radius: 8px;
+  position: relative;
 }
 
-.ai-advice-card {
+.task-icon-wrapper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  border: 1px solid rgba(var(--v-theme-primary), 0.2);
+  opacity: 0.8;
+}
+
+.task-status-chip {
+  position: relative;
+  overflow: hidden;
+}
+
+.task-header-card:hover {
+  border-bottom-color: rgba(var(--v-theme-primary), 0.25);
+}
+
+.join-btn {
+  background: linear-gradient(to right, rgb(var(--v-theme-primary)), rgb(var(--v-theme-primary)));
+  box-shadow: 0 2px 8px -2px rgba(var(--v-theme-primary), 0.6);
+  border-radius: 6px;
+  min-width: 120px;
   transition: all 0.3s ease;
-  border-left: 3px solid rgba(var(--v-theme-primary), 0.3);
+  position: relative;
+  overflow: hidden;
 }
 
-.ai-advice-card:hover {
-  transform: translateY(-2px);
-  border-left-color: rgb(var(--v-theme-primary));
+.join-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), transparent);
+  border-radius: 6px 6px 0 0;
+}
+
+.join-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px -3px rgba(var(--v-theme-primary), 0.7);
+}
+
+.task-tabs-card {
+  background-color: var(--v-theme-surface);
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.task-tabs-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    rgba(var(--v-theme-primary), 0.25),
+    rgba(var(--v-theme-primary), 0.15),
+    rgba(var(--v-theme-primary), 0.02)
+  );
+  z-index: 1;
+}
+
+.task-navigation-tabs {
+  overflow: hidden;
+}
+
+.task-navigation-tabs :deep(.v-tab) {
+  min-height: 46px;
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 500;
+  opacity: 0.8;
+  transition: all 0.25s ease;
+  border-radius: 0;
+  position: relative;
+}
+
+.task-navigation-tabs :deep(.v-tab:hover) {
+  opacity: 0.95;
+  background-color: rgba(var(--v-theme-primary), 0.04);
+}
+
+.task-navigation-tabs :deep(.v-tab--selected) {
+  background-color: transparent;
+  color: rgb(var(--v-theme-primary));
+  opacity: 1;
+  font-weight: 600;
+}
+
+.task-navigation-tabs :deep(.v-tab--selected::after) {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 10%;
+  width: 80%;
+  height: 2px;
+  background-color: rgb(var(--v-theme-primary));
+  border-radius: 2px 2px 0 0;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.verify-info-dialog :deep(.v-card) {
+  overflow: hidden;
+}
+
+.info-alert-card {
+  border: 1px solid rgba(var(--v-border-color), 0.12);
+  transition: all 0.2s ease;
+}
+
+.info-avatar {
+  background: linear-gradient(135deg, rgb(var(--v-theme-info)), rgb(var(--v-theme-info)));
+  box-shadow: 0 2px 4px rgba(var(--v-theme-info), 0.2);
+}
+
+.primary-soft {
+  background-color: rgba(var(--v-theme-primary), 0.08);
+}
+
+.privacy-protection-card {
+  border: 1px solid rgba(var(--v-border-color), 0.12);
+  background-color: rgb(var(--v-theme-surface));
+}
+
+.privacy-usage-card {
+  border: 1px solid rgba(var(--v-border-color), 0.12);
+  background-color: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.privacy-usage-card:hover {
+  border-color: rgba(var(--v-theme-primary), 0.15);
+  background-color: rgba(var(--v-theme-primary), 0.01);
+}
+
+.privacy-rights-alert {
+  background-color: rgba(var(--v-theme-info), 0.05);
+  border-color: rgba(var(--v-theme-info), 0.3);
+}
+
+/* AI 对话按钮样式 */
+.ai-chat-fab {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 100;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.ai-chat-fab:hover {
+  transform: scale(1.05);
+}
+
+.privacy-link {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px dashed rgba(var(--v-theme-primary), 0.5);
+}
+
+.privacy-link:hover {
+  border-bottom-color: rgb(var(--v-theme-primary));
+  opacity: 0.9;
+}
+
+.privacy-checkbox :deep(.v-label) {
+  opacity: 1;
+}
+
+/* 团队选择样式 */
+.team-cards-container {
+  max-height: 460px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.team-card {
+  position: relative;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(var(--v-border-color), 0.15);
+  background-color: rgb(var(--v-theme-surface));
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.team-card:not(.team-card-disabled):hover {
+  border-color: rgba(var(--v-theme-primary), 0.5);
+  background-color: rgba(var(--v-theme-primary), 0.04);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(var(--v-theme-primary), 0.05);
+}
+
+.team-card-disabled {
+  opacity: 0.9;
+  background-color: rgb(var(--v-theme-surface));
+  cursor: not-allowed;
+  border-color: rgba(var(--v-border-color), 0.2);
+}
+
+.team-card-disabled::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(var(--v-theme-surface-variant), 0.3),
+    rgba(var(--v-theme-surface-variant), 0.15)
+  );
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.team-card-overlay {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 3;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(1px);
+}
+
+.certification-required {
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  background-color: rgba(var(--v-theme-error), 0.08);
+  border-radius: 20px;
+  border: 1px solid rgba(var(--v-theme-error), 0.2);
+  color: rgb(var(--v-theme-error));
+  font-weight: 500;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(var(--v-theme-error), 0.1);
+}
+
+.disabled-notice {
+  position: relative;
+  z-index: 2;
+}
+
+.member-chip {
+  transition: all 0.15s ease;
+}
+
+.member-chip:hover {
+  transform: translateY(-1px);
+}
+
+.team-members-container {
+  padding-top: 4px;
+  border-top: 1px dashed rgba(var(--v-border-color), 0.3);
+}
+
+.min-width-0 {
+  min-width: 0;
+}
+
+.max-width-400 {
+  max-width: 400px;
+}
+
+.select-btn-container {
+  align-self: center;
+}
+
+.team-card-disabled .member-chip {
+  opacity: 0.7;
 }
 </style>

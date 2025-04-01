@@ -35,7 +35,7 @@ export namespace ProjectsApi {
     })
 
   export const list = (params: GetProjectsRequestParams) =>
-    NewApiInstance.request<{ projects: Project[]; page: Page }>({
+    NewApiInstance.request<{ projects: Project[] }>({
       url: '/projects',
       method: 'GET',
       params,
@@ -47,7 +47,7 @@ export namespace ProjectsApi {
       method: 'GET',
     })
 
-  export const update = (projectId: number, data: Partial<CreateProjectRequestData>) =>
+  export const update = (projectId: number, data: Partial<CreateProjectRequestData> & { archived?: boolean }) =>
     NewApiInstance.request<{ project: Project }>({
       url: `/projects/${projectId}`,
       method: 'PATCH',

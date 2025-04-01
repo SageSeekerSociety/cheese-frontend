@@ -23,10 +23,12 @@ export interface Project {
   externalTaskId?: number
   githubRepo?: string
   content: string
+  archived?: boolean
   members: {
     count: number
     examples: ProjectMember[]
   }
   createdAt: number
   updatedAt: number
+  children?: Project[]
 }

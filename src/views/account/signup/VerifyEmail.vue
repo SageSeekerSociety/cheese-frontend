@@ -58,7 +58,7 @@ import { z } from 'zod'
 import { vuetifyConfig } from '@/utils/form'
 
 import AccountService from '@/services/account'
-import { useSignupStore } from '@/store/signup'
+import { useSignupStore } from '@/stores/signup'
 
 const router = useRouter()
 

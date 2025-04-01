@@ -48,7 +48,7 @@ import { toast } from 'vuetify-sonner'
 import { storeToRefs } from 'pinia'
 
 import TopicSelector from '@/components/common/TopicSelector.vue'
-import { useSpaceStore } from '@/store/space'
+import { useSpaceStore } from '@/stores/space'
 import { Topic } from '@/types'
 
 const spaceStore = useSpaceStore()

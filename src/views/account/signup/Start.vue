@@ -107,7 +107,7 @@ import { z } from 'zod'
 import { REGEX_PASSWORD, vuetifyConfig } from '@/utils/form'
 
 import { ServerError } from '@/network/types/error'
-import { useSignupStore } from '@/store/signup'
+import { useSignupStore } from '@/stores/signup'
 
 const error = ref('')
 

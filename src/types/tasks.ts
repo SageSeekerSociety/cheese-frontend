@@ -26,7 +26,8 @@ export interface Task {
     examples: { avatarId: number }[]
   }
   joinable: boolean
-  joinableAsTeam?: Team[]
+  joinableTeams?: Team[]
+  joinRejectReason?: string
   submittable: boolean
   submittableAsTeam?: Team[]
   createdAt: number
@@ -34,15 +35,13 @@ export interface Task {
   rank: number
   approved: 'APPROVED' | 'DISAPPROVED' | 'NONE'
   rejectReason?: string
+  requireRealName: boolean
+  minTeamSize?: number
+  maxTeamSize?: number
   joined?: boolean
-  joinedAsTeam?: Team[]
-  joinedApproved?: boolean
-  joinedApprovedAsTeam?: Team[]
-  joinedDisapproved?: boolean
-  joinedDisapprovedAsTeam?: Team[]
-  joinedNotApprovedOrDisapproved?: boolean
-  joinedNotApprovedOrDisapprovedAsTeam?: Team[]
+  joinedTeams?: Team[]
   topics?: Topic[]
+  userDeadline?: number
 }
 
 export interface TaskSubmissionReview {
@@ -113,4 +112,8 @@ export type TaskFormSubmitData = {
   editable: boolean
   intro: string
   description: string
+  categoryId: number
+  requireRealName: boolean
+  minTeamSize: number
+  maxTeamSize: number
 }
