@@ -112,6 +112,7 @@ export type TaskFormSubmitData = {
   editable: boolean
   intro: string
   description: string
+  categoryId: number
   requireRealName: boolean
   minTeamSize: number
   maxTeamSize: number

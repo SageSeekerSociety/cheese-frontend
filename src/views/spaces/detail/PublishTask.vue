@@ -22,13 +22,7 @@
 
 <script setup lang="ts">
 import type { TaskSubmissionSchemaEntry } from '@/types'
-import type { TaskFormSubmitData as BaseTaskFormSubmitData } from '@/types'
-
-// Extended interface that includes requireRealName
-interface TaskFormSubmitData extends BaseTaskFormSubmitData {
-  requireRealName?: boolean
-  categoryId?: number
-}
+import type { TaskFormSubmitData } from '@/types'
 
 import { computed, defineAsyncComponent, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
