@@ -14,19 +14,14 @@
       </v-card-item>
 
       <v-card-text class="pt-2">
-        <v-row>
+        <v-row dense>
           <v-col cols="12">
-            <v-text-field
-              v-model="formData.name"
-              :label="t('tasks.form.taskName')"
-              required
-              v-bind="nameProps"
-            ></v-text-field>
+            <v-text-field v-model="name" :label="t('tasks.form.taskName')" required v-bind="nameProps"></v-text-field>
           </v-col>
 
           <v-col cols="12" md="6">
             <v-radio-group
-              v-model="formData.submitterType"
+              v-model="submitterType"
               :label="t('tasks.form.participantType')"
               required
               inline
@@ -41,7 +36,7 @@
 
           <v-col cols="12" md="6">
             <v-radio-group
-              v-model="formData.rank"
+              v-model="rank"
               :label="t('tasks.form.taskLevel')"
               required
               inline
@@ -55,15 +50,14 @@
           </v-col>
 
           <!-- 小队人数限制 -->
-          <template v-if="formData.submitterType === 'TEAM'">
+          <template v-if="submitterType === 'TEAM'">
             <v-col cols="12" md="6">
               <v-text-field
-                v-model.number="formData.minTeamSize"
+                v-model.number="minTeamSize"
                 label="最小队伍人数"
                 type="number"
                 required
                 min="1"
-                :rules="[(v: number | null) => !v || v >= 1 || '最小人数不能小于1']"
                 v-bind="minTeamSizeProps"
               >
                 <template #append-inner>
@@ -73,15 +67,11 @@
             </v-col>
             <v-col cols="12" md="6">
               <v-text-field
-                v-model.number="formData.maxTeamSize"
+                v-model.number="maxTeamSize"
                 label="最大队伍人数"
                 type="number"
                 required
                 min="1"
-                :rules="[
-                  (v: number | null) => !v || v >= (formData.minTeamSize || 1) || '最大人数不能小于最小人数',
-                  (v: number | null) => !v || v >= 1 || '最大人数不能小于1',
-                ]"
                 v-bind="maxTeamSizeProps"
               >
                 <template #append-inner>
@@ -108,10 +98,10 @@
       </v-card-item>
 
       <v-card-text class="pt-2">
-        <v-row>
+        <v-row dense>
           <v-col cols="12" md="6">
             <v-date-input
-              v-model="formData.deadline"
+              v-model="deadline"
               :label="t('tasks.form.deadline')"
               required
               density="comfortable"
@@ -121,7 +111,7 @@
           </v-col>
           <v-col cols="12" md="6">
             <v-text-field
-              v-model.number="formData.defaultDeadline"
+              v-model.number="defaultDeadline"
               :label="t('tasks.form.defaultDeadline')"
               type="number"
               required
@@ -153,7 +143,7 @@
           <v-col cols="12" md="6">
             <v-select
               v-if="categories.length > 0"
-              v-model="formData.categoryId"
+              v-model="categoryId"
               :items="categoryItems"
               :label="t('spaces.detail.tasks.category')"
               item-title="title"
@@ -168,7 +158,7 @@
 
           <v-col cols="12" md="6">
             <v-select
-              v-model="formData.topics"
+              v-model="topics"
               :items="topicItems"
               :label="t('spaces.detail.tasks.topic')"
               chips
@@ -194,12 +184,12 @@
       </v-card-item>
 
       <v-card-text class="pt-2">
-        <v-switch v-model="formData.requireRealName" color="primary" hide-details>
+        <v-switch v-model="requireRealName" color="primary" hide-details v-bind="requireRealNameProps">
           <template #label>
             <div class="d-flex align-center">
               <v-icon
-                :icon="formData.requireRealName ? 'mdi-account-check' : 'mdi-account-outline'"
-                :color="formData.requireRealName ? 'primary' : 'medium-emphasis'"
+                :icon="requireRealName ? 'mdi-account-check' : 'mdi-account-outline'"
+                :color="requireRealName ? 'primary' : 'medium-emphasis'"
                 class="mr-2"
               ></v-icon>
               <span>要求参与者提供实名信息</span>
@@ -214,7 +204,7 @@
         </v-switch>
 
         <v-alert
-          v-if="formData.requireRealName"
+          v-if="requireRealName"
           color="primary"
           variant="tonal"
           class="mt-3 mb-0"
@@ -259,7 +249,7 @@
       <v-card-text class="pt-2">
         <TipTapEditor
           ref="descriptionEditor"
-          v-model="formData.description"
+          v-model="description"
           output="json"
           rounded
           :min-height="200"
@@ -424,12 +414,11 @@
 </template>
 
 <script setup lang="ts">
-import type { TaskFormSubmitData as BaseTaskFormSubmitData, Topic } from '@/types'
+import type { TaskFormSubmitData, Topic } from '@/types'
 import type { SpaceCategory } from '@/types'
 
-import { computed, defineEmits, defineProps, nextTick, reactive, ref, toRefs } from 'vue'
+import { computed, defineEmits, defineProps, ref, toRefs } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useDisplay } from 'vuetify'
 import { VDateInput } from 'vuetify/labs/VDateInput'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
@@ -438,13 +427,6 @@ import { z } from 'zod'
 import { truncateString, vuetifyConfig } from '@/utils/form'
 
 import TipTapEditor from '@/components/common/Editor/TipTapEditor.vue'
-
-// Extend the TaskFormSubmitData type to include requireRealName and team size limits
-interface TaskFormSubmitData extends BaseTaskFormSubmitData {
-  requireRealName?: boolean
-  minTeamSize?: number
-  maxTeamSize?: number
-}
 
 const isAllowedDates = (date: unknown) => {
   if (!(date instanceof Date)) return false
@@ -473,14 +455,10 @@ const props = withDefaults(
   }
 )
 
-const { classificationTopics, categories, selectedCategoryId } = toRefs(props)
-const display = useDisplay()
+const { classificationTopics, categories } = toRefs(props)
 
 const topicItems = computed(() => classificationTopics.value.map((topic) => ({ title: topic.name, value: topic.id })))
-const categoryItems = computed(() => [
-  { title: '无分类', value: null },
-  ...categories.value.map((category) => ({ title: category.name, value: category.id })),
-])
+const categoryItems = computed(() => categories.value.map((category) => ({ title: category.name, value: category.id })))
 
 const emit = defineEmits<{
   submit: [data: TaskFormSubmitData]
@@ -493,18 +471,23 @@ const descriptionEditor = ref<InstanceType<typeof TipTapEditor> | null>(null)
 
 const { handleSubmit, defineField, isSubmitting } = useForm({
   validationSchema: toTypedSchema(
-    z.object({
-      name: z.string().min(1).max(100),
-      submitterType: z.enum(['USER', 'TEAM']),
-      deadline: z.date(),
-      defaultDeadline: z.number().int().default(30),
-      rank: z.number().int().min(1).max(3),
-      topics: z.array(z.number()).optional(),
-      categoryId: z.number().optional().nullable(),
-      minTeamSize: z.number().int().min(2).max(10).optional(),
-      maxTeamSize: z.number().int().min(2).max(10).optional(),
-      requireRealName: z.boolean().optional().default(false),
-    })
+    z
+      .object({
+        name: z.string().min(1).max(100),
+        submitterType: z.enum(['USER', 'TEAM']),
+        deadline: z.date(),
+        defaultDeadline: z.number().int().default(30),
+        rank: z.number().int().min(1).max(3),
+        topics: z.array(z.number()).optional(),
+        categoryId: z.number().optional().nullable(),
+        minTeamSize: z.number().int().min(1).optional(),
+        maxTeamSize: z.number().int().min(1).optional(),
+        requireRealName: z.boolean().optional().default(false),
+      })
+      .refine((arg) => !arg.maxTeamSize || !arg.minTeamSize || arg.maxTeamSize >= arg.minTeamSize, {
+        message: '最大人数不能小于最小人数',
+        path: ['maxTeamSize'],
+      })
   ),
   initialValues: {
     ...(props.initialData ?? {}),
@@ -526,25 +509,14 @@ const [topics, topicsProps] = defineField('topics', vuetifyConfig)
 const [minTeamSize, minTeamSizeProps] = defineField('minTeamSize', vuetifyConfig)
 const [maxTeamSize, maxTeamSizeProps] = defineField('maxTeamSize', vuetifyConfig)
 const [categoryId, categoryIdProps] = defineField('categoryId', vuetifyConfig)
+const [requireRealName, requireRealNameProps] = defineField('requireRealName', vuetifyConfig)
 
-const formData = reactive({
-  name,
-  submitterType,
-  rank,
-  deadline,
-  defaultDeadline,
-  topics,
-  description: props.initialData?.description || [],
-  requireRealName: !!props.initialData?.requireRealName,
-  minTeamSize,
-  maxTeamSize,
-  categoryId: props.selectedCategoryId || null,
-})
+const description = ref(props.initialData?.description || [])
 
 const pendingSubmissionData = ref<{ descriptionText: string | undefined; values: any } | null>(null)
 
 const submitForm = handleSubmit((values) => {
-  if (formData.requireRealName && !wasRealNameEnabled.value) {
+  if (requireRealName.value && !wasRealNameEnabled.value) {
     privacyDialogOpen.value = true
     pendingSubmissionData.value = {
       descriptionText: descriptionEditor.value?.editor?.getText(),
@@ -561,15 +533,15 @@ const submitFormData = (values: any) => {
   deadlineDate.setHours(23, 59, 59, 999)
   const submissionData: TaskFormSubmitData = {
     ...values,
-    description: JSON.stringify(formData.description),
+    description: JSON.stringify(description.value),
     intro: truncateString(descriptionText || '', 255),
     deadline: deadlineDate.getTime(),
     resubmittable: true,
     editable: true,
-    requireRealName: formData.requireRealName,
-    categoryId: formData.categoryId || undefined,
-    minTeamSize: formData.submitterType === 'TEAM' ? formData.minTeamSize : undefined,
-    maxTeamSize: formData.submitterType === 'TEAM' ? formData.maxTeamSize : undefined,
+    requireRealName: requireRealName.value,
+    categoryId: categoryId.value || undefined,
+    minTeamSize: submitterType.value === 'TEAM' ? minTeamSize.value : undefined,
+    maxTeamSize: submitterType.value === 'TEAM' ? maxTeamSize.value : undefined,
   }
   emit('submit', submissionData)
 }
@@ -578,7 +550,7 @@ const privacyDialogOpen = ref(false)
 const wasRealNameEnabled = ref(false)
 
 const cancelSubmitWithRealName = () => {
-  formData.requireRealName = false
+  requireRealName.value = false
   wasRealNameEnabled.value = false
   privacyDialogOpen.value = false
   pendingSubmissionData.value = null
