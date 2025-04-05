@@ -1,18 +1,20 @@
-name: Build and Push Product Docker Image
+name: Build and Test Development Docker Image
 
 on: 
   push:
     branches:
-      - main
+      - dev
+  pull_request:
+    branches:
       - dev
   workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: SageSeekerSociety/cheese-frontend
+  IMAGE_NAME: SageSeekerSociety/cheese-frontend-dev
 
 jobs:
-  build-and-push-image:
+  build-and-test-dev-image:
     runs-on: ubuntu-latest
 
     permissions:
@@ -43,9 +45,10 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          target: prod
-          push: true
+          target: dev
+          push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
