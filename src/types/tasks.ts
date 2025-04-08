@@ -1,7 +1,48 @@
-import type { Material, Space, SpaceCategory, Team, Topic, User } from '.'
+import type { Material, Space, SpaceCategory, Team, TeamSummary, Topic, User } from '.'
 
 export type TaskSubmitterType = 'USER' | 'TEAM'
 export type TaskSubmissionEntryType = 'TEXT' | 'FILE'
+
+export type EligibilityRejectReasonCode =
+  | 'ALREADY_PARTICIPATING'
+  | 'PARTICIPANT_LIMIT_REACHED'
+  | 'TASK_NOT_APPROVED'
+  | 'DEADLINE_PASSED'
+  | 'USER_NOT_FOUND'
+  | 'USER_ACCOUNT_ISSUE'
+  | 'USER_MISSING_REAL_NAME'
+  | 'USER_RANK_NOT_HIGH_ENOUGH'
+  | 'TEAM_NOT_FOUND'
+  | 'TEAM_SIZE_MIN_NOT_MET'
+  | 'TEAM_SIZE_MAX_EXCEEDED'
+  | 'TEAM_MISSING_REQUIRED_INFO'
+  | 'TEAM_MEMBER_MISSING_REAL_NAME'
+  | 'TEAM_MEMBERS_NOT_VERIFIED'
+  | 'TEAM_MEMBER_RANK_NOT_HIGH_ENOUGH'
+  | 'INDIVIDUAL_PARTICIPATION_NOT_ALLOWED'
+  | 'TEAM_PARTICIPATION_NOT_ALLOWED'
+  | 'UNKNOWN'
+
+export interface EligibilityRejectReasonInfo {
+  code: EligibilityRejectReasonCode
+  message: string
+  details?: Record<string, any>
+}
+
+export interface EligibilityStatus {
+  eligible: boolean
+  reasons?: EligibilityRejectReasonInfo[]
+}
+
+export interface TeamTaskEligibility {
+  team: TeamSummary
+  eligibility: EligibilityStatus
+}
+
+export interface ParticipationEligibility {
+  user?: EligibilityStatus
+  teams?: TeamTaskEligibility[]
+}
 
 export interface TaskSubmissionSchemaEntry {
   prompt: string
@@ -27,9 +68,6 @@ export interface Task {
     total: number
     examples: { avatarId: number }[]
   }
-  joinable: boolean
-  joinableTeams?: Team[]
-  joinRejectReason?: string
   submittable: boolean
   submittableAsTeam?: Team[]
   createdAt: number
@@ -44,6 +82,7 @@ export interface Task {
   joinedTeams?: Team[]
   topics?: Topic[]
   userDeadline?: number
+  participationEligibility?: ParticipationEligibility
 }
 
 export interface TaskSubmissionReview {

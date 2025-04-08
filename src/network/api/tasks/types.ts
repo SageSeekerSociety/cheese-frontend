@@ -184,23 +184,3 @@ export enum ReasoningStatus {
   REASONING = 'reasoning',
   COMPLETED = 'completed',
 }
-
-// 队伍成员实名状态
-export interface TeamMemberRealNameStatus {
-  memberId: number
-  hasRealNameInfo: boolean
-  userName: string
-}
-
-// 队伍摘要信息
-export interface TeamSummary {
-  id: number
-  name: string
-  intro: string
-  avatarId: number
-  allMembersVerified: boolean
-  memberRealNameStatus?: TeamMemberRealNameStatus[]
-  joinRejectReason?: string
-  updatedAt: number
-  createdAt: number
-}

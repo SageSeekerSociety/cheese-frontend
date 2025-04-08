@@ -1,6 +1,6 @@
 // src/api/tasks.ts
 
-import type { Page, TaskMembership, TaskSubmission } from '@/types'
+import type { Page, TaskMembership, TaskSubmission, TeamSummary } from '@/types'
 import type { Task } from '@/types'
 import type {
   AddTaskParticipantRequestData,
@@ -17,7 +17,6 @@ import type {
   TaskAIAdviceConversation,
   TaskAIAdviceConversationContext,
   TaskParticipationInfo,
-  TeamSummary,
 } from './types'
 
 import { EventSource } from 'eventsource'

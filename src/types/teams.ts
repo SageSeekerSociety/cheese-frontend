@@ -27,11 +27,21 @@ export type ApplicationType = 'REQUEST' | 'INVITATION'
 
 export type ApplicationStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'ACCEPTED' | 'DECLINED' | 'CANCELED'
 
+export interface TeamMemberRealNameStatus {
+  memberId: number
+  hasRealNameInfo: boolean
+  userName: string
+}
+
 export interface TeamSummary {
   id: number
   name: string
   intro: string
   avatarId: number
+  allMembersVerified?: boolean
+  memberRealNameStatus?: TeamMemberRealNameStatus[]
+  updatedAt: number
+  createdAt: number
 }
 
 export interface TeamMembershipApplication {

@@ -69,7 +69,7 @@
 
             <div class="task-actions d-flex align-center gap-3">
               <!-- 参与状态和行动按钮 -->
-              <template v-if="!taskData.joined && taskData.joinable">
+              <template v-if="!taskData.joined && canUserJoin">
                 <v-btn color="primary" class="join-btn" rounded="lg" @click="$emit('join')">
                   <v-icon start icon="mdi-arrow-right" class="mr-1"></v-icon>
                   领取赛题
@@ -99,11 +99,12 @@
 <script setup lang="ts">
 import type { Task } from '@/types'
 
+import { computed } from 'vue'
 import dayjs from 'dayjs'
 
 import { getAvatarUrl } from '@/utils/materials'
 
-defineProps<{
+const props = defineProps<{
   taskData: Task
   breadcrumbItems: any[] | null
   isCreator: boolean
@@ -112,6 +113,16 @@ defineProps<{
   taskStatusType: string
   titleWithPunctuation: boolean
 }>()
+
+const canUserJoin = computed(() => {
+  if (!props.taskData) return false
+
+  if (props.taskData.submitterType === 'USER') {
+    return !!props.taskData.participationEligibility?.user?.eligible
+  } else {
+    return !!props.taskData.participationEligibility?.teams?.some((team) => team.eligibility.eligible)
+  }
+})
 
 defineEmits<{
   (e: 'edit'): void

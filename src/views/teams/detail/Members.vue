@@ -296,6 +296,27 @@ const teamData = inject(teamDataInjectionKey, ref())
 
 const activeTab = ref('members')
 
+const isSelfOwner = computed(() => {
+  if (!teamData.value) {
+    return false
+  }
+  return AccountService.user?.id === teamData.value.owner.id
+})
+
+const isSelfAdmin = computed(() => {
+  if (!teamData.value || !AccountService.user) {
+    return false
+  }
+
+  if (teamData.value.owner.id === AccountService.user.id) {
+    return true
+  }
+
+  const isAdmin = teamData.value.admins.examples?.some((admin) => admin.id === AccountService.user?.id)
+
+  return !!isAdmin
+})
+
 const updateActiveTabFromRoute = () => {
   if (route.query.tab && ['members', 'requests', 'invitations'].includes(route.query.tab as string)) {
     activeTab.value = route.query.tab as string
@@ -388,27 +409,6 @@ const fetchTeamInvitations = async (teamId: number) => {
     loadingInvitations.value = false
   }
 }
-
-const isSelfOwner = computed(() => {
-  if (!teamData.value) {
-    return false
-  }
-  return AccountService.user?.id === teamData.value.owner.id
-})
-
-const isSelfAdmin = computed(() => {
-  if (!teamData.value || !AccountService.user) {
-    return false
-  }
-
-  if (teamData.value.owner.id === AccountService.user.id) {
-    return true
-  }
-
-  const isAdmin = teamData.value.admins.examples?.some((admin) => admin.id === AccountService.user?.id)
-
-  return !!isAdmin
-})
 
 const pendingRequests = computed(() => {
   return joinRequests.value.filter((request) => request.status === 'PENDING')

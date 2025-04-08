@@ -40,11 +40,7 @@
         提交
       </v-tab>
 
-      <v-tab
-        v-if="taskData.joined || taskData.joinable"
-        :value="'ai-advice'"
-        :to="{ name: 'TasksAIAdvice', params: { taskId: taskData.id } }"
-      >
+      <v-tab :value="'ai-advice'" :to="{ name: 'TasksAIAdvice', params: { taskId: taskData.id } }">
         <v-icon start>mdi-robot</v-icon>
         启星研导
       </v-tab>
@@ -53,14 +49,26 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+
 import { Task } from '@/types'
 
-defineProps<{
+const props = defineProps<{
   taskData: Task
   isCreator: boolean
   isAdmin: boolean
   modelValue: any
 }>()
+
+const canUserJoin = computed(() => {
+  if (!props.taskData) return false
+
+  if (props.taskData.submitterType === 'USER') {
+    return !!props.taskData.participationEligibility?.user?.eligible
+  } else {
+    return !!props.taskData.participationEligibility?.teams?.some((team) => team.eligibility.eligible)
+  }
+})
 
 defineEmits<{
   (e: 'update:modelValue', value: any): void

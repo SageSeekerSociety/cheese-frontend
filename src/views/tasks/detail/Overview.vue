@@ -16,9 +16,16 @@
         </div>
       </template>
     </v-alert>
-    <!-- 不可加入原因提示 -->
+
+    <!-- 个人任务参与限制提示 -->
     <v-alert
-      v-if="!taskData?.joinable && !taskData?.joined && taskData?.joinRejectReason && !isDeadlinePassed"
+      v-if="
+        taskData?.submitterType === 'USER' &&
+        !canUserJoin &&
+        !taskData?.joined &&
+        userReasons.length > 0 &&
+        !isDeadlinePassed
+      "
       type="warning"
       class="mb-4"
       rounded="lg"
@@ -26,38 +33,155 @@
     >
       <template #text>
         <div class="mt-2">
-          <div class="font-weight-medium">{{ joinRejectReasonText }}</div>
-          <div v-if="taskData?.joinRejectReason === 'YourRankIsNotHighEnoughError'" class="mt-2 text-medium-emphasis">
+          <div class="font-weight-medium">{{ userReasons[0]?.message || '您当前无法参与此赛题' }}</div>
+
+          <!-- 等级不足提示 -->
+          <div v-if="userReasons[0]?.code === 'USER_RANK_NOT_HIGH_ENOUGH'" class="mt-2 text-medium-emphasis">
             完成更多基础题目来提升您的等级，解锁更高难度的挑战。
+          </div>
+
+          <!-- 缺少实名信息提示 -->
+          <div v-if="userReasons[0]?.code === 'USER_MISSING_REAL_NAME'" class="mt-2 text-medium-emphasis">
+            <div class="d-flex align-center gap-2">
+              <span>此赛题需要提供实名信息才能参与。</span>
+              <v-btn color="primary" variant="tonal" size="small" :to="{ name: 'ProfileVerification' }">
+                前往验证
+                <v-icon end>mdi-arrow-right</v-icon>
+              </v-btn>
+            </div>
+          </div>
+
+          <!-- 人数已满提示 -->
+          <div v-if="userReasons[0]?.code === 'PARTICIPANT_LIMIT_REACHED'" class="mt-2 text-medium-emphasis">
+            该赛题参与名额已满，请关注其他赛题。
           </div>
         </div>
       </template>
     </v-alert>
-    <!-- 小队任务无可加入小队提示 -->
-    <v-alert v-if="showNoTeamAlert" type="info" class="mb-4" rounded="lg" title="需要创建小队">
+
+    <!-- 小队任务参与限制提示 -->
+    <v-alert
+      v-if="taskData?.submitterType === 'TEAM' && !canUserJoin && !taskData?.joined && !isDeadlinePassed"
+      type="warning"
+      class="mb-4"
+      rounded="lg"
+      title="小队不满足参与条件"
+    >
       <template #text>
         <div class="mt-2">
-          <div class="font-weight-medium">此赛题需要以小队形式参与，但您还没有可以领取此赛题的小队</div>
-          <div class="mt-2 d-flex align-center">
-            <span class="text-medium-emphasis me-3">您可以创建一个新小队或加入已有小队来参与</span>
-            <v-btn color="primary" variant="tonal" size="small" :to="{ name: 'Teams' }">
-              查看我的小队
-              <v-icon end>mdi-arrow-right</v-icon>
-            </v-btn>
+          <!-- 没有小队的情况 -->
+          <div v-if="noTeams" class="font-weight-medium">
+            您需要创建或加入一个小队才能参与此赛题
+            <div class="mt-2 d-flex align-center">
+              <v-btn color="primary" variant="tonal" size="small" :to="{ name: 'TeamsIndex' }">
+                前往管理我的小队
+                <v-icon end>mdi-arrow-right</v-icon>
+              </v-btn>
+            </div>
+          </div>
+
+          <!-- 有小队但都不符合条件的情况 -->
+          <div v-else-if="hasTeamsButNoneEligible" class="font-weight-medium">
+            您有 {{ teamCount }} 个小队，但没有符合条件的小队可以参与此赛题
+
+            <v-expansion-panels variant="accordion" class="mt-3">
+              <v-expansion-panel v-for="teamEligibility in teamEligibilityList" :key="teamEligibility.team.id">
+                <v-expansion-panel-title class="py-2">
+                  <div class="d-flex align-center">
+                    <v-avatar size="24" class="mr-2">
+                      <v-img
+                        v-if="teamEligibility.team.avatarId"
+                        :src="getAvatarUrl(teamEligibility.team.avatarId)"
+                        alt="小队头像"
+                      ></v-img>
+                      <v-icon v-else>mdi-account-group</v-icon>
+                    </v-avatar>
+                    <span>{{ teamEligibility.team.name }}</span>
+                  </div>
+                </v-expansion-panel-title>
+                <v-expansion-panel-text>
+                  <div v-for="(reason, index) in teamEligibility.eligibility.reasons" :key="index" class="mb-2">
+                    <div class="font-weight-medium">
+                      <v-icon color="warning" size="small" class="mr-1">mdi-alert-circle</v-icon>
+                      {{ reason.message }}
+                    </div>
+
+                    <!-- 团队人数不满足要求 -->
+                    <div v-if="reason.code === 'TEAM_SIZE_MIN_NOT_MET'" class="mt-1 text-medium-emphasis">
+                      此赛题要求小队最少 {{ taskData.minTeamSize }} 人，请邀请更多成员加入您的小队。
+                    </div>
+                    <div v-if="reason.code === 'TEAM_SIZE_MAX_EXCEEDED'" class="mt-1 text-medium-emphasis">
+                      此赛题要求小队最多 {{ taskData.maxTeamSize }} 人，您的小队人数超出限制。
+                    </div>
+
+                    <!-- 团队成员缺少实名信息 -->
+                    <div v-if="reason.code === 'TEAM_MEMBER_MISSING_REAL_NAME'" class="mt-1">
+                      <p class="text-medium-emphasis mb-2">
+                        小队中有成员尚未提供实名信息，请通知相关成员完成实名验证。
+                      </p>
+
+                      <v-list
+                        v-if="teamEligibility.team.memberRealNameStatus"
+                        density="compact"
+                        class="bg-grey-lighten-5 rounded-lg pa-0 mb-2"
+                      >
+                        <v-list-subheader class="text-caption font-weight-medium"
+                          >未完成实名验证的成员：</v-list-subheader
+                        >
+                        <v-list-item
+                          v-for="member in teamEligibility.team.memberRealNameStatus.filter((m) => !m.hasRealNameInfo)"
+                          :key="member.memberId"
+                          density="compact"
+                          class="py-1"
+                        >
+                          <template #prepend>
+                            <v-icon size="small" color="error" class="mr-2">mdi-account-alert</v-icon>
+                          </template>
+                          <v-list-item-title class="text-body-2">{{ member.userName }}</v-list-item-title>
+                        </v-list-item>
+                      </v-list>
+                    </div>
+
+                    <!-- 团队成员等级不足 -->
+                    <div v-if="reason.code === 'TEAM_MEMBER_RANK_NOT_HIGH_ENOUGH'" class="mt-1 text-medium-emphasis">
+                      小队中有成员等级不足，无法参与此难度的赛题。
+                    </div>
+                  </div>
+
+                  <v-btn
+                    color="primary"
+                    variant="tonal"
+                    size="small"
+                    class="mt-2"
+                    :to="{ name: 'TeamsDetailMembers', params: { teamId: teamEligibility.team.id } }"
+                  >
+                    管理此小队
+                    <v-icon end>mdi-arrow-right</v-icon>
+                  </v-btn>
+                </v-expansion-panel-text>
+              </v-expansion-panel>
+            </v-expansion-panels>
+          </div>
+
+          <!-- 非小队原因导致的限制 -->
+          <div v-else-if="userReasons.length > 0" class="font-weight-medium">
+            {{ userReasons[0]?.message || '您当前无法参与此赛题' }}
+
+            <!-- 根据不同原因显示不同提示 -->
+            <div v-if="userReasons[0]?.code === 'USER_RANK_NOT_HIGH_ENOUGH'" class="mt-2 text-medium-emphasis">
+              完成更多基础题目来提升您的等级，解锁更高难度的挑战。
+            </div>
+
+            <div v-if="userReasons[0]?.code === 'PARTICIPANT_LIMIT_REACHED'" class="mt-2 text-medium-emphasis">
+              该赛题参与名额已满，请关注其他赛题。
+            </div>
           </div>
         </div>
       </template>
     </v-alert>
 
     <!-- AI建议入口卡片 -->
-    <v-card
-      v-if="taskData?.joined || taskData?.joinable"
-      flat
-      rounded="lg"
-      class="gradient-card cursor-pointer mb-4"
-      elevation="0"
-      @click="goToAIAdvice"
-    >
+    <v-card flat rounded="lg" class="gradient-card cursor-pointer mb-4" elevation="0" @click="goToAIAdvice">
       <v-card-text class="pa-6">
         <div class="d-flex align-center gap-4">
           <v-avatar color="primary-lighten-4" size="56" class="elevation-0">
@@ -231,12 +355,15 @@
 </template>
 
 <script setup lang="ts">
-import type { Task } from '@/types'
+import type { Task, TaskMembership, TeamTaskEligibility } from '@/types'
 
-import { computed, defineAsyncComponent } from 'vue'
+import { computed, defineAsyncComponent, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import dayjs from 'dayjs'
 
+import { getAvatarUrl } from '@/utils/materials'
+
+import { TasksApi } from '@/network/api/tasks'
 import { TaskParticipationInfo } from '@/network/api/tasks/types'
 import AccountService from '@/services/account'
 
@@ -288,29 +415,40 @@ const isDeadlinePassed = computed(() => {
   return dayjs(props.taskData.deadline).isBefore(dayjs())
 })
 
-const showNoTeamAlert = computed(() => {
-  return (
-    props.taskData?.submitterType === 'TEAM' &&
-    props.taskData.joinable &&
-    (!props.taskData.submittableAsTeam || props.taskData.submittableAsTeam.length === 0) &&
-    !props.taskData.joined &&
-    !isDeadlinePassed.value
-  )
+const canUserJoin = computed(() => {
+  if (!props.taskData) return false
+
+  // 对于个人任务，检查用户是否可以参与
+  if (props.taskData.submitterType === 'USER') {
+    return !!props.taskData.participationEligibility?.user?.eligible
+  } else {
+    return !!props.taskData.participationEligibility?.teams?.some((team) => team.eligibility.eligible)
+  }
 })
 
-const joinRejectReasonText = computed(() => {
-  switch (props.taskData?.joinRejectReason) {
-    case 'YourRankIsNotHighEnoughError':
-      return '您当前的等级不足以参与此题目'
-    case 'AlreadyBeTaskParticipantError':
-      return '您已经参与了此题目'
-    case 'RealNameInfoRequiredError':
-      return '此题目需要实名认证后才能参与'
-    case 'TaskParticipantsReachedLimitError':
-      return '该题目参与人数已达到上限'
-    default:
-      return '暂时无法参与此题目'
-  }
+const userReasons = computed(() => {
+  return props.taskData?.participationEligibility?.user?.reasons || []
+})
+
+const teamEligibilityList = computed(() => {
+  return props.taskData?.participationEligibility?.teams || []
+})
+
+const teamCount = computed(() => {
+  return teamEligibilityList.value.length
+})
+
+const noTeams = computed(() => {
+  return teamCount.value === 0
+})
+
+const hasTeamsButNoneEligible = computed(() => {
+  return teamCount.value > 0 && !teamEligibilityList.value.some((team) => team.eligibility.eligible)
+})
+
+const showNoTeamAlert = computed(() => {
+  // 已由上面的小队参与限制提示替代，不再需要单独显示
+  return false
 })
 
 const goToAIAdvice = () => {
