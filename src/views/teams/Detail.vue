@@ -319,6 +319,7 @@
       :loading="saving"
       :parent-channel-id="parentChannelId"
       :available-parent-channels="parentActiveProjects"
+      :dialog-subtitle="getDialogSubtitle()"
       @submit="saveChannel"
     />
   </v-container>
@@ -355,27 +356,17 @@ const projects = ref<Project[]>([])
 const loading = ref(true)
 const saving = ref(false)
 
-// 创建/编辑频道状态
 const createChannelDialog = ref(false)
 const editingChannel = ref<Project | null>(null)
 
-// 存储创建子频道时的父频道ID
 const parentChannelId = ref<number | null>(null)
 
-// 活跃和归档频道(项目)
 const activeProjects = computed(() => projects.value.filter((project) => !project.archived))
 
-// 当前选中的频道
 const activeChannelId = computed(() => {
   const channelId = route.params.channelId
-  // 如果URL中有channelId，则使用它
   if (channelId) {
     return Number(channelId)
-  }
-
-  // 否则默认使用第一个活跃频道
-  if (activeProjects.value.length > 0) {
-    return activeProjects.value[0].id
   }
 
   return null
@@ -385,11 +376,9 @@ const currentChannel = computed(() => {
   const channelId = activeChannelId.value
   if (!channelId) return null
 
-  // 在所有项目中查找
   const directMatch = projects.value.find((project) => project.id === channelId)
   if (directMatch) return directMatch
 
-  // 如果没找到，在子频道中查找
   for (const project of projects.value) {
     if (project.children) {
       const childMatch = project.children.find((child) => child.id === channelId)
@@ -400,24 +389,20 @@ const currentChannel = computed(() => {
   return null
 })
 
-// 是否为小队管理员或创建者
 const isTeamAdmin = computed(() => {
   if (!teamData.value || !AccountService.user) {
     return false
   }
 
-  // 是创建者
   if (teamData.value.owner.id === AccountService.user.id) {
     return true
   }
 
-  // 是管理员
   const isAdmin = teamData.value.admins.examples?.some((admin) => admin.id === AccountService.user?.id)
 
   return !!isAdmin
 })
 
-// 在路由改变时更新activeTab
 watch(
   () => route.name,
   (newRouteName) => {
@@ -430,19 +415,14 @@ watch(
 watch(
   () => route.query.channelId,
   (newChannelId) => {
-    // 重置讨论状态
     discussionStore.clearCurrentDiscussion()
 
-    // 如果有新的频道ID，加载这个频道的讨论列表
     if (newChannelId) {
       const channelId = Number(newChannelId)
-      // 确保讨论列表重新加载
       discussionStore.loadDiscussionsByChannel(channelId)
 
-      // 查找此频道是否是某个父频道的子频道
       for (const project of projects.value) {
         if (project.children && project.children.some((child) => child.id === channelId)) {
-          // 如果是子频道，确保父频道展开
           expandedChannels.value[project.id] = true
           break
         }
@@ -452,7 +432,6 @@ watch(
   { immediate: true }
 )
 
-// 模拟获取未读消息数
 const getUnreadCount = (channelId: number) => {
   // 这里应该通过API获取真实的未读消息数
   // 现在先模拟一些数据
@@ -460,7 +439,6 @@ const getUnreadCount = (channelId: number) => {
   return counts[channelId] || 0
 }
 
-// 获取小队数据
 const fetchTeamData = async (teamId: number) => {
   const {
     data: { team },
@@ -468,7 +446,6 @@ const fetchTeamData = async (teamId: number) => {
   teamData.value = team
 }
 
-// 获取小队项目(作为频道)
 const fetchProjects = async () => {
   try {
     loading.value = true
@@ -484,7 +461,6 @@ const fetchProjects = async () => {
   }
 }
 
-// 获取小队成员
 const fetchTeamMembers = async () => {
   try {
     const response = await TeamsApi.getMembers(teamId.value)
@@ -495,7 +471,6 @@ const fetchTeamMembers = async () => {
   }
 }
 
-// 打开创建频道对话框
 const openCreateChannelDialog = (parentId?: number) => {
   editingChannel.value = null
   if (parentId) {
@@ -507,13 +482,11 @@ const openCreateChannelDialog = (parentId?: number) => {
   }
 }
 
-// 编辑频道
 const editChannel = (channel: Project) => {
   editingChannel.value = channel
   createChannelDialog.value = true
 }
 
-// 保存频道
 const saveChannel = async (formData: any) => {
   if (!AccountService.user?.id) {
     return
@@ -522,7 +495,6 @@ const saveChannel = async (formData: any) => {
   try {
     saving.value = true
 
-    // 确保leaderId有效
     const finalFormData = {
       ...formData,
       leaderId: formData.leaderId || AccountService.user.id,
@@ -537,18 +509,14 @@ const saveChannel = async (formData: any) => {
       savedProject = response.data.project
     }
 
-    // 刷新项目列表
     await fetchProjects()
     createChannelDialog.value = false
-    // 重置父频道ID
     parentChannelId.value = null
 
-    // 如果创建的是子频道，确保父频道展开
     if (formData.parentId) {
       expandedChannels.value[formData.parentId] = true
     }
 
-    // 导航到新创建或编辑的频道
     router.replace({
       name: 'TeamsDetailChannels',
       params: { ...route.params },
@@ -561,12 +529,9 @@ const saveChannel = async (formData: any) => {
   }
 }
 
-// 归档频道
 const archiveChannel = async (channel: Project) => {
-  // 确定是主频道还是子频道
   const isParentChannel = !channel.parentId
 
-  // 添加提示信息
   let confirmMessage = `您确定要归档频道 ${channel.name} 吗？`
   if (isParentChannel && hasChildren(channel)) {
     confirmMessage += `\n\n注意：归档父频道将同时归档其下所有子频道。`
@@ -581,29 +546,22 @@ const archiveChannel = async (channel: Project) => {
 
   if (result) {
     try {
-      // 调用API归档频道
       await ProjectsApi.update(channel.id, { archived: true })
 
-      // 如果是父频道，同时归档所有子频道
       if (isParentChannel && channel.children && channel.children.length > 0) {
-        // 创建子频道归档的Promise数组
         const childArchivePromises = channel.children.map((child) => ProjectsApi.update(child.id, { archived: true }))
 
-        // 等待所有子频道归档完成
         await Promise.all(childArchivePromises)
       }
 
-      // 刷新项目列表以获取最新状态
       await fetchProjects()
 
-      // 显示成功消息
       if (isParentChannel && hasChildren(channel)) {
         dialog.alert(`频道 ${channel.name} 及其子频道已归档`, { title: '成功' })
       } else {
         dialog.alert(`频道 ${channel.name} 已归档`, { title: '成功' })
       }
 
-      // 如果当前选中的是被归档的频道，切换到第一个活跃频道
       if (activeChannelId.value === channel.id && activeProjects.value.length > 0) {
         router.replace({
           ...route,
@@ -617,12 +575,9 @@ const archiveChannel = async (channel: Project) => {
   }
 }
 
-// 取消归档频道
 const unarchiveChannel = async (channel: Project) => {
-  // 确定是主频道还是子频道
   const isParentChannel = !channel.parentId
 
-  // 添加提示信息
   let confirmMessage = `您确定要取消归档频道 ${channel.name} 吗？`
   if (isParentChannel && hasChildren(channel)) {
     confirmMessage += `\n\n注意：取消归档父频道将同时取消归档其下所有子频道。`
@@ -637,22 +592,16 @@ const unarchiveChannel = async (channel: Project) => {
   if (!result) return
 
   try {
-    // 调用API取消归档频道
     await ProjectsApi.update(channel.id, { archived: false })
 
-    // 如果是父频道，同时取消归档所有子频道
     if (isParentChannel && channel.children && channel.children.length > 0) {
-      // 创建子频道取消归档的Promise数组
       const childUnarchivePromises = channel.children.map((child) => ProjectsApi.update(child.id, { archived: false }))
 
-      // 等待所有子频道取消归档完成
       await Promise.all(childUnarchivePromises)
     }
 
-    // 刷新项目列表以获取最新状态
     await fetchProjects()
 
-    // 显示成功消息
     if (isParentChannel && hasChildren(channel)) {
       dialog.alert(`频道 ${channel.name} 及其子频道已取消归档`, { title: '成功' })
     } else {
@@ -689,7 +638,6 @@ const ownerAndAdminsText = computed(() => {
 })
 
 const parentActiveProjects = computed(() => projects.value.filter((project) => !project.archived && !project.parentId))
-const parentArchivedProjects = computed(() => projects.value.filter((project) => project.archived && !project.parentId))
 
 const expandedChannels = ref<Record<number, boolean>>({})
 
@@ -701,13 +649,10 @@ const toggleChannelExpand = (channelId: number) => {
   expandedChannels.value[channelId] = !expandedChannels.value[channelId]
 }
 
-// 为子频道按钮创建专用的处理函数
 const handleCreateSubChannel = (parentId: number) => {
-  // 简化处理，只调用创建对话框
   openCreateChannelDialog(parentId)
 }
 
-// 为讨论组件提供必要的数据
 provide('discussionData', {
   currentMessage: computed(() => discussionStore.currentDiscussion),
   isCurrentUserMessage: computed(() => {
@@ -718,20 +663,16 @@ provide('discussionData', {
   goBack: () => router.back(),
 })
 
-// 判断当前是否为讨论详情页面
 const isDiscussionDetailRoute = computed(() => {
   return route.name === 'TeamsDetailDiscussion' || (route.meta && route.meta.isDiscussionDetail === true)
 })
 
-// 获取所有归档频道，包括子频道（平铺显示）
 const allArchivedProjects = computed(() => {
   const result: Project[] = []
 
-  // 收集已归档的父频道
   const archivedParents = projects.value.filter((project) => project.archived && !project.parentId)
   result.push(...archivedParents)
 
-  // 收集所有已归档的子频道（从所有父频道的children属性中查找）
   for (const project of projects.value) {
     if (project.children && project.children.length > 0) {
       const archivedChildren = project.children.filter((child) => child.archived)
@@ -742,8 +683,21 @@ const allArchivedProjects = computed(() => {
   return result
 })
 
-// 在script部分修改状态变量
 const showArchivedChannels = ref(true) // 默认展开
+
+// 获取对话框副标题
+const getDialogSubtitle = () => {
+  if (editingChannel.value) {
+    return '修改频道信息'
+  }
+
+  if (parentChannelId.value) {
+    const parentChannel = parentActiveProjects.value.find((p) => p.id === parentChannelId.value)
+    return `在 ${parentChannel?.name || '父频道'} 下创建子频道`
+  }
+
+  return '创建新的顶级频道'
+}
 
 onMounted(async () => {
   const teamId = Number(route.params.teamId)

@@ -497,6 +497,7 @@ const { handleSubmit, defineField, isSubmitting } = useForm({
     requireRealName: props.initialData?.requireRealName ?? false,
     minTeamSize: props.initialData?.minTeamSize ?? 1,
     maxTeamSize: props.initialData?.maxTeamSize ?? 10,
+    defaultDeadline: props.initialData?.defaultDeadline ?? 30,
   },
 })
 

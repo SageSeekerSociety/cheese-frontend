@@ -188,6 +188,163 @@
               </v-list>
             </v-card-text>
           </v-card>
+
+          <!-- 我的申请和邀请卡片 -->
+          <v-card rounded="lg" class="my-applications-card elevation-0 border">
+            <v-card-title class="d-flex align-center pb-2 pt-4 px-4">
+              <v-icon icon="mdi-ticket-account" class="mr-2" color="primary" />
+              <span class="text-h6">申请与邀请</span>
+            </v-card-title>
+            <v-card-text class="px-3 py-3">
+              <!-- 选项卡切换 -->
+              <v-tabs v-model="activeApplicationTab" density="comfortable" color="primary" class="mb-3">
+                <v-tab value="myRequests">我发起的</v-tab>
+                <v-tab value="myInvitations">收到的邀请</v-tab>
+              </v-tabs>
+
+              <v-window v-model="activeApplicationTab">
+                <!-- 我的申请 -->
+                <v-window-item value="myRequests">
+                  <!-- 加载中 -->
+                  <div v-if="loadingMyRequests" class="d-flex flex-column align-center py-4">
+                    <v-progress-circular
+                      indeterminate
+                      color="primary"
+                      :size="40"
+                      :width="3"
+                      class="mb-3"
+                    ></v-progress-circular>
+                    <p class="text-body-2 text-medium-emphasis">加载中...</p>
+                  </div>
+
+                  <!-- 空状态 -->
+                  <div v-else-if="!myRequests.length" class="d-flex flex-column align-center py-4">
+                    <v-avatar size="48" class="bg-grey-lighten-4 mb-3">
+                      <v-icon icon="mdi-account-arrow-right" size="large" color="grey-darken-1"></v-icon>
+                    </v-avatar>
+                    <p class="text-subtitle-2 font-weight-medium text-center mb-1">暂无申请记录</p>
+                    <p class="text-caption text-center text-medium-emphasis">您还没有申请加入任何小队</p>
+                  </div>
+
+                  <!-- 申请列表 -->
+                  <div v-else>
+                    <v-list class="pa-0">
+                      <v-list-item
+                        v-for="request in myRequests"
+                        :key="request.id"
+                        rounded="lg"
+                        class="mb-2 application-item"
+                      >
+                        <template #prepend>
+                          <v-avatar size="40" class="mr-3">
+                            <v-img :src="getAvatarUrl(request.team.avatarId)"></v-img>
+                          </v-avatar>
+                        </template>
+                        <v-list-item-title class="d-flex align-center">
+                          {{ request.team.name }}
+                          <v-chip :color="getStatusColor(request.status)" size="x-small" class="ml-2" variant="tonal">
+                            {{ getStatusText(request.status) }}
+                          </v-chip>
+                        </v-list-item-title>
+                        <v-list-item-subtitle class="text-caption">
+                          申请时间: {{ formatDate(request.createdAt) }}
+                        </v-list-item-subtitle>
+
+                        <template #append>
+                          <v-btn
+                            v-if="request.status === 'PENDING'"
+                            variant="text"
+                            color="error"
+                            size="small"
+                            icon="mdi-close"
+                            @click="cancelRequest(request.id)"
+                          ></v-btn>
+                        </template>
+                      </v-list-item>
+                    </v-list>
+                  </div>
+                </v-window-item>
+
+                <!-- 收到的邀请 -->
+                <v-window-item value="myInvitations">
+                  <!-- 加载中 -->
+                  <div v-if="loadingMyInvitations" class="d-flex flex-column align-center py-4">
+                    <v-progress-circular
+                      indeterminate
+                      color="primary"
+                      :size="40"
+                      :width="3"
+                      class="mb-3"
+                    ></v-progress-circular>
+                    <p class="text-body-2 text-medium-emphasis">加载中...</p>
+                  </div>
+
+                  <!-- 空状态 -->
+                  <div v-else-if="!myInvitations.length" class="d-flex flex-column align-center py-4">
+                    <v-avatar size="48" class="bg-grey-lighten-4 mb-3">
+                      <v-icon icon="mdi-email-outline" size="large" color="grey-darken-1"></v-icon>
+                    </v-avatar>
+                    <p class="text-subtitle-2 font-weight-medium text-center mb-1">暂无邀请</p>
+                    <p class="text-caption text-center text-medium-emphasis">您暂时没有收到小队邀请</p>
+                  </div>
+
+                  <!-- 邀请列表 -->
+                  <div v-else>
+                    <v-list class="pa-0">
+                      <v-list-item
+                        v-for="invitation in myInvitations"
+                        :key="invitation.id"
+                        rounded="lg"
+                        class="mb-2 application-item"
+                      >
+                        <template #prepend>
+                          <v-avatar size="40" class="mr-3">
+                            <v-img :src="getAvatarUrl(invitation.team.avatarId)"></v-img>
+                          </v-avatar>
+                        </template>
+                        <v-list-item-title class="d-flex align-center">
+                          {{ invitation.team.name }}
+                          <v-chip
+                            :color="getStatusColor(invitation.status)"
+                            size="x-small"
+                            class="ml-2"
+                            variant="tonal"
+                          >
+                            {{ getStatusText(invitation.status) }}
+                          </v-chip>
+                        </v-list-item-title>
+                        <v-list-item-subtitle class="text-caption">
+                          邀请时间: {{ formatDate(invitation.createdAt) }}
+                        </v-list-item-subtitle>
+
+                        <template #append>
+                          <div v-if="invitation.status === 'PENDING'" class="d-flex">
+                            <v-btn
+                              variant="text"
+                              color="success"
+                              size="small"
+                              icon="mdi-check"
+                              title="接受"
+                              class="mr-1"
+                              @click="acceptInvitation(invitation.id)"
+                            ></v-btn>
+                            <v-btn
+                              variant="text"
+                              color="error"
+                              size="small"
+                              icon="mdi-close"
+                              title="拒绝"
+                              @click="declineInvitation(invitation.id)"
+                            ></v-btn>
+                          </div>
+                        </template>
+                      </v-list-item>
+                    </v-list>
+                  </div>
+                </v-window-item>
+              </v-window>
+            </v-card-text>
+          </v-card>
         </div>
       </v-col>
     </v-row>
@@ -251,11 +408,51 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
+
+  <!-- 申请加入对话框 -->
+  <v-dialog v-model="joinRequestDialogOpen" max-width="500" transition="dialog-bottom-transition">
+    <v-card rounded="lg" class="join-request-dialog elevation-0 border">
+      <v-toolbar color="transparent" flat>
+        <v-toolbar-title class="text-h6">申请加入小队</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-btn icon @click="joinRequestDialogOpen = false">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+      </v-toolbar>
+
+      <v-divider></v-divider>
+
+      <v-card-text class="py-5">
+        <v-form @submit.prevent="submitJoinRequest">
+          <p class="text-body-2 text-medium-emphasis mb-4">请输入申请理由，帮助管理员了解你加入小队的目的</p>
+          <v-textarea
+            v-model="joinRequestMessage"
+            label="申请理由"
+            variant="outlined"
+            color="primary"
+            placeholder="请简要介绍自己，说明为什么想加入这个小队..."
+            rows="4"
+            auto-grow
+            class="mb-4"
+            rounded="md"
+          ></v-textarea>
+        </v-form>
+      </v-card-text>
+
+      <v-divider></v-divider>
+
+      <v-card-actions class="pa-4">
+        <v-spacer></v-spacer>
+        <v-btn variant="text" class="mr-2" @click="joinRequestDialogOpen = false">取消</v-btn>
+        <v-btn color="primary" variant="elevated" rounded="md" @click="submitJoinRequest"> 提交申请 </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script setup lang="ts">
 import type { JSONContent } from 'vuetify-pro-tiptap'
-import type { Team } from '@/types'
+import type { Team, TeamMembershipApplication } from '@/types'
 
 import { defineAsyncComponent, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -282,6 +479,18 @@ const teamAvatar = ref<File | undefined>()
 const creatingTeam = ref(false)
 const isLoadingMyTeams = ref(false)
 const loadMyTeamsError = ref(false)
+
+// 申请和邀请的状态
+const activeApplicationTab = ref('myRequests')
+const myRequests = ref<TeamMembershipApplication[]>([])
+const myInvitations = ref<TeamMembershipApplication[]>([])
+const loadingMyRequests = ref(false)
+const loadingMyInvitations = ref(false)
+
+// 加入申请对话框
+const joinRequestDialogOpen = ref(false)
+const joinRequestMessage = ref('')
+const targetTeamId = ref<number | null>(null)
 
 const router = useRouter()
 
@@ -366,18 +575,147 @@ const joinTeam = async (teamId: number) => {
     return
   }
 
+  // 打开申请对话框
+  targetTeamId.value = teamId
+  joinRequestDialogOpen.value = true
+}
+
+const submitJoinRequest = async () => {
+  if (!targetTeamId.value) return
+
   try {
-    await TeamsApi.addMember(teamId, { user_id: AccountService.user.id, role: 'MEMBER' })
-    toast.success('申请加入小队成功')
-    await fetchMyTeams() // 刷新我的小队列表
+    await TeamsApi.createJoinRequest(targetTeamId.value, {
+      message: joinRequestMessage.value || undefined,
+    })
+    toast.success('申请已提交，请等待管理员审核')
+    joinRequestDialogOpen.value = false
+    joinRequestMessage.value = ''
+    targetTeamId.value = null
+
+    // 刷新我的申请列表
+    await fetchMyJoinRequests()
   } catch (error) {
-    toast.error('申请加入失败，请稍后重试')
+    toast.error('申请提交失败，请稍后重试')
     console.error(error)
+  }
+}
+
+// 获取我发起的申请
+const fetchMyJoinRequests = async () => {
+  loadingMyRequests.value = true
+  try {
+    const response = await TeamsApi.listMyJoinRequests()
+    myRequests.value = response.data.requests
+  } catch (error) {
+    console.error('获取申请列表失败', error)
+    toast.error('获取申请列表失败')
+  } finally {
+    loadingMyRequests.value = false
+  }
+}
+
+// 获取我收到的邀请
+const fetchMyInvitations = async () => {
+  loadingMyInvitations.value = true
+  try {
+    const response = await TeamsApi.listMyInvitations()
+    myInvitations.value = response.data.invitations
+  } catch (error) {
+    console.error('获取邀请列表失败', error)
+    toast.error('获取邀请列表失败')
+  } finally {
+    loadingMyInvitations.value = false
+  }
+}
+
+// 取消申请
+const cancelRequest = async (requestId: number) => {
+  try {
+    await TeamsApi.cancelMyJoinRequest(requestId)
+    toast.success('申请已取消')
+    await fetchMyJoinRequests()
+  } catch (error) {
+    console.error('取消申请失败', error)
+    toast.error('取消申请失败')
+  }
+}
+
+// 接受邀请
+const acceptInvitation = async (invitationId: number) => {
+  try {
+    await TeamsApi.acceptInvitation(invitationId)
+    toast.success('已接受邀请')
+    await Promise.all([fetchMyInvitations(), fetchMyTeams()])
+  } catch (error) {
+    console.error('接受邀请失败', error)
+    toast.error('接受邀请失败')
+  }
+}
+
+// 拒绝邀请
+const declineInvitation = async (invitationId: number) => {
+  try {
+    await TeamsApi.declineInvitation(invitationId)
+    toast.success('已拒绝邀请')
+    await fetchMyInvitations()
+  } catch (error) {
+    console.error('拒绝邀请失败', error)
+    toast.error('拒绝邀请失败')
+  }
+}
+
+// 格式化日期
+const formatDate = (timestamp: number) => {
+  return new Date(timestamp).toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+// 获取状态颜色
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'PENDING':
+      return 'warning'
+    case 'APPROVED':
+    case 'ACCEPTED':
+      return 'success'
+    case 'REJECTED':
+    case 'DECLINED':
+    case 'CANCELED':
+      return 'error'
+    default:
+      return 'grey'
+  }
+}
+
+// 获取状态文本
+const getStatusText = (status: string) => {
+  switch (status) {
+    case 'PENDING':
+      return '待处理'
+    case 'APPROVED':
+      return '已批准'
+    case 'ACCEPTED':
+      return '已接受'
+    case 'REJECTED':
+      return '已拒绝'
+    case 'DECLINED':
+      return '已拒绝'
+    case 'CANCELED':
+      return '已取消'
+    default:
+      return '未知'
   }
 }
 
 onMounted(async () => {
   await fetchMyTeams()
+  await fetchMyJoinRequests()
+  await fetchMyInvitations()
 })
 </script>
 
@@ -476,5 +814,24 @@ onMounted(async () => {
 
 .bg-error-lighten-5 {
   background-color: rgba(var(--v-theme-error), 0.1);
+}
+
+.my-applications-card {
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.application-item {
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.application-item:hover {
+  background-color: rgba(var(--v-theme-primary), 0.04);
+  border-color: rgba(var(--v-theme-primary), 0.1);
+}
+
+.join-request-dialog {
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
 }
 </style>

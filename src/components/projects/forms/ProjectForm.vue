@@ -130,32 +130,11 @@ const emit = defineEmits(['submit', 'cancel'])
 const formRef = ref<InstanceType<typeof VForm> | null>(null)
 const selectedParentId = ref<number | null>(null)
 
-// 初始化时设置父频道ID
 onMounted(() => {
   console.log('ProjectForm mounted - setting parent ID:', props.parentId)
   selectedParentId.value = props.parentId || null
 })
 
-// 父频道选择项
-const parentChannelsOptions = computed(() => {
-  if (!props.parentChannels) return []
-
-  return props.parentChannels.map((channel) => ({
-    text: channel.name,
-    value: channel.id,
-    colorCode: channel.colorCode,
-  }))
-})
-
-// 父频道提示文字
-const parentIdHint = computed(() => {
-  if (selectedParentId.value) {
-    return '创建为子频道，将在选定的父频道下显示'
-  }
-  return '留空将创建为顶级频道'
-})
-
-// 表单验证 - 只保留名称和颜色为必填项
 const {
   handleSubmit,
   defineField,

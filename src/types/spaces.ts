@@ -35,6 +35,12 @@ export type SpaceTaskTemplate = {
   description: string
   title: string
   content: string
+  submitterType?: 'USER' | 'TEAM' | null
+  rank?: number | null
+  minTeamSize?: number
+  maxTeamSize?: number
+  defaultDeadline?: number | null
+  requireRealName?: boolean | null
 }
 
 export type SpaceAdmin = {

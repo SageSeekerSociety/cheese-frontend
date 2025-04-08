@@ -1,4 +1,4 @@
-import type { Material, Space, Team, Topic, User } from '.'
+import type { Material, Space, SpaceCategory, Team, Topic, User } from '.'
 
 export type TaskSubmitterType = 'USER' | 'TEAM'
 export type TaskSubmissionEntryType = 'TEXT' | 'FILE'
@@ -20,6 +20,7 @@ export interface Task {
   editable: boolean
   description: string
   space?: Space
+  category?: SpaceCategory
   submissionSchema: TaskSubmissionSchemaEntry[]
   submitters: {
     total: number

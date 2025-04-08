@@ -10,6 +10,9 @@
         <span class="text-h6">
           {{ getDialogTitle() }}
         </span>
+        <div v-if="dialogSubtitle" class="text-subtitle-2 text-medium-emphasis mt-1">
+          {{ dialogSubtitle }}
+        </div>
       </v-card-title>
       <v-card-text class="px-4">
         <project-form
@@ -54,6 +57,7 @@ const props = defineProps<{
   loading?: boolean
   parentChannelId?: number | null
   availableParentChannels?: Project[]
+  dialogSubtitle?: string
 }>()
 
 const computedParentId = computed<number | undefined>(() => {

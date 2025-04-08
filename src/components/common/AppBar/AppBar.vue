@@ -215,6 +215,13 @@ const menuOpen = ref(false)
 const notificationMenuOpen = ref(false)
 const unreadNotificationsCount = ref(0)
 
+watch(
+  () => router.currentRoute.value.fullPath,
+  () => {
+    notificationMenuOpen.value = false
+  }
+)
+
 watch(menuOpen, (newValue) => {
   if (newValue) {
     fetchAIQuota()
@@ -255,10 +262,10 @@ const fetchAIQuota = async () => {
 
 // 获取未读通知数量
 const fetchUnreadNotificationsCount = async () => {
-  if (!loggedIn.value || !currentUser.value?.id) return
+  if (!loggedIn.value) return
 
   try {
-    const response = await NotificationsApi.getUnreadCount(currentUser.value.id)
+    const response = await NotificationsApi.getUnreadCount()
     unreadNotificationsCount.value = response.data.count
   } catch (error) {
     console.error('获取未读通知数量失败:', error)

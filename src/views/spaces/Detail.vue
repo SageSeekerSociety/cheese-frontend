@@ -355,6 +355,7 @@ const isCurrentUserAtLeastAdmin = computed(() => {
 
 const getSpace = async (spaceId: number) => {
   await spaceStore.fetchSpace(spaceId)
+  spaceStore.fetchCategories()
   resetForm({
     values: {
       name: space.value?.name,

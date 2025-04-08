@@ -54,7 +54,9 @@
       "operationFailed": "操作失败",
       "rejectReason": "驳回原因",
       "rejectReasonRequired": "驳回原因不能为空",
-      "rejectReasonDialogTitle": "请输入驳回原因"
+      "rejectReasonDialogTitle": "请输入驳回原因",
+      "pendingReview": "待审核",
+      "published": "发布"
     },
     "manageTemplates": {
       "title": "管理赛题模板",

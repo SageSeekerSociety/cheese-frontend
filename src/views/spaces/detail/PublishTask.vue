@@ -126,6 +126,12 @@ const loadTemplate = async (templateId: number) => {
     initialTaskData.value = {
       name: template.title,
       description: JSON.parse(template.content),
+      submitterType: template.submitterType !== null ? template.submitterType : undefined,
+      rank: template.rank !== null ? template.rank : undefined,
+      minTeamSize: template.minTeamSize,
+      maxTeamSize: template.maxTeamSize,
+      defaultDeadline: template.defaultDeadline !== null ? template.defaultDeadline : undefined,
+      requireRealName: template.requireRealName !== null ? template.requireRealName : undefined,
     }
   }
 }

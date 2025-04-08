@@ -1,38 +1,77 @@
-import type { Page, User } from '@/types'
+import type { User } from '@/types'
 
-export type NotificationType = 'mention' | 'reply' | 'reaction' | 'project_invite' | 'deadline_remind'
+export type NotificationType =
+  | 'MENTION'
+  | 'REPLY'
+  | 'REACTION'
+  | 'PROJECT_INVITE'
+  | 'DEADLINE_REMIND'
+  | 'TEAM_JOIN_REQUEST'
+  | 'TEAM_INVITATION'
+  | 'TEAM_REQUEST_APPROVED'
+  | 'TEAM_REQUEST_REJECTED'
+  | 'TEAM_INVITATION_ACCEPTED'
+  | 'TEAM_INVITATION_DECLINED'
+  | 'TEAM_INVITATION_CANCELED'
+  | 'TEAM_REQUEST_CANCELED'
+
+export interface EntityInfo {
+  id: string
+  type: string
+  name: string
+  avatarUrl?: string
+}
 
 export interface Notification {
   id: number
   type: NotificationType
-  title: string
-  content: string
-  sender?: User
   read: boolean
-  resourceType: string
-  resourceId: number
   createdAt: number
-  updatedAt: number
+  updatedAt?: number
+  entities: Record<string, EntityInfo | null>
+  contextMetadata: Record<string, any>
+}
+
+export interface EncodedCursorPage {
+  page_start: string
+  page_size: number
+  has_prev: boolean
+  has_more: boolean
+  next_start?: string
+  total?: number
 }
 
 export interface ListNotificationsParams {
   type?: NotificationType
   read?: boolean
-  page_start: number
-  page_size: number
+  pageStart?: string
+  pageSize: number
 }
 
 export interface ListNotificationsResponse {
   notifications: Notification[]
-  page: Page
+  page: EncodedCursorPage
 }
 
-export interface MarkAsReadRequest {
-  notificationIds: number[]
+export interface NotificationUpdate {
+  id: number
+  read: boolean
 }
 
-export interface MarkAsReadResponse {
-  notificationIds: number[]
+export interface BulkUpdateRequest {
+  updates: NotificationUpdate[]
+}
+
+export interface BulkUpdateResponse {
+  updatedIds: number[]
+}
+
+export interface MarkAllAsReadRequest {
+  read: boolean
+}
+
+export interface MarkAllAsReadResponse {
+  count: number
 }
 
 export interface UnreadCountResponse {
