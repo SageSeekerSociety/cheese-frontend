@@ -126,11 +126,6 @@ export interface TaskParticipantRealNameInfo {
   grade: string
   major?: string
   className: string
-  email?: string
-  phone?: string
-  applyReason?: string
-  personalAdvantage?: string
-  remark?: string
 }
 
 export interface TaskMembership {
@@ -141,6 +136,12 @@ export interface TaskMembership {
   deadline: number | null
   approved: 'APPROVED' | 'DISAPPROVED' | 'NONE'
   realNameInfo?: TaskParticipantRealNameInfo
+  email?: string
+  phone?: string
+  applyReason?: string
+  personalAdvantage?: string
+  remark?: string
+  teamMembers?: (TaskParticipantSummary & { isLeader: boolean })[]
 }
 
 export type TaskFormSubmitData = {

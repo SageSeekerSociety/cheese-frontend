@@ -1,4 +1,3 @@
-import type { TaskParticipantRealNameInfo } from '@/types'
 import type { useTaskData } from './useTaskData'
 
 import { ref } from 'vue'
@@ -33,9 +32,7 @@ export function useTaskParticipation(taskDataModule: ReturnType<typeof useTaskDa
   }
 
   // 处理验证信息提交
-  const handleVerifyInfoSubmit = async (
-    formData: Pick<TaskParticipantRealNameInfo, 'phone' | 'email' | 'applyReason'>
-  ) => {
+  const handleVerifyInfoSubmit = async (formData: { phone?: string; email?: string; applyReason?: string }) => {
     try {
       events.emit('verify-dialog-open', false)
 
@@ -51,7 +48,11 @@ export function useTaskParticipation(taskDataModule: ReturnType<typeof useTaskDa
 
   // 团队参与任务
   const joinTaskWithTeam = async (
-    contactInfo: Pick<TaskParticipantRealNameInfo, 'phone' | 'email' | 'applyReason'>,
+    contactInfo: {
+      phone?: string
+      email?: string
+      applyReason?: string
+    },
     teamId: number
   ) => {
     if (!taskData.value || !teamId) return
@@ -76,9 +77,7 @@ export function useTaskParticipation(taskDataModule: ReturnType<typeof useTaskDa
   }
 
   // 个人参与任务
-  const joinTaskAsIndividual = async (
-    contactInfo?: Pick<TaskParticipantRealNameInfo, 'phone' | 'email' | 'applyReason'>
-  ) => {
+  const joinTaskAsIndividual = async (contactInfo?: { phone?: string; email?: string; applyReason?: string }) => {
     if (!taskData.value) return
     try {
       const userId = AccountService.user?.id

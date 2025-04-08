@@ -77,8 +77,7 @@
 </template>
 
 <script setup lang="ts">
-import type { TeamSummary } from '@/network/api/tasks/types'
-import type { Task } from '@/types'
+import type { Task, Team } from '@/types'
 
 import { computed } from 'vue'
 
@@ -88,7 +87,7 @@ const props = defineProps<{
   open: boolean
   taskData: Task | null
   loading: boolean
-  joinedTeams: TeamSummary[]
+  joinedTeams: Team[]
   selectedTeamId: number | null
 }>()
 

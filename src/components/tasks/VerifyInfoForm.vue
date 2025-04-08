@@ -90,7 +90,6 @@ import { z } from 'zod'
 
 import { vuetifyConfig } from '@/utils/form'
 
-import { TaskParticipantRealNameInfo } from '@/types'
 import { useEvents } from '@/views/tasks/events'
 
 defineProps<{
@@ -99,11 +98,15 @@ defineProps<{
 
 const STORAGE_KEY = 'verify_info_form_data'
 
-const emit = defineEmits<{
-  (e: 'submit', formData: TaskParticipantRealNameInfo): void
-}>()
+type VerifyInfoFormData = {
+  phone?: string
+  email?: string
+  applyReason?: string
+}
 
-type VerifyInfoFormData = Pick<TaskParticipantRealNameInfo, 'phone' | 'email' | 'applyReason'>
+const emit = defineEmits<{
+  (e: 'submit', formData: VerifyInfoFormData): void
+}>()
 
 const phoneRegex = /^1[3-9]\d{9}$/
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
@@ -184,7 +187,7 @@ const submitForm = handleSubmit((values) => {
   // 通过事件总线发送数据
   events.emit('verify-form-submit', values as any)
   // 通过props发送数据
-  emit('submit', values as TaskParticipantRealNameInfo)
+  emit('submit', values as VerifyInfoFormData)
 })
 
 // 暴露方法供父组件调用

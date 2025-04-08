@@ -1,12 +1,11 @@
-import type { TeamSummary } from '@/network/api/tasks/types'
+import type { Team, TeamSummary, TeamTaskEligibility } from '@/types'
 import type { useTaskData } from './useTaskData'
 
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { toast } from 'vuetify-sonner'
 
 import { useEvents } from '../events'
 
-import { TasksApi } from '@/network/api/tasks'
 import { useDialog } from '@/plugins/dialog'
 
 export function useTeamParticipation(taskDataModule: ReturnType<typeof useTaskData>) {
@@ -20,8 +19,8 @@ export function useTeamParticipation(taskDataModule: ReturnType<typeof useTaskDa
   const loadingTeams = ref(false)
 
   // 数据状态
-  const availableTeams = ref<TeamSummary[]>([])
-  const joinedTeams = ref<TeamSummary[]>([])
+  const availableTeams = ref<TeamTaskEligibility[]>([])
+  const joinedTeams = ref<Team[]>([])
   const selectedTeamId = ref<number | null>(null)
   const selectedLeaveTeamId = ref<number | null>(null)
 
@@ -44,6 +43,36 @@ export function useTeamParticipation(taskDataModule: ReturnType<typeof useTaskDa
     })
   })
 
+  // 当任务数据更新时，更新团队信息
+  watch(
+    () => taskData.value,
+    () => {
+      if (taskData.value) {
+        updateTeamsFromTaskData()
+      }
+    },
+    { immediate: true }
+  )
+
+  // 从任务数据中更新团队信息
+  const updateTeamsFromTaskData = () => {
+    if (!taskData.value) return
+
+    // 如果有participationEligibility数据，使用它来更新可用团队
+    if (taskData.value.participationEligibility?.teams) {
+      availableTeams.value = taskData.value.participationEligibility.teams
+    } else {
+      availableTeams.value = []
+    }
+
+    // 更新已加入的团队
+    if (taskData.value.joinedTeams && Array.isArray(taskData.value.joinedTeams)) {
+      joinedTeams.value = [...taskData.value.joinedTeams]
+    } else {
+      joinedTeams.value = []
+    }
+  }
+
   // 获取团队验证状态
   const getTeamVerificationStatus = (team: TeamSummary): { status: string; color: string } => {
     if (!taskData.value?.requireRealName) {
@@ -57,7 +86,12 @@ export function useTeamParticipation(taskDataModule: ReturnType<typeof useTaskDa
     }
   }
 
-  // 加载可用团队
+  // 获取可选择的团队列表（符合条件的团队）
+  const eligibleTeams = computed(() => {
+    return availableTeams.value.filter((team) => team.eligibility.eligible)
+  })
+
+  // 打开团队选择对话框
   const openTeamSelectionDialog = async () => {
     if (!taskData.value) return
 
@@ -65,17 +99,17 @@ export function useTeamParticipation(taskDataModule: ReturnType<typeof useTaskDa
     selectedTeamId.value = null
 
     try {
-      const { data } = await TasksApi.getTaskTeams(taskData.value.id)
-      availableTeams.value = data.teams
+      // 直接使用任务数据中的团队信息
+      updateTeamsFromTaskData()
 
-      if (availableTeams.value.length === 0) {
+      if (eligibleTeams.value.length === 0) {
         toast.info('您没有符合条件的小队可以参与此赛题')
       }
 
       teamSelectionDialogOpen.value = true
     } catch (error) {
       toast.error('获取小队信息失败')
-      console.error('Failed to load teams:', error)
+      console.error('Failed to process teams:', error)
     } finally {
       loadingTeams.value = false
     }
@@ -92,18 +126,11 @@ export function useTeamParticipation(taskDataModule: ReturnType<typeof useTaskDa
   const loadJoinedTeams = async () => {
     if (!taskData.value) return
 
-    loadingTeams.value = true
-    try {
-      const { data } = await TasksApi.getTaskTeams(taskData.value.id, { filter: 'all' })
-
-      joinedTeams.value = data.teams.filter((team) =>
-        taskData.value?.joinedTeams?.some((joinedTeam) => joinedTeam.id === team.id)
-      )
-    } catch (error) {
-      console.error('Failed to load joined teams:', error)
-      toast.error('加载参与小队失败')
-    } finally {
-      loadingTeams.value = false
+    // 已参与的团队信息应该直接从任务数据中获取
+    if (taskData.value.joinedTeams && Array.isArray(taskData.value.joinedTeams)) {
+      joinedTeams.value = [...taskData.value.joinedTeams]
+    } else {
+      joinedTeams.value = []
     }
   }
 
@@ -139,6 +166,7 @@ export function useTeamParticipation(taskDataModule: ReturnType<typeof useTaskDa
 
     // 数据
     availableTeams,
+    eligibleTeams,
     selectedTeamId,
     selectedLeaveTeamId,
     joinedTeams,

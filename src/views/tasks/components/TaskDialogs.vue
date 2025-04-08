@@ -179,9 +179,8 @@
 </template>
 
 <script setup lang="ts">
-import type { TeamSummary } from '@/network/api/tasks/types'
 import type { TaskAIAdviceConversationContext } from '@/network/api/tasks/types'
-import type { Task } from '@/types'
+import type { Task, Team, TeamTaskEligibility } from '@/types'
 
 import { computed, defineAsyncComponent, onMounted, ref } from 'vue'
 
@@ -199,9 +198,9 @@ const LeaveTeamDialog = defineAsyncComponent(() => import('./LeaveTeamDialog.vue
 const props = defineProps<{
   taskData: Task | null
   editTaskData: any
-  availableTeams: TeamSummary[]
+  availableTeams: TeamTaskEligibility[]
   loadingTeams: boolean
-  joinedTeams: TeamSummary[]
+  joinedTeams: Team[]
   selectedLeaveTeamId: number | null
   selectedContext: TaskAIAdviceConversationContext | undefined
 }>()

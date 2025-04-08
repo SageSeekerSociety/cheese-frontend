@@ -77,7 +77,7 @@
             <template #prepend>
               <v-avatar
                 :color="
-                  participant.type === 'TEAM'
+                  taskData?.submitterType === 'TEAM'
                     ? 'success'
                     : participant.realNameInfo?.realName
                       ? 'primary'
@@ -86,13 +86,8 @@
                 size="48"
               >
                 <v-img
-                  v-if="participant.type === 'USER' && participant.member.avatarId && !taskData?.requireRealName"
+                  v-if="participant.member.avatarId && !taskData?.requireRealName"
                   :src="getAvatarUrl(participant.member.avatarId)"
-                  cover
-                ></v-img>
-                <v-img
-                  v-else-if="participant.type === 'TEAM' && participant.team.avatarId"
-                  :src="getAvatarUrl(participant.team.avatarId)"
                   cover
                 ></v-img>
                 <span v-else>{{ getParticipantDisplayName(participant).slice(0, 1) }}</span>
@@ -102,7 +97,13 @@
             <v-list-item-title>
               <div class="d-flex align-center flex-wrap gap-2">
                 <span class="font-weight-medium">{{ getParticipantDisplayName(participant) }}</span>
-                <v-chip v-if="participant.type === 'TEAM'" variant="tonal" color="success" size="small" class="my-1">
+                <v-chip
+                  v-if="taskData?.submitterType === 'TEAM'"
+                  variant="tonal"
+                  color="success"
+                  size="small"
+                  class="my-1"
+                >
                   团队
                 </v-chip>
                 <v-chip
@@ -136,7 +137,7 @@
             </v-list-item-title>
 
             <v-list-item-subtitle>
-              <template v-if="participant.type === 'USER' && participant.realNameInfo?.realName">
+              <template v-if="taskData?.submitterType === 'USER' && participant.realNameInfo?.realName">
                 <div class="d-flex flex-wrap gap-2 mt-1">
                   <span
                     v-if="participant.realNameInfo.grade || participant.realNameInfo.className"
@@ -145,21 +146,21 @@
                     <v-icon size="16" class="me-1">mdi-school</v-icon>
                     {{ participant.realNameInfo.grade }}级 {{ participant.realNameInfo.className }}
                   </span>
-                  <span v-if="participant.realNameInfo.phone" class="d-inline-flex align-center">
+                  <span v-if="participant.phone" class="d-inline-flex align-center">
                     <v-icon size="16" class="me-1">mdi-phone</v-icon>
-                    {{ participant.realNameInfo.phone }}
+                    {{ participant.phone }}
                   </span>
-                  <span v-if="participant.realNameInfo.email" class="d-inline-flex align-center">
+                  <span v-if="participant.email" class="d-inline-flex align-center">
                     <v-icon size="16" class="me-1">mdi-email</v-icon>
-                    {{ participant.realNameInfo.email }}
+                    {{ participant.email }}
                   </span>
                 </div>
-                <div v-if="participant.realNameInfo.applyReason" class="mt-1">
+                <div v-if="participant.applyReason" class="mt-1">
                   <v-icon size="16" class="me-1">mdi-text-box</v-icon>
-                  申请理由：{{ participant.realNameInfo.applyReason }}
+                  申请理由：{{ participant.applyReason }}
                 </div>
               </template>
-              <template v-if="participant.type === 'TEAM' && participant.teamMembers?.length">
+              <template v-if="taskData?.submitterType === 'TEAM' && participant.teamMembers?.length">
                 <div class="d-flex flex-wrap gap-1 mt-1">
                   <span class="d-inline-flex align-center">
                     <v-icon size="16" class="me-1">mdi-account-multiple</v-icon>
@@ -173,7 +174,7 @@
                     :color="member.isLeader ? 'primary' : ''"
                     :variant="member.isLeader ? 'flat' : 'outlined'"
                   >
-                    {{ taskData?.requireRealName ? member.realName || '未实名用户' : member.name }}
+                    {{ member.name }}
                     <v-icon v-if="member.isLeader" size="12" class="ms-1">mdi-crown</v-icon>
                   </v-chip>
                 </div>
@@ -358,51 +359,8 @@ const props = defineProps<{
   taskData: Task | null
 }>()
 
-interface TeamMember {
-  id: number
-  name: string
-  realName?: string
-  isLeader: boolean
-}
-
-interface ParticipantBase {
-  id: number
-  approved: 'NONE' | 'APPROVED' | 'DISAPPROVED'
-  deadline?: string | Date
-}
-
-interface TeamParticipant extends ParticipantBase {
-  type: 'TEAM'
-  team: {
-    id: number
-    name: string
-    avatarId?: number
-  }
-  teamMembers?: TeamMember[]
-}
-
-interface IndividualParticipant extends ParticipantBase {
-  type: 'USER'
-  member: {
-    id: number
-    name: string
-    avatarId?: number
-  }
-  realNameInfo?: {
-    realName: string
-    studentId?: string
-    grade?: string
-    className?: string
-    phone?: string
-    email?: string
-    applyReason?: string
-  }
-}
-
-type Participant = TeamParticipant | IndividualParticipant
-
 // 数据状态
-const participants = ref<Participant[]>([])
+const participants = ref<TaskMembership[]>([])
 const loading = ref(true)
 const searchQuery = ref('')
 const filterStatus = ref('all')
@@ -412,7 +370,7 @@ const currentPage = ref(1)
 const deadlineDialog = ref(false)
 const submissionsDialog = ref(false)
 const rejectDialog = ref(false)
-const selectedParticipant = ref<Participant | null>(null)
+const selectedParticipant = ref<TaskMembership | null>(null)
 const newDeadlineDate = ref<Date>()
 const newDeadlineTime = ref('23:59')
 const rejectReason = ref('')
@@ -446,27 +404,6 @@ const filteredParticipants = computed(() => {
     result = result.filter((p) => p.approved === 'DISAPPROVED')
   }
 
-  // 搜索过滤
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    result = result.filter((p) => {
-      let name = ''
-      let realName = ''
-      let studentId = ''
-
-      if (p.type === 'TEAM') {
-        name = p.team?.name?.toLowerCase() || ''
-        // 团队没有真实姓名和学号
-      } else {
-        name = p.member?.name?.toLowerCase() || ''
-        realName = p.realNameInfo?.realName?.toLowerCase() || ''
-        studentId = p.realNameInfo?.studentId?.toLowerCase() || ''
-      }
-
-      return name.includes(query) || realName.includes(query) || studentId.includes(query)
-    })
-  }
-
   return result
 })
 
@@ -475,18 +412,11 @@ const formatDate = (date: string | Date | number) => {
   return dayjs(date).format('YYYY-MM-DD HH:mm')
 }
 
-const getParticipantDisplayName = (participant: Participant) => {
-  // 如果是团队参与
-  if (participant.type === 'TEAM') {
-    return participant.team?.name || '未命名团队'
-  }
-
-  // 如果是实名赛题，且有实名信息则显示实名
+const getParticipantDisplayName = (participant: TaskMembership) => {
   if (props.taskData?.requireRealName && participant.realNameInfo?.realName) {
     return `${participant.realNameInfo.realName}${participant.realNameInfo.studentId ? ` (${participant.realNameInfo.studentId})` : ''}`
   }
 
-  // 否则显示匿名用户名
   return participant.member?.name || '未知用户'
 }
 
@@ -500,49 +430,7 @@ const fetchParticipants = async () => {
       queryTeamInfo: true,
     })
 
-    // 将 API 返回的数据转换为我们定义的类型
-    participants.value = data.participants.map((p) => {
-      // 根据接口返回的数据结构进行适配
-      // 由于 API 返回的数据结构可能与我们定义的不同，需要进行转换
-      const submitterType = (p as any).submitterType || 'USER'
-      const deadline = p.deadline || undefined
-
-      if (submitterType === 'TEAM') {
-        const team = (p as any).team || { id: 0, name: '未命名团队' }
-        const teamMembers = (p as any).teamMembers || []
-
-        return {
-          id: p.id,
-          approved: p.approved,
-          deadline,
-          type: 'TEAM' as const,
-          team: {
-            id: team.id || 0,
-            name: team.name || '未命名团队',
-            avatarId: team.avatarId,
-          },
-          teamMembers: teamMembers.map((m: any) => ({
-            id: m.id,
-            name: m.name,
-            realName: m.realName,
-            isLeader: m.isLeader,
-          })),
-        }
-      } else {
-        return {
-          id: p.id,
-          approved: p.approved,
-          deadline,
-          type: 'USER' as const,
-          member: {
-            id: p.member.id,
-            name: p.member.name,
-            avatarId: p.member.avatarId,
-          },
-          realNameInfo: p.realNameInfo,
-        }
-      }
-    }) as Participant[]
+    participants.value = data.participants
   } catch (error) {
     toast.error('获取参与者列表失败')
   } finally {
@@ -550,7 +438,7 @@ const fetchParticipants = async () => {
   }
 }
 
-const showDeadlineDialog = (participant: Participant) => {
+const showDeadlineDialog = (participant: TaskMembership) => {
   selectedParticipant.value = participant
   const defaultDate = participant.deadline ? dayjs(participant.deadline).toDate() : new Date(tomorrow.value)
   const defaultTime = participant.deadline ? dayjs(participant.deadline).format('HH:mm') : '23:59'
@@ -576,12 +464,12 @@ const setDeadline = async () => {
   }
 }
 
-const showSubmissions = (participant: Participant) => {
+const showSubmissions = (participant: TaskMembership) => {
   selectedParticipant.value = participant
   submissionsDialog.value = true
 }
 
-const approveParticipant = async (participant: Participant) => {
+const approveParticipant = async (participant: TaskMembership) => {
   if (!props.taskData) return
 
   // 设置默认截止时间（当前时间 + 默认天数）
@@ -597,7 +485,7 @@ const approveParticipant = async (participant: Participant) => {
   }
 }
 
-const rejectParticipant = (participant: Participant) => {
+const rejectParticipant = (participant: TaskMembership) => {
   selectedParticipant.value = participant
   rejectReason.value = ''
   rejectDialog.value = true
