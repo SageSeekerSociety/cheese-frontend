@@ -33,6 +33,7 @@ export type PostTaskRequestData = {
   requireRealName?: boolean
   minTeamSize?: number
   maxTeamSize?: number
+  participantLimit?: number
 }
 
 export type PatchTaskRequestData = {
@@ -46,6 +47,7 @@ export type PatchTaskRequestData = {
   approved?: 'APPROVED' | 'DISAPPROVED' | 'NONE'
   rejectReason?: string
   requireRealName?: boolean
+  participantLimit?: number
 }
 
 export type AddTaskParticipantRequestData = {

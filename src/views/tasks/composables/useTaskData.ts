@@ -66,6 +66,11 @@ export function useTaskData() {
       resubmittable: taskData.value.resubmittable,
       editable: taskData.value.editable,
       description: JSON.parse(taskData.value.description),
+      requireRealName: taskData.value.requireRealName,
+      minTeamSize: taskData.value.minTeamSize,
+      maxTeamSize: taskData.value.maxTeamSize,
+      participantLimit: taskData.value.participantLimit,
+      categoryId: taskData.value.category?.id,
     }
   })
 

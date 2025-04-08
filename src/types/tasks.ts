@@ -15,6 +15,7 @@ export interface Task {
   submitterType: TaskSubmitterType
   creator: User
   deadline: number
+  participantLimit: number
   defaultDeadline: number
   resubmittable: boolean
   editable: boolean
@@ -117,4 +118,5 @@ export type TaskFormSubmitData = {
   requireRealName: boolean
   minTeamSize: number
   maxTeamSize: number
+  participantLimit?: number
 }

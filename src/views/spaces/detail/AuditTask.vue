@@ -81,6 +81,15 @@
                       : t('spaces.detail.auditTasks.individualContest')
                   }}
                 </v-chip>
+                <v-chip
+                  v-if="task.requireRealName"
+                  size="small"
+                  color="info"
+                  variant="tonal"
+                  prepend-icon="mdi-shield-account"
+                >
+                  需要实名信息
+                </v-chip>
                 <v-chip v-if="task.resubmittable" size="small" color="info" variant="tonal">{{
                   t('spaces.detail.auditTasks.resubmittable')
                 }}</v-chip>
@@ -166,7 +175,7 @@ const {
   }
   const { data } = await TasksApi.list({
     space: currentSpaceId.value,
-    page_start: pageStart,
+    pageStart: pageStart,
     sort_by: 'createdAt',
     sort_order: 'desc',
     approved: 'NONE',

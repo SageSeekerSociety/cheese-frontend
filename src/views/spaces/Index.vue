@@ -89,8 +89,8 @@ const {
   const { data } = await SpacesApi.list({
     sort_by: 'createdAt',
     sort_order: 'desc',
-    page_start: pageStart,
-    page_size: 12,
+    pageStart: pageStart,
+    pageSize: 12,
   })
   return { data: data.spaces, page: data.page }
 })

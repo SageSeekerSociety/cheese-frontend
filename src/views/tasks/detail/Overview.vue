@@ -33,16 +33,21 @@
         </div>
       </template>
     </v-alert>
-    <!-- 
-    <v-alert
-      v-else-if="taskData?.joined && (taskData?.joinedApproved === false || taskData?.joinedDisapproved)"
-      type="info"
-      class="mb-4"
-      rounded="lg"
-      :title="taskData.joinedDisapproved ? '审核未通过' : '等待审核'"
-      :text="taskData.joinedDisapproved ? '您的参与申请未通过审核' : '您的参与申请正在审核中'"
-    >
-    </v-alert> -->
+    <!-- 小队任务无可加入小队提示 -->
+    <v-alert v-if="showNoTeamAlert" type="info" class="mb-4" rounded="lg" title="需要创建小队">
+      <template #text>
+        <div class="mt-2">
+          <div class="font-weight-medium">此赛题需要以小队形式参与，但您还没有可以领取此赛题的小队</div>
+          <div class="mt-2 d-flex align-center">
+            <span class="text-medium-emphasis me-3">您可以创建一个新小队或加入已有小队来参与</span>
+            <v-btn color="primary" variant="tonal" size="small" :to="{ name: 'Teams' }">
+              查看我的小队
+              <v-icon end>mdi-arrow-right</v-icon>
+            </v-btn>
+          </div>
+        </div>
+      </template>
+    </v-alert>
 
     <!-- AI建议入口卡片 -->
     <v-card
@@ -79,26 +84,6 @@
             查看建议
             <v-icon end>mdi-arrow-right</v-icon>
           </v-btn>
-        </div>
-      </v-card-text>
-    </v-card>
-
-    <!-- 赛题详情 -->
-    <v-card flat rounded="lg" class="mb-4 task-detail-card">
-      <v-card-item>
-        <template #prepend>
-          <div class="me-3">
-            <v-avatar color="primary-lighten-5" size="48" class="elevation-0">
-              <v-icon color="primary" size="28">mdi-information-outline</v-icon>
-            </v-avatar>
-          </div>
-        </template>
-        <v-card-title class="text-h5 ps-0">赛题详情</v-card-title>
-      </v-card-item>
-
-      <v-card-text>
-        <div class="task-description">
-          <TipTapViewer :value="taskDescription" />
         </div>
       </v-card-text>
     </v-card>
@@ -203,22 +188,55 @@
                   {{ taskData?.resubmittable ? '可多次提交' : '仅可提交一次' }}
                 </v-chip>
               </div>
+
+              <v-divider></v-divider>
+
+              <div class="d-flex justify-space-between align-center">
+                <div class="text-subtitle-1">
+                  {{ taskData?.submitterType === 'TEAM' ? '队伍数量限制' : '参与者人数限制' }}
+                </div>
+                <div class="d-flex align-center">
+                  <v-chip v-if="taskData?.participantLimit" color="primary" variant="flat">
+                    {{ taskData.participantLimit }} {{ taskData?.submitterType === 'TEAM' ? '队' : '人' }}
+                  </v-chip>
+                  <span v-else class="text-primary font-weight-medium">不限</span>
+                </div>
+              </div>
             </div>
           </v-card-text>
         </v-card>
       </v-col>
     </v-row>
+
+    <!-- 赛题详情 -->
+    <v-card flat rounded="lg" class="mt-4 task-detail-card">
+      <v-card-item>
+        <template #prepend>
+          <div class="me-3">
+            <v-avatar color="primary-lighten-5" size="48" class="elevation-0">
+              <v-icon color="primary" size="28">mdi-information-outline</v-icon>
+            </v-avatar>
+          </div>
+        </template>
+        <v-card-title class="text-h5 ps-0">赛题详情</v-card-title>
+      </v-card-item>
+
+      <v-card-text>
+        <div class="task-description">
+          <TipTapViewer :value="taskDescription" />
+        </div>
+      </v-card-text>
+    </v-card>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { Task, TaskMembership } from '@/types'
+import type { Task } from '@/types'
 
-import { computed, defineAsyncComponent, onMounted, ref } from 'vue'
+import { computed, defineAsyncComponent } from 'vue'
 import { useRouter } from 'vue-router'
 import dayjs from 'dayjs'
 
-import { TasksApi } from '@/network/api/tasks'
 import { TaskParticipationInfo } from '@/network/api/tasks/types'
 import AccountService from '@/services/account'
 
@@ -268,6 +286,16 @@ const taskUserDeadline = computed(() => {
 const isDeadlinePassed = computed(() => {
   if (!props.taskData?.deadline) return false
   return dayjs(props.taskData.deadline).isBefore(dayjs())
+})
+
+const showNoTeamAlert = computed(() => {
+  return (
+    props.taskData?.submitterType === 'TEAM' &&
+    props.taskData.joinable &&
+    (!props.taskData.submittableAsTeam || props.taskData.submittableAsTeam.length === 0) &&
+    !props.taskData.joined &&
+    !isDeadlinePassed.value
+  )
 })
 
 const joinRejectReasonText = computed(() => {

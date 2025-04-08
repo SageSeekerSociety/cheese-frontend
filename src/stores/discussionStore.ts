@@ -21,8 +21,8 @@ export const useDiscussionStore = defineStore('discussion', () => {
   const loadDiscussion = async (
     discussionId: number,
     params?: {
-      page_start?: number
-      page_size?: number
+      pageStart?: number
+      pageSize?: number
       sort_by?: 'createdAt' | 'updatedAt'
       sort_order?: 'asc' | 'desc'
     }
@@ -63,8 +63,8 @@ export const useDiscussionStore = defineStore('discussion', () => {
   const loadSubDiscussions = async (
     discussionId: number,
     params?: {
-      page_start?: number
-      page_size?: number
+      pageStart?: number
+      pageSize?: number
       sort_by?: 'createdAt' | 'updatedAt'
       sort_order?: 'asc' | 'desc'
     }
@@ -94,7 +94,7 @@ export const useDiscussionStore = defineStore('discussion', () => {
         }
       } else {
         // 如果是加载更多,则追加
-        if (params?.page_start) {
+        if (params?.pageStart) {
           currentDiscussion.value.subDiscussions.examples.push(...replies)
         } else {
           // 否则替换

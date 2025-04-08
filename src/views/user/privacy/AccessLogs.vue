@@ -154,7 +154,7 @@ import { currentUserId } from '@/services/account'
 const pageSize = 10
 
 const fetchLogs = async (pageStart?: number, customParams?: LogsParams) => {
-  if (!currentUserId.value) return { data: [], page: { page_start: 0, page_size: 0, next_start: 0, has_more: false } }
+  if (!currentUserId.value) return { data: [], page: { pageStart: 0, pageSize: 0, nextStart: 0, hasMore: false } }
 
   try {
     const { data } = await UserApi.getRealNameAccessLogs(currentUserId.value, pageStart, pageSize)
@@ -167,16 +167,16 @@ const fetchLogs = async (pageStart?: number, customParams?: LogsParams) => {
     return {
       data: data.logs,
       page: {
-        page_start: pageStart || 0,
-        page_size: pageSize,
-        next_start: data.page.next_start,
-        has_more: data.page.has_more,
+        pageStart: pageStart || 0,
+        pageSize: pageSize,
+        nextStart: data.page.nextStart,
+        hasMore: data.page.hasMore,
         total: data.page.total,
       },
     }
   } catch (error) {
     console.error('获取访问记录失败', error)
-    return { data: [], page: { page_start: 0, page_size: 0, next_start: 0, has_more: false } }
+    return { data: [], page: { pageStart: 0, pageSize: 0, nextStart: 0, hasMore: false } }
   }
 }
 

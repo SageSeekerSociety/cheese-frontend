@@ -86,8 +86,8 @@ const fetchNotifications = async () => {
     })
 
     notifications.value = [...notifications.value, ...data.notifications]
-    hasMore.value = data.page.has_more
-    cursorStart.value = data.page.next_start
+    hasMore.value = data.page.hasMore
+    cursorStart.value = data.page.nextStart
   } catch (error) {
     console.error('获取通知失败:', error)
   } finally {

@@ -711,10 +711,10 @@ const viewMode = ref('grid')
 const searchQuery = ref('')
 const knowledges = ref<Knowledge[]>([])
 const page = ref({
-  page_start: undefined as number | undefined,
-  page_size: 20,
-  has_more: false,
-  next_start: 0,
+  pageStart: undefined as number | undefined,
+  pageSize: 20,
+  hasMore: false,
+  nextStart: 0,
   total: 0,
 })
 const resourceDetailDialog = ref(false)
@@ -806,7 +806,7 @@ const loadKnowledges = async () => {
 
     const params: any = {
       teamId: teamId.value,
-      page_size: 20,
+      pageSize: 20,
       sort_by: 'createdAt',
       sort_order: 'desc',
     }
@@ -832,10 +832,10 @@ const loadKnowledges = async () => {
 
     knowledges.value = fetchedKnowledges
     page.value = {
-      page_start: fetchedPage.page_start,
-      page_size: fetchedPage.page_size,
-      has_more: fetchedPage.has_more,
-      next_start: fetchedPage.next_start,
+      pageStart: fetchedPage.pageStart,
+      pageSize: fetchedPage.pageSize,
+      hasMore: fetchedPage.hasMore,
+      nextStart: fetchedPage.nextStart,
       total: fetchedPage.total || 0,
     }
   } catch (error) {

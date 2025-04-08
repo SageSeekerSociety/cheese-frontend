@@ -300,11 +300,11 @@ const {
     if (!queryOptions || !queryOptions.space)
       return {
         data: [],
-        page: { page_start: 0, total: 0, page_size: 0, has_more: false, next_start: 0 },
+        page: { pageStart: 0, total: 0, pageSize: 0, hasMore: false, nextStart: 0 },
       }
     const { data } = await TasksApi.list({
       space: queryOptions.space,
-      page_start: pageStart,
+      pageStart: pageStart,
       sort_by: queryOptions?.by ?? 'createdAt',
       sort_order: queryOptions?.order ?? 'desc',
       keywords: queryOptions?.keywords,

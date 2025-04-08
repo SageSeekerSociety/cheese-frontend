@@ -33,11 +33,11 @@ export interface Notification {
 }
 
 export interface EncodedCursorPage {
-  page_start: string
-  page_size: number
+  pageStart: string
+  pageSize: number
   has_prev: boolean
-  has_more: boolean
-  next_start?: string
+  hasMore: boolean
+  nextStart?: string
   total?: number
 }
 

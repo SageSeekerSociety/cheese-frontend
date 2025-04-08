@@ -49,6 +49,21 @@
             </v-radio-group>
           </v-col>
 
+          <v-col cols="12" md="6">
+            <v-text-field
+              v-model.number="participantLimit"
+              :label="submitterType === 'TEAM' ? '队伍数量限制' : '参与者人数限制'"
+              type="number"
+              min="1"
+              v-bind="participantLimitProps"
+              :hint="t('tasks.form.participantLimitHint')"
+            >
+              <template #append-inner>
+                <v-icon size="small" color="primary">mdi-account-group</v-icon>
+              </template>
+            </v-text-field>
+          </v-col>
+
           <!-- 小队人数限制 -->
           <template v-if="submitterType === 'TEAM'">
             <v-col cols="12" md="6">
@@ -483,6 +498,7 @@ const { handleSubmit, defineField, isSubmitting } = useForm({
         minTeamSize: z.number().int().min(1).optional(),
         maxTeamSize: z.number().int().min(1).optional(),
         requireRealName: z.boolean().optional().default(false),
+        participantLimit: z.number().int().min(1).optional().nullable(),
       })
       .refine((arg) => !arg.maxTeamSize || !arg.minTeamSize || arg.maxTeamSize >= arg.minTeamSize, {
         message: '最大人数不能小于最小人数',
@@ -498,6 +514,7 @@ const { handleSubmit, defineField, isSubmitting } = useForm({
     minTeamSize: props.initialData?.minTeamSize ?? 1,
     maxTeamSize: props.initialData?.maxTeamSize ?? 10,
     defaultDeadline: props.initialData?.defaultDeadline ?? 30,
+    participantLimit: props.initialData?.participantLimit ?? null,
   },
 })
 
@@ -511,6 +528,7 @@ const [minTeamSize, minTeamSizeProps] = defineField('minTeamSize', vuetifyConfig
 const [maxTeamSize, maxTeamSizeProps] = defineField('maxTeamSize', vuetifyConfig)
 const [categoryId, categoryIdProps] = defineField('categoryId', vuetifyConfig)
 const [requireRealName, requireRealNameProps] = defineField('requireRealName', vuetifyConfig)
+const [participantLimit, participantLimitProps] = defineField('participantLimit', vuetifyConfig)
 
 const description = ref(props.initialData?.description || [])
 
@@ -543,6 +561,7 @@ const submitFormData = (values: any) => {
     categoryId: categoryId.value || undefined,
     minTeamSize: submitterType.value === 'TEAM' ? minTeamSize.value : undefined,
     maxTeamSize: submitterType.value === 'TEAM' ? maxTeamSize.value : undefined,
+    participantLimit: participantLimit.value || undefined,
   }
   emit('submit', submissionData)
 }

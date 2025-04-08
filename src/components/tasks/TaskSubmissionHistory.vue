@@ -166,8 +166,8 @@ const {
     allVersions: true,
     sort_by: 'createdAt',
     sort_order: 'desc',
-    page_start: pageStart,
-    page_size: 10,
+    pageStart: pageStart,
+    pageSize: 10,
     queryReview: true,
   })
   return { data: data.submissions, page: data.page }

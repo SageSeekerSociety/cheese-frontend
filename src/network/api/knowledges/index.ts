@@ -5,7 +5,7 @@ import { NewApiInstance } from '../index'
 export namespace KnowledgesApi {
   export const create = (data: CreateKnowledgeRequest) =>
     NewApiInstance.request<{ knowledge: Knowledge }>({
-      url: '/knowledges',
+      url: '/knowledge',
       method: 'POST',
       data,
     })
@@ -22,7 +22,7 @@ export namespace KnowledgesApi {
       }
     })
     return NewApiInstance.request<{ knowledges: Knowledge[]; page: Page }>({
-      url: '/knowledges',
+      url: '/knowledge',
       method: 'GET',
       params: finalParams,
     })
@@ -30,20 +30,20 @@ export namespace KnowledgesApi {
 
   export const getDetail = (knowledgeId: number) =>
     NewApiInstance.request<{ knowledge: Knowledge }>({
-      url: `/knowledges/${knowledgeId}`,
+      url: `/knowledge/${knowledgeId}`,
       method: 'GET',
     })
 
   export const update = (knowledgeId: number, data: UpdateKnowledgeRequest) =>
     NewApiInstance.request<{ knowledge: Knowledge }>({
-      url: `/knowledges/${knowledgeId}`,
+      url: `/knowledge/${knowledgeId}`,
       method: 'PATCH',
       data,
     })
 
   export const deleteKnowledge = (knowledgeId: number) =>
     NewApiInstance.request<void>({
-      url: `/knowledges/${knowledgeId}`,
+      url: `/knowledge/${knowledgeId}`,
       method: 'DELETE',
     })
 }

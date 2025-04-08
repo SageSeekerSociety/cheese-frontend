@@ -35,8 +35,8 @@ export namespace TeamsApi {
 
   export type SearchTeamsRequestData = {
     query: string
-    page_start?: number
-    page_size?: number
+    pageStart?: number
+    pageSize?: number
   }
 
   export const search = (params: SearchTeamsRequestData) =>

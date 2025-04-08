@@ -123,8 +123,8 @@ export namespace UserApi {
       url: `/users/${userId}/questions`,
       method: 'GET',
       data: {
-        page_start: pageStart,
-        page_size: pageSize,
+        pageStart: pageStart,
+        pageSize: pageSize,
       },
     })
 
@@ -415,8 +415,8 @@ export namespace UserApi {
       url: `/users/${userId}/identity/access-logs`,
       method: 'GET',
       params: {
-        page_start: pageStart,
-        page_size: pageSize,
+        pageStart: pageStart,
+        pageSize: pageSize,
       },
     })
 }

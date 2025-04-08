@@ -23,8 +23,8 @@ export namespace ProjectsApi {
     parent_id?: number
     leader_id?: number
     member_id?: number
-    page_start?: number
-    page_size?: number
+    pageStart?: number
+    pageSize?: number
   }
 
   export const create = (data: CreateProjectRequestData) =>

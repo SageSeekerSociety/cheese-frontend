@@ -39,8 +39,8 @@ export type ListDiscussionsParams = {
   modelType: DiscussableModelType
   modelId: number
   parent_id?: number
-  page_start?: number
-  page_size?: number
+  pageStart?: number
+  pageSize?: number
   sort_by?: 'createdAt' | 'updatedAt'
   sort_order?: 'asc' | 'desc'
 }

@@ -81,8 +81,8 @@ export namespace TasksApi {
     space?: number
     team?: number
     owner?: number
-    page_size?: number
-    page_start?: number
+    pageSize?: number
+    pageStart?: number
     sort_by: 'createdAt' | 'updatedAt' | 'deadline'
     sort_order: 'asc' | 'desc'
     querySpace?: boolean
@@ -204,8 +204,8 @@ export namespace TasksApi {
     participantId: number,
     params: {
       allVersions?: boolean
-      page_size?: number
-      page_start?: number
+      pageSize?: number
+      pageStart?: number
       sort_by: 'createdAt' | 'updatedAt'
       sort_order: 'asc' | 'desc'
       queryReview?: boolean

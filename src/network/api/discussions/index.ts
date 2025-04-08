@@ -47,8 +47,8 @@ export namespace DiscussionsApi {
   export const getDetail = (
     discussionId: number,
     params?: {
-      page_start?: number
-      page_size?: number
+      pageStart?: number
+      pageSize?: number
       sort_by?: 'createdAt' | 'updatedAt'
       sort_order?: 'asc' | 'desc'
     }
@@ -74,8 +74,8 @@ export namespace DiscussionsApi {
   export const listSubDiscussions = (
     discussionId: number,
     params?: {
-      page_start?: number
-      page_size?: number
+      pageStart?: number
+      pageSize?: number
       sort_by?: 'createdAt' | 'updatedAt'
       sort_order?: 'asc' | 'desc'
     }

@@ -42,7 +42,7 @@ export namespace SpacesApi {
       params,
     })
 
-  export const list = (params: { page_size?: number; page_start?: number; sort_by: string; sort_order: string }) =>
+  export const list = (params: { pageSize?: number; pageStart?: number; sort_by: string; sort_order: string }) =>
     NewApiInstance.request<GetSpacesResponseData>({
       url: '/spaces',
       method: 'GET',

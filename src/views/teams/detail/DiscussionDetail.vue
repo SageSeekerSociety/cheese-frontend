@@ -251,8 +251,8 @@ const loadMoreReplies = async () => {
 
     // 调用API加载更多回复
     await discussionStore.loadSubDiscussions(discussionId.value, {
-      page_start: pageStart,
-      page_size: pageSize.value,
+      pageStart: pageStart,
+      pageSize: pageSize.value,
     })
 
     // 更新页码
@@ -423,7 +423,7 @@ const discussionData = inject<DiscussionData>('discussionData', {
 onMounted(async () => {
   await discussionStore.loadReactionTypes()
   await discussionStore.loadDiscussion(discussionId.value, {
-    page_size: pageSize.value,
+    pageSize: pageSize.value,
     sort_order: 'asc',
   })
 

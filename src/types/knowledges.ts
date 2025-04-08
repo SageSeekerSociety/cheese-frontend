@@ -51,8 +51,8 @@ export interface ListKnowledgesParams {
   materialType?: MaterialType
   labels?: string[]
   query?: string
-  page_start?: number
-  page_size?: number
+  pageStart?: number
+  pageSize?: number
   sort_by?: 'createdAt' | 'updatedAt'
   sort_order?: 'asc' | 'desc'
 }
