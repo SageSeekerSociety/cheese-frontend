@@ -1,4 +1,4 @@
-import type { TaskSubmissionSchemaEntry, TaskSubmitterType } from '@/types'
+import type { TaskSubmissionSchemaEntry, TaskSubmitterType, TaskTeamMembershipLockPolicy } from '@/types'
 
 import { ChatContext } from '@/components/chat'
 
@@ -34,6 +34,7 @@ export type PostTaskRequestData = {
   minTeamSize?: number
   maxTeamSize?: number
   participantLimit?: number
+  teamLockingPolicy?: TaskTeamMembershipLockPolicy
 }
 
 export type PatchTaskRequestData = {
@@ -48,6 +49,7 @@ export type PatchTaskRequestData = {
   rejectReason?: string
   requireRealName?: boolean
   participantLimit?: number
+  teamLockingPolicy?: TaskTeamMembershipLockPolicy
 }
 
 export type AddTaskParticipantRequestData = {

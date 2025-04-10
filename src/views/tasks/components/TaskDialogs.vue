@@ -71,6 +71,69 @@
           </v-card-text>
         </v-card>
 
+        <v-tooltip v-if="taskData?.teamLockingPolicy === 'LOCK_ON_APPROVAL'" location="top">
+          <template #activator="{ props }">
+            <v-card
+              class="mb-4 info-alert-card cursor-pointer"
+              variant="flat"
+              rounded="lg"
+              color="grey-lighten-4"
+              v-bind="props"
+            >
+              <v-card-text class="pa-3">
+                <div class="d-flex align-center">
+                  <v-avatar size="36" color="warning" class="mr-3 warning-avatar">
+                    <v-icon icon="mdi-lock-check" color="white" size="18"></v-icon>
+                  </v-avatar>
+                  <div class="flex-grow-1">
+                    <span class="text-body-2"
+                      >此赛题设置了<strong>审核通过后锁定</strong>策略，队伍一旦确认参与将无法变更成员
+                    </span>
+                  </div>
+                  <v-icon size="small" color="info">mdi-information-outline</v-icon>
+                </div>
+              </v-card-text>
+            </v-card>
+          </template>
+          <div class="pa-2">
+            <div class="text-subtitle-2 font-weight-medium mb-1">队伍成员锁定说明</div>
+            <p class="text-body-2 mb-0">
+              • 参与申请被审核通过后，队伍成员将被<strong>锁定</strong>，无法添加或移除成员<br />
+              • 成员锁定将在任务完成后解除（提交被接受或赛题截止日期结束后）<br />
+              • 系统将以审核通过时的队伍成员名单为准进行最终评估和认证
+            </p>
+          </div>
+        </v-tooltip>
+
+        <v-tooltip v-else-if="taskData?.submitterType === 'TEAM'" location="top">
+          <template #activator="{ props }">
+            <v-card
+              class="mb-4 info-alert-card cursor-pointer"
+              variant="flat"
+              rounded="lg"
+              color="grey-lighten-4"
+              v-bind="props"
+            >
+              <v-card-text class="pa-3">
+                <div class="d-flex align-center">
+                  <v-avatar size="36" color="info" class="mr-3 info-avatar">
+                    <v-icon icon="mdi-account-group" color="white" size="18"></v-icon>
+                  </v-avatar>
+                  <span class="text-body-2">系统将记录审核通过时的队伍成员名单，用于最终评估和证书发放</span>
+                  <v-icon size="small" color="info" class="ms-auto">mdi-information-outline</v-icon>
+                </div>
+              </v-card-text>
+            </v-card>
+          </template>
+          <div class="pa-2">
+            <div class="text-subtitle-2 font-weight-medium mb-1">队伍成员管理说明</div>
+            <p class="text-body-2 mb-0">
+              • 系统会记录审核通过时的队伍成员名单，用于最终评估和证书发放<br />
+              • 即使申请通过后可以调整队伍成员，但这些变动不会影响已记录的参与情况
+            </p>
+          </div>
+        </v-tooltip>
+
         <VerifyInfoFormComponent
           ref="verifyInfoFormRef"
           data-role="verify-info-form"
@@ -203,6 +266,7 @@ const props = defineProps<{
   joinedTeams: Team[]
   selectedLeaveTeamId: number | null
   selectedContext: TaskAIAdviceConversationContext | undefined
+  participationInfo: any
 }>()
 
 // 使用事件总线
@@ -390,6 +454,11 @@ const directShowPrivacy = () => {
   box-shadow: 0 2px 4px rgba(var(--v-theme-info), 0.2);
 }
 
+.warning-avatar {
+  background: linear-gradient(135deg, rgb(var(--v-theme-warning)), rgb(var(--v-theme-warning)));
+  box-shadow: 0 2px 4px rgba(var(--v-theme-warning), 0.2);
+}
+
 .privacy-link {
   cursor: pointer;
   transition: all 0.2s ease;
@@ -407,5 +476,9 @@ const directShowPrivacy = () => {
 
 .verify-info-dialog :deep(.v-card) {
   overflow: hidden;
+}
+
+.cursor-pointer {
+  cursor: pointer;
 }
 </style>

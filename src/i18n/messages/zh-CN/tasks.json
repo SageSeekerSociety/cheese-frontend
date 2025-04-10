@@ -13,7 +13,13 @@
     "allowMultipleSubmissions": "允许多次提交",
     "allowEditSubmissions": "允许编辑提交",
     "taskDescription": "赛题描述",
-    "participantLimitHint": "留空表示不限制参与人数"
+    "participantLimitHint": "留空表示不限制参与人数",
+    "teamLockingPolicy": "队伍成员锁定策略",
+    "teamLockingPolicyNoLock": "允许自由调整",
+    "teamLockingPolicyNoLockDesc": "参与申请通过后，队伍仍可自由添加或移除成员（变更不影响已记录的参与情况）",
+    "teamLockingPolicyLockOnApproval": "审核通过后锁定",
+    "teamLockingPolicyLockOnApprovalDesc": "参与申请通过后，队伍成员名单将被完全锁定，无法进行任何成员变更",
+    "teamMemberManagement": "队伍成员管理说明"
   },
   "detail": {
     "editTask": "编辑赛题",

@@ -10,12 +10,7 @@
       <v-divider></v-divider>
       <v-card-text class="pa-0">
         <div class="px-4 pt-4 pb-2">
-          <div class="text-body-1">请选择一个小队代表参与此赛题。</div>
-          <div class="text-caption text-medium-emphasis mt-1">
-            仅显示您可以参与的小队<span v-if="taskData?.requireRealName"
-              >，实名认证赛题要求所有成员都已完成实名认证</span
-            >
-          </div>
+          <div class="text-body-1">请选择一个小队代表参与此赛题</div>
         </div>
 
         <div v-if="loading" class="d-flex justify-center my-8">
@@ -37,18 +32,26 @@
         </div>
 
         <div v-else class="px-4 pt-2 pb-4">
-          <v-alert
+          <!-- 实名认证提示 -->
+          <v-card
             v-if="taskData?.requireRealName"
-            type="info"
-            variant="tonal"
-            density="comfortable"
-            color="primary"
-            class="mb-4"
-            icon="mdi-shield-account"
-            border="start"
+            class="mb-4 info-alert-card"
+            variant="flat"
+            rounded="lg"
+            color="grey-lighten-4"
           >
-            此赛题要求实名参与，只有所有成员都已完成实名认证的小队才能参与
-          </v-alert>
+            <v-card-text class="pa-3">
+              <div class="d-flex align-start">
+                <v-avatar size="36" color="primary" class="mr-3 info-avatar">
+                  <v-icon icon="mdi-shield-account" color="white" size="20"></v-icon>
+                </v-avatar>
+                <div>
+                  <div class="text-subtitle-2 font-weight-medium mb-1">实名认证要求</div>
+                  <p class="text-body-2 mb-0">此赛题要求实名参与，只有所有成员都已完成实名认证的小队才能参与</p>
+                </div>
+              </div>
+            </v-card-text>
+          </v-card>
 
           <div class="team-cards-container mt-2">
             <v-card
@@ -325,5 +328,19 @@ const getTeamDisabledText = (teamEligibility: TeamTaskEligibility): string => {
 
 .select-btn-container {
   align-self: center;
+}
+
+.info-avatar {
+  background: linear-gradient(135deg, rgb(var(--v-theme-info)), rgb(var(--v-theme-info)));
+  box-shadow: 0 2px 4px rgba(var(--v-theme-info), 0.2);
+}
+
+.info-alert-card {
+  border: 1px solid rgba(var(--v-border-color), 0.12);
+  transition: all 0.2s ease;
+}
+
+.cursor-pointer {
+  cursor: pointer;
 }
 </style>

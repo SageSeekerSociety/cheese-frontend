@@ -90,6 +90,19 @@
                 >
                   需要实名信息
                 </v-chip>
+                <v-chip
+                  v-if="task.submitterType === 'TEAM' && task.teamLockingPolicy"
+                  size="small"
+                  color="info"
+                  variant="tonal"
+                  :prepend-icon="task.teamLockingPolicy === 'NO_LOCK' ? 'mdi-lock-open-outline' : 'mdi-lock-outline'"
+                >
+                  {{
+                    task.teamLockingPolicy === 'NO_LOCK'
+                      ? t('spaces.detail.auditTasks.teamLockingPolicyNoLock')
+                      : t('spaces.detail.auditTasks.teamLockingPolicyLockOnApproval')
+                  }}
+                </v-chip>
                 <v-chip v-if="task.resubmittable" size="small" color="info" variant="tonal">{{
                   t('spaces.detail.auditTasks.resubmittable')
                 }}</v-chip>

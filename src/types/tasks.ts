@@ -2,7 +2,7 @@ import type { Material, Space, SpaceCategory, Team, TeamSummary, Topic, User } f
 
 export type TaskSubmitterType = 'USER' | 'TEAM'
 export type TaskSubmissionEntryType = 'TEXT' | 'FILE'
-
+export type TaskTeamMembershipLockPolicy = 'NO_LOCK' | 'LOCK_ON_APPROVAL'
 export type EligibilityRejectReasonCode =
   | 'ALREADY_PARTICIPATING'
   | 'PARTICIPANT_LIMIT_REACHED'
@@ -78,6 +78,7 @@ export interface Task {
   requireRealName: boolean
   minTeamSize?: number
   maxTeamSize?: number
+  teamLockingPolicy?: TaskTeamMembershipLockPolicy
   joined?: boolean
   joinedTeams?: Team[]
   topics?: Topic[]
@@ -128,6 +129,14 @@ export interface TaskParticipantRealNameInfo {
   className: string
 }
 
+export interface TaskTeamParticipantMemberSummary {
+  name: string
+  intro: string
+  avatarId: number
+  isLeader: boolean
+  realNameInfo?: TaskParticipantRealNameInfo
+}
+
 export interface TaskMembership {
   id: number
   member: TaskParticipantSummary
@@ -141,7 +150,7 @@ export interface TaskMembership {
   applyReason?: string
   personalAdvantage?: string
   remark?: string
-  teamMembers?: (TaskParticipantSummary & { isLeader: boolean })[]
+  teamMembers?: TaskTeamParticipantMemberSummary[]
 }
 
 export type TaskFormSubmitData = {

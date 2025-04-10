@@ -137,8 +137,8 @@
             </v-list-item-title>
 
             <v-list-item-subtitle>
-              <template v-if="taskData?.submitterType === 'USER' && participant.realNameInfo?.realName">
-                <div class="d-flex flex-wrap gap-2 mt-1">
+              <template v-if="taskData?.submitterType === 'USER'">
+                <div v-if="participant.realNameInfo?.realName" class="d-flex flex-wrap gap-2 mt-1">
                   <span
                     v-if="participant.realNameInfo.grade || participant.realNameInfo.className"
                     class="d-inline-flex align-center"
@@ -146,6 +146,8 @@
                     <v-icon size="16" class="me-1">mdi-school</v-icon>
                     {{ participant.realNameInfo.grade }}级 {{ participant.realNameInfo.className }}
                   </span>
+                </div>
+                <div class="d-flex flex-wrap gap-2 mt-1">
                   <span v-if="participant.phone" class="d-inline-flex align-center">
                     <v-icon size="16" class="me-1">mdi-phone</v-icon>
                     {{ participant.phone }}
@@ -159,24 +161,50 @@
                   <v-icon size="16" class="me-1">mdi-text-box</v-icon>
                   申请理由：{{ participant.applyReason }}
                 </div>
+                <div v-if="participant.personalAdvantage" class="mt-1">
+                  <v-icon size="16" class="me-1">mdi-star</v-icon>
+                  个人优势：{{ participant.personalAdvantage }}
+                </div>
               </template>
-              <template v-if="taskData?.submitterType === 'TEAM' && participant.teamMembers?.length">
-                <div class="d-flex flex-wrap gap-1 mt-1">
+              <template v-if="taskData?.submitterType === 'TEAM'">
+                <div v-if="participant.teamMembers?.length" class="d-flex flex-wrap gap-1 mt-1">
                   <span class="d-inline-flex align-center">
                     <v-icon size="16" class="me-1">mdi-account-multiple</v-icon>
                     团队成员：
                   </span>
                   <v-chip
-                    v-for="member in participant.teamMembers"
-                    :key="member.id"
+                    v-for="(member, index) in participant.teamMembers"
+                    :key="index"
                     size="x-small"
                     class="ms-1"
                     :color="member.isLeader ? 'primary' : ''"
                     :variant="member.isLeader ? 'flat' : 'outlined'"
                   >
-                    {{ member.name }}
+                    <span v-if="taskData?.requireRealName && member.realNameInfo?.realName">
+                      {{ member.realNameInfo.realName }}
+                      <span v-if="member.realNameInfo.studentId"> ({{ member.realNameInfo.studentId }}) </span>
+                    </span>
+                    <span v-else>{{ member.name }}</span>
                     <v-icon v-if="member.isLeader" size="12" class="ms-1">mdi-crown</v-icon>
                   </v-chip>
+                </div>
+                <div class="d-flex flex-wrap gap-2 mt-1">
+                  <span v-if="participant.phone" class="d-inline-flex align-center">
+                    <v-icon size="16" class="me-1">mdi-phone</v-icon>
+                    {{ participant.phone }}
+                  </span>
+                  <span v-if="participant.email" class="d-inline-flex align-center">
+                    <v-icon size="16" class="me-1">mdi-email</v-icon>
+                    {{ participant.email }}
+                  </span>
+                </div>
+                <div v-if="participant.applyReason" class="mt-1">
+                  <v-icon size="16" class="me-1">mdi-text-box</v-icon>
+                  申请理由：{{ participant.applyReason }}
+                </div>
+                <div v-if="participant.personalAdvantage" class="mt-1">
+                  <v-icon size="16" class="me-1">mdi-star</v-icon>
+                  团队优势：{{ participant.personalAdvantage }}
                 </div>
               </template>
               <template v-if="participant.deadline">
@@ -413,6 +441,12 @@ const formatDate = (date: string | Date | number) => {
 }
 
 const getParticipantDisplayName = (participant: TaskMembership) => {
+  // 对于团队类型的参与者，显示团队名称
+  if (props.taskData?.submitterType === 'TEAM') {
+    return participant.member?.name || '未知团队'
+  }
+
+  // 对于个人类型的参与者
   if (props.taskData?.requireRealName && participant.realNameInfo?.realName) {
     return `${participant.realNameInfo.realName}${participant.realNameInfo.studentId ? ` (${participant.realNameInfo.studentId})` : ''}`
   }
@@ -520,13 +554,6 @@ watch(
 
 watch([filterStatus, searchQuery], () => {
   currentPage.value = 1
-})
-
-// 生命周期
-onMounted(() => {
-  if (props.taskData) {
-    fetchParticipants()
-  }
 })
 </script>
 

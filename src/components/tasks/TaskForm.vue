@@ -67,6 +67,48 @@
           <!-- 小队人数限制 -->
           <template v-if="submitterType === 'TEAM'">
             <v-col cols="12" md="6">
+              <v-select
+                v-model="teamLockingPolicy"
+                :label="t('tasks.form.teamLockingPolicy')"
+                required
+                v-bind="teamLockingPolicyProps"
+                density="comfortable"
+                :items="[
+                  {
+                    title: t('tasks.form.teamLockingPolicyNoLock'),
+                    value: 'NO_LOCK',
+                    description: t('tasks.form.teamLockingPolicyNoLockDesc'),
+                  },
+                  {
+                    title: t('tasks.form.teamLockingPolicyLockOnApproval'),
+                    value: 'LOCK_ON_APPROVAL',
+                    description: t('tasks.form.teamLockingPolicyLockOnApprovalDesc'),
+                  },
+                ]"
+                item-title="title"
+                item-value="value"
+              >
+                <template #prepend-inner>
+                  <v-icon size="small" color="primary">mdi-lock-outline</v-icon>
+                </template>
+                <template #item="{ item, props: slotProps }">
+                  <v-list-item v-bind="slotProps">
+                    <template #prepend>
+                      <v-icon
+                        :icon="item.raw && item.raw.value === 'NO_LOCK' ? 'mdi-lock-open-outline' : 'mdi-lock-outline'"
+                        color="primary"
+                        class="mr-2"
+                      ></v-icon>
+                    </template>
+                    <v-list-item-subtitle class="text-wrap">{{
+                      item.raw ? item.raw.description : item.description
+                    }}</v-list-item-subtitle>
+                  </v-list-item>
+                </template>
+              </v-select>
+            </v-col>
+
+            <v-col cols="12" md="6">
               <v-text-field
                 v-model.number="minTeamSize"
                 label="最小队伍人数"
@@ -93,6 +135,24 @@
                   <v-icon size="small" color="primary">mdi-account-group</v-icon>
                 </template>
               </v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-alert
+                color="info"
+                variant="tonal"
+                density="comfortable"
+                border="start"
+                class="mt-2"
+                icon="mdi-information-outline"
+              >
+                <div class="text-subtitle-2 font-weight-medium mb-1">{{ t('tasks.form.teamMemberManagement') }}</div>
+                <p class="text-body-2 mb-0">
+                  • 系统会在参与申请被审核通过时<strong>记录当前的队伍成员名单</strong><br />
+                  • 无论选择哪种策略，最终的参与记录都只会基于审核通过时的成员名单<br />
+                  • <strong>允许自由调整</strong>：队伍可以继续添加/移除成员，但这些变动不会影响已记录的参与情况<br />
+                  • <strong>审核通过后锁定</strong>：队伍成员将被锁定，无法再进行任何成员变更
+                </p>
+              </v-alert>
             </v-col>
           </template>
         </v-row>
@@ -499,6 +559,7 @@ const { handleSubmit, defineField, isSubmitting } = useForm({
         maxTeamSize: z.number().int().min(1).optional(),
         requireRealName: z.boolean().optional().default(false),
         participantLimit: z.number().int().min(1).optional().nullable(),
+        teamLockingPolicy: z.enum(['NO_LOCK', 'LOCK_ON_APPROVAL']).optional(),
       })
       .refine((arg) => !arg.maxTeamSize || !arg.minTeamSize || arg.maxTeamSize >= arg.minTeamSize, {
         message: '最大人数不能小于最小人数',
@@ -515,6 +576,7 @@ const { handleSubmit, defineField, isSubmitting } = useForm({
     maxTeamSize: props.initialData?.maxTeamSize ?? 10,
     defaultDeadline: props.initialData?.defaultDeadline ?? 30,
     participantLimit: props.initialData?.participantLimit ?? null,
+    teamLockingPolicy: props.initialData?.teamLockingPolicy ?? 'NO_LOCK',
   },
 })
 
@@ -529,6 +591,7 @@ const [maxTeamSize, maxTeamSizeProps] = defineField('maxTeamSize', vuetifyConfig
 const [categoryId, categoryIdProps] = defineField('categoryId', vuetifyConfig)
 const [requireRealName, requireRealNameProps] = defineField('requireRealName', vuetifyConfig)
 const [participantLimit, participantLimitProps] = defineField('participantLimit', vuetifyConfig)
+const [teamLockingPolicy, teamLockingPolicyProps] = defineField('teamLockingPolicy', vuetifyConfig)
 
 const description = ref(props.initialData?.description || [])
 
@@ -562,6 +625,7 @@ const submitFormData = (values: any) => {
     minTeamSize: submitterType.value === 'TEAM' ? minTeamSize.value : undefined,
     maxTeamSize: submitterType.value === 'TEAM' ? maxTeamSize.value : undefined,
     participantLimit: participantLimit.value || undefined,
+    teamLockingPolicy: submitterType.value === 'TEAM' ? teamLockingPolicy.value : undefined,
   }
   emit('submit', submissionData)
 }

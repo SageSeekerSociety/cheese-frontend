@@ -44,8 +44,8 @@
           <div v-if="userReasons[0]?.code === 'USER_MISSING_REAL_NAME'" class="mt-2 text-medium-emphasis">
             <div class="d-flex align-center gap-2">
               <span>此赛题需要提供实名信息才能参与。</span>
-              <v-btn color="primary" variant="tonal" size="small" :to="{ name: 'ProfileVerification' }">
-                前往验证
+              <v-btn color="primary" variant="tonal" size="small" :to="{ name: 'UserSettingsRealName' }">
+                前往填写
                 <v-icon end>mdi-arrow-right</v-icon>
               </v-btn>
             </div>

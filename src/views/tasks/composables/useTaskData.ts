@@ -70,6 +70,7 @@ export function useTaskData() {
       minTeamSize: taskData.value.minTeamSize,
       maxTeamSize: taskData.value.maxTeamSize,
       participantLimit: taskData.value.participantLimit,
+      teamLockingPolicy: taskData.value.teamLockingPolicy,
       categoryId: taskData.value.category?.id,
     }
   })

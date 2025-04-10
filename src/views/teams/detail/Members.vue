@@ -288,6 +288,7 @@ import { getAvatarUrl } from '@/utils/materials'
 import { teamDataInjectionKey } from '@/keys'
 import { TeamsApi } from '@/network/api/teams'
 import AccountService from '@/services/account'
+import errorHandler from '@/services/ErrorHandler'
 
 const route = useRoute()
 const isInviteDialogActive = ref(false)
@@ -418,17 +419,17 @@ const confirmInvite = async () => {
   if (!teamData.value || !inviteUidInput.value) {
     return
   }
-  try {
-    await TeamsApi.createInvitation(teamData.value.id, {
-      userId: inviteUidInput.value,
+
+  const result = await errorHandler.withErrorHandling(async () => {
+    return await TeamsApi.createInvitation(teamData.value!.id, {
+      userId: inviteUidInput.value!,
       role: inviteRoleInput.value as any,
       message: inviteMessageInput.value || undefined,
     })
+  })
+
+  if (result) {
     toast.success('邀请已发送')
-  } catch (error) {
-    console.error(error)
-    toast.error(`邀请失败: ${error instanceof Error ? error.message : '未知错误'}`)
-  } finally {
     inviteUidInput.value = undefined
     inviteRoleInput.value = 'MEMBER'
     inviteMessageInput.value = ''
@@ -441,13 +442,16 @@ const promoteToAdmin = async (userId: number) => {
   if (!teamData.value) {
     return
   }
-  try {
-    await TeamsApi.updateMember(teamData.value.id, userId, { role: 'ADMIN' })
+
+  const result = await errorHandler.withErrorHandling(
+    async () => {
+      return await TeamsApi.updateMember(teamData.value!.id, userId, { role: 'ADMIN' })
+    },
+    { defaultMessage: '提升为管理员失败' }
+  )
+
+  if (result) {
     toast.success('提升为管理员成功')
-  } catch (error) {
-    console.error(error)
-    toast.error(`提升为管理员失败: ${error instanceof Error ? error.message : '未知错误'}`)
-  } finally {
     await fetchTeamMembers(Number(route.params.teamId))
   }
 }
@@ -456,13 +460,16 @@ const demoteToMember = async (userId: number) => {
   if (!teamData.value) {
     return
   }
-  try {
-    await TeamsApi.updateMember(teamData.value.id, userId, { role: 'MEMBER' })
+
+  const result = await errorHandler.withErrorHandling(
+    async () => {
+      return await TeamsApi.updateMember(teamData.value!.id, userId, { role: 'MEMBER' })
+    },
+    { defaultMessage: '降级为成员失败' }
+  )
+
+  if (result) {
     toast.success('降级为成员成功')
-  } catch (error) {
-    console.error(error)
-    toast.error(`降级为成员失败: ${error instanceof Error ? error.message : '未知错误'}`)
-  } finally {
     await fetchTeamMembers(Number(route.params.teamId))
   }
 }
@@ -471,13 +478,16 @@ const removeMember = async (userId: number) => {
   if (!teamData.value) {
     return
   }
-  try {
-    await TeamsApi.removeMember(teamData.value.id, userId)
+
+  const result = await errorHandler.withErrorHandling(
+    async () => {
+      return await TeamsApi.removeMember(teamData.value!.id, userId)
+    },
+    { defaultMessage: '移除成员失败' }
+  )
+
+  if (result) {
     toast.success('移除成员成功')
-  } catch (error) {
-    console.error(error)
-    toast.error(`移除成员失败: ${error instanceof Error ? error.message : '未知错误'}`)
-  } finally {
     await fetchTeamMembers(Number(route.params.teamId))
   }
 }
@@ -485,42 +495,51 @@ const removeMember = async (userId: number) => {
 const approveRequest = async (requestId: number) => {
   if (!teamData.value) return
 
-  try {
-    await TeamsApi.approveJoinRequest(teamData.value.id, requestId)
+  const result = await errorHandler.withErrorHandling(
+    async () => {
+      return await TeamsApi.approveJoinRequest(teamData.value!.id, requestId)
+    },
+    { defaultMessage: '批准申请失败' }
+  )
+
+  if (result) {
     toast.success('已批准申请')
     // 刷新数据
-    await Promise.all([fetchJoinRequests(teamData.value.id), fetchTeamMembers(teamData.value.id)])
-  } catch (error) {
-    console.error('批准申请失败', error)
-    toast.error('批准申请失败')
+    await Promise.all([fetchJoinRequests(teamData.value!.id), fetchTeamMembers(teamData.value!.id)])
   }
 }
 
 const rejectRequest = async (requestId: number) => {
   if (!teamData.value) return
 
-  try {
-    await TeamsApi.rejectJoinRequest(teamData.value.id, requestId)
+  const result = await errorHandler.withErrorHandling(
+    async () => {
+      return await TeamsApi.rejectJoinRequest(teamData.value!.id, requestId)
+    },
+    { defaultMessage: '拒绝申请失败' }
+  )
+
+  if (result) {
     toast.success('已拒绝申请')
     // 刷新数据
-    await fetchJoinRequests(teamData.value.id)
-  } catch (error) {
-    console.error('拒绝申请失败', error)
-    toast.error('拒绝申请失败')
+    await fetchJoinRequests(teamData.value!.id)
   }
 }
 
 const cancelInvitation = async (invitationId: number) => {
   if (!teamData.value) return
 
-  try {
-    await TeamsApi.cancelInvitation(teamData.value.id, invitationId)
+  const result = await errorHandler.withErrorHandling(
+    async () => {
+      return await TeamsApi.cancelInvitation(teamData.value!.id, invitationId)
+    },
+    { defaultMessage: '取消邀请失败' }
+  )
+
+  if (result) {
     toast.success('已取消邀请')
     // 刷新数据
-    await fetchTeamInvitations(teamData.value.id)
-  } catch (error) {
-    console.error('取消邀请失败', error)
-    toast.error('取消邀请失败')
+    await fetchTeamInvitations(teamData.value!.id)
   }
 }
 
