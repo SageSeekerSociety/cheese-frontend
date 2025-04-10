@@ -100,8 +100,8 @@
                         class="mr-2"
                       ></v-icon>
                     </template>
-                    <v-list-item-subtitle class="text-wrap">{{
-                      item.raw ? item.raw.description : item.description
+                    <v-list-item-subtitle v-if="item.raw" class="text-wrap">{{
+                      item.raw.description
                     }}</v-list-item-subtitle>
                   </v-list-item>
                 </template>

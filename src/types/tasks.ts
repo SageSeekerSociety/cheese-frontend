@@ -168,4 +168,5 @@ export type TaskFormSubmitData = {
   minTeamSize: number
   maxTeamSize: number
   participantLimit?: number
+  teamLockingPolicy?: TaskTeamMembershipLockPolicy
 }

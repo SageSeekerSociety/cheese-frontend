@@ -72,14 +72,6 @@ class ErrorHandlerService {
 // 创建单例
 const errorHandler = new ErrorHandlerService()
 
-// 预注册一些常见错误处理器
-errorHandler.register('SudoRequiredError', (error) => {
-  // 这里可以触发二次验证流程
-  toast.warning('此操作需要二次验证')
-  // TODO: 打开二次验证对话框
-  return false
-})
-
 errorHandler.register('TeamLockedError', (error) => {
   if (error instanceof Error && 'error' in error && (error as any).error?.data) {
     const data = (error as any).error.data
@@ -87,6 +79,16 @@ errorHandler.register('TeamLockedError', (error) => {
   } else {
     toast.warning('团队已锁定，无法修改成员')
   }
+  return false
+})
+
+errorHandler.register('AccessDeniedError', (error) => {
+  toast.error('您没有权限执行此操作')
+  return false
+})
+
+errorHandler.register('PermissionDeniedError', (error) => {
+  toast.error('您没有权限执行此操作')
   return false
 })
 
