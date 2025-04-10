@@ -13,22 +13,25 @@
       :initial-data="initialTaskData"
       :submit-button-text="t('tasks.publish.submit')"
       :classification-topics="classificationTopics"
+      :categories="activeCategories"
+      :selected-category-id="preselectedCategoryId"
       @submit="submitTask"
     />
   </v-sheet>
 </template>
 
 <script setup lang="ts">
-import type { TaskFormSubmitData, TaskSubmissionSchemaEntry } from '@/types'
+import type { TaskSubmissionSchemaEntry } from '@/types'
+import type { TaskFormSubmitData } from '@/types'
 
-import { defineAsyncComponent, onMounted, ref } from 'vue'
+import { computed, defineAsyncComponent, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vuetify-sonner'
 import { storeToRefs } from 'pinia'
 
 import { TasksApi } from '@/network/api/tasks'
-import { useSpaceStore } from '@/store/space'
+import { useSpaceStore } from '@/stores/space'
 
 const TaskForm = defineAsyncComponent(() => import('@/components/tasks/TaskForm.vue'))
 
@@ -37,7 +40,22 @@ const route = useRoute()
 const { t } = useI18n()
 
 const spaceStore = useSpaceStore()
-const { currentSpaceId, templates, classificationTopics } = storeToRefs(spaceStore)
+const { currentSpaceId, templates, classificationTopics, categories } = storeToRefs(spaceStore)
+
+// 获取活跃的分类列表
+const activeCategories = computed(() => {
+  return categories.value.filter((category) => !category.archivedAt).sort((a, b) => a.displayOrder - b.displayOrder)
+})
+
+// 从URL参数中获取预选的分类ID
+const preselectedCategoryId = computed(() => {
+  const categoryParam = route.query.categoryId
+  if (!categoryParam) return undefined
+
+  const categoryId = Number(categoryParam)
+  // 确保分类在活跃分类列表中
+  return activeCategories.value.some((cat) => cat.id === categoryId) ? categoryId : undefined
+})
 
 const loadedTemplate = ref(false)
 
@@ -73,7 +91,13 @@ const submitTask = async (taskData: TaskFormSubmitData) => {
       data: {
         task: { approved },
       },
-    } = await TasksApi.create({ ...taskData, submissionSchema: taskSubmissionSchema.value, space: spaceId })
+    } = await TasksApi.create({
+      ...taskData,
+      submissionSchema: taskSubmissionSchema.value,
+      space: spaceId,
+      requireRealName: taskData.requireRealName || false,
+      categoryId: taskData.categoryId,
+    })
     if (!approved) {
       toast.success(t('spaces.detail.publishTask.createSuccessAndWaitingAudit'))
     } else {
@@ -87,6 +111,8 @@ const submitTask = async (taskData: TaskFormSubmitData) => {
 }
 
 onMounted(async () => {
+  await spaceStore.fetchCategories() // 加载分类列表
+
   const templateId = route.query.templateId
   if (templateId && templateId !== 'blank') {
     await loadTemplate(Number(templateId))
@@ -100,6 +126,12 @@ const loadTemplate = async (templateId: number) => {
     initialTaskData.value = {
       name: template.title,
       description: JSON.parse(template.content),
+      submitterType: template.submitterType !== null ? template.submitterType : undefined,
+      rank: template.rank !== null ? template.rank : undefined,
+      minTeamSize: template.minTeamSize,
+      maxTeamSize: template.maxTeamSize,
+      defaultDeadline: template.defaultDeadline !== null ? template.defaultDeadline : undefined,
+      requireRealName: template.requireRealName !== null ? template.requireRealName : undefined,
     }
   }
 }

@@ -2,8 +2,8 @@ import type { Page, Space } from '@/types'
 
 export type PostSpaceRequestData = {
   name: string
-  intro: string
-  avatarId: number
+  intro?: string
+  avatarId?: number
   announcements?: string
   taskTemplates?: string
 }
@@ -15,6 +15,7 @@ export type PatchSpaceRequestData = {
   announcements?: string
   taskTemplates?: string
   classificationTopics?: number[]
+  defaultCategoryId?: number
 }
 
 export type PostSpaceAdminRequestData = {
@@ -30,3 +31,11 @@ export type GetSpacesResponseData = {
   spaces: Space[]
   page: Page
 }
+
+export type PostSpaceCategoryRequestData = {
+  name: string
+  description?: string | null
+  displayOrder?: number
+}
+
+export type PatchSpaceCategoryRequestData = Partial<PostSpaceCategoryRequestData>

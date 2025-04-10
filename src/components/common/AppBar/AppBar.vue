@@ -29,7 +29,30 @@
         <v-btn icon class="me-1 d-md-none" disabled @click="openFloatingSearch">
           <v-icon>mdi-magnify</v-icon>
         </v-btn>
-        <v-btn icon class="me-4" disabled>
+        <v-menu
+          v-if="loggedIn"
+          v-model="notificationMenuOpen"
+          :close-on-content-click="false"
+          location="bottom"
+          :offset="16"
+          transition="scale-transition"
+        >
+          <template #activator="{ props }">
+            <v-btn icon class="me-4 position-relative" v-bind="props">
+              <v-icon>mdi-bell</v-icon>
+              <v-badge
+                v-if="unreadNotificationsCount > 0"
+                color="error"
+                :content="unreadNotificationsCount > 99 ? '99+' : unreadNotificationsCount.toString()"
+                floating
+                dot
+                :model-value="unreadNotificationsCount > 0"
+              ></v-badge>
+            </v-btn>
+          </template>
+          <notification-panel @update-count="updateUnreadCount" />
+        </v-menu>
+        <v-btn v-else icon class="me-4" disabled>
           <v-icon>mdi-bell</v-icon>
         </v-btn>
         <v-menu
@@ -39,62 +62,94 @@
           open-on-click
           location="bottom center"
           :offset="16"
-          :close-on-content-click="false"
+          transition="scale-transition"
         >
           <template #activator="{ props }">
-            <user-avatar :avatar="avatar" :size="32" v-bind="props"></user-avatar>
+            <v-avatar class="cursor-pointer elevation-1" size="32" v-bind="props">
+              <v-img v-if="avatar" :src="avatar" />
+              <v-icon v-else icon="mdi-account" />
+            </v-avatar>
           </template>
 
-          <v-list max-width="300px" rounded="lg">
-            <v-list-item :title="nickname" :subtitle="intro">
-              <template #prepend>
-                <user-avatar :avatar="avatar" :size="48"></user-avatar>
-              </template>
-            </v-list-item>
-            <v-list-item>
-              <div class="d-flex ga-2">
-                <v-chip prepend-icon="mdi-account" color="text">UID: {{ currentUser?.id }}</v-chip>
+          <v-card class="user-menu-card rounded-lg elevation-1 border pa-0" min-width="300">
+            <v-card-item class="user-header pa-4 pb-3">
+              <v-avatar size="56" class="mb-2" elevation="1">
+                <v-img v-if="avatar" :src="avatar" />
+                <v-icon v-else icon="mdi-account" size="large" />
+              </v-avatar>
+              <div class="mt-2">
+                <v-card-title class="px-0 py-0 text-h6 font-weight-bold">{{ nickname }}</v-card-title>
+                <v-card-subtitle class="px-0 pt-1 pb-0 text-body-2 text-medium-emphasis text-truncate" max-width="220">
+                  {{ intro || '还没有个人简介' }}
+                </v-card-subtitle>
               </div>
-            </v-list-item>
-            <v-list-item>
-              <v-card variant="tonal" color="primary" class="rounded-lg">
-                <v-card-item prepend-icon="mdi-creation">
-                  <v-card-title>知启星 AI</v-card-title>
-                </v-card-item>
-                <v-card-text>
-                  <div class="d-flex justify-space-between align-center text-body-2 mb-1">
+              <div class="d-flex mt-2">
+                <v-chip
+                  prepend-icon="mdi-account"
+                  color="primary"
+                  variant="outlined"
+                  density="comfortable"
+                  size="small"
+                >
+                  UID: {{ currentUser?.id }}
+                </v-chip>
+              </div>
+            </v-card-item>
+
+            <v-divider></v-divider>
+
+            <v-card-text class="px-4 py-4">
+              <v-card variant="tonal" color="primary" class="ai-quota-card rounded-lg mb-3" elevation="0">
+                <v-card-text class="pa-3">
+                  <div class="d-flex align-center mb-2">
+                    <v-avatar color="white" size="28" class="me-2">
+                      <v-icon icon="mdi-creation" color="primary" size="small"></v-icon>
+                    </v-avatar>
+                    <span class="text-subtitle-2 font-weight-medium">知启星 AI</span>
+                  </div>
+
+                  <div class="d-flex justify-space-between align-center text-body-2 mb-2">
                     <span>今日剩余额度</span>
-                    <span class="text-primary font-weight-medium">
+                    <span class="font-weight-medium">
                       {{ aiQuota?.remaining ?? '-' }}/{{ aiQuota?.total ?? '-' }}
                     </span>
                   </div>
+
                   <v-progress-linear
                     :model-value="aiQuota ? (aiQuota.remaining / aiQuota.total) * 100 : 0"
                     color="primary"
-                    height="8"
+                    bg-color="primary-lighten-5"
+                    height="4"
                     rounded
                   ></v-progress-linear>
-                  <div class="text-caption text-medium-emphasis mt-1">
-                    将在 {{ aiQuota ? dayjs(aiQuota.reset_time).fromNow() : '-' }}重置
+
+                  <div class="text-caption mt-1">
+                    将在 {{ aiQuota ? dayjs(aiQuota.reset_time).fromNow() : '-' }} 重置
                   </div>
                 </v-card-text>
               </v-card>
-            </v-list-item>
-            <v-divider class="mt-2"></v-divider>
-            <v-list-item :to="{ name: 'UserDefault', params: { id: currentUser?.id } }">
-              <template #prepend>
-                <v-icon icon="mdi-account"></v-icon>
-              </template>
-              <v-list-item-title>个人中心</v-list-item-title>
-            </v-list-item>
-            <v-divider></v-divider>
-            <v-list-item @click="onLogout">
-              <template #prepend>
-                <v-icon icon="mdi-exit-to-app"></v-icon>
-              </template>
-              <v-list-item-title>退出登录</v-list-item-title>
-            </v-list-item>
-          </v-list>
+
+              <v-list class="user-menu-list pa-0" rounded="lg" elevation="0">
+                <v-list-item
+                  :to="{ name: 'UserDefault', params: { id: currentUser?.id } }"
+                  rounded="lg"
+                  class="mb-1"
+                  color="primary"
+                >
+                  <template #prepend>
+                    <v-icon icon="mdi-account" class="me-2"></v-icon>
+                  </template>
+                  <v-list-item-title>个人中心</v-list-item-title>
+                </v-list-item>
+                <v-list-item rounded="lg" color="error" @click="onLogout">
+                  <template #prepend>
+                    <v-icon icon="mdi-exit-to-app" class="me-2"></v-icon>
+                  </template>
+                  <v-list-item-title>退出登录</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-card-text>
+          </v-card>
         </v-menu>
         <v-btn v-else to="/account/signin" variant="tonal" color="primary" prepend-icon="mdi-account">登录</v-btn>
       </v-container>
@@ -139,10 +194,12 @@ import dayjs from 'dayjs'
 
 import { getAvatarUrl } from '@/utils/materials'
 
+import NotificationPanel from '../Notification/NotificationPanel.vue'
 import UserAvatar from '../UserAvatar.vue'
 
 import logo from '@/assets/logo.svg?url'
 import { AIApi } from '@/network/api/ai'
+import { NotificationsApi } from '@/network/api/notifications'
 import { UserApi } from '@/network/api/users'
 import AccountService from '@/services/account'
 
@@ -155,6 +212,15 @@ const { links } = toRefs(appBarProps)
 const router = useRouter()
 
 const menuOpen = ref(false)
+const notificationMenuOpen = ref(false)
+const unreadNotificationsCount = ref(0)
+
+watch(
+  () => router.currentRoute.value.fullPath,
+  () => {
+    notificationMenuOpen.value = false
+  }
+)
 
 watch(menuOpen, (newValue) => {
   if (newValue) {
@@ -194,17 +260,37 @@ const fetchAIQuota = async () => {
   }
 }
 
+// 获取未读通知数量
+const fetchUnreadNotificationsCount = async () => {
+  if (!loggedIn.value) return
+
+  try {
+    const response = await NotificationsApi.getUnreadCount()
+    unreadNotificationsCount.value = response.data.count
+  } catch (error) {
+    console.error('获取未读通知数量失败:', error)
+  }
+}
+
+// 更新未读通知数量
+const updateUnreadCount = (count: number) => {
+  unreadNotificationsCount.value = count
+}
+
 watch(loggedIn, (newValue) => {
   if (newValue) {
     fetchAIQuota()
+    fetchUnreadNotificationsCount()
   } else {
     aiQuota.value = null
+    unreadNotificationsCount.value = 0
   }
 })
 
 onMounted(() => {
   if (loggedIn.value) {
     fetchAIQuota()
+    fetchUnreadNotificationsCount()
   }
 })
 
@@ -222,5 +308,32 @@ const onLogout = async () => {
 
 .floating-search-container {
   float: left;
+}
+
+.user-menu-card {
+  overflow: hidden;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+}
+
+.user-menu-list .v-list-item {
+  transition: all 0.2s ease;
+  min-height: 44px;
+}
+
+.user-menu-list .v-list-item:hover {
+  background-color: rgba(var(--v-theme-primary), 0.04);
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.primary-gradient {
+  background: linear-gradient(135deg, var(--v-theme-primary), var(--v-theme-primary-darken-1));
+}
+
+.ai-quota-card {
+  transition: all 0.2s ease;
+  overflow: hidden;
 }
 </style>

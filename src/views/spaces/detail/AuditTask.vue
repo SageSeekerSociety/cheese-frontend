@@ -19,31 +19,59 @@
           border
           :ripple="false"
           rounded="lg"
-          class="pa-4 tasks-list-item"
+          class="task-card tasks-list-item"
           @click="toggleExpand(task.id)"
         >
-          <div class="d-flex flex-row">
-            <div class="d-flex flex-column flex-grow-1">
-              <div class="text-subtitle-2 text-medium-emphasis">
-                {{
-                  t('spaces.detail.auditTasks.publishedAt', {
-                    publisher: task.creator.nickname,
-                    time: dayjs(task.createdAt).format('YYYY-MM-DD HH:mm'),
-                  })
-                }}
-              </div>
-              <div class="text-h6">{{ task.name }}</div>
-              <div class="text-subtitle-1 text-medium-emphasis task-description">{{ task.intro }}</div>
+          <div class="d-flex flex-column pa-4">
+            <div class="d-flex justify-space-between">
+              <div class="text-h6 font-weight-medium task-title">{{ task.name }}</div>
+              <v-chip color="warning" size="small" class="task-status-chip ms-2 pulse-animation-warning">
+                {{ t('spaces.detail.auditTasks.pendingReview') }}
+              </v-chip>
             </div>
-            <div class="d-flex flex-column align-end flex-shrink-0">
-              <div class="text-subtitle-2 text-medium-emphasis">
-                <v-icon left>mdi-alarm</v-icon>
-                {{ t('spaces.detail.auditTasks.deadline') }}: {{ dayjs(task.deadline).format('YYYY-MM-DD HH:mm') }}
+
+            <div class="text-body-2 text-medium-emphasis mt-2 task-description">{{ task.intro }}</div>
+
+            <div class="d-flex flex-wrap align-center justify-space-between mt-3">
+              <div class="d-flex align-center text-caption text-medium-emphasis creator-info">
+                <v-avatar size="20" class="me-2" :image="getAvatarUrl(task.creator.avatarId)"></v-avatar>
+                <span>{{ task.creator.nickname }} {{ t('spaces.detail.auditTasks.published') }}</span>
+                <v-icon size="12" class="mx-1">mdi-circle-small</v-icon>
+                <span>{{ dayjs(task.createdAt).format('MM-DD HH:mm') }}</span>
+                <v-icon v-if="task.category" size="12" class="ms-2 me-1" color="primary">mdi-folder</v-icon>
+                <span v-if="task.category" class="text-primary">{{ task.category.name }}</span>
+              </div>
+
+              <div class="d-flex align-center gap-3 mt-2 mt-sm-0">
+                <div v-if="task.topics && task.topics.length > 0" class="d-flex flex-wrap gap-1">
+                  <v-chip
+                    v-for="topic in task.topics"
+                    :key="topic.id"
+                    size="x-small"
+                    variant="tonal"
+                    class="task-topic-chip"
+                  >
+                    {{ topic.name }}
+                  </v-chip>
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex align-center justify-end gap-3 mt-3">
+              <div class="d-flex align-center text-caption">
+                <v-icon size="small" color="primary" class="me-1">mdi-account-multiple</v-icon>
+                <span>{{ task.submitters?.total || 0 }}</span>
+              </div>
+              <div class="d-flex align-center text-caption">
+                <v-icon size="small" color="primary" class="me-1">mdi-alarm</v-icon>
+                <span>{{ dayjs(task.deadline).format('MM-DD HH:mm') }}</span>
               </div>
             </div>
           </div>
+
           <v-expand-transition>
-            <div v-show="expandedTaskId === task.id" class="mt-4">
+            <div v-show="expandedTaskId === task.id" class="detail-section px-4 pb-4">
+              <v-divider class="mb-4"></v-divider>
               <div class="text-h6 mb-2">{{ t('spaces.detail.auditTasks.detailedInfo') }}</div>
               <div class="d-flex flex-row align-center mb-2" style="gap: 16px">
                 <v-chip size="small" color="primary" variant="tonal">
@@ -51,6 +79,28 @@
                     task.submitterType === 'TEAM'
                       ? t('spaces.detail.auditTasks.teamContest')
                       : t('spaces.detail.auditTasks.individualContest')
+                  }}
+                </v-chip>
+                <v-chip
+                  v-if="task.requireRealName"
+                  size="small"
+                  color="info"
+                  variant="tonal"
+                  prepend-icon="mdi-shield-account"
+                >
+                  需要实名信息
+                </v-chip>
+                <v-chip
+                  v-if="task.submitterType === 'TEAM' && task.teamLockingPolicy"
+                  size="small"
+                  color="info"
+                  variant="tonal"
+                  :prepend-icon="task.teamLockingPolicy === 'NO_LOCK' ? 'mdi-lock-open-outline' : 'mdi-lock-outline'"
+                >
+                  {{
+                    task.teamLockingPolicy === 'NO_LOCK'
+                      ? t('spaces.detail.auditTasks.teamLockingPolicyNoLock')
+                      : t('spaces.detail.auditTasks.teamLockingPolicyLockOnApproval')
                   }}
                 </v-chip>
                 <v-chip v-if="task.resubmittable" size="small" color="info" variant="tonal">{{
@@ -100,18 +150,19 @@
 <script setup lang="ts">
 import type { Task } from '@/types'
 
-import { defineAsyncComponent, onMounted, ref } from 'vue'
+import { computed, defineAsyncComponent, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vuetify-sonner'
 import dayjs from 'dayjs'
 import { storeToRefs } from 'pinia'
 
+import { getAvatarUrl } from '@/utils/materials'
 import { createEmptyResult, usePaging } from '@/utils/paging'
 
 import InfiniteScroll from '@/components/common/InfiniteScroll.vue'
 import { TasksApi } from '@/network/api/tasks'
 import { CancelError, useDialog } from '@/plugins/dialog'
-import { useSpaceStore } from '@/store/space'
+import { useSpaceStore } from '@/stores/space'
 
 const TipTapViewer = defineAsyncComponent(() => import('@/components/common/Editor/TipTapViewer.vue'))
 
@@ -137,10 +188,12 @@ const {
   }
   const { data } = await TasksApi.list({
     space: currentSpaceId.value,
-    page_start: pageStart,
+    pageStart: pageStart,
     sort_by: 'createdAt',
     sort_order: 'desc',
     approved: 'NONE',
+    queryTopics: true,
+    querySpace: true,
   })
   return { data: data.tasks, page: data.page }
 })
@@ -200,14 +253,6 @@ onMounted(async () => {
 </script>
 
 <style scoped lang="scss">
-.tasks-header {
-  gap: 8px;
-}
-
-.tasks-header-selects {
-  gap: 8px;
-}
-
 .tasks-list {
   padding: 16px;
   gap: 16px;
@@ -217,8 +262,31 @@ onMounted(async () => {
   }
 }
 
-.tasks-list-item {
-  gap: 16px;
+.task-card {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s ease;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.09);
+  cursor: pointer;
+
+  &:hover {
+    border-color: rgba(var(--v-theme-primary), 0.15);
+    background-color: rgba(var(--v-theme-primary), 0.02);
+
+    .task-title {
+      color: rgb(var(--v-theme-primary));
+    }
+  }
+}
+
+.task-title {
+  transition: color 0.2s ease;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .task-description {
@@ -226,6 +294,51 @@ onMounted(async () => {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis; /* 显示省略号 */
+  text-overflow: ellipsis;
+  line-height: 1.5;
+  color: rgba(var(--v-theme-on-surface), 0.7);
+}
+
+.creator-info {
+  flex-wrap: nowrap;
+  overflow: hidden;
+  max-width: 100%;
+  white-space: nowrap;
+}
+
+.task-status-chip {
+  font-weight: 500;
+  letter-spacing: 0;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+.task-topic-chip,
+.task-category-chip {
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.detail-section {
+  border-top: 1px solid rgba(var(--v-theme-primary), 0.05);
+}
+
+.pulse-animation-warning {
+  animation: pulse-warning 2s infinite;
+}
+
+@keyframes pulse-warning {
+  0% {
+    box-shadow: 0 0 0 0 rgba(var(--v-theme-warning), 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 5px rgba(var(--v-theme-warning), 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(var(--v-theme-warning), 0);
+  }
 }
 </style>

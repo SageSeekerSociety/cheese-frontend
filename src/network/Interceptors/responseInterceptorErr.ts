@@ -1,40 +1,64 @@
 import type { AxiosError } from 'axios'
 import type { ResponseDataType } from '../types/index'
 
-import { ServerError, SudoRequiredError } from '../types/error'
+import { BusinessError, ServerError, SudoRequiredError } from '../types/error'
 
-import forbidden from './hooks/forbidden'
 import refreshToken from './hooks/refreshToken'
-
-const handleError = (error: AxiosError<ResponseDataType>) => {
-  const response = error.response?.data
-  if (response && response.message) {
-    return Promise.reject(new ServerError(response.message))
-  }
-  return Promise.reject(error)
-}
 
 export default (error: AxiosError<ResponseDataType>) => {
   const statusCode = error.response?.status
   const path = error.response?.config.url
-  const data = error.response?.data
 
-  // 处理403 Sudo Required的情况
-  if (statusCode === 403 && data?.message?.includes('SudoRequiredError')) {
-    return Promise.reject(new SudoRequiredError(data.message))
+  // 处理特殊错误
+  if (statusCode === 401) {
+    if (path?.startsWith('/users/auth')) {
+      throw createError(error)
+    }
+    // Token 过期，尝试刷新
+    return refreshToken(error)
   }
 
-  switch (statusCode) {
-    case 401:
-      if (path?.startsWith('/users/auth')) {
-        return handleError(error)
-      }
-      // 一些操作，例如：刷新令牌，如令牌刷新失败时退出到登录页面
-      console.log('401 token expired')
-      return refreshToken(error)
-    case 403:
-      return forbidden(error)
-    default:
-      return handleError(error)
+  // 403 错误可能是 SudoRequired 或其他业务错误
+  if (statusCode === 403) {
+    throw createBusinessError(error)
   }
+
+  // 抛出适当类型的错误
+  throw createError(error)
+}
+
+// 创建业务错误对象（特殊处理 SudoRequired）
+function createBusinessError(error: AxiosError<ResponseDataType>): Error {
+  const response = error.response?.data
+
+  // 特殊处理 SudoRequired 错误
+  if (response?.error?.name === 'SudoRequiredError' || response?.message?.includes('SudoRequiredError')) {
+    return new SudoRequiredError(response.message)
+  }
+
+  // 处理带有详细错误信息的响应
+  if (response?.error?.name) {
+    return new BusinessError(response.message, 403, response.error)
+  }
+
+  // 返回通用业务错误
+  return new BusinessError(response?.message || '无权限执行此操作', 403)
+}
+
+// 创建一般错误对象
+function createError(error: AxiosError<ResponseDataType>): Error {
+  const response = error.response?.data
+  const statusCode = error.response?.status || 500
+
+  if (!response) {
+    return new Error(error.message || '网络请求失败')
+  }
+
+  // 处理带有详细错误信息的响应
+  if (response.error?.name) {
+    return new BusinessError(response.message, statusCode, response.error)
+  }
+
+  // 其他服务器错误
+  return new ServerError(response.message || '服务器错误', statusCode)
 }

@@ -11,12 +11,10 @@ export const createEmptyResult = <T>(): FetchResult<T> => {
   return {
     data: [],
     page: {
-      page_start: 0,
-      page_size: 0,
-      prev_start: 0,
-      next_start: 0,
-      has_prev: false,
-      has_more: false,
+      pageStart: 0,
+      pageSize: 0,
+      nextStart: 0,
+      hasMore: false,
     },
   }
 }
@@ -53,8 +51,8 @@ export function usePaging<T, P extends Record<string, any>>(
       const { data: newData, page } = await fetcher(nextPageStart.value || 1, customParams.value)
       data.value = [...data.value, ...newData]
       pageCount.value++
-      nextPageStart.value = page.next_start
-      hasMore.value = page.has_more
+      nextPageStart.value = page.nextStart
+      hasMore.value = page.hasMore
     } catch (e) {
       if (e instanceof Error) {
         error.value = e
@@ -75,8 +73,8 @@ export function usePaging<T, P extends Record<string, any>>(
       const { data: newData, page } = await fetcher(firstPageStart.value, customParams.value)
       data.value = newData
       pageCount.value = 1
-      nextPageStart.value = page.next_start
-      hasMore.value = page.has_more
+      nextPageStart.value = page.nextStart
+      hasMore.value = page.hasMore
     } catch (e) {
       if (e instanceof Error) {
         error.value = e

@@ -1,6 +1,22 @@
-import type { TaskSubmissionSchemaEntry } from '@/types'
+import type { TaskSubmissionSchemaEntry, TaskSubmitterType, TaskTeamMembershipLockPolicy } from '@/types'
 
 import { ChatContext } from '@/components/chat'
+
+// 添加参与者身份类型
+export interface TaskParticipationIdentity {
+  id: number
+  type: TaskSubmitterType
+  memberId: number
+  teamName?: string
+  canSubmit: boolean
+  approved: 'NONE' | 'APPROVED' | 'DISAPPROVED'
+}
+
+// 添加参与信息类型
+export interface TaskParticipationInfo {
+  hasParticipation: boolean
+  identities: TaskParticipationIdentity[]
+}
 
 export type PostTaskRequestData = {
   name: string
@@ -13,6 +29,12 @@ export type PostTaskRequestData = {
   submissionSchema: TaskSubmissionSchemaEntry[]
   team?: number
   space?: number
+  categoryId?: number
+  requireRealName?: boolean
+  minTeamSize?: number
+  maxTeamSize?: number
+  participantLimit?: number
+  teamLockingPolicy?: TaskTeamMembershipLockPolicy
 }
 
 export type PatchTaskRequestData = {
@@ -25,16 +47,34 @@ export type PatchTaskRequestData = {
   submissionSchema?: TaskSubmissionSchemaEntry[]
   approved?: 'APPROVED' | 'DISAPPROVED' | 'NONE'
   rejectReason?: string
+  requireRealName?: boolean
+  participantLimit?: number
+  teamLockingPolicy?: TaskTeamMembershipLockPolicy
+}
+
+export type AddTaskParticipantRequestData = {
+  deadline: number | null
+  email?: string
+  phone?: string
+  applyReason?: string
+  personalAdvantage?: string
+  remark?: string
 }
 
 export type PatchTaskParticipantRequestData = {
   deadline?: number
   approved?: 'APPROVED' | 'DISAPPROVED' | 'NONE'
+  rejectReason?: string
+  email?: string
+  phone?: string
+  applyReason?: string
+  personalAdvantage?: string
+  remark?: string
 }
 
 export type PostTaskSubmissionRequestData = {
-  contentText?: string
-  contentAttachmentId?: number
+  text?: string
+  attachmentId?: number
 }
 
 export type PostTaskSubmissionReviewRequestData = {

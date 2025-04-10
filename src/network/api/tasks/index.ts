@@ -1,8 +1,9 @@
 // src/api/tasks.ts
 
-import type { Page, TaskMembership, TaskParticipantRealNameInfo, TaskParticipantSummary, TaskSubmission } from '@/types'
+import type { Page, TaskMembership, TaskSubmission, TeamSummary } from '@/types'
 import type { Task } from '@/types'
 import type {
+  AddTaskParticipantRequestData,
   ChatReference,
   ConversationGroupSummary,
   CreateTaskAIAdviceConversationRequest,
@@ -15,6 +16,7 @@ import type {
   TaskAIAdvice,
   TaskAIAdviceConversation,
   TaskAIAdviceConversationContext,
+  TaskParticipationInfo,
 } from './types'
 
 import { EventSource } from 'eventsource'
@@ -68,7 +70,7 @@ export namespace TasksApi {
       queryJoinedNotApprovedOrDisapproved: true,
     }
   ) =>
-    NewApiInstance.request<{ task: Task }>({
+    NewApiInstance.request<{ task: Task; participation?: TaskParticipationInfo }>({
       url: `/tasks/${taskId}`,
       method: 'GET',
       params,
@@ -78,8 +80,8 @@ export namespace TasksApi {
     space?: number
     team?: number
     owner?: number
-    page_size?: number
-    page_start?: number
+    pageSize?: number
+    pageStart?: number
     sort_by: 'createdAt' | 'updatedAt' | 'deadline'
     sort_order: 'asc' | 'desc'
     querySpace?: boolean
@@ -91,6 +93,7 @@ export namespace TasksApi {
     approved?: 'APPROVED' | 'DISAPPROVED' | 'NONE'
     joined?: boolean
     topics?: number[]
+    categoryId?: number
   }) => {
     const finalParams = new URLSearchParams()
     Object.entries(params).forEach(([key, value]) => {
@@ -112,7 +115,7 @@ export namespace TasksApi {
   export const addParticipant = (
     taskId: number,
     member: number,
-    data: { deadline: number | null; realNameInfo?: TaskParticipantRealNameInfo } = { deadline: null }
+    data: AddTaskParticipantRequestData = { deadline: null }
   ) =>
     NewApiInstance.request<{ task: Task }>({
       url: `/tasks/${taskId}/participants`,
@@ -121,16 +124,35 @@ export namespace TasksApi {
       data,
     })
 
-  export const removeParticipant = (taskId: number, member: number) =>
+  // 获取可参与任务的队伍列表
+  export const getTaskTeams = (
+    taskId: number,
+    params: {
+      filter?: 'all' | 'eligible'
+    } = { filter: 'all' }
+  ) =>
+    NewApiInstance.request<{ teams: TeamSummary[] }>({
+      url: `/tasks/${taskId}/teams`,
+      method: 'GET',
+      params,
+    })
+
+  export const removeParticipant = (taskId: number, participantId: number) =>
+    NewApiInstance.request<{ task: Task }>({
+      url: `/tasks/${taskId}/participants/${participantId}`,
+      method: 'DELETE',
+    })
+
+  export const removeParticipantByMemberId = (taskId: number, memberId: number) =>
     NewApiInstance.request<{ task: Task }>({
       url: `/tasks/${taskId}/participants`,
       method: 'DELETE',
-      params: { member },
+      params: { member: memberId },
     })
 
   export const getParticipants = (
     taskId: number,
-    params: { queryRealNameInfo?: boolean } = { queryRealNameInfo: true }
+    params: { queryRealNameInfo?: boolean; queryTeamInfo?: boolean } = { queryRealNameInfo: true }
   ) =>
     NewApiInstance.request<{ participants: TaskMembership[] }>({
       url: `/tasks/${taskId}/participants`,
@@ -138,71 +160,89 @@ export namespace TasksApi {
       params,
     })
 
-  export const updateParticipant = (taskId: number, member: number, data: PatchTaskParticipantRequestData) =>
+  export const updateParticipant = (taskId: number, participantId: number, data: PatchTaskParticipantRequestData) =>
     NewApiInstance.request<{ task: Task }>({
-      url: `/tasks/${taskId}/participants`,
+      url: `/tasks/${taskId}/participants/${participantId}`,
       method: 'PATCH',
-      params: { member },
       data,
     })
 
-  export const createSubmission = (taskId: number, member: number, data: PostTaskSubmissionRequestData[]) =>
+  export const updateParticipantByMemberId = (
+    taskId: number,
+    memberId: number,
+    data: PatchTaskParticipantRequestData
+  ) =>
+    NewApiInstance.request<{ task: Task }>({
+      url: `/tasks/${taskId}/participants`,
+      method: 'PATCH',
+      params: { member: memberId },
+      data,
+    })
+
+  export const createSubmission = (taskId: number, participantId: number, data: PostTaskSubmissionRequestData[]) =>
     NewApiInstance.request<{ submission: TaskSubmission }>({
-      url: `/tasks/${taskId}/submissions`,
+      url: `/tasks/${taskId}/participants/${participantId}/submissions`,
       method: 'POST',
-      params: { member },
       data,
     })
 
   export const updateSubmission = (
     taskId: number,
-    member: number,
+    participantId: number,
     version: number,
     data: PostTaskSubmissionRequestData[]
   ) =>
     NewApiInstance.request<{ submission: TaskSubmission }>({
-      url: `/tasks/${taskId}/submissions/${version}`,
+      url: `/tasks/${taskId}/participants/${participantId}/submissions/${version}`,
       method: 'PATCH',
-      params: { member },
       data,
     })
 
   export const listSubmissions = (
     taskId: number,
+    participantId: number,
     params: {
-      member?: number
       allVersions?: boolean
-      page_size?: number
-      page_start?: number
+      pageSize?: number
+      pageStart?: number
       sort_by: 'createdAt' | 'updatedAt'
       sort_order: 'asc' | 'desc'
       queryReview?: boolean
     }
   ) =>
     NewApiInstance.request<{ submissions: TaskSubmission[]; page: Page }>({
-      url: `/tasks/${taskId}/submissions`,
+      url: `/tasks/${taskId}/participants/${participantId}/submissions`,
       method: 'GET',
       params,
     })
 
-  export const postSubmissionReview = (submissionId: number, data: PostTaskSubmissionReviewRequestData) =>
+  export const postSubmissionReview = (
+    taskId: number,
+    participantId: number,
+    submissionId: number,
+    data: PostTaskSubmissionReviewRequestData
+  ) =>
     NewApiInstance.request<{ submission: TaskSubmission }>({
-      // the fucking backend designed the endpoint like this
-      url: `/tasks/submissions/${submissionId}/review`,
+      url: `/tasks/${taskId}/participants/${participantId}/submissions/${submissionId}/review`,
       method: 'POST',
       data,
     })
 
-  export const patchSubmissionReview = (submissionId: number, data: PatchTaskSubmissionReviewRequestData) =>
+  export const patchSubmissionReview = (
+    taskId: number,
+    participantId: number,
+    submissionId: number,
+    data: PatchTaskSubmissionReviewRequestData
+  ) =>
     NewApiInstance.request<{ submission: TaskSubmission }>({
-      url: `/tasks/submissions/${submissionId}/review`,
+      url: `/tasks/${taskId}/participants/${participantId}/submissions/${submissionId}/review`,
       method: 'PATCH',
       data,
     })
 
-  export const deleteSubmissionReview = (submissionId: number) =>
+  export const deleteSubmissionReview = (taskId: number, participantId: number, submissionId: number) =>
     NewApiInstance.request<{ submission: TaskSubmission }>({
-      url: `/tasks/submissions/${submissionId}/review`,
+      url: `/tasks/${taskId}/participants/${participantId}/submissions/${submissionId}/review`,
       method: 'DELETE',
     })
 

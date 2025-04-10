@@ -25,9 +25,11 @@ export type FileMeta = {
   expires: number
 }
 
+export type MaterialType = 'image' | 'video' | 'audio' | 'file'
+
 export type Material = {
   id: number
-  type: 'image' | 'video' | 'audio' | 'file'
+  type: MaterialType
   url: string
   meta: ImageMeta | VideoMeta | AudioMeta | FileMeta
 }

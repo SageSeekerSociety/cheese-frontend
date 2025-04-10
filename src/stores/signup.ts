@@ -35,7 +35,7 @@ export const useSignupStore = defineStore('signup', {
       this.srpVerifier = data.srpVerifier
 
       // 发送验证邮件
-      if (!import.meta.env.VITE_DISABLE_EMAIL_VERIFY) {
+      if (import.meta.env.VITE_DISABLE_EMAIL_VERIFY !== 'true') {
         await UserApi.sendEmailCode(data.email)
       }
     },

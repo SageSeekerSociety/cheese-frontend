@@ -14,8 +14,8 @@ export namespace AnswersApi {
       url: `/questions/${questionId}/answers`,
       method: 'GET',
       params: {
-        page_start: pageStart,
-        page_size: pageSize,
+        pageStart: pageStart,
+        pageSize: pageSize,
       },
     })
 

@@ -26,7 +26,7 @@ export namespace QuestionApi {
     ApiInstance.request<QuestionList>({
       url: '/questions',
       method: 'GET',
-      params: { q: query, page_start: pageStart, page_size: pageSize },
+      params: { q: query, pageStart: pageStart, pageSize: pageSize },
     })
 
   export const ask = (data: AskQuestionRequest) =>
@@ -84,7 +84,7 @@ export namespace QuestionApi {
     ApiInstance.request<GetInvitationsResponse>({
       url: `/questions/${questionId}/invitations`,
       method: 'GET',
-      params: { page_start: pageStart, page_size: pageSize },
+      params: { pageStart: pageStart, pageSize: pageSize },
     })
 
   export const addBounty = (questionId: number, bounty: number) =>

@@ -17,22 +17,12 @@ export default {
       path: ':spaceId',
       name: 'SpacesDetail',
       component: () => import('@/views/spaces/Detail.vue'),
+      redirect: { name: 'SpacesDetailTasks' },
       children: [
-        {
-          path: '',
-          name: 'SpacesDetailDefault',
-        },
         {
           path: 'tasks',
           name: 'SpacesDetailTasks',
           component: () => import('@/views/spaces/detail/Tasks.vue'),
-          beforeEnter: (to, _, next) => {
-            if (!to.query.type) {
-              next({ ...to, query: { type: 'all' } })
-            } else {
-              next()
-            }
-          },
         },
         {
           path: 'tasks/publish',
@@ -69,14 +59,12 @@ export default {
           name: 'SpacesDetailManageTopics',
           component: () => import('@/views/spaces/detail/ManageTopics.vue'),
         },
+        {
+          path: 'manage/categories',
+          name: 'SpacesDetailManageCategories',
+          component: () => import('@/views/spaces/detail/ManageCategories.vue'),
+        },
       ],
-      beforeEnter: (to, _, next) => {
-        if (to.name === 'SpacesDetailDefault' || to.name === 'SpacesDetail') {
-          next({ name: 'SpacesDetailTasks', params: to.params })
-        } else {
-          next()
-        }
-      },
     },
   ],
 } as RouteRecordRaw

@@ -14,7 +14,7 @@ import viewer from 'v-viewer'
 
 import i18n from '../i18n'
 import router from '../router'
-import pinia from '../store'
+import pinia from '../stores'
 
 import { createDialogPlugin } from './dialog'
 import { vuetifyProTipTap } from './tiptap'

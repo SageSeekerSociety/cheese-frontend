@@ -3,7 +3,7 @@
     <v-banner v-if="hasSavedInfo" class="mb-4" lines="one">
       <template #text>
         <div class="d-flex align-center justify-space-between">
-          <span>检测到您之前保存的信息，是否填入？</span>
+          <span>检测到您之前保存的联系方式，是否填入？</span>
         </div>
       </template>
       <template #actions>
@@ -13,27 +13,16 @@
     </v-banner>
 
     <v-form ref="verifyForm" @submit.prevent="submitForm">
-      <v-row dense>
-        <v-col cols="12" sm="6">
-          <v-text-field v-model="formData.realName" label="真实姓名" required v-bind="realNameProps"></v-text-field>
-        </v-col>
-        <v-col cols="12" sm="6">
-          <v-text-field v-model="formData.studentId" label="学号" required v-bind="studentIdProps"></v-text-field>
-        </v-col>
-      </v-row>
-      <v-row dense>
-        <v-col cols="12" sm="6">
-          <v-select v-model="formData.grade" label="年级" required v-bind="gradeProps" :items="gradeItems"></v-select>
-        </v-col>
-        <v-col cols="12" sm="6">
-          <v-text-field v-model="formData.className" label="班级" required v-bind="classNameProps"></v-text-field>
-        </v-col>
-      </v-row>
-
       <div class="contact-section">
         <div class="d-flex align-center mb-2">
           <span class="text-subtitle-2">联系方式</span>
           <v-chip class="ms-2" size="small" color="primary" variant="tonal">至少填写一项</v-chip>
+          <v-tooltip v-if="requireRealName" location="top" max-width="300">
+            <template #activator="{ props }">
+              <v-icon v-bind="props" color="info" size="18" class="ms-2">mdi-information-outline</v-icon>
+            </template>
+            <span>此赛题要求实名参与，您的联系方式将用于身份验证和通知</span>
+          </v-tooltip>
         </div>
 
         <v-row dense>
@@ -62,7 +51,7 @@
 
       <v-textarea
         v-model="formData.applyReason"
-        label="申请理由（选填）"
+        label="申请理由"
         v-bind="applyReasonProps"
         hint="请简要说明参与赛题的目的和期望"
         rows="3"
@@ -72,7 +61,7 @@
       <div class="d-flex align-center">
         <v-checkbox
           v-model="saveToLocal"
-          label="保存信息到本地，下次自动填写"
+          label="保存联系方式到本地，下次自动填写"
           color="primary"
           hide-details
           density="compact"
@@ -83,7 +72,7 @@
             <v-icon v-bind="props" color="primary" size="18" class="ms-2"> mdi-shield-check </v-icon>
           </template>
           <div class="text-body-2">
-            为方便您下次填写，可选择将信息保存在浏览器本地。<br />
+            为方便您下次填写，可选择将联系方式保存在浏览器本地。<br />
             这些信息仅存储在您的设备上，平台不会收集或保存。<br />
             申请理由不会被保存。
           </div>
@@ -101,22 +90,23 @@ import { z } from 'zod'
 
 import { vuetifyConfig } from '@/utils/form'
 
-import { TaskParticipantRealNameInfo } from '@/types'
+import { useEvents } from '@/views/tasks/events'
+
+defineProps<{
+  requireRealName: boolean
+}>()
 
 const STORAGE_KEY = 'verify_info_form_data'
 
+type VerifyInfoFormData = {
+  phone?: string
+  email?: string
+  applyReason?: string
+}
+
 const emit = defineEmits<{
-  submit: [data: VerifyInfoFormData]
+  (e: 'submit', formData: VerifyInfoFormData): void
 }>()
-
-type VerifyInfoFormData = Omit<TaskParticipantRealNameInfo, 'major' | 'personalAdvantage' | 'remark'>
-
-// 生成最近4个年级选项
-const currentYear = new Date().getFullYear()
-const gradeItems = Array.from({ length: 4 }, (_, i) => ({
-  title: `${currentYear - i}级`,
-  value: `${currentYear - i}`,
-}))
 
 const phoneRegex = /^1[3-9]\d{9}$/
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
@@ -125,13 +115,9 @@ const { handleSubmit, defineField, isSubmitting, setFieldValue } = useForm({
   validationSchema: toTypedSchema(
     z
       .object({
-        realName: z.string().min(2, '姓名至少2个字符').max(20, '姓名最多20个字符'),
-        studentId: z.string().min(5, '学号格式不正确').max(20, '学号格式不正确'),
-        className: z.string().min(2, '班级至少2个字符').max(50, '班级最多50个字符'),
-        grade: z.string().min(4, '请选择年级'),
         phone: z.string().regex(phoneRegex, '请输入正确的手机号').optional().or(z.literal('')),
         email: z.string().regex(emailRegex, '请输入正确的邮箱地址').optional().or(z.literal('')),
-        applyReason: z.string().max(500, '理由最多500个字符').optional(),
+        applyReason: z.string().max(500, '理由最多500个字符').optional().or(z.literal('')),
       })
       .refine((data) => data.phone || data.email, {
         message: '请至少填写手机号或邮箱中的一项',
@@ -149,19 +135,11 @@ const fieldConfig = (state: { errors: any }) => ({
   validateOnModelUpdate: false, // 数据更新时不验证
 })
 
-const [realName, realNameProps] = defineField('realName', fieldConfig)
-const [studentId, studentIdProps] = defineField('studentId', fieldConfig)
-const [className, classNameProps] = defineField('className', fieldConfig)
-const [grade, gradeProps] = defineField('grade', fieldConfig)
 const [phone, phoneProps] = defineField('phone', fieldConfig)
 const [email, emailProps] = defineField('email', fieldConfig)
 const [applyReason, applyReasonProps] = defineField('applyReason', fieldConfig)
 
 const formData = reactive({
-  realName,
-  studentId,
-  className,
-  grade,
   phone,
   email,
   applyReason,
@@ -170,6 +148,9 @@ const formData = reactive({
 const verifyForm = ref<HTMLFormElement | null>(null)
 const saveToLocal = ref(false)
 const hasSavedInfo = ref(false)
+
+// 使用事件总线
+const events = useEvents()
 
 // 检查本地存储
 onMounted(() => {
@@ -202,12 +183,26 @@ const submitForm = handleSubmit((values) => {
     delete dataToSave.applyReason
     localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave))
   }
-  emit('submit', values)
+
+  // 通过事件总线发送数据
+  events.emit('verify-form-submit', values as any)
+  // 通过props发送数据
+  emit('submit', values as VerifyInfoFormData)
 })
 
-// 对外暴露提交方法
+// 暴露方法供父组件调用
 defineExpose({
-  submit: () => verifyForm.value?.requestSubmit(),
+  /**
+   * 提交表单的方法
+   */
+  submit: () => {
+    console.log('提交表单', verifyForm.value)
+    if (verifyForm.value) {
+      verifyForm.value.requestSubmit()
+    } else {
+      submitForm()
+    }
+  },
   isSubmitting,
 })
 </script>
