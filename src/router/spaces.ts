@@ -55,6 +55,11 @@ export default {
           component: () => import('@/views/spaces/detail/SelectTemplate.vue'),
         },
         {
+          path: 'analytics/tasks',
+          name: 'SpacesDetailAnalyticsTasks',
+          component: () => import('@/views/spaces/detail/AnalyticsTasks.vue'),
+        },
+        {
           path: 'manage/topics',
           name: 'SpacesDetailManageTopics',
           component: () => import('@/views/spaces/detail/ManageTopics.vue'),
