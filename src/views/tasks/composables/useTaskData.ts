@@ -105,6 +105,7 @@ export function useTaskData() {
   }
 
   return {
+    taskId,
     taskData,
     loading,
     error,

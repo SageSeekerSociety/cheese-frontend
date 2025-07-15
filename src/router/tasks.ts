@@ -53,5 +53,13 @@ export default {
         },
       ],
     },
+    {
+      path: ':taskId/edit',
+      name: 'TasksEdit',
+      component: () => import('@/views/tasks/Edit.vue'),
+      meta: {
+        title: '编辑赛题',
+      },
+    },
   ],
 } as RouteRecordRaw

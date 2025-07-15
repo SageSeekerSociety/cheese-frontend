@@ -16,7 +16,7 @@
       :task-status-type="taskStatusType"
       :title-with-punctuation="titleStartsWithChinesePunctuation"
       :participation-info="participationInfo"
-      @edit="openEditDialog"
+      @edit="navigateToEditPage"
       @delete="confirmDeleteTask"
       @join="events.emit('join-clicked')"
       @leave="events.emit('leave-clicked')"
@@ -48,7 +48,6 @@
   <!-- 对话框组件集合，通过事件总线通信 -->
   <TaskDialogs
     :task-data="taskData"
-    :edit-task-data="editTaskData"
     :available-teams="availableTeams"
     :loading-teams="loadingTeams"
     :joined-teams="joinedTeams"
@@ -60,12 +59,14 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 import { AIChatButton, LoadingErrorContainer, TaskDialogs, TaskHeader, TaskNavigationTabs } from './components'
 import { useAIChat, useTaskData, useTaskManagement, useTaskParticipation, useTeamParticipation } from './composables'
 import { useEvents } from './events'
 
 const activeTab = ref(null)
+const router = useRouter()
 
 // 使用任务模块的事件总线
 const events = useEvents()
@@ -82,13 +83,13 @@ const {
   taskStatusType,
   titleStartsWithChinesePunctuation,
   breadcrumbItems,
-  editTaskData,
   loadTaskData,
   participationInfo,
+  taskId,
 } = taskDataModule
 
 const taskManagementModule = useTaskManagement(taskDataModule)
-const { openEditDialog, confirmDeleteTask } = taskManagementModule
+const { confirmDeleteTask } = taskManagementModule
 
 const aiChatModule = useAIChat()
 const { chatDialogOpen, selectedContext, openGeneralChat } = aiChatModule
@@ -99,6 +100,11 @@ const { availableTeams, loadingTeams, joinedTeams, loadJoinedTeams, selectedLeav
 const taskParticipationModule = useTaskParticipation(taskDataModule)
 const { onJoinTaskClicked, confirmLeaveTask } = taskParticipationModule
 
+// Navigate to the edit page
+const navigateToEditPage = () => {
+  router.push({ name: 'TasksEdit', params: { taskId: taskId.value } })
+}
+
 onMounted(() => {
   events.on('join-clicked', onJoinTaskClicked)
   events.on('leave-clicked', confirmLeaveTask)
@@ -106,12 +112,6 @@ onMounted(() => {
   events.on('submit-verify', (data) => {
     taskParticipationModule.handleVerifyInfoSubmit(data).catch((error: Error) => {
       console.error('提交验证信息失败', error)
-    })
-  })
-
-  events.on('submit-edit', (data) => {
-    taskManagementModule.submitEditTask(data).catch((error: Error) => {
-      console.error('编辑任务失败', error)
     })
   })
 

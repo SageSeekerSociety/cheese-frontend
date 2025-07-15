@@ -515,7 +515,7 @@ const approveParticipant = async (participant: TaskMembership) => {
     toast.success('已通过申请')
     await fetchParticipants()
   } catch (error) {
-    toast.error('操作失败')
+    toast.error(`操作失败: ${error}`)
   }
 }
 
@@ -531,13 +531,13 @@ const confirmReject = async () => {
   try {
     await TasksApi.updateParticipant(props.taskData.id, selectedParticipant.value.id, {
       approved: 'DISAPPROVED',
-      // rejectReason: rejectReason.value || undefined,
+      rejectReason: rejectReason.value || undefined,
     })
     toast.success('已驳回申请')
     rejectDialog.value = false
     await fetchParticipants()
   } catch (error) {
-    toast.error('操作失败')
+    toast.error(`操作失败: ${error}`)
   }
 }
 

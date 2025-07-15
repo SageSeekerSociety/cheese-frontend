@@ -44,15 +44,30 @@
       </div>
     </div>
 
-    <v-alert
+    <div
       v-if="task.approved === 'DISAPPROVED' && isSelfTask"
-      type="error"
-      class="mx-4 mb-4 mt-0"
-      density="compact"
-      title="审核未通过"
+      class="disapproved-notice mx-4 mb-3 mt-0 d-flex align-center"
+      @click.stop
     >
-      {{ task.rejectReason }}
-    </v-alert>
+      <div class="flex-grow-1">
+        <div class="d-flex align-center">
+          <v-icon color="error" size="small" class="me-2">mdi-alert-circle</v-icon>
+          <span class="text-error text-caption font-weight-medium">审核未通过</span>
+        </div>
+        <div class="text-caption text-medium-emphasis mt-1 reject-reason">{{ task.rejectReason }}</div>
+      </div>
+      <v-btn
+        color="primary"
+        size="small"
+        variant="text"
+        density="comfortable"
+        :to="{ name: 'TasksEdit', params: { taskId: task.id } }"
+        class="edit-btn ms-2"
+        @click.stop
+      >
+        <v-icon size="small" class="me-1">mdi-pencil</v-icon>编辑
+      </v-btn>
+    </div>
   </v-card>
 </template>
 
@@ -242,5 +257,32 @@ const formatDeadline = (deadline: number) => {
 
 .pulse-animation {
   display: none;
+}
+
+.disapproved-notice {
+  background-color: rgba(var(--v-theme-error), 0.05);
+  border-radius: 8px;
+  padding: 10px 12px;
+  border-left: 3px solid rgba(var(--v-theme-error), 0.7);
+  transition: all 0.2s ease;
+}
+
+.reject-reason {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+
+.edit-btn {
+  border-radius: 4px;
+  min-width: 64px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: rgba(var(--v-theme-primary), 0.08);
+  }
 }
 </style>

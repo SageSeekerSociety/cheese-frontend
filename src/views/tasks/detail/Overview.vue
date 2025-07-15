@@ -293,7 +293,13 @@
 
               <div class="d-flex justify-space-between align-center">
                 <div class="text-subtitle-1">难度等级</div>
-                <div>
+                <div v-if="taskData?.space?.name?.includes('eTrip')">
+                  <!-- 如果赛题属于 eTrip，则按照初级、中级、高级显示（分别对应 1,2,3） -->
+                  <v-chip color="primary" variant="flat">
+                    {{ taskData?.rank === 1 ? '初级' : taskData?.rank === 2 ? '中级' : '高级' }}
+                  </v-chip>
+                </div>
+                <div v-else>
                   <v-rating
                     :model-value="rankStars"
                     color="amber"
@@ -355,15 +361,14 @@
 </template>
 
 <script setup lang="ts">
-import type { Task, TaskMembership, TeamTaskEligibility } from '@/types'
+import type { Task } from '@/types'
 
-import { computed, defineAsyncComponent, onMounted, ref } from 'vue'
+import { computed, defineAsyncComponent } from 'vue'
 import { useRouter } from 'vue-router'
 import dayjs from 'dayjs'
 
 import { getAvatarUrl } from '@/utils/materials'
 
-import { TasksApi } from '@/network/api/tasks'
 import { TaskParticipationInfo } from '@/network/api/tasks/types'
 import AccountService from '@/services/account'
 
@@ -444,11 +449,6 @@ const noTeams = computed(() => {
 
 const hasTeamsButNoneEligible = computed(() => {
   return teamCount.value > 0 && !teamEligibilityList.value.some((team) => team.eligibility.eligible)
-})
-
-const showNoTeamAlert = computed(() => {
-  // 已由上面的小队参与限制提示替代，不再需要单独显示
-  return false
 })
 
 const goToAIAdvice = () => {

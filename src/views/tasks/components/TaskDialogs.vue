@@ -1,29 +1,4 @@
 <template>
-  <!-- 编辑对话框 -->
-  <v-dialog :model-value="editDialogOpen" fullscreen scrollable @update:model-value="handleCloseEdit">
-    <v-card>
-      <v-toolbar color="primary" dark>
-        <v-btn icon @click="handleCloseEdit">
-          <v-icon>mdi-close</v-icon>
-        </v-btn>
-        <v-toolbar-title>编辑赛题</v-toolbar-title>
-        <v-spacer></v-spacer>
-      </v-toolbar>
-      <v-card-text>
-        <v-container>
-          <TaskForm
-            v-if="taskData"
-            :initial-data="editTaskData"
-            :submit-button-text="'保存'"
-            is-editing
-            :classification-topics="taskData.space?.classificationTopics || []"
-            @submit="handleSubmitEdit"
-          />
-        </v-container>
-      </v-card-text>
-    </v-card>
-  </v-dialog>
-
   <!-- 实名验证对话框 -->
   <v-dialog
     :model-value="verifyInfoDialogOpen"
@@ -250,7 +225,6 @@ import { computed, defineAsyncComponent, onMounted, ref } from 'vue'
 import { useEvents } from '../events'
 
 // 组件
-const TaskForm = defineAsyncComponent(() => import('@/components/tasks/TaskForm.vue'))
 const VerifyInfoFormComponent = defineAsyncComponent(() => import('@/components/tasks/VerifyInfoForm.vue'))
 const AIAdviceChatDialog = defineAsyncComponent(() => import('@/components/tasks/AIAdviceChatDialog.vue'))
 const PrivacyProtectionInfo = defineAsyncComponent(() => import('./PrivacyProtectionInfo.vue'))
@@ -260,7 +234,6 @@ const LeaveTeamDialog = defineAsyncComponent(() => import('./LeaveTeamDialog.vue
 // 只保留必要的props
 const props = defineProps<{
   taskData: Task | null
-  editTaskData: any
   availableTeams: TeamTaskEligibility[]
   loadingTeams: boolean
   joinedTeams: Team[]
@@ -273,7 +246,6 @@ const props = defineProps<{
 const events = useEvents()
 
 // 各种对话框的状态
-const editDialogOpen = ref(false)
 const verifyInfoDialogOpen = ref(false)
 const privacyDialogOpen = ref(false)
 const chatDialogOpen = ref(false)
@@ -288,10 +260,6 @@ const chatDialogRef = ref<InstanceType<typeof AIAdviceChatDialog> | null>(null)
 
 // 监听对话框状态变化
 onMounted(() => {
-  events.on('edit-dialog-open', (value) => {
-    editDialogOpen.value = value
-  })
-
   events.on('verify-dialog-open', (value) => {
     verifyInfoDialogOpen.value = value
   })
@@ -365,12 +333,6 @@ const handleSubmitVerify = (data: any) => {
   verifyInfoDialogOpen.value = false
 }
 
-// 处理编辑提交
-const handleSubmitEdit = (data: any) => {
-  events.emit('submit-edit', data)
-  editDialogOpen.value = false
-}
-
 // 确认隐私协议
 const confirmPrivacy = () => {
   events.emit('confirm-privacy', { fromSubmit: fromSubmit.value })
@@ -385,12 +347,6 @@ const confirmPrivacy = () => {
       }
     }, 300)
   }
-}
-
-// 处理对话框关闭事件
-const handleCloseEdit = () => {
-  editDialogOpen.value = false
-  events.emit('edit-dialog-open', false)
 }
 
 const handleCloseVerify = () => {

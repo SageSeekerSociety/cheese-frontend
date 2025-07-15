@@ -506,4 +506,10 @@ export namespace TasksApi {
       },
     }
   }
+
+  export const resubmitTask = (taskId: number) =>
+    NewApiInstance.request<{ task: Task }>({
+      url: `/tasks/${taskId}/resubmit`,
+      method: 'POST',
+    })
 }

@@ -335,7 +335,12 @@
     </v-card>
 
     <div class="d-flex justify-end">
-      <v-btn type="submit" color="primary" size="large" :loading="isSubmitting">{{ submitButtonText }}</v-btn>
+      <slot name="buttons" :is-submitting="isSubmitting">
+        <div class="d-flex gap-4">
+          <v-btn v-if="isEditing" variant="text" :disabled="isSubmitting" @click="handleCancel">取消</v-btn>
+          <v-btn type="submit" color="primary" size="large" :loading="isSubmitting">{{ submitButtonText }}</v-btn>
+        </div>
+      </slot>
     </div>
 
     <!-- 隐私政策确认弹窗 -->
@@ -537,6 +542,7 @@ const categoryItems = computed(() => categories.value.map((category) => ({ title
 
 const emit = defineEmits<{
   submit: [data: TaskFormSubmitData]
+  cancel: []
 }>()
 
 const { t } = useI18n()
@@ -651,6 +657,10 @@ const confirmSubmitWithRealName = () => {
 
 // 初始化wasRealNameEnabled
 wasRealNameEnabled.value = !!props.initialData?.requireRealName
+
+const handleCancel = () => {
+  emit('cancel')
+}
 </script>
 
 <style scoped>

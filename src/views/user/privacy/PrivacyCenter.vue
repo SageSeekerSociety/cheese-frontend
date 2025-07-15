@@ -41,10 +41,10 @@
             访问记录
           </v-tab>
 
-          <v-tab value="data-sharing" :to="{ name: 'PrivacyCenterDataSharing' }">
+          <!-- <v-tab value="data-sharing" :to="{ name: 'PrivacyCenterDataSharing' }">
             <v-icon icon="mdi-clipboard-text-outline" size="small" class="mr-1"></v-icon>
             实名赛题
-          </v-tab>
+          </v-tab> -->
 
           <v-tab value="policy" :to="{ name: 'PrivacyCenterPolicy' }">
             <v-icon icon="mdi-file-document-outline" size="small" class="mr-1"></v-icon>
