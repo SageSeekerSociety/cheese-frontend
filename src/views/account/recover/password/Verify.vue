@@ -1,19 +1,25 @@
 <template>
-  <v-card class="mx-auto" max-width="500" rounded="lg">
-    <v-card-item
-      class="bg-primary text-white"
-      prepend-icon="mdi-key-change"
-      title="设置新密码"
-      subtitle="请设置安全的新登录密码"
-    />
+  <div>
+    <!-- 标题区域 - 美观大气 -->
+    <div class="mb-12">
+      <div class="d-flex align-center mb-3">
+        <v-icon color="primary" size="28" class="mr-3">mdi-key-change</v-icon>
+        <h1 class="text-h3 font-weight-light" style="color: #212121; line-height: 1.2">设置新密码</h1>
+      </div>
+      <p class="text-body-1" style="color: #757575; line-height: 1.5">请设置安全的新登录密码</p>
+    </div>
 
-    <v-card-text class="pa-6">
-      <v-fade-transition mode="out-in">
-        <div :key="String(isSubmitting)">
-          <v-alert v-if="myAlert.message" :type="myAlert.type" density="compact" class="mb-4">
-            {{ myAlert.message }}
-          </v-alert>
+    <!-- 错误/成功提示区域 -->
+    <div v-if="myAlert.message" class="mb-8">
+      <v-alert :type="myAlert.type" variant="tonal" density="comfortable">
+        {{ myAlert.message }}
+      </v-alert>
+    </div>
 
+    <v-fade-transition mode="out-in">
+      <div :key="String(isSubmitting)">
+        <!-- 密码重置表单区域 -->
+        <div class="mb-8">
           <v-form @submit.prevent="submit">
             <v-row dense>
               <v-col cols="12" md="6">
@@ -22,9 +28,9 @@
                   label="新密码"
                   type="password"
                   variant="outlined"
-                  prepend-inner-icon="mdi-lock"
                   :loading="isSubmitting"
                   v-bind="passwordProps"
+                  class="mb-4"
                 />
               </v-col>
               <v-col cols="12" md="6">
@@ -33,21 +39,44 @@
                   label="确认密码"
                   type="password"
                   variant="outlined"
-                  prepend-inner-icon="mdi-lock-check"
                   :loading="isSubmitting"
                   v-bind="confirmPasswordProps"
+                  class="mb-4"
                 />
               </v-col>
             </v-row>
 
-            <v-btn block color="primary" size="large" type="submit" :loading="isSubmitting" class="mt-2">
-              确认重置
+            <v-btn
+              block
+              color="primary"
+              size="large"
+              type="submit"
+              :loading="isSubmitting"
+              style="text-transform: none; font-weight: 500; height: 48px"
+              class="mb-4"
+            >
+              确认重置密码
             </v-btn>
+
+            <p class="text-body-2" style="color: #757575">
+              想要返回？
+              <v-btn
+                variant="text"
+                color="primary"
+                to="/account/signin"
+                size="small"
+                style="text-transform: none; padding: 0; min-width: auto; height: auto; vertical-align: baseline"
+                class="text-decoration-none"
+              >
+                <v-icon start size="16">mdi-arrow-left</v-icon>
+                返回登录
+              </v-btn>
+            </p>
           </v-form>
         </div>
-      </v-fade-transition>
-    </v-card-text>
-  </v-card>
+      </div>
+    </v-fade-transition>
+  </div>
 </template>
 
 <script lang="ts" setup>

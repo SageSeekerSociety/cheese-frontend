@@ -56,6 +56,7 @@ export default defineConfig({
     port: 3000,
   },
   build: {
+    minify: 'terser',
     terserOptions: {
       compress: {
         drop_console: true,

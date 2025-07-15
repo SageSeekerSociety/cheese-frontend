@@ -2,6 +2,7 @@ import type { AxiosError } from 'axios'
 import type { ResponseDataType } from '../types/index'
 
 import { BusinessError, ServerError, SudoRequiredError } from '../types/error'
+import { messageFailed } from '../utils/showMessage'
 
 import refreshToken from './hooks/refreshToken'
 
@@ -42,6 +43,7 @@ function createBusinessError(error: AxiosError<ResponseDataType>): Error {
   }
 
   // 返回通用业务错误
+  // messageFailed(response?.message || '无权限执行此操作')
   return new BusinessError(response?.message || '无权限执行此操作', 403)
 }
 
@@ -60,5 +62,6 @@ function createError(error: AxiosError<ResponseDataType>): Error {
   }
 
   // 其他服务器错误
+  // messageFailed(response.message || '服务器错误')
   return new ServerError(response.message || '服务器错误', statusCode)
 }

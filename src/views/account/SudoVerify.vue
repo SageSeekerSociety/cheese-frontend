@@ -1,89 +1,121 @@
 <template>
-  <v-card class="mx-auto" max-width="500" rounded="lg">
-    <v-card-item
-      class="bg-primary text-white"
-      prepend-icon="mdi-shield-account"
-      title="安全验证"
-      subtitle="为保护您的账户安全，请完成身份核验"
-    />
+  <div>
+    <!-- 标题区域 -->
+    <div class="mb-12">
+      <div class="d-flex align-center mb-3">
+        <v-icon color="primary" size="28" class="mr-3">mdi-shield-account</v-icon>
+        <h1 class="text-h3 font-weight-light" style="color: #212121; line-height: 1.2">安全验证</h1>
+      </div>
+      <p class="text-body-1" style="color: #757575; line-height: 1.5">为保护您的账户安全，请完成身份核验</p>
+    </div>
 
-    <v-card-text class="pa-6">
-      <!-- 错误提示 -->
-      <v-alert v-if="errorMessage" type="error" density="compact" class="mb-4">
+    <!-- 错误提示区域 -->
+    <div v-if="errorMessage" class="mb-8">
+      <v-alert type="error" variant="tonal" density="comfortable">
         {{ errorMessage }}
       </v-alert>
+    </div>
 
-      <!-- 加载状态 -->
-      <div v-if="isInitializing" class="d-flex justify-center align-center py-4">
-        <v-progress-circular indeterminate color="primary" />
-      </div>
+    <!-- 加载状态 -->
+    <div v-if="isInitializing" class="d-flex justify-center align-center py-12">
+      <v-progress-circular indeterminate color="primary" />
+    </div>
 
-      <!-- 动态验证内容 -->
-      <v-fade-transition v-else mode="out-in">
-        <div :key="activeMethod">
-          <!-- 通行密钥 -->
-          <div v-if="activeMethod === 'passkey'" class="text-center py-4">
-            <v-icon icon="mdi-key-chain" size="64" class="text-primary mb-4" />
-            <h3 class="text-h6 mb-2">通行密钥验证</h3>
-            <p class="text-body-2 text-medium-emphasis mb-4">使用已注册的安全密钥或生物识别</p>
-            <v-btn color="primary" size="large" :loading="loading" @click="handlePasskeyVerify"> 立即验证 </v-btn>
-          </div>
-
-          <!-- 密码验证 -->
-          <div v-if="activeMethod === 'password'">
-            <v-form @submit.prevent="handlePasswordVerify">
-              <v-text-field
-                v-model="password"
-                label="账户密码"
-                :type="showPassword ? 'text' : 'password'"
-                variant="outlined"
-                :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-                @click:append-inner="showPassword = !showPassword"
-              />
-              <v-btn block color="primary" size="large" type="submit" :loading="loading" class="mt-2"> 验证密码 </v-btn>
-            </v-form>
-          </div>
-
-          <!-- TOTP验证 -->
-          <div v-if="activeMethod === 'totp'">
-            <v-form class="text-center" @submit.prevent="handleTOTPVerify">
-              <v-otp-input v-model="totpCode" length="6" @input="handleTOTPInput" />
-              <v-btn block color="primary" size="large" type="submit" :loading="loading" class="mt-4">
-                验证动态码
-              </v-btn>
-            </v-form>
-          </div>
+    <!-- 验证内容区域 -->
+    <v-fade-transition v-else mode="out-in">
+      <div :key="activeMethod" class="mb-8">
+        <!-- 通行密钥验证 -->
+        <div v-if="activeMethod === 'passkey'">
+          <v-btn
+            block
+            color="primary"
+            size="large"
+            :loading="loading"
+            style="text-transform: none; font-weight: 500; height: 48px"
+            class="mb-6"
+            @click="handlePasskeyVerify"
+          >
+            <v-icon start>mdi-key-chain</v-icon>
+            使用通行密钥验证
+          </v-btn>
         </div>
-      </v-fade-transition>
 
-      <!-- 验证方式切换 -->
-      <v-fade-transition>
-        <div v-if="!isInitializing && hasAlternativeMethods" class="text-center mt-6">
-          <p class="text-caption text-medium-emphasis mb-2">切换验证方式</p>
-          <v-list density="compact" class="py-0" bg-color="transparent">
+        <!-- 密码验证 -->
+        <div v-if="activeMethod === 'password'">
+          <v-form @submit.prevent="handlePasswordVerify">
+            <v-text-field
+              v-model="password"
+              label="账户密码"
+              :type="showPassword ? 'text' : 'password'"
+              variant="outlined"
+              :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+              class="mb-6"
+              @click:append-inner="showPassword = !showPassword"
+            />
+
+            <v-btn
+              block
+              color="primary"
+              size="large"
+              type="submit"
+              :loading="loading"
+              style="text-transform: none; font-weight: 500; height: 48px"
+              class="mb-6"
+            >
+              验证密码
+            </v-btn>
+          </v-form>
+        </div>
+
+        <!-- TOTP验证 -->
+        <div v-if="activeMethod === 'totp'">
+          <v-form @submit.prevent="handleTOTPVerify">
+            <v-otp-input v-model="totpCode" length="6" variant="outlined" class="mb-6" @input="handleTOTPInput" />
+
+            <v-btn
+              block
+              color="primary"
+              size="large"
+              type="submit"
+              :loading="loading"
+              style="text-transform: none; font-weight: 500; height: 48px"
+              class="mb-6"
+            >
+              验证动态码
+            </v-btn>
+          </v-form>
+        </div>
+
+        <!-- 切换验证方式 -->
+        <div v-if="!isInitializing && hasAlternativeMethods">
+          <p class="text-body-2 mb-4" style="color: #757575">或使用其他方式验证</p>
+
+          <div class="d-flex flex-column" style="gap: 8px">
             <template v-for="method in availableMethods" :key="method.id">
-              <v-list-item
+              <v-btn
                 v-if="method.visible && method.id !== activeMethod"
+                variant="outlined"
+                size="large"
                 :disabled="loading || method.disabled"
-                class="px-0"
+                style="
+                  text-transform: none;
+                  font-weight: 400;
+                  height: 48px;
+                  justify-content: flex-start;
+                  padding-left: 16px;
+                  border-color: #e0e0e0;
+                "
                 @click="activeMethod = method.id"
               >
-                <template #prepend>
-                  <v-icon :icon="method.icon" size="small" class="text-medium-emphasis" />
-                </template>
-                <v-list-item-title class="text-body-2">
-                  {{ method.label }}
-                </v-list-item-title>
-                <template #append>
-                  <v-icon icon="mdi-chevron-right" size="small" />
-                </template>
-              </v-list-item>
+                <v-icon start :icon="method.icon" size="20" />
+                {{ method.label }}
+              </v-btn>
             </template>
-          </v-list>
+          </div>
         </div>
-      </v-fade-transition>
-    </v-card-text>
-  </v-card>
+      </div>
+    </v-fade-transition>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -190,10 +222,8 @@ const handlePasswordVerify = async () => {
       // 1. 生成客户端临时值对
       srpSession.value.clientEphemeral = srp.generateEphemeral()
 
-      // 2. 发送用户名和客户端公开临时值到服务器
-      const initResponse = await UserApi.verifySudoSrpInit({
-        clientPublicEphemeral: srpSession.value.clientEphemeral.public,
-      })
+      // 2. 发送空的 credentials 到服务器初始化 SRP
+      const initResponse = await UserApi.verifySudoSrpInit()
 
       const { salt, serverPublicEphemeral } = initResponse.data
       srpSession.value.salt = salt
@@ -211,6 +241,7 @@ const handlePasswordVerify = async () => {
 
       // 4. 发送客户端证明到服务器
       const verifyResponse = await UserApi.verifySudoSrpVerify({
+        clientPublicEphemeral: srpSession.value.clientEphemeral.public,
         clientProof: clientSession.proof,
       })
 
