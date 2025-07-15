@@ -53,6 +53,82 @@
                 </template>
               </v-dialog>
             </v-btn>
+
+            <v-btn v-if="isCurrentUserOwner" class="ms-2" prepend-icon="mdi-account-cog" rounded="lg">
+              <div class="text-none font-weight-regular">{{ t('spaces.detail.manageAdmins') }}</div>
+
+              <v-dialog v-model="isManagingAdmins" activator="parent" width="800">
+                <template #default>
+                  <v-card>
+                    <v-card-title>{{ t('spaces.detail.manageAdmins') }}</v-card-title>
+                    <v-card-text>
+                      <v-list>
+                        <v-list-subheader>{{ t('spaces.detail.currentAdmins') }}</v-list-subheader>
+                        <v-list-item
+                          v-for="admin in space?.admins"
+                          :key="admin.user.id"
+                          :title="admin.user.nickname"
+                          :subtitle="admin.role === 'OWNER' ? t('spaces.detail.owner') : t('spaces.detail.admin')"
+                        >
+                          <template #prepend>
+                            <v-avatar size="36" :image="getAvatarUrl(admin.user.avatarId)" />
+                          </template>
+                          <template #append>
+                            <div class="d-flex align-center">
+                              <v-select
+                                v-if="
+                                  admin.role !== 'OWNER' || (admin.user.id !== currentUser?.id && isCurrentUserOwner)
+                                "
+                                v-model="admin.role"
+                                :items="adminRoles"
+                                density="compact"
+                                hide-details
+                                class="me-2 admin-role-select"
+                                @update:model-value="updateAdminRole(admin.user.id, $event)"
+                              />
+                              <v-btn
+                                v-if="admin.user.id !== currentUser?.id && isCurrentUserOwner"
+                                icon="mdi-delete"
+                                variant="text"
+                                color="error"
+                                size="small"
+                                @click="confirmRemoveAdmin(admin.user.id, admin.user.nickname)"
+                              />
+                            </div>
+                          </template>
+                        </v-list-item>
+                      </v-list>
+
+                      <v-divider class="my-4" />
+
+                      <v-form @submit.prevent="addNewAdmin">
+                        <v-list-subheader>{{ t('spaces.detail.addNewAdmin') }}</v-list-subheader>
+                        <div class="d-flex align-center">
+                          <v-text-field
+                            v-model="newAdminUserId"
+                            type="number"
+                            :label="t('spaces.detail.userId')"
+                            density="compact"
+                            class="me-2"
+                          />
+                          <v-select
+                            v-model="newAdminRole"
+                            :items="adminRoles"
+                            :label="t('spaces.detail.role')"
+                            density="compact"
+                            class="me-2"
+                          />
+                          <v-btn color="primary" @click="addNewAdmin">{{ t('spaces.detail.add') }}</v-btn>
+                        </div>
+                      </v-form>
+                    </v-card-text>
+                    <v-card-actions>
+                      <v-btn color="primary" @click="isManagingAdmins = false">{{ t('spaces.detail.close') }}</v-btn>
+                    </v-card-actions>
+                  </v-card>
+                </template>
+              </v-dialog>
+            </v-btn>
           </div>
         </div>
       </v-col>
@@ -235,7 +311,7 @@ import { SpacesApi } from '@/network/api/spaces'
 import { useDialog } from '@/plugins/dialog'
 import AccountService from '@/services/account'
 import { useSpaceStore } from '@/stores/space'
-import { SpaceAnnouncement } from '@/types'
+import { SpaceAdminRoleType, SpaceAnnouncement } from '@/types'
 
 const TipTapEditor = defineAsyncComponent(() => import('@/components/common/Editor/TipTapEditor.vue'))
 const TipTapViewer = defineAsyncComponent(() => import('@/components/common/Editor/TipTapViewer.vue'))
@@ -459,6 +535,57 @@ const getAnnouncementPreview = (content: string, length = 120) => {
   const textContent = content.replace(/<[^>]*>/g, '').trim()
   return textContent.length > length ? textContent.substring(0, length) + '...' : textContent
 }
+
+// 管理员管理相关
+const isManagingAdmins = ref(false)
+const newAdminUserId = ref<number>()
+const newAdminRole = ref<SpaceAdminRoleType>('ADMIN')
+const adminRoles = [
+  { title: t('spaces.detail.owner'), value: 'OWNER' },
+  { title: t('spaces.detail.admin'), value: 'ADMIN' },
+]
+
+const currentUser = computed(() => AccountService._user.value)
+
+const isCurrentUserOwner = computed(() => {
+  return space.value?.admins?.some((admin) => admin.user.id === currentUser.value?.id && admin.role === 'OWNER')
+})
+
+const addNewAdmin = async () => {
+  if (!newAdminUserId.value) {
+    toast.error(t('spaces.detail.userIdRequired'))
+    return
+  }
+
+  try {
+    await spaceStore.addAdmin(newAdminUserId.value, newAdminRole.value)
+    newAdminUserId.value = undefined
+    newAdminRole.value = 'ADMIN'
+  } catch (error) {
+    console.error('添加管理员失败:', error)
+  }
+}
+
+const updateAdminRole = async (userId: number, role: SpaceAdminRoleType) => {
+  try {
+    await spaceStore.updateAdmin(userId, role)
+  } catch (error) {
+    console.error('更新管理员角色失败:', error)
+  }
+}
+
+const confirmRemoveAdmin = async (userId: number, nickname: string) => {
+  const result = await dialog.confirm(t('spaces.detail.confirmRemoveAdmin', { nickname })).wait()
+  if (!result) {
+    return
+  }
+
+  try {
+    await spaceStore.removeAdmin(userId)
+  } catch (error) {
+    console.error('移除管理员失败:', error)
+  }
+}
 </script>
 
 <style scoped lang="scss">
@@ -507,6 +634,10 @@ const getAnnouncementPreview = (content: string, length = 120) => {
 .admin-text {
   margin-left: 12px;
   white-space: nowrap;
+}
+
+.admin-role-select {
+  max-width: 140px;
 }
 
 .floating-add-btn {

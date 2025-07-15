@@ -1,4 +1,4 @@
-import type { Space, SpaceAnnouncement, SpaceCategory, SpaceTaskTemplate, Topic } from '@/types'
+import type { Space, SpaceAdminRoleType, SpaceAnnouncement, SpaceCategory, SpaceTaskTemplate, Topic } from '@/types'
 
 import { computed, ref } from 'vue'
 import { toast } from 'vuetify-sonner'
@@ -245,6 +245,50 @@ export const useSpaceStore = defineStore('space', () => {
     }
   }
 
+  // 管理员相关方法
+  const addAdmin = async (userId: number, role: SpaceAdminRoleType) => {
+    if (!currentSpaceId.value) return
+
+    try {
+      const { data } = await SpacesApi.addAdmin(currentSpaceId.value, { userId, role })
+      currentSpace.value = data.space
+      toast.success('添加管理员成功')
+    } catch (error) {
+      console.error('添加管理员失败:', error)
+      toast.error('添加管理员失败')
+      throw error
+    }
+  }
+
+  const updateAdmin = async (userId: number, role: SpaceAdminRoleType) => {
+    if (!currentSpaceId.value) return
+
+    try {
+      const { data } = await SpacesApi.updateAdmin(currentSpaceId.value, userId, { role })
+      currentSpace.value = data.space
+      toast.success('更新管理员角色成功')
+    } catch (error) {
+      console.error('更新管理员角色失败:', error)
+      toast.error('更新管理员角色失败')
+      throw error
+    }
+  }
+
+  const removeAdmin = async (userId: number) => {
+    if (!currentSpaceId.value) return
+
+    try {
+      await SpacesApi.removeAdmin(currentSpaceId.value, userId)
+      // 重新获取空间信息以更新管理员列表
+      await fetchSpace(currentSpaceId.value)
+      toast.success('移除管理员成功')
+    } catch (error) {
+      console.error('移除管理员失败:', error)
+      toast.error('移除管理员失败')
+      throw error
+    }
+  }
+
   return {
     currentSpace,
     currentSpaceId,
@@ -272,5 +316,8 @@ export const useSpaceStore = defineStore('space', () => {
     archiveCategory,
     unarchiveCategory,
     setDefaultCategory,
+    addAdmin,
+    updateAdmin,
+    removeAdmin,
   }
 })
