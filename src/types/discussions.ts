@@ -1,6 +1,6 @@
 import type { User } from '.'
 
-export type DiscussableModelType = 'PROJECT'
+export type DiscussableModelType = 'PROJECT' | 'SPACE'
 
 export interface ReactionType {
   id: number

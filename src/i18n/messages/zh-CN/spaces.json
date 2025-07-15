@@ -131,7 +131,10 @@
       "submit": "提交",
       "createSuccess": "创建任务成功",
       "createSuccessAndWaitingAudit": "创建任务成功，等待审核",
-      "createFailed": "创建任务失败:"
+      "createFailed": "创建任务失败",
+      "spaceIdNotFound": "未找到空间ID",
+      "initializationFailed": "初始化失败",
+      "loadTemplateFailed": "加载模板失败"
     },
     "selectTemplate": {
       "title": "选择赛题模板",
@@ -169,6 +172,35 @@
       "createSuccess": "模板创建成功",
       "saveTemplateFailed": "保存模板失败"
     }
+  },
+  "discussions": {
+    "title": "讨论区",
+    "newDiscussion": "发起新讨论",
+    "createDiscussion": "创建新讨论",
+    "editDiscussion": "编辑讨论",
+    "discussionTitle": "讨论标题",
+    "discussionContent": "讨论内容",
+    "noDiscussions": "暂无讨论，点击右上角按钮发起一个新讨论吧！",
+    "untitled": "无标题",
+    "repliesCount": "{count} 条回复",
+    "publishSuccess": "讨论发布成功",
+    "publishFailed": "讨论发布失败",
+    "loadFailed": "加载讨论失败",
+    "deleteConfirm": "确定要删除这条讨论吗？其下的所有回复也会被删除。",
+    "deleteSuccess": "删除成功",
+    "deleteFailed": "删除失败",
+    "backToDiscussions": "返回讨论列表",
+    "discussionNotFound": "讨论不存在或已被删除",
+    "replyPlaceholder": "发表你的看法...",
+    "sendReply": "发送回复",
+    "loadMoreReplies": "加载更多回复",
+    "noReplies": "暂无回复",
+    "startDiscussion": "这里还没有讨论，开始第一个话题吧！",
+    "noRepliesYet": "还没有人回复，成为第一个回复的人吧！",
+    "beFirstToReply": "成为第一个回复的人",
+    "reply": "回复",
+    "replyToUserPlaceholder": "回复 {user}...",
+    "deleteReplyConfirm": "确定要删除这条回复吗？"
   },
   "index": {
     "searchPlaceholder": "搜索空间",

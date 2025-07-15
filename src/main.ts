@@ -10,6 +10,7 @@ import '@/styles/content.scss'
 import '@/styles/fonts.css'
 
 import 'dayjs/locale/zh-cn'
+import 'wc-waterfall'
 
 import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'

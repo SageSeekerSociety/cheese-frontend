@@ -201,14 +201,17 @@ importers:
         specifier: ^4.5.0
         version: 4.5.0(vue@3.5.13(typescript@5.6.3))
       vuetify:
-        specifier: ^3.8.1
-        version: 3.8.1(typescript@5.6.3)(vite-plugin-vuetify@2.1.1)(vue@3.5.13(typescript@5.6.3))
+        specifier: ^3.8.2
+        version: 3.8.2(typescript@5.6.3)(vite-plugin-vuetify@2.1.1)(vue@3.5.13(typescript@5.6.3))
       vuetify-pro-tiptap:
         specifier: ^2.5.4
-        version: 2.5.7(@tiptap/suggestion@2.11.7(@tiptap/core@2.11.5(@tiptap/pm@2.11.7))(@tiptap/pm@2.11.7))(vue@3.5.13(typescript@5.6.3))(vuetify@3.8.1)
+        version: 2.5.7(@tiptap/suggestion@2.11.7(@tiptap/core@2.11.5(@tiptap/pm@2.11.7))(@tiptap/pm@2.11.7))(vue@3.5.13(typescript@5.6.3))(vuetify@3.8.2)
       vuetify-sonner:
         specifier: ^0.3.20
-        version: 0.3.20(vue@3.5.13(typescript@5.6.3))(vuetify@3.8.1)
+        version: 0.3.20(vue@3.5.13(typescript@5.6.3))(vuetify@3.8.2)
+      wc-waterfall:
+        specifier: ^0.1.3
+        version: 0.1.3
       zod:
         specifier: ^3.23.8
         version: 3.23.8
@@ -338,7 +341,7 @@ importers:
         version: 0.0.11(prismjs@1.29.0)
       vite-plugin-vuetify:
         specifier: ^2.1.1
-        version: 2.1.1(vite@6.2.1(@types/node@18.19.58)(jiti@2.4.2)(sass@1.80.3)(terser@5.39.0)(yaml@2.5.1))(vue@3.5.13(typescript@5.6.3))(vuetify@3.8.1)
+        version: 2.1.1(vite@6.2.1(@types/node@18.19.58)(jiti@2.4.2)(sass@1.80.3)(terser@5.39.0)(yaml@2.5.1))(vue@3.5.13(typescript@5.6.3))(vuetify@3.8.2)
       vitest:
         specifier: ^2.1.3
         version: 2.1.3(@types/node@18.19.58)(happy-dom@13.10.1)(sass@1.80.3)(terser@5.39.0)
@@ -4939,8 +4942,8 @@ packages:
       vue: ^3.3.0
       vuetify: ^3.3.0
 
-  vuetify@3.8.1:
-    resolution: {integrity: sha512-3qReKBBWIIdJJmwnFU1blVIKHDtnLfIP7kk0MwUrrfjYkWmsDpsymtDnsukkTCnlJ1WvhLr64eQFosr0RVbj9w==}
+  vuetify@3.8.2:
+    resolution: {integrity: sha512-UJNFP4egmKJTQ3V3MKOq+7vIUKO7/Fko5G6yUsOW2Rm0VNBvAjgO6VY6EnK3DTqEKN6ugVXDEPw37NQSTGLZvw==}
     engines: {node: ^12.20 || >=14.13}
     peerDependencies:
       typescript: '>=4.7'
@@ -4957,6 +4960,9 @@ packages:
 
   w3c-keyname@2.2.8:
     resolution: {integrity: sha512-dpojBhNsCNN7T82Tm7k26A6G9ML3NkhDsnw9n/eoxSRlVBB4CEtIQ/KTCLI2Fwf3ataSXRhYFkQi3SlnFwPvPQ==}
+
+  wc-waterfall@0.1.3:
+    resolution: {integrity: sha512-zJQLFGSSueI+hVAwBXaSKWS/juOFQ50nmfDK5F7GbVjxGJIOm+LJH76tghBvB1BFxG45+MBfZpL+MSDgnNKX0Q==}
 
   wcwidth@1.0.1:
     resolution: {integrity: sha512-XHPEwS0q6TaxcvG85+8EYkbiCux2XtWG2mkc47Ng2A77BQu9+DqIOJldST4HgPkuea7dvKSj5VgX3P1d4rW8Tg==}
@@ -7161,11 +7167,11 @@ snapshots:
       js-beautify: 1.15.1
       vue-component-type-helpers: 2.1.6
 
-  '@vuetify/loader-shared@2.1.0(vue@3.5.13(typescript@5.6.3))(vuetify@3.8.1)':
+  '@vuetify/loader-shared@2.1.0(vue@3.5.13(typescript@5.6.3))(vuetify@3.8.2)':
     dependencies:
       upath: 2.0.1
       vue: 3.5.13(typescript@5.6.3)
-      vuetify: 3.8.1(typescript@5.6.3)(vite-plugin-vuetify@2.1.1)(vue@3.5.13(typescript@5.6.3))
+      vuetify: 3.8.2(typescript@5.6.3)(vite-plugin-vuetify@2.1.1)(vue@3.5.13(typescript@5.6.3))
 
   JSONStream@1.3.5:
     dependencies:
@@ -9732,14 +9738,14 @@ snapshots:
       - prismjs
       - supports-color
 
-  vite-plugin-vuetify@2.1.1(vite@6.2.1(@types/node@18.19.58)(jiti@2.4.2)(sass@1.80.3)(terser@5.39.0)(yaml@2.5.1))(vue@3.5.13(typescript@5.6.3))(vuetify@3.8.1):
+  vite-plugin-vuetify@2.1.1(vite@6.2.1(@types/node@18.19.58)(jiti@2.4.2)(sass@1.80.3)(terser@5.39.0)(yaml@2.5.1))(vue@3.5.13(typescript@5.6.3))(vuetify@3.8.2):
     dependencies:
-      '@vuetify/loader-shared': 2.1.0(vue@3.5.13(typescript@5.6.3))(vuetify@3.8.1)
+      '@vuetify/loader-shared': 2.1.0(vue@3.5.13(typescript@5.6.3))(vuetify@3.8.2)
       debug: 4.3.7
       upath: 2.0.1
       vite: 6.2.1(@types/node@18.19.58)(jiti@2.4.2)(sass@1.80.3)(terser@5.39.0)(yaml@2.5.1)
       vue: 3.5.13(typescript@5.6.3)
-      vuetify: 3.8.1(typescript@5.6.3)(vite-plugin-vuetify@2.1.1)(vue@3.5.13(typescript@5.6.3))
+      vuetify: 3.8.2(typescript@5.6.3)(vite-plugin-vuetify@2.1.1)(vue@3.5.13(typescript@5.6.3))
     transitivePeerDependencies:
       - supports-color
 
@@ -9854,7 +9860,7 @@ snapshots:
     optionalDependencies:
       typescript: 5.6.3
 
-  vuetify-pro-tiptap@2.5.7(@tiptap/suggestion@2.11.7(@tiptap/core@2.11.5(@tiptap/pm@2.11.7))(@tiptap/pm@2.11.7))(vue@3.5.13(typescript@5.6.3))(vuetify@3.8.1):
+  vuetify-pro-tiptap@2.5.7(@tiptap/suggestion@2.11.7(@tiptap/core@2.11.5(@tiptap/pm@2.11.7))(@tiptap/pm@2.11.7))(vue@3.5.13(typescript@5.6.3))(vuetify@3.8.2):
     dependencies:
       '@tiptap/core': 2.11.5(@tiptap/pm@2.11.7)
       '@tiptap/extension-blockquote': 2.11.5(@tiptap/core@2.11.5(@tiptap/pm@2.11.7))
@@ -9899,24 +9905,26 @@ snapshots:
       '@tiptap/pm': 2.11.7
       '@tiptap/vue-3': 2.11.5(@tiptap/core@2.11.5(@tiptap/pm@2.11.7))(@tiptap/pm@2.11.7)(vue@3.5.13(typescript@5.6.3))
       vue: 3.5.13(typescript@5.6.3)
-      vuetify: 3.8.1(typescript@5.6.3)(vite-plugin-vuetify@2.1.1)(vue@3.5.13(typescript@5.6.3))
+      vuetify: 3.8.2(typescript@5.6.3)(vite-plugin-vuetify@2.1.1)(vue@3.5.13(typescript@5.6.3))
     transitivePeerDependencies:
       - '@tiptap/suggestion'
 
-  vuetify-sonner@0.3.20(vue@3.5.13(typescript@5.6.3))(vuetify@3.8.1):
+  vuetify-sonner@0.3.20(vue@3.5.13(typescript@5.6.3))(vuetify@3.8.2):
     dependencies:
       vue: 3.5.13(typescript@5.6.3)
       vue-sonner: 1.3.0
-      vuetify: 3.8.1(typescript@5.6.3)(vite-plugin-vuetify@2.1.1)(vue@3.5.13(typescript@5.6.3))
+      vuetify: 3.8.2(typescript@5.6.3)(vite-plugin-vuetify@2.1.1)(vue@3.5.13(typescript@5.6.3))
 
-  vuetify@3.8.1(typescript@5.6.3)(vite-plugin-vuetify@2.1.1)(vue@3.5.13(typescript@5.6.3)):
+  vuetify@3.8.2(typescript@5.6.3)(vite-plugin-vuetify@2.1.1)(vue@3.5.13(typescript@5.6.3)):
     dependencies:
       vue: 3.5.13(typescript@5.6.3)
     optionalDependencies:
       typescript: 5.6.3
-      vite-plugin-vuetify: 2.1.1(vite@6.2.1(@types/node@18.19.58)(jiti@2.4.2)(sass@1.80.3)(terser@5.39.0)(yaml@2.5.1))(vue@3.5.13(typescript@5.6.3))(vuetify@3.8.1)
+      vite-plugin-vuetify: 2.1.1(vite@6.2.1(@types/node@18.19.58)(jiti@2.4.2)(sass@1.80.3)(terser@5.39.0)(yaml@2.5.1))(vue@3.5.13(typescript@5.6.3))(vuetify@3.8.2)
 
   w3c-keyname@2.2.8: {}
+
+  wc-waterfall@0.1.3: {}
 
   wcwidth@1.0.1:
     dependencies:

@@ -131,9 +131,31 @@ const spaceId = computed(() => Number(route.params.spaceId))
       <span>{{ t('spaces.detail.myJoinedContests') }}</span>
     </v-tooltip>
 
+    <v-divider class="my-2"></v-divider>
+
+    <!-- Discussions Link -->
+    <v-tooltip :disabled="expanded" location="end">
+      <template #activator="{ props }">
+        <v-list-item
+          v-bind="expanded ? {} : props"
+          rounded="lg"
+          :to="{ name: 'SpacesDetailDiscussions', params: { spaceId: spaceId } }"
+          color="primary"
+          class="sidebar-item"
+        >
+          <template #prepend>
+            <v-icon>mdi-forum-outline</v-icon>
+          </template>
+          <v-list-item-title v-show="expanded">{{ t('spaces.discussions.title') }}</v-list-item-title>
+        </v-list-item>
+      </template>
+      <span>{{ t('spaces.discussions.title') }}</span>
+    </v-tooltip>
+
+    <v-divider class="my-2"></v-divider>
+
     <!-- 管理员操作 -->
     <template v-if="isCurrentUserAtLeastAdmin">
-      <v-divider class="my-2"></v-divider>
       <v-list-subheader v-show="expanded">{{ t('spaces.detail.adminOperations') }}</v-list-subheader>
 
       <v-tooltip :disabled="expanded" location="end">

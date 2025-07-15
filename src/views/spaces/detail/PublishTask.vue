@@ -31,6 +31,7 @@ import { toast } from 'vuetify-sonner'
 import { storeToRefs } from 'pinia'
 
 import { TasksApi } from '@/network/api/tasks'
+import errorHandler from '@/services/ErrorHandler'
 import { useSpaceStore } from '@/stores/space'
 
 const TaskForm = defineAsyncComponent(() => import('@/components/tasks/TaskForm.vue'))
@@ -83,41 +84,55 @@ const taskSubmissionSchema = ref<TaskSubmissionSchemaEntry[]>([
 const submitTask = async (taskData: TaskFormSubmitData) => {
   const spaceId = currentSpaceId.value
   if (!spaceId) {
-    console.error('Space ID not found')
+    toast.error(t('spaces.detail.publishTask.spaceIdNotFound'))
     return
   }
-  try {
-    const {
-      data: {
-        task: { approved },
-      },
-    } = await TasksApi.create({
-      ...taskData,
-      submissionSchema: taskSubmissionSchema.value,
-      space: spaceId,
-      requireRealName: taskData.requireRealName || false,
-      categoryId: taskData.categoryId,
-    })
-    if (!approved) {
-      toast.success(t('spaces.detail.publishTask.createSuccessAndWaitingAudit'))
-    } else {
-      toast.success(t('spaces.detail.publishTask.createSuccess'))
+
+  const result = await errorHandler.withErrorHandling(
+    async () => {
+      const {
+        data: {
+          task: { approved },
+        },
+      } = await TasksApi.create({
+        ...taskData,
+        submissionSchema: taskSubmissionSchema.value,
+        space: spaceId,
+        requireRealName: taskData.requireRealName || false,
+        categoryId: taskData.categoryId,
+      })
+
+      if (!approved) {
+        toast.success(t('spaces.detail.publishTask.createSuccessAndWaitingAudit'))
+      } else {
+        toast.success(t('spaces.detail.publishTask.createSuccess'))
+      }
+
+      router.replace({ name: 'SpacesDetailTasks', params: { spaceId }, query: { type: 'published' } })
+      return approved
+    },
+    {
+      defaultMessage: t('spaces.detail.publishTask.createFailed'),
     }
-    router.replace({ name: 'SpacesDetailTasks', params: { spaceId }, query: { type: 'published' } })
-  } catch (error) {
-    console.error(t('spaces.detail.publishTask.createFailed'), error)
-    toast.error(t('spaces.detail.publishTask.createFailed'))
-  }
+  )
+
+  return result !== undefined
 }
 
 onMounted(async () => {
-  await spaceStore.fetchCategories() // 加载分类列表
-
-  const templateId = route.query.templateId
-  if (templateId && templateId !== 'blank') {
-    await loadTemplate(Number(templateId))
-  }
-  loadedTemplate.value = true
+  await errorHandler.withErrorHandling(
+    async () => {
+      await spaceStore.fetchCategories()
+      const templateId = route.query.templateId
+      if (templateId && templateId !== 'blank') {
+        await loadTemplate(Number(templateId))
+      }
+      loadedTemplate.value = true
+    },
+    {
+      defaultMessage: t('spaces.detail.publishTask.initializationFailed'),
+    }
+  )
 })
 
 const loadTemplate = async (templateId: number) => {

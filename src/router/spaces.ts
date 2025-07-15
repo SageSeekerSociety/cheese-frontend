@@ -64,6 +64,21 @@ export default {
           name: 'SpacesDetailManageCategories',
           component: () => import('@/views/spaces/detail/ManageCategories.vue'),
         },
+        {
+          path: 'discussions',
+          name: 'SpacesDetailDiscussions',
+          component: () => import('@/views/spaces/detail/Discussions.vue'),
+        },
+        {
+          path: 'discussions/create',
+          name: 'SpacesDetailCreateDiscussion',
+          component: () => import('@/views/spaces/detail/CreateDiscussion.vue'),
+        },
+        {
+          path: 'discussions/:discussionId',
+          name: 'SpacesDetailDiscussionItem',
+          component: () => import('@/views/spaces/detail/DiscussionItem.vue'),
+        },
       ],
     },
   ],
