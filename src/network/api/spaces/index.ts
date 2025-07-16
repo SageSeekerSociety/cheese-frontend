@@ -7,6 +7,7 @@ import type {
   PostSpaceAdminRequestData,
   PostSpaceCategoryRequestData,
   PostSpaceRequestData,
+  SpaceAnalyticsTasksData,
 } from './types'
 
 import { NewApiInstance } from '../index'
@@ -47,6 +48,12 @@ export namespace SpacesApi {
       url: '/spaces',
       method: 'GET',
       params,
+    })
+
+  export const getAnalyticsTasks = (spaceId: number) =>
+    NewApiInstance.request<SpaceAnalyticsTasksData>({
+      url: `/spaces/${spaceId}/analytics/tasks`,
+      method: 'GET',
     })
 
   export const addAdmin = (spaceId: number, data: PostSpaceAdminRequestData) =>

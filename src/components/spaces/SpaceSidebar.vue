@@ -199,6 +199,24 @@ const spaceId = computed(() => Number(route.params.spaceId))
           <v-list-item
             v-bind="expanded ? {} : props"
             rounded="lg"
+            :to="{ name: 'SpacesDetailAnalyticsTasks', params: { spaceId: spaceId } }"
+            color="primary"
+            class="sidebar-item"
+          >
+            <template #prepend>
+              <v-icon>mdi-chart-line</v-icon>
+            </template>
+            <v-list-item-title v-show="expanded">{{ t('spaces.detail.analytics.title') }}</v-list-item-title>
+          </v-list-item>
+        </template>
+        <span>{{ t('spaces.detail.analytics.title') }}</span>
+      </v-tooltip>
+
+      <v-tooltip :disabled="expanded" location="end">
+        <template #activator="{ props }">
+          <v-list-item
+            v-bind="expanded ? {} : props"
+            rounded="lg"
             :to="{ name: 'SpacesDetailManageTopics', params: { spaceId: spaceId } }"
             color="primary"
             class="sidebar-item"

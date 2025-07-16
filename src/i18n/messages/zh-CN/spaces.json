@@ -124,6 +124,9 @@
       "categoryNameMaxLength": "分类名称最多32个字符",
       "descriptionMaxLength": "描述最多255个字符"
     },
+    "analytics": {
+      "title": "数据分析"
+    },
     "publishTask": {
       "title": "发布赛题",
       "back": "返回",
