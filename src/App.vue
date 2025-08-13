@@ -42,5 +42,10 @@ const links = [
     title: '小队',
     path: '/teams',
   },
+  {
+    key: 'Assistant',
+    title: 'AI助手',
+    path: '/assistant',
+  },
 ]
 </script>

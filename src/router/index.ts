@@ -5,6 +5,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { refreshTitle } from '@/utils/title'
 
 import AccountRoutes from './account'
+import AssistantRoutes from './assistant'
 import GroupRoutes from './group'
 import HomeRoutes from './home'
 import ProjectsRoutes from './projects'
@@ -16,6 +17,7 @@ import UserRoutes from './user'
 
 const routes: RouteRecordRaw[] = [
   AccountRoutes,
+  AssistantRoutes,
   GroupRoutes,
   HomeRoutes,
   UserRoutes,
