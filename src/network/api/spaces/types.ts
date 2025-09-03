@@ -71,3 +71,11 @@ export type SpaceAnalyticsTasksData = {
   unsuccessStudentStatistics: AnalyticsStudentStatistics
   rankDistribution: AnalyticsDistribution
 }
+
+export type PublisherParticipation = {
+  publisherId: number
+  publisherName: string
+  participants: number
+  completedUsers: number
+  taskCount: number
+}

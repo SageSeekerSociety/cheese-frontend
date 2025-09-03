@@ -7,6 +7,7 @@ import type {
   PostSpaceAdminRequestData,
   PostSpaceCategoryRequestData,
   PostSpaceRequestData,
+  PublisherParticipation,
   SpaceAnalyticsTasksData,
 } from './types'
 
@@ -50,11 +51,34 @@ export namespace SpacesApi {
       params,
     })
 
-  export const getAnalyticsTasks = (spaceId: number) =>
+  export const getAnalyticsTasks = (
+    spaceId: number,
+    params?: Partial<{
+      successBy: 'completion' | 'approve'
+      from: number
+      to: number
+      taskStatus: string
+      categoryId: number
+      realName: 'all' | 'with' | 'without'
+      publisherId: number
+    }>
+  ) =>
     NewApiInstance.request<SpaceAnalyticsTasksData>({
       url: `/spaces/${spaceId}/analytics/tasks`,
       method: 'GET',
+      params,
     })
+
+  export const getPublishersParticipation = (spaceId: number, successBy: 'completion' | 'approve' = 'completion') =>
+    NewApiInstance.request<PublisherParticipation[]>({
+      url: `/spaces/${spaceId}/publishers/participation`,
+      method: 'GET',
+      params: { successBy },
+    })
+
+  // 导出参与者（CSV 或后续支持 Excel）
+  // 返回 AxiosResponse<Blob> 更适合文件下载，但这里直接返回 ResponseDataType<void>
+  // 实际下载放在视图中用 fetch 处理 Authorization 并保存文件
 
   export const addAdmin = (spaceId: number, data: PostSpaceAdminRequestData) =>
     NewApiInstance.request<{ space: Space }>({

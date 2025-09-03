@@ -160,7 +160,7 @@ const route = useRoute()
 const { handleSubmit, defineField, isSubmitting } = useForm({
   validationSchema: toTypedSchema(
     z.object({
-      username: z.string().min(4).max(16),
+      username: z.string().min(4).max(30),
       password: z.string().min(8),
       agree: z.boolean().refine((v) => v, {
         message: '请同意用户协议和隐私政策',
