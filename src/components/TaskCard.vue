@@ -1,5 +1,10 @@
 <template>
-  <v-card flat class="task-card" rounded="md" :to="{ name: 'TasksDetail', params: { taskId: task.id } }">
+  <v-card
+    flat
+    class="task-card"
+    rounded="lg"
+    :to="{ name: 'TasksDetail', params: { taskId: task.id }, query: $route.query }"
+  >
     <div class="d-flex flex-column pa-4">
       <div class="d-flex justify-space-between">
         <div class="text-h6 font-weight-medium task-title">{{ task.name }}</div>

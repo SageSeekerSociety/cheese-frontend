@@ -1,12 +1,5 @@
 <template>
   <v-sheet flat rounded="lg">
-    <v-toolbar :title="t('tasks.publish.title')" color="transparent" density="compact">
-      <template #prepend>
-        <v-btn variant="text" prepend-icon="mdi-chevron-left" @click="goBack">
-          {{ t('tasks.publish.back') }}
-        </v-btn>
-      </template>
-    </v-toolbar>
     <task-form
       v-if="loadedTemplate"
       class="ma-4 pb-4"

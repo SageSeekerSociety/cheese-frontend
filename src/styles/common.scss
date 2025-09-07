@@ -1,0 +1,136 @@
+html,
+body,
+#app {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  scrollbar-gutter: auto;
+}
+
+.page-sidebar {
+  border-top-left-radius: 12px;
+}
+
+.page-sidebar.rounded-0 {
+  border-top-left-radius: 0px;
+}
+
+:root {
+  --app-page-header-height: 48px;
+  --app-page-header-bg-opacity: 0;
+}
+
+.page-header {
+  height: var(--app-page-header-height);
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-block-end-width: 1px;
+  border-block-end-style: solid;
+  border-block-end-color: rgba(var(--v-border-color), var(--v-border-opacity));
+  position: sticky;
+  top: 0px;
+  z-index: 10;
+  background-color: rgba(var(--v-theme-surface), var(--app-page-header-bg-opacity));
+  backdrop-filter: blur(16px);
+}
+
+.page-sidebar {
+  .page-header {
+    border-top-left-radius: 12px;
+    transition: all 0.2s ease;
+  }
+
+  .page-header.page-header-menu:hover,
+  .page-header.page-header-menu.page-header-menu-active {
+    background-color: rgba(var(--v-theme-surface-light), 0.67);
+  }
+}
+
+
+@property --s1 {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 36%;
+}
+@property --s2 {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 68%;
+}
+@property --ang {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 115deg;
+}
+
+.header-corner-glow-flow {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden; /* 隐藏超出圆角的部分 */
+
+  /* 底层：极浅暖底，维持页面统一
+      中层：右上角暖光晕（原“Corner Glow”的灵魂）
+      顶层：一条很浅的线性渐变，持续移动色标 → 颜色流动
+    */
+  background: linear-gradient(
+      var(--ang),
+      rgba(var(--v-theme-logo-secondary), 0.08) 0%,
+      rgba(var(--v-theme-logo-primary), 0.07) var(--s1),
+      rgba(var(--v-theme-primary), 0.06) var(--s2),
+      rgba(var(--v-theme-primary), 0.04) 100%
+    ),
+    radial-gradient(
+      120% 140% at 110% -10%,
+      rgba(var(--v-theme-primary), 0.2) 0%,
+      rgba(var(--v-theme-primary), 0.08) 35%,
+      rgba(var(--v-theme-primary), 0) 70%
+    ),
+    linear-gradient(180deg, rgba(var(--v-theme-logo-secondary), 0.06) 0%, rgba(var(--v-theme-primary), 0.04) 100%);
+
+  box-shadow: inset 0 -1px rgba(0, 0, 0, 0.06);
+
+  /* 添加动画属性 */
+  animation: flow-effect 12s infinite linear;
+}
+
+/* 定义流动动画 */
+@keyframes flow-effect {
+  0% {
+    --ang: 115deg;
+    --s1: 36%;
+    --s2: 68%;
+  }
+  25% {
+    --ang: 130deg;
+    --s1: 45%;
+    --s2: 75%;
+  }
+  50% {
+    --ang: 145deg;
+    --s1: 50%;
+    --s2: 85%;
+  }
+  75% {
+    --ang: 130deg;
+    --s1: 45%;
+    --s2: 75%;
+  }
+  100% {
+    --ang: 115deg;
+    --s1: 36%;
+    --s2: 68%;
+  }
+}
+
+/* 尊重减少动效偏好 */
+@media (prefers-reduced-motion: reduce) {
+  .header-corner-glow-flow {
+    animation: none;
+  }
+}

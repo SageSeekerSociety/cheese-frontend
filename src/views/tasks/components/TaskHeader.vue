@@ -1,29 +1,7 @@
 <template>
-  <v-row>
+  <v-row no-gutters class="task-header-row">
     <v-col cols="12">
-      <div class="d-flex flex-wrap align-center gap-4 mb-4">
-        <!-- 面包屑导航 -->
-        <v-breadcrumbs v-if="breadcrumbItems" :items="breadcrumbItems" density="compact" class="pa-0">
-          <template #prepend>
-            <v-icon icon="mdi-cheese" class="text-primary mr-1"></v-icon>
-          </template>
-        </v-breadcrumbs>
-
-        <v-spacer></v-spacer>
-
-        <!-- 管理功能 -->
-        <div v-if="isCreator || isAdmin" class="d-flex align-center gap-2">
-          <v-btn-group color="primary" density="comfortable" rounded="lg">
-            <v-btn prepend-icon="mdi-pencil" @click="$emit('edit')">编辑</v-btn>
-            <v-btn icon @click="$emit('delete')">
-              <v-icon>mdi-delete</v-icon>
-            </v-btn>
-          </v-btn-group>
-        </div>
-      </div>
-
-      <!-- 赛题标题信息卡片 -->
-      <v-card flat class="mb-4 task-header-card">
+      <v-card flat rounded="0" class="task-header-card header-corner-glow-flow">
         <div class="task-header-inner pa-5 pa-sm-6">
           <div class="d-flex flex-column flex-md-row justify-space-between gap-4">
             <div class="task-header-content">
@@ -107,8 +85,6 @@ import { getAvatarUrl } from '@/utils/materials'
 const props = defineProps<{
   taskData: Task
   breadcrumbItems: any[] | null
-  isCreator: boolean
-  isAdmin: boolean
   taskStatusText: string
   taskStatusType: string
   titleWithPunctuation: boolean
@@ -125,8 +101,6 @@ const canUserJoin = computed(() => {
 })
 
 defineEmits<{
-  (e: 'edit'): void
-  (e: 'delete'): void
   (e: 'join'): void
   (e: 'leave'): void
 }>()
@@ -137,12 +111,16 @@ const formatDate = (date: string | Date | number) => {
 </script>
 
 <style scoped>
-.task-header-card {
-  background: linear-gradient(to right, rgb(var(--v-theme-surface)), rgb(var(--v-theme-background)));
+.task-header-row {
   position: relative;
+  top: calc(-1 * var(--app-page-header-height));
+  margin-bottom: calc(var(--app-page-header-height) * -1);
+}
+
+.task-header-card {
+  padding-top: var(--app-page-header-height);
   overflow: hidden;
   transition: all 0.3s ease;
-  border-radius: 8px;
   color: rgb(var(--v-theme-on-surface));
 }
 
@@ -158,18 +136,6 @@ const formatDate = (date: string | Date | number) => {
 .task-header-inner {
   position: relative;
   z-index: 2;
-}
-
-.task-header-inner::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 30%;
-  height: 100%;
-  background: radial-gradient(circle at top right, rgba(var(--v-theme-primary), 0.1), transparent 70%);
-  opacity: 0.6;
-  z-index: -1;
 }
 
 .task-icon-wrapper {

@@ -13,6 +13,25 @@ export const useSpaceStore = defineStore('space', () => {
   const categories = ref<SpaceCategory[]>([])
   const loadingCategories = ref(false)
 
+  const isEditingProfile = ref<boolean>(false)
+  const isManagingAdmins = ref<boolean>(false)
+
+  const openEditProfile = () => {
+    isEditingProfile.value = true
+  }
+
+  const closeEditProfile = () => {
+    isEditingProfile.value = false
+  }
+
+  const openManageAdmins = () => {
+    isManagingAdmins.value = true
+  }
+
+  const closeManageAdmins = () => {
+    isManagingAdmins.value = false
+  }
+
   const templates = computed<SpaceTaskTemplate[]>(() => {
     if (!currentSpace.value) return []
     try {
@@ -297,6 +316,8 @@ export const useSpaceStore = defineStore('space', () => {
     classificationTopics,
     categories,
     loadingCategories,
+    isEditingProfile,
+    isManagingAdmins,
     fetchSpace,
     updateSpace,
     updateTemplates,
@@ -319,5 +340,9 @@ export const useSpaceStore = defineStore('space', () => {
     addAdmin,
     updateAdmin,
     removeAdmin,
+    openEditProfile,
+    closeEditProfile,
+    openManageAdmins,
+    closeManageAdmins,
   }
 })

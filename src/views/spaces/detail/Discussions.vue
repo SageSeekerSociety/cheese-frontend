@@ -1,15 +1,22 @@
 <template>
+  <div class="page-header">
+    <v-icon size="24">mdi-forum-outline</v-icon>
+    <span class="text-subtitle-1">{{ t('spaces.discussions.title') }}</span>
+    <v-spacer></v-spacer>
+    <v-btn
+      class="text-medium-emphasis"
+      color="text"
+      size="small"
+      icon
+      variant="text"
+      @click="navigateToCreateDiscussion"
+    >
+      <v-icon left size="20">mdi-plus</v-icon>
+    </v-btn>
+  </div>
   <v-container fluid>
     <v-row>
       <v-col cols="12">
-        <div class="d-flex justify-space-between align-center mb-4">
-          <h1 class="text-h5">{{ t('spaces.discussions.title') }}</h1>
-          <v-btn color="primary" rounded="pill" @click="navigateToCreateDiscussion">
-            <v-icon start>mdi-plus-circle-outline</v-icon>
-            {{ t('spaces.discussions.newDiscussion') }}
-          </v-btn>
-        </div>
-
         <InfiniteScroll
           :loading="isLoadingMore"
           :has-more="pageInfo.hasMore"

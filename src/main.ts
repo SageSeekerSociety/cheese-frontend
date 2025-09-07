@@ -45,7 +45,6 @@ const app = createApp(App)
 
 registerPlugins(app)
 registerDirectives(app)
-
 app.mount('#app')
 
 // Initialize i18next

@@ -1,17 +1,14 @@
 import type { RouteRecordRaw } from 'vue-router'
 
+import RouterPassThrough from '@/layouts/RouterPassThrough.vue'
+
 export default {
   path: '/teams',
-  component: () => import('@/layouts/teams/Teams.vue'),
+  component: RouterPassThrough,
   meta: {
     title: '小队',
   },
   children: [
-    {
-      path: '',
-      name: 'TeamsIndex',
-      component: () => import('@/views/teams/Index.vue'),
-    },
     {
       path: ':teamId',
       name: 'TeamsDetail',

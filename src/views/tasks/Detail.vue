@@ -2,48 +2,37 @@
   <!-- 加载和错误状态 -->
   <LoadingErrorContainer v-if="loading || error" :loading="loading" :error="error" @retry="loadTaskData" />
 
-  <v-container v-else-if="taskData" class="pa-4">
-    <!-- AI对话按钮 -->
-    <AIChatButton :open="!chatDialogOpen" @click="openGeneralChat" />
-
+  <template v-else-if="taskData">
     <!-- 任务头部区域 -->
     <TaskHeader
       :task-data="taskData"
       :breadcrumb-items="breadcrumbItems"
-      :is-creator="isTaskCreator"
-      :is-admin="isSpaceAdmin"
       :task-status-text="taskStatusText"
       :task-status-type="taskStatusType"
       :title-with-punctuation="titleStartsWithChinesePunctuation"
       :participation-info="participationInfo"
-      @edit="navigateToEditPage"
-      @delete="confirmDeleteTask"
       @join="events.emit('join-clicked')"
       @leave="events.emit('leave-clicked')"
     />
 
-    <!-- 导航标签页 -->
-    <TaskNavigationTabs
-      v-model="activeTab"
-      :task-data="taskData"
-      :is-creator="isTaskCreator"
-      :is-admin="isSpaceAdmin"
-      :participation-info="participationInfo"
-    />
+    <v-container fluid class="pt-4">
+      <!-- 路由视图 -->
+      <router-view
+        v-slot="{ Component }"
+        :task-data="taskData"
+        :is-creator="isTaskCreator"
+        :is-admin="isSpaceAdmin"
+        :participation-info="participationInfo"
+      >
+        <transition name="fade" mode="out-in">
+          <component :is="Component" :task-data="taskData" :participation-info="participationInfo" />
+        </transition>
+      </router-view>
+    </v-container>
+  </template>
 
-    <!-- 路由视图 -->
-    <router-view
-      v-slot="{ Component }"
-      :task-data="taskData"
-      :is-creator="isTaskCreator"
-      :is-admin="isSpaceAdmin"
-      :participation-info="participationInfo"
-    >
-      <transition name="fade" mode="out-in">
-        <component :is="Component" :task-data="taskData" :participation-info="participationInfo" />
-      </transition>
-    </router-view>
-  </v-container>
+  <!-- AI对话按钮 -->
+  <AIChatButton :open="!chatDialogOpen" @click="openGeneralChat" />
 
   <!-- 对话框组件集合，通过事件总线通信 -->
   <TaskDialogs
@@ -57,16 +46,24 @@
   />
 </template>
 
-<script setup lang="ts">
-import { onMounted, ref } from 'vue'
+<script setup lang="tsx">
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { VBtn } from 'vuetify/components'
+
+import { usePageTitle } from '@/composables/usePageTitle'
 
 import { AIChatButton, LoadingErrorContainer, TaskDialogs, TaskHeader, TaskNavigationTabs } from './components'
 import { useAIChat, useTaskData, useTaskManagement, useTaskParticipation, useTeamParticipation } from './composables'
 import { useEvents } from './events'
 
-const activeTab = ref(null)
+import { useNavigationStore } from '@/stores/navigation'
+
+const { setActions, clearActions, setTabs, clearTabs } = useNavigationStore()
+
+const activeTab = ref<string>()
 const router = useRouter()
+const { setDynamicTitle } = usePageTitle()
 
 // 使用任务模块的事件总线
 const events = useEvents()
@@ -105,6 +102,37 @@ const navigateToEditPage = () => {
   router.push({ name: 'TasksEdit', params: { taskId: taskId.value } })
 }
 
+const PageHeaderActions = () => (
+  <>
+    {(isTaskCreator.value || isSpaceAdmin.value) && <VBtn icon="mdi-pencil" onClick={navigateToEditPage}></VBtn>}
+    {(isTaskCreator.value || isSpaceAdmin.value) && <VBtn icon="mdi-delete" onClick={confirmDeleteTask}></VBtn>}
+  </>
+)
+
+const PageHeaderTabs = () => (
+  <>
+    {taskData.value && (
+      <TaskNavigationTabs
+        modelValue={activeTab.value}
+        onUpdateModelValue={(newValue) => (activeTab.value = newValue)}
+        taskData={taskData.value}
+        isCreator={isTaskCreator.value}
+        isAdmin={isSpaceAdmin.value}
+      />
+    )}
+  </>
+)
+
+onMounted(() => {
+  setActions(PageHeaderActions)
+  setTabs(PageHeaderTabs)
+})
+
+onUnmounted(() => {
+  clearActions()
+  clearTabs()
+})
+
 onMounted(() => {
   events.on('join-clicked', onJoinTaskClicked)
   events.on('leave-clicked', confirmLeaveTask)
@@ -136,6 +164,9 @@ onMounted(() => {
 
   // 加载任务数据
   loadTaskData().then(() => {
+    if (taskData.value?.name) {
+      setDynamicTitle(taskData.value.name, 'SpacesDetailTasksDetail')
+    }
     // 如果是小队赛题，加载已参与的小队
     if (taskData.value?.submitterType === 'TEAM') {
       loadJoinedTeams()
