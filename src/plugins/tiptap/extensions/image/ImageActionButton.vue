@@ -1,6 +1,6 @@
 <template>
   <file-select v-model="files" accept="image/*" :max="1" :disabled="disabled" @change="onFileChange">
-    <action-button :tooltip="t('editor.image.tooltip')" :disabled="disabled">
+    <action-button :editor="editor" :tooltip="t('editor.image.tooltip')" :disabled="disabled">
       <v-icon>mdi-image-plus</v-icon>
     </action-button>
   </file-select>

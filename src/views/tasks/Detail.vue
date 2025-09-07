@@ -102,10 +102,14 @@ const navigateToEditPage = () => {
   router.push({ name: 'TasksEdit', params: { taskId: taskId.value } })
 }
 
+// Vuetify's VBtn TSX typing doesn't expose `onClick` in props.
+// Cast to any for clean TSX event binding without affecting runtime.
+const VBtnAny = VBtn as any
+
 const PageHeaderActions = () => (
   <>
-    {(isTaskCreator.value || isSpaceAdmin.value) && <VBtn icon="mdi-pencil" onClick={navigateToEditPage}></VBtn>}
-    {(isTaskCreator.value || isSpaceAdmin.value) && <VBtn icon="mdi-delete" onClick={confirmDeleteTask}></VBtn>}
+    {(isTaskCreator.value || isSpaceAdmin.value) && <VBtnAny icon="mdi-pencil" onClick={navigateToEditPage} />}
+    {(isTaskCreator.value || isSpaceAdmin.value) && <VBtnAny icon="mdi-delete" onClick={confirmDeleteTask} />}
   </>
 )
 
@@ -114,7 +118,7 @@ const PageHeaderTabs = () => (
     {taskData.value && (
       <TaskNavigationTabs
         modelValue={activeTab.value}
-        onUpdateModelValue={(newValue) => (activeTab.value = newValue)}
+        onUpdate:modelValue={(newValue: string | undefined) => (activeTab.value = newValue)}
         taskData={taskData.value}
         isCreator={isTaskCreator.value}
         isAdmin={isSpaceAdmin.value}

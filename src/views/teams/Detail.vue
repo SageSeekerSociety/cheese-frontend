@@ -279,7 +279,7 @@ const saveChannel = async (formData: Record<string, any>) => {
       const response = await ProjectsApi.update(editingChannel.value.id, finalFormData)
       savedProject = response.data.project
     } else {
-      const response = await ProjectsApi.create(finalFormData)
+      const response = await ProjectsApi.create(finalFormData as any)
       savedProject = response.data.project
     }
 
@@ -414,6 +414,10 @@ provide('discussionData', {
 
 const isDiscussionDetailRoute = computed(() => {
   return route.name === 'TeamsDetailDiscussion' || (route.meta && route.meta.isDiscussionDetail === true)
+})
+
+const parentActiveProjects = computed(() => {
+  return projects.value.filter((project) => !project.archived && !project.parentId)
 })
 
 const showArchivedChannels = ref(true) // 默认展开
