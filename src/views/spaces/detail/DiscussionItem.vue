@@ -27,7 +27,7 @@
               <v-icon>mdi-arrow-left</v-icon>
             </v-btn>
             <div class="text-h6 text-truncate font-weight-medium">
-              {{ getDiscussionTitle(discussion.content) || t('spaces.discussions.untitled') }}
+              {{ getDiscussionTitle(discussion.content) || t('spaces.discussions.detailTitle') }}
             </div>
             <v-spacer></v-spacer>
             <v-btn icon variant="text" density="comfortable" class="discussion-action-btn">
@@ -138,20 +138,19 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vuetify-sonner'
 
-import { getFullAttachmentUrl } from '@/utils/materials'
-import { setTitle } from '@/utils/title'
+import { usePageTitle } from '@/composables/usePageTitle'
 
 import InfiniteScroll from '@/components/common/InfiniteScroll.vue'
 import DiscussionItemComponent from '@/components/discussions/DiscussionItem.vue'
 import ReplyInput from '@/components/discussions/ReplyInput.vue'
-import { AttachmentsApi } from '@/network/api/attachments'
 import { DiscussionsApi } from '@/network/api/discussions'
 import { useDialog } from '@/plugins/dialog'
 
+const dialog = useDialog()
 const { t } = useI18n()
+const { setDynamicTitle } = usePageTitle()
 const route = useRoute()
 const router = useRouter()
-const dialog = useDialog()
 
 const discussion = ref<DiscussionWithUI | null>(null)
 const replies = ref<DiscussionWithUI[]>([])
@@ -175,8 +174,6 @@ const subDiscussionsPageInfo = ref<Page>({
 const spaceId = computed(() => Number(route.params.spaceId))
 const discussionId = computed(() => Number(route.params.discussionId))
 
-const mainDiscussionImage = ref<{ url: string; aspectRatio?: number } | null>(null)
-
 const fetchDiscussionDetail = async () => {
   isLoading.value = true
   errorLoading.value = null
@@ -195,7 +192,10 @@ const fetchDiscussionDetail = async () => {
       replies.value = []
       subDiscussionsPageInfo.value = { ...subDiscussionsPageInfo.value, hasMore: false, total: 0, nextStart: 0 }
     }
-    setTitle(getDiscussionTitle(discussion.value?.content || '') || t('spaces.discussions.title'), route)
+    const title = getDiscussionTitle(discussion.value?.content || '')
+    if (title) {
+      setDynamicTitle(title)
+    }
   } catch (err: any) {
     console.error('Failed to load discussion detail:', err)
     errorLoading.value = err.message || 'Unknown error'
@@ -342,8 +342,8 @@ const handleDeleteReply = async (replyToDelete: DiscussionWithUI) => {
   }
 }
 
-const getDiscussionTitle = (contentString?: string): string => {
-  if (!contentString) return ''
+const getDiscussionTitle = (contentString?: string): string | null => {
+  if (!contentString) return null
   try {
     const parsedContent = JSON.parse(contentString)
     if (parsedContent.content && parsedContent.content.length > 0) {
@@ -351,21 +351,12 @@ const getDiscussionTitle = (contentString?: string): string => {
       if (firstNode.type === 'heading' && firstNode.attrs?.level === 1 && firstNode.content?.[0]?.text) {
         return firstNode.content[0].text.trim()
       }
-      for (const node of parsedContent.content) {
-        if (node.type === 'paragraph' && node.content) {
-          const text = node.content
-            .map((n: any) => n.text || '')
-            .join('')
-            .trim()
-          if (text) return text.substring(0, 70) + (text.length > 70 ? '...' : '')
-        }
-      }
+      return null
     }
   } catch (e) {
     /* Ignore parsing error, will fallback */
   }
-  const plainText = contentString.replace(/<[^>]*>/g, '').trim()
-  return plainText.substring(0, 70) + (plainText.length > 70 ? '...' : '')
+  return null
 }
 
 const goBack = () => {

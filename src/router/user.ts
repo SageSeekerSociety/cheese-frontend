@@ -1,14 +1,19 @@
 import type { RouteRecordRaw } from 'vue-router'
 
+import RouterPassThrough from '@/layouts/RouterPassThrough.vue'
+
 export default {
   path: '/users',
   name: 'User',
-  component: () => import('@/layouts/user/User.vue'),
+  component: RouterPassThrough,
   children: [
     {
       path: 'settings',
       name: 'UserSettings',
-      component: () => import('@/layouts/user/Settings.vue'),
+      components: {
+        default: () => import('@/layouts/user/Settings.vue'),
+        sidebar: () => import('@/views/user/settings/SettingsSidebar.vue'),
+      },
       redirect: { name: 'UserSettingsProfile' },
       children: [
         {

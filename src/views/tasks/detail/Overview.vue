@@ -180,93 +180,27 @@
       </template>
     </v-alert>
 
-    <!-- AI建议入口卡片 -->
-    <v-card flat rounded="lg" class="gradient-card cursor-pointer mb-4" elevation="0" @click="goToAIAdvice">
-      <v-card-text class="pa-6">
-        <div class="d-flex align-center gap-4">
-          <v-avatar color="primary-lighten-4" size="56" class="elevation-0">
-            <v-icon color="primary" size="32">mdi-robot</v-icon>
-          </v-avatar>
-
-          <div class="flex-grow-1">
-            <div class="text-h5 font-weight-bold d-flex flex-wrap align-center gap-2">
-              <span>启星研导 <span class="text-primary">Navigator AI</span></span>
-              <span class="text-caption text-disabled d-block d-sm-inline-block">
-                Powered by 知启星 AI & DeepSeek-R1
-              </span>
-            </div>
-            <div class="text-medium-emphasis">为您解析赛题核心，推荐学习路径，助力科研探索</div>
-          </div>
-
-          <v-btn
-            color="primary"
-            variant="tonal"
-            rounded="pill"
-            :to="{ name: 'TasksAIAdvice', params: { taskId: taskData?.id } }"
-            class="px-4"
-          >
-            查看建议
-            <v-icon end>mdi-arrow-right</v-icon>
-          </v-btn>
-        </div>
-      </v-card-text>
-    </v-card>
-
-    <!-- 截止时间信息 -->
     <v-row>
-      <v-col cols="12" md="6">
-        <v-card flat rounded="lg" class="h-100 task-info-card">
+      <v-col cols="12" md="9" lg="8">
+        <v-card flat rounded="lg" class="task-detail-card" border="sm">
           <v-card-item>
             <template #prepend>
               <div class="me-3">
                 <v-avatar color="primary-lighten-5" size="48" class="elevation-0">
-                  <v-icon color="primary" size="28">mdi-clock-outline</v-icon>
+                  <v-icon color="primary" size="28">mdi-information-outline</v-icon>
                 </v-avatar>
               </div>
             </template>
-            <v-card-title class="text-h5 ps-0">时间信息</v-card-title>
+            <v-card-title class="text-h5 ps-0">赛题详情</v-card-title>
           </v-card-item>
 
-          <v-divider class="mx-6"></v-divider>
-
-          <v-card-text class="px-6 py-4">
-            <div class="d-flex flex-column gap-3">
-              <div class="d-flex justify-space-between align-center">
-                <div class="text-subtitle-1">报名截止时间</div>
-                <div class="d-flex align-center">
-                  <span class="text-primary font-weight-medium">
-                    {{ formatTaskDate(taskData?.deadline) }}
-                  </span>
-                  <v-chip v-if="isDeadlineSoon(taskData?.deadline)" color="error" size="small" class="ms-2">
-                    即将截止
-                  </v-chip>
-                </div>
-              </div>
-
-              <v-divider></v-divider>
-
-              <div class="d-flex justify-space-between align-center">
-                <div class="text-subtitle-1">默认提交期限</div>
-                <div class="text-primary font-weight-medium">{{ taskData?.defaultDeadline || 0 }} 天</div>
-              </div>
-
-              <div v-if="taskData?.joined && taskUserDeadline" class="mt-2">
-                <v-alert type="info" variant="tonal" density="comfortable" rounded="lg">
-                  <template #text>
-                    <div class="d-flex align-center justify-space-between">
-                      <span>您的提交截止时间：</span>
-                      <CountdownTimer :deadline="taskUserDeadline" label="" class="text-right" />
-                    </div>
-                  </template>
-                </v-alert>
-              </div>
+          <v-card-text>
+            <div class="task-description">
+              <TipTapViewer :value="taskDescription" />
             </div>
           </v-card-text>
         </v-card>
-      </v-col>
-
-      <v-col cols="12" md="6">
-        <v-card flat rounded="lg" class="h-100 task-info-card">
+        <v-card flat rounded="lg" class="mt-4 task-info-card" border="sm">
           <v-card-item>
             <template #prepend>
               <div class="me-3">
@@ -336,27 +270,87 @@
           </v-card-text>
         </v-card>
       </v-col>
+
+      <v-col cols="12" md="3" lg="4">
+        <v-card flat rounded="lg" class="task-info-card" border="sm">
+          <v-card-item>
+            <template #prepend>
+              <div class="me-3">
+                <v-avatar color="primary-lighten-5" size="48" class="elevation-0">
+                  <v-icon color="primary" size="28">mdi-clock-outline</v-icon>
+                </v-avatar>
+              </div>
+            </template>
+            <v-card-title class="text-h5 ps-0">时间信息</v-card-title>
+          </v-card-item>
+
+          <v-divider class="mx-6"></v-divider>
+
+          <v-card-text class="px-6 py-4">
+            <div class="d-flex flex-column gap-3">
+              <div class="d-flex justify-space-between align-center">
+                <div class="text-subtitle-1">报名截止时间</div>
+                <div class="d-flex align-center">
+                  <span class="text-primary font-weight-medium">
+                    {{ formatTaskDate(taskData?.deadline) }}
+                  </span>
+                  <v-chip v-if="isDeadlineSoon(taskData?.deadline)" color="error" size="small" class="ms-2">
+                    即将截止
+                  </v-chip>
+                </div>
+              </div>
+
+              <v-divider></v-divider>
+
+              <div class="d-flex justify-space-between align-center">
+                <div class="text-subtitle-1">默认提交期限</div>
+                <div class="text-primary font-weight-medium">{{ taskData?.defaultDeadline || 0 }} 天</div>
+              </div>
+
+              <div v-if="taskData?.joined && taskUserDeadline" class="mt-2">
+                <v-alert type="info" variant="tonal" density="comfortable" rounded="lg">
+                  <template #text>
+                    <div class="d-flex align-center justify-space-between">
+                      <span>您的提交截止时间：</span>
+                      <CountdownTimer :deadline="taskUserDeadline" label="" class="text-right" />
+                    </div>
+                  </template>
+                </v-alert>
+              </div>
+            </div>
+          </v-card-text>
+        </v-card>
+        <v-card flat rounded="lg" class="gradient-card cursor-pointer mt-4" elevation="0" @click="goToAIAdvice">
+          <v-card-text class="pa-6">
+            <div class="d-flex align-center gap-4">
+              <v-avatar color="primary-lighten-4" size="56" class="elevation-0">
+                <v-icon color="primary" size="32">mdi-robot</v-icon>
+              </v-avatar>
+
+              <div class="flex-grow-1">
+                <div class="text-h5 font-weight-bold d-flex flex-wrap align-center gap-2">
+                  <span>启星研导 <span class="text-primary">Navigator AI</span></span>
+                </div>
+                <div class="text-medium-emphasis">为您解析赛题核心，推荐学习路径，助力科研探索</div>
+              </div>
+
+              <v-btn
+                color="primary"
+                variant="tonal"
+                rounded="pill"
+                :to="{ name: 'TasksAIAdvice', params: { taskId: taskData?.id } }"
+                class="px-4"
+              >
+                查看建议
+                <v-icon end>mdi-arrow-right</v-icon>
+              </v-btn>
+            </div>
+          </v-card-text>
+        </v-card>
+      </v-col>
     </v-row>
 
     <!-- 赛题详情 -->
-    <v-card flat rounded="lg" class="mt-4 task-detail-card">
-      <v-card-item>
-        <template #prepend>
-          <div class="me-3">
-            <v-avatar color="primary-lighten-5" size="48" class="elevation-0">
-              <v-icon color="primary" size="28">mdi-information-outline</v-icon>
-            </v-avatar>
-          </div>
-        </template>
-        <v-card-title class="text-h5 ps-0">赛题详情</v-card-title>
-      </v-card-item>
-
-      <v-card-text>
-        <div class="task-description">
-          <TipTapViewer :value="taskDescription" />
-        </div>
-      </v-card-text>
-    </v-card>
   </div>
 </template>
 
@@ -365,6 +359,7 @@ import type { Task } from '@/types'
 
 import { computed, defineAsyncComponent } from 'vue'
 import { useRouter } from 'vue-router'
+import { VBtn } from 'vuetify/components'
 import dayjs from 'dayjs'
 
 import { getAvatarUrl } from '@/utils/materials'
@@ -469,17 +464,7 @@ const goToAIAdvice = () => {
 
 .task-detail-card,
 .task-info-card {
-  border: 1px solid rgba(var(--v-theme-primary), 0.08);
-  background-color: rgb(var(--v-theme-surface));
   transition: all 0.3s ease;
-  box-shadow: 0 2px 12px rgba(var(--v-theme-primary), 0.03) !important;
-}
-
-.task-detail-card:hover,
-.task-info-card:hover {
-  border-color: rgba(var(--v-theme-primary), 0.15);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(var(--v-theme-primary), 0.05) !important;
 }
 
 .gradient-card {

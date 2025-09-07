@@ -1,7 +1,7 @@
 <template>
   <div class="chat-container d-flex flex-column h-100">
     <!-- 聊天头部 -->
-    <v-toolbar flat class="bg-white">
+    <!-- <v-toolbar flat class="bg-white">
       <v-toolbar-title class="d-flex align-center">
         <span>AI助手</span>
       </v-toolbar-title>
@@ -9,7 +9,7 @@
       <v-btn variant="text" @click="showSettings = true">
         <v-icon>mdi-cog</v-icon>
       </v-btn>
-    </v-toolbar>
+    </v-toolbar> -->
 
     <!-- 聊天内容区域 -->
     <div class="chat-content flex-grow-1 overflow-auto pa-4">
@@ -17,16 +17,14 @@
       <div v-if="messages.length === 0" class="welcome-container">
         <div class="text-center mb-8">
           <v-avatar size="80" class="mb-4">
-            <v-icon icon="mdi-robot" size="48" color="primary"></v-icon>
+            <v-icon icon="mdi-assistant" size="48" color="primary"></v-icon>
           </v-avatar>
-          <h2 class="text-h4 font-weight-light mb-2">欢迎使用AI助手</h2>
-          <p class="text-subtitle-1 text-medium-emphasis mb-6">
-            我可以帮助您解答问题、分析数据、管理知识，让我们开始对话吧！
-          </p>
+          <h2 class="text-h4 font-weight-light mb-2">欢迎使用元思</h2>
+          <p class="text-subtitle-1 text-medium-emphasis mb-6">你的第二个大脑，与你共同进化</p>
         </div>
 
         <!-- 快速操作建议 -->
-        <v-row justify="center" class="mb-6">
+        <!-- <v-row justify="center" class="mb-6">
           <v-col cols="12" sm="10" md="8">
             <v-card flat border>
               <v-card-text>
@@ -72,7 +70,7 @@
               </v-card-text>
             </v-card>
           </v-col>
-        </v-row>
+        </v-row> -->
       </div>
 
       <!-- 消息列表 -->
@@ -145,6 +143,7 @@ import { type AssistantMessage, assistantService } from '@/services/assistantSer
 const inputMessage = ref('')
 const isSending = ref(false)
 const isTyping = ref(false)
+let currentAbortController: AbortController | null = null
 const showSettings = ref(false)
 
 // 设置
@@ -163,9 +162,10 @@ const handleSendMessage = async (message: string) => {
   if (!message.trim() || isSending.value) return
 
   // 添加用户消息
-  const userMessage = {
+  const userMessage: AssistantMessage = {
     id: Date.now().toString(),
     role: 'user' as const,
+    messageType: 'TEXT' as const,
     content: message,
     timestamp: new Date(),
   }
@@ -177,9 +177,10 @@ const handleSendMessage = async (message: string) => {
   isTyping.value = true
 
   // 创建AI响应消息占位符
-  const aiMessage = {
+  const aiMessage: AssistantMessage = {
     id: (Date.now() + 1).toString(),
     role: 'assistant' as const,
+    messageType: 'TEXT' as const,
     content: '',
     timestamp: new Date(),
     isTyping: true,
@@ -187,8 +188,9 @@ const handleSendMessage = async (message: string) => {
   messages.value.push(aiMessage)
 
   try {
-    // 调用ProjectMetis API进行流式响应
-    const stream = assistantService.sendMessage(message)
+    // 调用ProjectMetis API进行流式响应（支持停止生成）
+    currentAbortController = new AbortController()
+    const stream = assistantService.sendMessage(message, { signal: currentAbortController.signal })
     let fullContent = ''
 
     for await (const chunk of stream) {
@@ -231,6 +233,7 @@ const handleSendMessage = async (message: string) => {
   } finally {
     isSending.value = false
     isTyping.value = false
+    currentAbortController = null
   }
 }
 
@@ -242,7 +245,14 @@ const sendQuickMessage = (message: string) => {
 
 // 停止生成
 const handleStopGeneration = () => {
-  // TODO: 实现停止生成逻辑
+  if (currentAbortController) {
+    try {
+      currentAbortController.abort()
+    } catch (e) {
+      console.error('停止生成时出错:', e)
+    }
+    currentAbortController = null
+  }
   isSending.value = false
   isTyping.value = false
 }
@@ -294,10 +304,6 @@ const openKnowledgeGraph = () => {
 </script>
 
 <style scoped>
-.chat-container {
-  height: calc(100vh - 64px); /* 减去AppBar高度 */
-}
-
 .welcome-container {
   max-width: 800px;
   margin: 0 auto;

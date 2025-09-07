@@ -10,6 +10,7 @@ import { defineConfig } from 'vite'
 import viteCompression from 'vite-plugin-compression'
 import { prismjsPlugin } from 'vite-plugin-prismjs'
 import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
+import svgLoader from 'vite-svg-loader'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -17,6 +18,7 @@ export default defineConfig({
     vue({
       template: { transformAssetUrls },
     }),
+    svgLoader(),
     vueJsx(),
     // https://github.com/vuetifyjs/vuetify-loader/tree/next/packages/vite-plugin
     vuetify({

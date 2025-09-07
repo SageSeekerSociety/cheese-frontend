@@ -1,9 +1,11 @@
 import type { RouteRecordRaw } from 'vue-router'
 
+import RouterPassThrough from '@/layouts/RouterPassThrough.vue'
+
 export default {
   path: '/questions',
   name: 'Question',
-  component: () => import('@/layouts/question/Question.vue'),
+  component: RouterPassThrough,
   meta: {
     title: '问答',
     disabled: true,

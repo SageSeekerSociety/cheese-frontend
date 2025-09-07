@@ -1,240 +1,21 @@
 <template>
+  <DetailSidebar
+    v-model:show-archived-channels="showArchivedChannels"
+    :team-data="teamData"
+    :team-members="teamMembers"
+    :team-members-count="teamMembersCount"
+    :projects="projects"
+    :loading="loading"
+    :expanded-channels="expandedChannels"
+    @open-create-channel-dialog="openCreateChannelDialog"
+    @handle-create-sub-channel="handleCreateSubChannel"
+    @toggle-channel-expand="toggleChannelExpand"
+  />
   <v-container fluid class="pa-0 layout-container">
     <v-row no-gutters class="fill-height">
-      <!-- 左侧边栏 -->
-      <v-col cols="12" sm="4" md="3" lg="2" class="sidebar-col">
-        <v-card class="sidebar-card fill-height" flat rounded="0">
-          <!-- 小队信息头部 -->
-          <div class="team-header pa-4">
-            <div class="d-flex align-center mb-4">
-              <v-avatar size="48" color="primary" class="team-avatar">
-                <v-img :src="getAvatarUrl(teamData?.avatarId)" />
-              </v-avatar>
-              <div class="ml-3">
-                <div class="text-h6 team-name">{{ teamData?.name }}</div>
-                <div class="text-caption text-medium-emphasis">{{ teamData?.intro }}</div>
-              </div>
-            </div>
-          </div>
-
-          <v-divider></v-divider>
-
-          <!-- 频道管理 -->
-          <div class="px-2 pt-4 pb-2">
-            <div class="d-flex align-center justify-space-between channels-header px-2">
-              <span class="text-subtitle-2 font-weight-medium">频道</span>
-              <v-btn
-                v-if="isTeamAdmin"
-                icon="mdi-plus"
-                variant="text"
-                size="small"
-                density="comfortable"
-                @click="openCreateChannelDialog()"
-              ></v-btn>
-            </div>
-
-            <!-- 活跃频道列表 -->
-            <v-list density="compact" nav>
-              <!-- 将项目作为频道显示 - 仅显示父频道 -->
-              <template v-for="project in parentActiveProjects" :key="project.id">
-                <!-- 父频道项 -->
-                <v-list-item
-                  :value="project.id"
-                  :to="{ name: 'TeamsDetailChannels', params: { ...route.params, channelId: project.id } }"
-                  :active="activeChannelId === project.id"
-                  rounded="lg"
-                  class="channel-item mb-1"
-                  color="primary"
-                >
-                  <template #prepend>
-                    <div class="channel-dot mr-2" :style="{ backgroundColor: project.colorCode }"></div>
-                  </template>
-                  <v-list-item-title class="text-body-2">{{ project.name }}</v-list-item-title>
-                  <template #append>
-                    <div class="d-flex align-center">
-                      <v-badge
-                        v-if="getUnreadCount(project.id) > 0"
-                        :content="getUnreadCount(project.id)"
-                        color="primary"
-                        dot
-                        floating
-                        class="mr-1"
-                      ></v-badge>
-                      <!-- 添加创建子频道按钮 -->
-                      <v-btn
-                        v-if="isTeamAdmin && !project.archived"
-                        icon="mdi-plus-circle-outline"
-                        variant="text"
-                        size="x-small"
-                        density="comfortable"
-                        class="create-subitem-btn mr-1"
-                        title="创建子频道"
-                        @click.stop.prevent="handleCreateSubChannel(project.id)"
-                      ></v-btn>
-                      <!-- 显示子频道指示器 -->
-                      <v-icon
-                        v-if="hasChildren(project)"
-                        size="small"
-                        :icon="expandedChannels[project.id] ? 'mdi-chevron-down' : 'mdi-chevron-right'"
-                        class="ml-1 expand-icon"
-                        @click.stop.prevent="toggleChannelExpand(project.id)"
-                      ></v-icon>
-                    </div>
-                  </template>
-                </v-list-item>
-
-                <!-- 子频道 -->
-                <div v-if="hasChildren(project) && expandedChannels[project.id]" class="child-channels ml-4">
-                  <v-list-item
-                    v-for="child in (project.children ?? []).filter((child) => !child.archived)"
-                    :key="child.id"
-                    :value="child.id"
-                    :to="{ name: 'TeamsDetailChannels', params: { ...route.params, channelId: child.id } }"
-                    :active="activeChannelId === child.id"
-                    rounded="lg"
-                    class="channel-item child-channel-item mb-1"
-                    color="primary"
-                    density="comfortable"
-                  >
-                    <template #prepend>
-                      <div
-                        class="channel-dot child-channel-dot mr-2"
-                        :style="{ backgroundColor: child.colorCode }"
-                      ></div>
-                    </template>
-                    <v-list-item-title class="text-body-2">{{ child.name }}</v-list-item-title>
-                    <template #append>
-                      <v-badge
-                        v-if="getUnreadCount(child.id) > 0"
-                        :content="getUnreadCount(child.id)"
-                        color="primary"
-                        dot
-                        floating
-                      ></v-badge>
-                    </template>
-                  </v-list-item>
-                </div>
-              </template>
-
-              <!-- 空状态提示 -->
-              <div v-if="!loading && activeProjects.length === 0" class="empty-channels-state pa-4 text-center">
-                <v-icon icon="mdi-message-text-outline" size="large" color="grey-lighten-1" class="mb-2"></v-icon>
-                <div class="text-body-2 text-medium-emphasis mb-1">暂无频道</div>
-                <div class="text-caption text-grey">创建频道开始团队协作</div>
-                <v-btn
-                  v-if="isTeamAdmin"
-                  color="primary"
-                  variant="tonal"
-                  size="small"
-                  class="mt-3"
-                  prepend-icon="mdi-plus"
-                  @click="openCreateChannelDialog()"
-                >
-                  创建频道
-                </v-btn>
-              </div>
-            </v-list>
-
-            <!-- 归档频道 -->
-            <div v-if="allArchivedProjects.length > 0" class="mt-2">
-              <!-- 归档频道标题栏 -->
-              <div
-                class="archive-header d-flex align-center px-2 py-1"
-                @click="showArchivedChannels = !showArchivedChannels"
-              >
-                <span class="text-caption text-medium-emphasis">已归档频道</span>
-                <v-spacer></v-spacer>
-                <v-icon
-                  size="x-small"
-                  class="text-medium-emphasis"
-                  :icon="showArchivedChannels ? 'mdi-chevron-up' : 'mdi-chevron-down'"
-                ></v-icon>
-              </div>
-
-              <!-- 可展开的归档频道列表 -->
-              <v-expand-transition>
-                <div v-show="showArchivedChannels">
-                  <v-list density="compact" nav class="archive-list pa-2">
-                    <!-- 所有归档频道平铺显示 -->
-                    <v-list-item
-                      v-for="project in allArchivedProjects"
-                      :key="project.id"
-                      :value="project.id"
-                      :to="{ name: 'TeamsDetailChannels', params: { ...route.params, channelId: project.id } }"
-                      :active="activeChannelId === project.id"
-                      rounded="lg"
-                      class="channel-item archived-channel mb-1"
-                    >
-                      <template #prepend>
-                        <div class="channel-dot mr-2" :style="{ backgroundColor: project.colorCode }"></div>
-                        <!-- 如果是子频道，显示标识 -->
-                        <v-icon v-if="project.parentId" size="x-small" class="mr-1 text-medium-emphasis">
-                          mdi-subdirectory-arrow-right
-                        </v-icon>
-                      </template>
-                      <v-list-item-title class="text-body-2">{{ project.name }}</v-list-item-title>
-                    </v-list-item>
-                  </v-list>
-                </div>
-              </v-expand-transition>
-            </div>
-          </div>
-
-          <v-divider></v-divider>
-
-          <!-- 小队功能区 -->
-          <div class="px-2 pt-2">
-            <v-list density="compact" nav>
-              <v-list-item
-                :to="{ name: 'TeamsDetailMembers', params: route.params }"
-                prepend-icon="mdi-account-group"
-                rounded="lg"
-                class="function-item"
-              >
-                <v-list-item-title>成员管理</v-list-item-title>
-                <template #append>
-                  <v-chip size="x-small" color="primary" variant="tonal" class="ml-2">
-                    {{ teamMembersCount }}
-                  </v-chip>
-                </template>
-              </v-list-item>
-
-              <v-list-item
-                :to="{ name: 'TeamsDetailKnowledge', params: route.params }"
-                prepend-icon="mdi-book-open-page-variant"
-                rounded="lg"
-                class="function-item"
-              >
-                <v-list-item-title>知识库</v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </div>
-
-          <!-- 管理员信息 -->
-          <v-divider class="my-2"></v-divider>
-          <div class="team-admins px-4 pt-2 pb-4">
-            <p class="text-caption text-medium-emphasis mb-2">管理员</p>
-            <div class="d-flex align-center">
-              <div class="admin-avatars">
-                <v-avatar
-                  v-for="admin in ownerAndAdminExamples"
-                  :key="admin.id"
-                  size="28"
-                  color="grey-lighten-2"
-                  class="admin-avatar"
-                >
-                  <v-img :src="getAvatarUrl(admin.avatarId)" />
-                </v-avatar>
-              </div>
-              <div class="text-caption text-medium-emphasis ml-2">{{ ownerAndAdminsText }}</div>
-            </div>
-          </div>
-        </v-card>
-      </v-col>
-
       <!-- 右侧内容区 -->
-      <v-col cols="12" sm="8" md="9" lg="10" class="content-col">
-        <v-sheet class="content-sheet d-flex flex-column ma-3" rounded="lg">
+      <v-col>
+        <v-sheet class="h-100 d-flex flex-column" rounded="lg">
           <!-- 顶部操作栏 -->
           <div class="content-header px-6 py-3 d-flex align-center">
             <!-- 如果是讨论详情页，使用DiscussionHeader组件 -->
@@ -333,6 +114,8 @@ import { useRoute, useRouter } from 'vue-router'
 
 import { getAvatarUrl } from '@/utils/materials'
 
+import DetailSidebar from './DetailSidebar.vue'
+
 import ProjectFormDialog from '@/components/projects/forms/ProjectFormDialog.vue'
 import { teamDataInjectionKey } from '@/keys'
 import { ProjectsApi } from '@/network/api/projects'
@@ -360,8 +143,6 @@ const createChannelDialog = ref(false)
 const editingChannel = ref<Project | null>(null)
 
 const parentChannelId = ref<number | null>(null)
-
-const activeProjects = computed(() => projects.value.filter((project) => !project.archived))
 
 const activeChannelId = computed(() => {
   const channelId = route.params.channelId
@@ -432,13 +213,6 @@ watch(
   { immediate: true }
 )
 
-const getUnreadCount = (channelId: number) => {
-  // 这里应该通过API获取真实的未读消息数
-  // 现在先模拟一些数据
-  const counts: Record<number, number> = {}
-  return counts[channelId] || 0
-}
-
 const fetchTeamData = async (teamId: number) => {
   const {
     data: { team },
@@ -487,7 +261,7 @@ const editChannel = (channel: Project) => {
   createChannelDialog.value = true
 }
 
-const saveChannel = async (formData: any) => {
+const saveChannel = async (formData: Record<string, any>) => {
   if (!AccountService.user?.id) {
     return
   }
@@ -562,10 +336,11 @@ const archiveChannel = async (channel: Project) => {
         dialog.alert(`频道 ${channel.name} 已归档`, { title: '成功' })
       }
 
-      if (activeChannelId.value === channel.id && activeProjects.value.length > 0) {
+      const activeProjects = projects.value.filter((project) => !project.archived)
+      if (activeChannelId.value === channel.id && activeProjects.length > 0) {
         router.replace({
           ...route,
-          query: { ...route.query, channelId: String(activeProjects.value[0].id) },
+          query: { ...route.query, channelId: String(activeProjects[0].id) },
         })
       }
     } catch (error) {
@@ -613,32 +388,6 @@ const unarchiveChannel = async (channel: Project) => {
   }
 }
 
-const ownerAndAdminExamples = computed(() => {
-  if (!teamData.value) {
-    return []
-  }
-  return [teamData.value.owner, ...(teamData.value.admins.examples || [])]
-})
-
-const ownerAndAdminTotal = computed(() => {
-  if (!teamData.value) {
-    return 0
-  }
-  return 1 + (teamData.value.admins.total || 0)
-})
-
-const ownerAndAdminsText = computed(() => {
-  if (!ownerAndAdminTotal.value) {
-    return '暂无管理员'
-  } else if (ownerAndAdminTotal.value === 1) {
-    return `创建者 ${ownerAndAdminExamples.value[0]!.nickname}`
-  } else {
-    return `创建者 ${ownerAndAdminExamples.value[0]!.nickname} 和 ${ownerAndAdminTotal.value - 1} 位管理员`
-  }
-})
-
-const parentActiveProjects = computed(() => projects.value.filter((project) => !project.archived && !project.parentId))
-
 const expandedChannels = ref<Record<number, boolean>>({})
 
 const hasChildren = (project: Project) => {
@@ -667,22 +416,6 @@ const isDiscussionDetailRoute = computed(() => {
   return route.name === 'TeamsDetailDiscussion' || (route.meta && route.meta.isDiscussionDetail === true)
 })
 
-const allArchivedProjects = computed(() => {
-  const result: Project[] = []
-
-  const archivedParents = projects.value.filter((project) => project.archived && !project.parentId)
-  result.push(...archivedParents)
-
-  for (const project of projects.value) {
-    if (project.children && project.children.length > 0) {
-      const archivedChildren = project.children.filter((child) => child.archived)
-      result.push(...archivedChildren)
-    }
-  }
-
-  return result
-})
-
 const showArchivedChannels = ref(true) // 默认展开
 
 // 获取对话框副标题
@@ -692,7 +425,8 @@ const getDialogSubtitle = () => {
   }
 
   if (parentChannelId.value) {
-    const parentChannel = parentActiveProjects.value.find((p) => p.id === parentChannelId.value)
+    const parentActiveProjects = projects.value.filter((project) => !project.archived && !project.parentId)
+    const parentChannel = parentActiveProjects.find((p) => p.id === parentChannelId.value)
     return `在 ${parentChannel?.name || '父频道'} 下创建子频道`
   }
 
@@ -707,27 +441,22 @@ onMounted(async () => {
 
 <style scoped lang="scss">
 .layout-container {
-  height: calc(100vh - var(--v-layout-top));
+  height: calc(100vh - var(--v-layout-top) - 1px);
   overflow: hidden;
 }
 
 .sidebar-col {
-  border-right: 1px solid rgba(0, 0, 0, 0.05);
-  height: calc(100vh - var(--v-layout-top));
+  height: 100%;
   overflow-y: auto;
-  position: fixed;
   top: var(--v-layout-top);
   left: 0;
   width: 16.666667%; /* 对应 lg="2" */
-  z-index: 2;
 }
 
 .content-col {
   background-color: rgba(0, 0, 0, 0.02);
-  height: calc(100vh - var(--v-layout-top));
+  height: 100%;
   overflow-y: auto;
-  margin-left: 16.666667%; /* 对应左侧边栏宽度 */
-  width: 83.333333%; /* 对应 lg="10" */
 }
 
 @media (min-width: 960px) and (max-width: 1264px) {
@@ -866,12 +595,7 @@ onMounted(async () => {
 }
 
 .content-sheet {
-  background-color: white;
-  border-radius: 16px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
   overflow: hidden;
-  height: calc(100vh - var(--v-layout-top) - 24px);
-  margin: 12px;
 }
 
 .content-header {

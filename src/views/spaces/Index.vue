@@ -1,14 +1,20 @@
 <template>
-  <v-container>
-    <v-row>
+  <div class="header-corner-glow-flow">
+    <PageHeader icon="mdi-view-dashboard" title="空间"></PageHeader>
+    <div class="w-100 pa-8 py-16">
+      <div class="text-h4 text-high-emphasis">在知是，灵感启航。</div>
+      <div class="text-subtitle-1 text-medium-emphasis mt-1">让你的学术好奇心，在此与一个好课题相遇。</div>
+    </div>
+  </div>
+  <v-container fluid>
+    <v-row no-gutters>
       <v-col cols="12">
-        <v-card rounded="lg" class="search-card elevation-0 border">
+        <v-card class="search-card elevation-0">
           <v-card-title class="d-flex align-center justify-space-between pb-0 pt-4 px-4">
             <div class="d-flex align-center">
-              <v-icon icon="mdi-google-maps" class="mr-2" color="primary" />
-              <span class="text-h6">发现空间</span>
+              <span class="text-h6">探索空间</span>
             </div>
-            <v-btn-toggle v-model="selectedSort" class="sort-toggle" rounded="lg" color="primary" density="comfortable">
+            <!-- <v-btn-toggle v-model="selectedSort" class="sort-toggle" rounded="lg" color="primary" density="comfortable">
               <v-btn
                 v-for="(item, index) in sortOptions"
                 :key="index"
@@ -22,7 +28,7 @@
                 ></v-icon>
                 {{ item.text }}
               </v-btn>
-            </v-btn-toggle>
+            </v-btn-toggle> -->
           </v-card-title>
           <v-card-text class="px-4 py-4">
             <infinite-scroll
@@ -67,6 +73,7 @@ import { getAvatarUrl } from '@/utils/materials'
 import { usePaging } from '@/utils/paging'
 
 import InfiniteScroll from '@/components/common/InfiniteScroll.vue'
+import PageHeader from '@/components/common/PageHeader.vue'
 import { SpacesApi } from '@/network/api/spaces'
 
 const { t } = useI18n()

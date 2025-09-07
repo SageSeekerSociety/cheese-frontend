@@ -249,7 +249,8 @@ import dayjs from 'dayjs'
 import { DEFAULT_CONFIG } from '@/utils/editor'
 import { getAvatarUrl } from '@/utils/materials'
 import { parse } from '@/utils/parser'
-import { setTitle } from '@/utils/title'
+
+import { usePageTitle } from '@/composables/usePageTitle'
 
 import ContentVoter from '@/components/common/ContentVoter.vue'
 import RichEditor from '@/components/common/Editor/Editor.vue'
@@ -268,6 +269,7 @@ const onCreate = (editorInstance: EditorJS) => {
 
 const route = useRoute()
 const router = useRouter()
+const { setDynamicTitle } = usePageTitle()
 
 const addBountyInput = ref<number>(1)
 const bountyDialog = ref(false)
@@ -389,7 +391,7 @@ onBeforeRouteUpdate(async (to, from) => {
 
 watch(questionData, (newVal) => {
   if (newVal) {
-    setTitle(newVal.title, route)
+    setDynamicTitle(newVal.title)
   }
 })
 </script>

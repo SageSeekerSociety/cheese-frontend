@@ -1,209 +1,186 @@
 <template>
-  <v-card title="实名信息" rounded="lg">
-    <template #title>
-      <div class="d-flex align-center">
-        <span>实名信息</span>
-        <v-chip
-          class="ml-3"
-          size="small"
-          color="primary"
-          variant="outlined"
-          :disabled="loadingPrecise"
-          style="cursor: pointer"
-          @click="fetchPreciseInfo"
-        >
-          <v-icon
-            v-if="!loadingPrecise"
-            start
-            :icon="showingPrecise ? 'mdi-eye-outline' : 'mdi-eye-off-outline'"
-            size="small"
-          ></v-icon>
-          <v-progress-circular
-            v-else
-            indeterminate
-            size="16"
-            width="2"
-            color="primary"
-            class="mr-2"
-          ></v-progress-circular>
-          {{ showingPrecise ? '已显示完整信息' : '姓名和学号已模糊处理' }}
-        </v-chip>
+  <div class="page-header">
+    <v-icon
+      v-if="!loadingPrecise"
+      :icon="showingPrecise ? 'mdi-eye-outline' : 'mdi-eye-off-outline'"
+      size="small"
+      style="cursor: pointer"
+      @click="fetchPreciseInfo"
+    ></v-icon>
+    <span class="text-subtitle-1">实名信息</span>
+    <v-spacer></v-spacer>
+  </div>
+  <v-container fluid>
+    <!-- 简洁隐私提示横条 -->
+    <v-card
+      class="mb-6 privacy-banner"
+      variant="flat"
+      rounded="lg"
+      color="grey-lighten-5"
+      elevation="0"
+      @click="showPrivacyDialog = true"
+    >
+      <v-card-text class="py-3">
+        <div class="d-flex align-center">
+          <v-icon icon="mdi-shield-lock-outline" color="primary" size="20" class="me-2"></v-icon>
+          <span class="text-body-2"
+            >某些赛题需要实名信息用于验证身份，您的信息将<strong>安全加密</strong>，平台活动<strong
+              >完全匿名</strong
+            ></span
+          >
+          <v-spacer></v-spacer>
+          <span class="flex-shrink-0 ps-4 text-caption text-primary d-flex align-center">
+            查看隐私说明
+            <v-icon icon="mdi-chevron-right" size="small" class="ms-1"></v-icon>
+          </span>
+        </div>
+      </v-card-text>
+    </v-card>
+
+    <v-form @submit.prevent="onSubmit">
+      <!-- 基本信息部分 -->
+      <div class="form-section">
+        <div class="d-flex align-center mb-2">
+          <v-icon icon="mdi-account-details-outline" color="primary" class="me-2"></v-icon>
+          <h3 class="text-subtitle-1 font-weight-medium mb-0">基本信息</h3>
+        </div>
+
+        <v-row>
+          <v-col cols="12" md="6">
+            <v-text-field
+              v-model="selectedRealName"
+              label="真实姓名"
+              placeholder="请输入您的真实姓名"
+              v-bind="realNameProps"
+              variant="outlined"
+              hide-details
+              prepend-inner-icon="mdi-account"
+              class="fuzzy-field"
+              @click="onFieldFocus('realName')"
+              @blur="onFieldBlur('realName')"
+            >
+              <template v-if="isRealNameEdited" #append-inner>
+                <v-icon
+                  color="primary"
+                  icon="mdi-refresh"
+                  size="small"
+                  title="恢复原值"
+                  class="reset-icon"
+                  @click.stop="resetField('realName')"
+                ></v-icon>
+              </template>
+            </v-text-field>
+            <div v-if="hasRealNameInfo" class="text-caption mt-1 ms-2">
+              <span v-if="!isRealNameEdited && !showingPrecise" class="text-grey">点击输入框编辑信息</span>
+              <span v-else-if="showingPrecise" class="text-primary">已显示完整信息</span>
+              <span v-else class="text-primary">已编辑，可点击恢复按钮还原</span>
+            </div>
+          </v-col>
+          <v-col cols="12" md="6">
+            <v-text-field
+              v-model="selectedStudentId"
+              label="学号"
+              placeholder="请输入您的学号"
+              v-bind="studentIdProps"
+              variant="outlined"
+              hide-details
+              prepend-inner-icon="mdi-card-account-details-outline"
+              class="fuzzy-field"
+              @click="onFieldFocus('studentId')"
+              @blur="onFieldBlur('studentId')"
+            >
+              <template v-if="isStudentIdEdited" #append-inner>
+                <v-icon
+                  color="primary"
+                  icon="mdi-refresh"
+                  size="small"
+                  title="恢复原值"
+                  class="reset-icon"
+                  @click.stop="resetField('studentId')"
+                ></v-icon>
+              </template>
+            </v-text-field>
+            <div v-if="hasRealNameInfo" class="text-caption mt-1 ms-2">
+              <span v-if="!isStudentIdEdited && !showingPrecise" class="text-grey">点击输入框编辑信息</span>
+              <span v-else-if="showingPrecise" class="text-primary">已显示完整信息</span>
+              <span v-else class="text-primary">已编辑，可点击恢复按钮还原</span>
+            </div>
+          </v-col>
+        </v-row>
       </div>
-    </template>
-    <template #text>
-      <v-container>
-        <!-- 简洁隐私提示横条 -->
-        <v-card
-          class="mb-6 privacy-banner"
-          variant="flat"
-          rounded="lg"
-          color="grey-lighten-5"
-          elevation="0"
-          @click="showPrivacyDialog = true"
-        >
-          <v-card-text class="py-3">
-            <div class="d-flex align-center">
-              <v-icon icon="mdi-shield-lock-outline" color="primary" size="20" class="me-2"></v-icon>
-              <span class="text-body-2"
-                >某些赛题需要实名信息用于验证身份，您的信息将<strong>安全加密</strong>，平台活动<strong
-                  >完全匿名</strong
-                ></span
-              >
-              <v-spacer></v-spacer>
-              <span class="flex-shrink-0 ps-4 text-caption text-primary d-flex align-center">
-                查看隐私说明
-                <v-icon icon="mdi-chevron-right" size="small" class="ms-1"></v-icon>
-              </span>
-            </div>
-          </v-card-text>
-        </v-card>
 
-        <v-form @submit.prevent="onSubmit">
-          <!-- 基本信息部分 -->
-          <div class="form-section">
-            <div class="d-flex align-center mb-4">
-              <v-icon icon="mdi-account-details-outline" color="primary" class="me-2"></v-icon>
-              <h3 class="text-subtitle-1 font-weight-medium mb-0">基本信息</h3>
-            </div>
+      <!-- 学业信息部分 -->
+      <div class="form-section mt-4">
+        <div class="d-flex align-center mb-2">
+          <v-icon icon="mdi-school-outline" color="primary" class="me-2"></v-icon>
+          <h3 class="text-subtitle-1 font-weight-medium mb-0">学业信息</h3>
+        </div>
 
-            <v-row>
-              <v-col cols="12" md="6">
-                <v-text-field
-                  v-model="selectedRealName"
-                  label="真实姓名"
-                  placeholder="请输入您的真实姓名"
-                  v-bind="realNameProps"
-                  variant="outlined"
-                  hide-details
-                  prepend-inner-icon="mdi-account"
-                  class="fuzzy-field"
-                  @click="onFieldFocus('realName')"
-                  @blur="onFieldBlur('realName')"
-                >
-                  <template v-if="isRealNameEdited" #append-inner>
-                    <v-icon
-                      color="primary"
-                      icon="mdi-refresh"
-                      size="small"
-                      title="恢复原值"
-                      class="reset-icon"
-                      @click.stop="resetField('realName')"
-                    ></v-icon>
-                  </template>
-                </v-text-field>
-                <div v-if="hasRealNameInfo" class="text-caption mt-1 ms-2">
-                  <span v-if="!isRealNameEdited && !showingPrecise" class="text-grey">点击输入框编辑信息</span>
-                  <span v-else-if="showingPrecise" class="text-primary">已显示完整信息</span>
-                  <span v-else class="text-primary">已编辑，可点击恢复按钮还原</span>
-                </div>
-              </v-col>
-              <v-col cols="12" md="6">
-                <v-text-field
-                  v-model="selectedStudentId"
-                  label="学号"
-                  placeholder="请输入您的学号"
-                  v-bind="studentIdProps"
-                  variant="outlined"
-                  hide-details
-                  prepend-inner-icon="mdi-card-account-details-outline"
-                  class="fuzzy-field"
-                  @click="onFieldFocus('studentId')"
-                  @blur="onFieldBlur('studentId')"
-                >
-                  <template v-if="isStudentIdEdited" #append-inner>
-                    <v-icon
-                      color="primary"
-                      icon="mdi-refresh"
-                      size="small"
-                      title="恢复原值"
-                      class="reset-icon"
-                      @click.stop="resetField('studentId')"
-                    ></v-icon>
-                  </template>
-                </v-text-field>
-                <div v-if="hasRealNameInfo" class="text-caption mt-1 ms-2">
-                  <span v-if="!isStudentIdEdited && !showingPrecise" class="text-grey">点击输入框编辑信息</span>
-                  <span v-else-if="showingPrecise" class="text-primary">已显示完整信息</span>
-                  <span v-else class="text-primary">已编辑，可点击恢复按钮还原</span>
-                </div>
-              </v-col>
-            </v-row>
+        <v-row>
+          <v-col cols="12" md="4">
+            <v-text-field
+              v-model="selectedGrade"
+              label="年级"
+              placeholder="例如：2023级"
+              v-bind="gradeProps"
+              variant="outlined"
+              prepend-inner-icon="mdi-school"
+              hint="填写您的入学年份，如2023级"
+              persistent-hint
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" md="4">
+            <v-text-field
+              v-model="selectedMajor"
+              label="专业"
+              placeholder="请输入您的专业"
+              v-bind="majorProps"
+              variant="outlined"
+              prepend-inner-icon="mdi-book-education"
+              hint="填写您的专业名称"
+              persistent-hint
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" md="4">
+            <v-text-field
+              v-model="selectedClassName"
+              label="班级"
+              placeholder="请输入您的班级"
+              v-bind="classNameProps"
+              variant="outlined"
+              prepend-inner-icon="mdi-account-group"
+              hint="填写您所在的班级"
+              persistent-hint
+            ></v-text-field>
+          </v-col>
+        </v-row>
+      </div>
+
+      <div class="usage-note mt-6 mb-4">
+        <div class="usage-note-content">
+          <div class="d-flex align-center mb-2">
+            <v-icon icon="mdi-information-outline" color="primary" size="20" class="me-2"></v-icon>
+            <h3 class="text-subtitle-2 font-weight-medium mb-0">实名信息的使用场景</h3>
           </div>
-
-          <!-- 学业信息部分 -->
-          <div class="form-section">
-            <div class="d-flex align-center mb-4">
-              <v-icon icon="mdi-school-outline" color="primary" class="me-2"></v-icon>
-              <h3 class="text-subtitle-1 font-weight-medium mb-0">学业信息</h3>
-            </div>
-
-            <v-row>
-              <v-col cols="12" md="4">
-                <v-text-field
-                  v-model="selectedGrade"
-                  label="年级"
-                  placeholder="例如：2023级"
-                  v-bind="gradeProps"
-                  variant="outlined"
-                  prepend-inner-icon="mdi-school"
-                  hint="填写您的入学年份，如2023级"
-                  persistent-hint
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" md="4">
-                <v-text-field
-                  v-model="selectedMajor"
-                  label="专业"
-                  placeholder="请输入您的专业"
-                  v-bind="majorProps"
-                  variant="outlined"
-                  prepend-inner-icon="mdi-book-education"
-                  hint="填写您的专业名称"
-                  persistent-hint
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" md="4">
-                <v-text-field
-                  v-model="selectedClassName"
-                  label="班级"
-                  placeholder="请输入您的班级"
-                  v-bind="classNameProps"
-                  variant="outlined"
-                  prepend-inner-icon="mdi-account-group"
-                  hint="填写您所在的班级"
-                  persistent-hint
-                ></v-text-field>
-              </v-col>
-            </v-row>
+          <p class="text-body-2 mb-0">您的实名信息仅用于：</p>
+          <div class="d-flex flex-wrap mt-1 usage-tags">
+            <span class="usage-tag">身份验证</span>
+            <span class="usage-tag">参与资格筛选</span>
+            <span class="usage-tag">项目结题认证</span>
+            <span class="usage-tag">评奖评优</span>
+            <span class="usage-tag">学分认定</span>
           </div>
+        </div>
+      </div>
 
-          <div class="usage-note mt-6 mb-4">
-            <div class="usage-note-content">
-              <div class="d-flex align-center mb-2">
-                <v-icon icon="mdi-information-outline" color="primary" size="20" class="me-2"></v-icon>
-                <h3 class="text-subtitle-2 font-weight-medium mb-0">实名信息的使用场景</h3>
-              </div>
-              <p class="text-body-2 mb-0">您的实名信息仅用于：</p>
-              <div class="d-flex flex-wrap mt-1 usage-tags">
-                <span class="usage-tag">身份验证</span>
-                <span class="usage-tag">参与资格筛选</span>
-                <span class="usage-tag">项目结题认证</span>
-                <span class="usage-tag">评奖评优</span>
-                <span class="usage-tag">学分认定</span>
-              </div>
-            </div>
-          </div>
-
-          <v-row>
-            <v-col class="d-flex justify-end gap-4">
-              <v-btn variant="outlined" @click="handleReset">重置</v-btn>
-              <v-btn color="primary" type="submit" :loading="submitting">保存信息</v-btn>
-            </v-col>
-          </v-row>
-        </v-form>
-      </v-container>
-    </template>
-  </v-card>
+      <v-row>
+        <v-col class="d-flex justify-end gap-4">
+          <v-btn variant="outlined" @click="handleReset">重置</v-btn>
+          <v-btn color="primary" type="submit" :loading="submitting">保存信息</v-btn>
+        </v-col>
+      </v-row>
+    </v-form>
+  </v-container>
 
   <!-- 隐私保护详情对话框 -->
   <v-dialog v-model="showPrivacyDialog" max-width="600">

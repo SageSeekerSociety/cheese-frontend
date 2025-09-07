@@ -11,17 +11,12 @@
       <div class="message-content">
         <!-- 消息气泡 -->
         <div class="message-bubble" :class="bubbleClass">
-          <!-- 正在输入状态 -->
-          <div v-if="message.isTyping" class="typing-animation">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-
           <!-- 消息文本 -->
-          <div v-else class="message-text">
-            <div v-if="isMarkdown" v-html="renderedContent"></div>
-            <div v-else>{{ message.content }}</div>
+          <div class="message-text">
+            <div v-html="renderedContent"></div>
+
+            <!-- 正在输入状态 - 显示在内容后面 -->
+            <span v-if="message.isTyping" class="typing-cursor">▊</span>
           </div>
         </div>
 
@@ -50,15 +45,23 @@
 </template>
 
 <script setup lang="ts">
+// 引入 Prism 语法高亮样式
+import 'prismjs/themes/prism.css'
+
 import { computed } from 'vue'
-import { marked } from 'marked'
+
+import { MarkdownRenderer } from '@/components/chat/services/markdownRenderer'
 
 interface Message {
   id: string
-  role: 'user' | 'assistant'
+  role: 'user' | 'assistant' | 'tool'
+  messageType: 'TEXT' | 'TOOL_CALL' | 'TOOL_RESULT'
   content: string
   timestamp: Date
   isTyping?: boolean
+  toolName?: string
+  toolInput?: Record<string, any>
+  toolResult?: string
 }
 
 interface Props {
@@ -66,6 +69,9 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+
+// 创建 Markdown 渲染器实例
+const markdownRenderer = new MarkdownRenderer()
 
 // 计算样式类
 const messageClass = computed(() => ({
@@ -79,25 +85,9 @@ const bubbleClass = computed(() => ({
   'bubble-typing': props.message.isTyping,
 }))
 
-// 判断是否需要Markdown渲染
-const isMarkdown = computed(() => {
-  const content = props.message.content
-  return /[*_`#[]()]/.test(content) || content.includes('```')
-})
-
 // 渲染Markdown内容
 const renderedContent = computed(() => {
-  if (!isMarkdown.value) return props.message.content
-
-  try {
-    return marked(props.message.content, {
-      breaks: true,
-      gfm: true,
-    })
-  } catch (error) {
-    console.error('Markdown渲染失败:', error)
-    return props.message.content
-  }
+  return markdownRenderer.render(props.message.content)
 })
 
 // 格式化时间
@@ -206,6 +196,12 @@ const regenerateMessage = () => {
   border-radius: 0.25rem;
   overflow-x: auto;
   margin: 0.5rem 0;
+  position: relative;
+}
+
+.message-text :deep(pre code) {
+  background-color: transparent;
+  padding: 0;
 }
 
 .message-text :deep(code) {
@@ -213,6 +209,64 @@ const regenerateMessage = () => {
   padding: 0.125rem 0.25rem;
   border-radius: 0.25rem;
   font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+}
+
+.message-text :deep(p) {
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.message-text :deep(p:last-child) {
+  margin-bottom: 0;
+}
+
+.message-text :deep(ul),
+.message-text :deep(ol) {
+  padding-left: 24px;
+  margin-bottom: 12px;
+}
+
+.message-text :deep(h1),
+.message-text :deep(h2),
+.message-text :deep(h3),
+.message-text :deep(h4),
+.message-text :deep(h5),
+.message-text :deep(h6) {
+  margin-top: 16px;
+  margin-bottom: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.message-text :deep(blockquote) {
+  border-left: 4px solid rgba(var(--v-theme-primary), 0.4);
+  padding: 0 0 0 16px;
+  margin: 12px 0;
+  color: rgba(var(--v-theme-on-surface), 0.7);
+  font-style: italic;
+}
+
+.message-text :deep(table) {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 16px 0;
+  font-size: 0.9em;
+}
+
+.message-text :deep(th),
+.message-text :deep(td) {
+  border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  padding: 8px;
+  text-align: left;
+}
+
+.message-text :deep(th) {
+  background-color: rgba(var(--v-theme-primary), 0.05);
+  font-weight: 600;
+}
+
+.message-text :deep(tr:nth-child(even)) {
+  background-color: rgba(0, 0, 0, 0.015);
 }
 
 .message-actions {
@@ -227,39 +281,22 @@ const regenerateMessage = () => {
   opacity: 1;
 }
 
-/* 正在输入动画 */
-.typing-animation {
-  display: flex;
-  gap: 0.25rem;
-  align-items: center;
+/* 输入光标样式 */
+.typing-cursor {
+  color: rgb(var(--v-theme-primary));
+  font-weight: bold;
+  animation: blink 1s infinite;
+  margin-left: 2px;
 }
 
-.typing-animation span {
-  width: 0.5rem;
-  height: 0.5rem;
-  background-color: rgb(var(--v-theme-on-surface-variant));
-  border-radius: 50%;
-  animation: typing 1.4s infinite;
-}
-
-.typing-animation span:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.typing-animation span:nth-child(3) {
-  animation-delay: 0.4s;
-}
-
-@keyframes typing {
+@keyframes blink {
   0%,
-  60%,
-  100% {
-    transform: translateY(0);
-    opacity: 0.5;
-  }
-  30% {
-    transform: translateY(-0.5rem);
+  50% {
     opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
   }
 }
 </style>

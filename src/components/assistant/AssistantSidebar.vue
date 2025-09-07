@@ -1,68 +1,49 @@
 <template>
   <div class="d-flex flex-column h-100">
     <!-- 侧边栏头部 -->
-    <div class="pa-2 d-flex align-center" :class="{ 'justify-center': !expanded }">
+    <div class="page-header">
       <template v-if="expanded">
-        <v-icon icon="mdi-robot" color="primary" size="24" class="mr-2"></v-icon>
-        <span class="text-h6 font-weight-medium flex-grow-1"></span>
-        <v-btn variant="text" icon="mdi-chevron-left" size="small" @click="$emit('toggle-expand')"></v-btn>
+        <span class="text-subtitle-1">元思</span>
+        <v-spacer></v-spacer>
       </template>
-      <template v-else>
-        <v-btn variant="text" icon="mdi-chevron-right" size="small" @click="$emit('toggle-expand')"></v-btn>
-      </template>
+      <v-btn
+        variant="text"
+        :icon="expanded ? 'mdi-chevron-left' : 'mdi-chevron-right'"
+        size="small"
+        color="text"
+        @click="$emit('toggle-expand')"
+      ></v-btn>
     </div>
-
-    <v-divider></v-divider>
 
     <!-- 新对话按钮 -->
-    <div class="pa-2 mt-4" :class="{ 'px-2': !expanded }">
-      <v-btn
+    <v-list nav :lines="false" density="compact">
+      <v-list-item
         v-for="item in navigationItems"
         :key="item.key"
-        :block="expanded"
-        :icon="!expanded"
-        :prepend-icon="expanded ? item.icon : undefined"
-        :size="expanded ? 'default' : 'small'"
-        variant="outlined"
-        color="primary"
-        class="mb-2"
-        :class="{ 'collapsed-btn': !expanded }"
+        rounded="lg"
+        :title="item.title"
         @click="handleNavigation(item)"
       >
-        <v-icon v-if="!expanded" :icon="item.icon" size="20"></v-icon>
-        <span v-if="expanded">{{ item.title }}</span>
-        <v-tooltip v-if="!expanded" activator="parent" location="end">
-          {{ item.title }}
-        </v-tooltip>
-      </v-btn>
-    </div>
+        <template #prepend>
+          <v-icon :icon="item.icon" size="small"></v-icon>
+        </template>
+      </v-list-item>
+    </v-list>
 
-    <v-divider class="my-2"></v-divider>
-
-    <!-- 对话历史标题 -->
-    <div v-if="expanded" class="px-2 mb-2">
-      <span class="text-subtitle-2 text-medium-emphasis">最近对话</span>
-    </div>
-
-    <!-- 对话历史列表 - 模仿ChatGPT的简洁列表 -->
     <div v-if="expanded && loading" class="pa-4 text-center">
       <v-progress-circular indeterminate color="primary" size="24"></v-progress-circular>
       <p class="text-body-2 text-medium-emphasis mt-2">加载中...</p>
     </div>
 
-    <v-list v-else-if="expanded" density="compact" class="flex-grow-1 overflow-auto px-2 conversation-list">
+    <v-list v-else-if="expanded" nav :lines="false" density="compact" class="flex-grow-1 overflow-auto">
+      <v-list-subheader> 最近对话 </v-list-subheader>
       <v-list-item
         v-for="conversation in conversations"
         :key="conversation.id"
-        :to="`/assistant/conversations/${conversation.id}`"
-        class="mb-1 conversation-item"
         rounded="lg"
-        lines="one"
+        :to="`/assistant/conversations/${conversation.id}`"
+        class="conversation-item"
       >
-        <template #prepend>
-          <v-icon icon="mdi-message-text-outline" size="16" class="text-medium-emphasis"></v-icon>
-        </template>
-
         <v-list-item-title class="text-truncate conversation-title">
           {{ conversation.title }}
         </v-list-item-title>
@@ -110,7 +91,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { assistantService } from '@/services/assistantService'
@@ -137,7 +118,7 @@ const navigationItems: NavigationItem[] = [
   {
     key: 'new-chat',
     title: '新对话',
-    icon: 'mdi-plus',
+    icon: 'mdi-circle-edit-outline',
     action: 'new-chat',
   },
 ]
@@ -209,23 +190,6 @@ onMounted(() => {
 .v-list-item--active {
   background-color: rgba(var(--v-theme-primary), 0.1);
   color: rgb(var(--v-theme-primary));
-}
-
-/* ChatGPT风格的对话列表 */
-.conversation-list {
-  padding: 0 !important;
-}
-
-.conversation-item {
-  padding: 8px 12px !important;
-  margin-bottom: 2px !important;
-  transition: all 0.2s ease;
-  border-radius: 8px !important;
-  min-height: 40px !important;
-}
-
-.conversation-item:hover {
-  background-color: rgba(var(--v-theme-surface-variant), 0.5) !important;
 }
 
 .conversation-item:hover .conversation-menu-btn {

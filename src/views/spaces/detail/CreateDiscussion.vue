@@ -65,16 +65,12 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vuetify-sonner'
 
-import { setTitle } from '@/utils/title'
-
 import TipTapEditor from '@/components/common/Editor/TipTapEditor.vue'
 import { DiscussionsApi } from '@/network/api/discussions'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
-
-setTitle(t('spaces.discussions.createDiscussion'), route)
 
 const editorRef = ref<InstanceType<typeof TipTapEditor> | null>(null)
 const discussionTitle = ref('')

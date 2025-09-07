@@ -5,7 +5,6 @@ import { useRoute } from 'vue-router'
 
 import { truncateString } from '@/utils/form'
 import { getTaskStatusText, getTaskStatusType } from '@/utils/tasks'
-import { setTitle } from '@/utils/title'
 
 import { TasksApi } from '@/network/api/tasks'
 import { TaskParticipationInfo } from '@/network/api/tasks/types'
@@ -93,9 +92,6 @@ export function useTaskData() {
           identities: [],
         }
       }
-
-      // 设置页面标题
-      setTitle(taskData.value.name || '赛题详情', route)
     } catch (err) {
       error.value = err instanceof Error ? err.message : '加载赛题信息失败'
       console.error('Failed to load task:', err)

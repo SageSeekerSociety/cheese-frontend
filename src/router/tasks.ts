@@ -1,8 +1,10 @@
 import type { RouteRecordRaw } from 'vue-router'
 
+import RouterPassThrough from '@/layouts/RouterPassThrough.vue'
+
 export default {
   path: '/tasks',
-  component: () => import('@/layouts/tasks/Tasks.vue'),
+  component: RouterPassThrough,
   meta: {
     title: '赛题',
   },

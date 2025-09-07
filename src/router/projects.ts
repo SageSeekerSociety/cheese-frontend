@@ -4,10 +4,11 @@ import ProjectHeader from '@/components/projects/header/ProjectHeader.vue'
 import SubprojectHeader from '@/components/projects/header/SubprojectHeader.vue'
 import ProjectNavigation from '@/components/projects/navigation/ProjectNavigation.vue'
 import SubprojectNavigation from '@/components/projects/navigation/SubprojectNavigation.vue'
+import RouterPassThrough from '@/layouts/RouterPassThrough.vue'
 
 export default {
   path: '/projects',
-  component: () => import('@/layouts/projects/Projects.vue'),
+  component: RouterPassThrough,
   meta: {
     title: '项目',
   },
