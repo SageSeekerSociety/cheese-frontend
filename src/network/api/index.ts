@@ -7,7 +7,7 @@ import Api from '..'
 const option: ApiType = {
   cfg: {
     baseURL: API_BASE_URL,
-    timeout: 5000,
+    timeout: 30000,
   },
   interceptor: {
     responseInterceptor,
@@ -20,7 +20,7 @@ const option: ApiType = {
 const newOption: ApiType = {
   cfg: {
     baseURL: NEW_API_BASE_URL,
-    timeout: 5000,
+    timeout: 30000,
   },
   interceptor: {
     responseInterceptor,
