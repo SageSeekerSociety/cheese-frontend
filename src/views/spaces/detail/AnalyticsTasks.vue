@@ -88,139 +88,146 @@
           </v-col>
         </v-row>
 
-        <!-- 成功学生统计 -->
+        <!-- 参与者统计 -->
         <v-row class="mt-4">
           <v-col cols="12">
             <v-card flat rounded="lg" class="border">
               <v-card-title class="pb-2">
-                <v-icon class="mr-2" color="success">mdi-check-circle</v-icon>
-                成功学生统计
+                <v-icon class="mr-2">mdi-account-group</v-icon>
+                参与者统计
               </v-card-title>
               <v-card-text>
+                <!-- 统计概览 -->
                 <v-row>
-                  <v-col cols="12" md="4">
-                    <v-sheet class="pa-4 text-center border rounded">
-                      <div class="text-h4 text-success">{{ analytics.successStudentStatistics.totalStudents }}</div>
-                      <div class="text-body-2 text-medium-emphasis">总成功学生数</div>
+                  <v-col cols="12" md="6">
+                    <v-sheet class="pa-3 border rounded">
+                      <div class="d-flex align-center mb-2">
+                        <v-icon color="success" size="small" class="mr-2">mdi-check-circle</v-icon>
+                        <span class="font-weight-medium">成功参与者</span>
+                      </div>
+                      <v-row dense>
+                        <v-col cols="4">
+                          <div class="text-h5 text-success">{{ analytics.successStudentStatistics.totalStudents }}</div>
+                          <div class="text-caption text-medium-emphasis">总数</div>
+                        </v-col>
+                        <v-col cols="4">
+                          <div class="text-h5 text-success">
+                            {{ analytics.successStudentStatistics.totalStudentsWithRealName }}
+                          </div>
+                          <div class="text-caption text-medium-emphasis">实名</div>
+                        </v-col>
+                        <v-col cols="4">
+                          <div class="text-h5 text-success">
+                            {{
+                              analytics.successStudentStatistics.totalStudents > 0
+                                ? Math.round(
+                                    (analytics.successStudentStatistics.totalStudentsWithRealName /
+                                      analytics.successStudentStatistics.totalStudents) *
+                                      100
+                                  )
+                                : 0
+                            }}%
+                          </div>
+                          <div class="text-caption text-medium-emphasis">实名率</div>
+                        </v-col>
+                      </v-row>
                     </v-sheet>
                   </v-col>
-                  <v-col cols="12" md="4">
-                    <v-sheet class="pa-4 text-center border rounded">
-                      <div class="text-h4 text-success">
-                        {{ analytics.successStudentStatistics.totalStudentsWithRealName }}
+                  <v-col cols="12" md="6">
+                    <v-sheet class="pa-3 border rounded">
+                      <div class="d-flex align-center mb-2">
+                        <v-icon color="error" size="small" class="mr-2">mdi-close-circle</v-icon>
+                        <span class="font-weight-medium">未完成参与者</span>
                       </div>
-                      <div class="text-body-2 text-medium-emphasis">有实名学生数</div>
-                    </v-sheet>
-                  </v-col>
-                  <v-col cols="12" md="4">
-                    <v-sheet class="pa-4 text-center border rounded">
-                      <div class="text-h4 text-success">
-                        {{
-                          analytics.successStudentStatistics.totalStudents > 0
-                            ? Math.round(
-                                (analytics.successStudentStatistics.totalStudentsWithRealName /
-                                  analytics.successStudentStatistics.totalStudents) *
-                                  100
-                              )
-                            : 0
-                        }}%
-                      </div>
-                      <div class="text-body-2 text-medium-emphasis">实名率</div>
+                      <v-row dense>
+                        <v-col cols="4">
+                          <div class="text-h5 text-error">{{ analytics.unsuccessStudentStatistics.totalStudents }}</div>
+                          <div class="text-caption text-medium-emphasis">总数</div>
+                        </v-col>
+                        <v-col cols="4">
+                          <div class="text-h5 text-error">
+                            {{ analytics.unsuccessStudentStatistics.totalStudentsWithRealName }}
+                          </div>
+                          <div class="text-caption text-medium-emphasis">实名</div>
+                        </v-col>
+                        <v-col cols="4">
+                          <div class="text-h5 text-error">
+                            {{
+                              analytics.unsuccessStudentStatistics.totalStudents > 0
+                                ? Math.round(
+                                    (analytics.unsuccessStudentStatistics.totalStudentsWithRealName /
+                                      analytics.unsuccessStudentStatistics.totalStudents) *
+                                      100
+                                  )
+                                : 0
+                            }}%
+                          </div>
+                          <div class="text-caption text-medium-emphasis">实名率</div>
+                        </v-col>
+                      </v-row>
                     </v-sheet>
                   </v-col>
                 </v-row>
-                <v-row class="mt-4">
-                  <v-col cols="12" md="4">
-                    <analytics-chart
-                      :title="analytics.successStudentStatistics.gradeDistribution.name"
-                      :data="analytics.successStudentStatistics.gradeDistribution.items"
-                      chart-type="pie"
-                    />
-                  </v-col>
-                  <v-col cols="12" md="4">
-                    <analytics-chart
-                      :title="analytics.successStudentStatistics.majorDistribution.name"
-                      :data="analytics.successStudentStatistics.majorDistribution.items"
-                      chart-type="pie"
-                    />
-                  </v-col>
-                  <v-col cols="12" md="4">
-                    <analytics-chart
-                      :title="analytics.successStudentStatistics.classNameDistribution.name"
-                      :data="analytics.successStudentStatistics.classNameDistribution.items"
-                      chart-type="pie"
-                    />
-                  </v-col>
-                </v-row>
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-
-        <!-- 失败学生统计 -->
-        <v-row class="mt-4">
-          <v-col cols="12">
-            <v-card flat rounded="lg" class="border">
-              <v-card-title class="pb-2">
-                <v-icon class="mr-2" color="error">mdi-close-circle</v-icon>
-                失败学生统计
-              </v-card-title>
-              <v-card-text>
-                <v-row>
-                  <v-col cols="12" md="4">
-                    <v-sheet class="pa-4 text-center border rounded">
-                      <div class="text-h4 text-error">{{ analytics.unsuccessStudentStatistics.totalStudents }}</div>
-                      <div class="text-body-2 text-medium-emphasis">总失败学生数</div>
-                    </v-sheet>
-                  </v-col>
-                  <v-col cols="12" md="4">
-                    <v-sheet class="pa-4 text-center border rounded">
-                      <div class="text-h4 text-error">
-                        {{ analytics.unsuccessStudentStatistics.totalStudentsWithRealName }}
-                      </div>
-                      <div class="text-body-2 text-medium-emphasis">有实名学生数</div>
-                    </v-sheet>
-                  </v-col>
-                  <v-col cols="12" md="4">
-                    <v-sheet class="pa-4 text-center border rounded">
-                      <div class="text-h4 text-error">
-                        {{
-                          analytics.unsuccessStudentStatistics.totalStudents > 0
-                            ? Math.round(
-                                (analytics.unsuccessStudentStatistics.totalStudentsWithRealName /
-                                  analytics.unsuccessStudentStatistics.totalStudents) *
-                                  100
-                              )
-                            : 0
-                        }}%
-                      </div>
-                      <div class="text-body-2 text-medium-emphasis">实名率</div>
-                    </v-sheet>
-                  </v-col>
-                </v-row>
-                <v-row class="mt-4">
-                  <v-col cols="12" md="4">
-                    <analytics-chart
-                      :title="analytics.unsuccessStudentStatistics.gradeDistribution.name"
-                      :data="analytics.unsuccessStudentStatistics.gradeDistribution.items"
-                      chart-type="pie"
-                    />
-                  </v-col>
-                  <v-col cols="12" md="4">
-                    <analytics-chart
-                      :title="analytics.unsuccessStudentStatistics.majorDistribution.name"
-                      :data="analytics.unsuccessStudentStatistics.majorDistribution.items"
-                      chart-type="pie"
-                    />
-                  </v-col>
-                  <v-col cols="12" md="4">
-                    <analytics-chart
-                      :title="analytics.unsuccessStudentStatistics.classNameDistribution.name"
-                      :data="analytics.unsuccessStudentStatistics.classNameDistribution.items"
-                      chart-type="pie"
-                    />
-                  </v-col>
-                </v-row>
+                
+                <!-- 分布图表 -->
+                <v-tabs v-model="participantTab" class="mt-4">
+                  <v-tab value="success">成功参与者分布</v-tab>
+                  <v-tab value="unsuccess">未完成参与者分布</v-tab>
+                </v-tabs>
+                
+                <v-window v-model="participantTab">
+                  <v-window-item value="success">
+                    <v-row class="mt-4">
+                      <v-col cols="12" md="4">
+                        <analytics-chart
+                          :title="analytics.successStudentStatistics.gradeDistribution.name"
+                          :data="analytics.successStudentStatistics.gradeDistribution.items"
+                          chart-type="pie"
+                        />
+                      </v-col>
+                      <v-col cols="12" md="4">
+                        <analytics-chart
+                          :title="analytics.successStudentStatistics.majorDistribution.name"
+                          :data="analytics.successStudentStatistics.majorDistribution.items"
+                          chart-type="pie"
+                        />
+                      </v-col>
+                      <v-col cols="12" md="4">
+                        <analytics-chart
+                          :title="analytics.successStudentStatistics.classNameDistribution.name"
+                          :data="analytics.successStudentStatistics.classNameDistribution.items"
+                          chart-type="pie"
+                        />
+                      </v-col>
+                    </v-row>
+                  </v-window-item>
+                  
+                  <v-window-item value="unsuccess">
+                    <v-row class="mt-4">
+                      <v-col cols="12" md="4">
+                        <analytics-chart
+                          :title="analytics.unsuccessStudentStatistics.gradeDistribution.name"
+                          :data="analytics.unsuccessStudentStatistics.gradeDistribution.items"
+                          chart-type="pie"
+                        />
+                      </v-col>
+                      <v-col cols="12" md="4">
+                        <analytics-chart
+                          :title="analytics.unsuccessStudentStatistics.majorDistribution.name"
+                          :data="analytics.unsuccessStudentStatistics.majorDistribution.items"
+                          chart-type="pie"
+                        />
+                      </v-col>
+                      <v-col cols="12" md="4">
+                        <analytics-chart
+                          :title="analytics.unsuccessStudentStatistics.classNameDistribution.name"
+                          :data="analytics.unsuccessStudentStatistics.classNameDistribution.items"
+                          chart-type="pie"
+                        />
+                      </v-col>
+                    </v-row>
+                  </v-window-item>
+                </v-window>
               </v-card-text>
             </v-card>
           </v-col>
@@ -231,19 +238,12 @@
             <v-card flat rounded="lg" class="border">
               <v-card-title class="d-flex align-center justify-space-between">
                 <div class="d-flex align-center">
-                  <v-icon class="mr-2">mdi-account-tie</v-icon>
-                  Publishers Participation
+                  <v-icon class="mr-2">mdi-clipboard-list</v-icon>
+                  Tasks Overview
                 </div>
                 <div class="d-flex align-center">
-                  <v-select
-                    v-model="successBy"
-                    :items="successByItems"
-                    density="compact"
-                    hide-details
-                    style="max-width: 220px"
-                    @update:model-value="loadPublishers"
-                  />
-                  <v-btn class="ml-2" color="primary" variant="flat" :loading="exporting" @click="exportCsv">
+                  <v-btn color="primary" variant="flat" :loading="exporting" @click="exportCsv">
+                    <v-icon start>mdi-download</v-icon>
                     Export CSV
                   </v-btn>
                 </div>
@@ -256,7 +256,21 @@
                   :loading="loadingPublishers"
                   items-per-page="10"
                   density="comfortable"
-                />
+                >
+                  <template #item.successRate="{ item }">
+                    <v-chip
+                      :color="getSuccessRateColor(item)"
+                      variant="tonal"
+                      size="small"
+                    >
+                      {{ calculateSuccessRate(item) }}%
+                    </v-chip>
+                  </template>
+                  <template #item.taskCount="{ item }">
+                    <span v-if="item.taskCount">{{ item.taskCount }}</span>
+                    <span v-else class="text-medium-emphasis">-</span>
+                  </template>
+                </v-data-table>
               </v-card-text>
             </v-card>
           </v-col>
@@ -289,16 +303,12 @@ const analytics = ref<SpaceAnalyticsTasksData | null>(null)
 const publishers = ref<PublisherParticipation[] | null>(null)
 const loadingPublishers = ref(false)
 const exporting = ref(false)
-const successBy = ref<'completion' | 'approve'>('completion')
-const successByItems = [
-  { title: 'Completion', value: 'completion' },
-  { title: 'ApproveType', value: 'approve' },
-]
 const publisherHeaders = [
-  { title: 'Publisher', value: 'publisherName' },
-  { title: 'Participants', value: 'participants' },
-  { title: 'Completed Users', value: 'completedUsers' },
-  { title: 'Task Count', value: 'taskCount' },
+  { title: 'Task Name', value: 'publisherName', key: 'publisherName' },
+  { title: 'Rank', value: 'taskCount', key: 'taskCount', align: 'center' },
+  { title: 'Participants', value: 'participants', key: 'participants', align: 'center' },
+  { title: 'Submissions', value: 'completedUsers', key: 'completedUsers', align: 'center' },
+  { title: 'Success Rate', value: 'successRate', key: 'successRate', align: 'center' },
 ]
 
 const from = ref<string>('')
@@ -321,12 +331,13 @@ const categoryItems = ref<{ title: string; value: number | null }[]>([{ title: '
 const publisherItems = ref<{ title: string; value: number | null }[]>([{ title: 'All', value: null }])
 
 const spaceId = Number(route.params.spaceId)
+const participantTab = ref('success')
 
 const loadAnalytics = async () => {
   loading.value = true
   try {
     const params: Record<string, any> = {
-      successBy: successBy.value,
+      successBy: 'completion',
       realName: realName.value,
     }
     if (from.value) params.from = new Date(from.value).getTime()
@@ -347,9 +358,8 @@ const loadAnalytics = async () => {
 const loadPublishers = async () => {
   loadingPublishers.value = true
   try {
-    // Note: Currently backend only supports successBy parameter for publishers participation
-    // Other filters are applied only to the analytics data, not publishers list
-    const { data } = await SpacesApi.getPublishersParticipation(spaceId, successBy.value)
+    // Load tasks overview instead of publishers participation
+    const { data } = await SpacesApi.getPublishersParticipation(spaceId, 'completion')
     publishers.value = data
   } finally {
     loadingPublishers.value = false
@@ -359,10 +369,11 @@ const loadPublishers = async () => {
 const exportCsv = async () => {
   exporting.value = true
   try {
+    // Use accountService for consistency (imported with lowercase)
     const token = accountService.accessToken
     const qs: Record<string, any> = {
       format: 'csv',
-      successBy: successBy.value,
+      successBy: 'completion',
       realName: realName.value,
     }
     if (from.value) qs.from = new Date(from.value).getTime()
@@ -377,7 +388,10 @@ const exportCsv = async () => {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       }
     )
-    if (!resp.ok) return
+    if (!resp.ok) {
+      console.error('CSV导出失败:', resp.status, resp.statusText)
+      return
+    }
     const blob = await resp.blob()
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -415,6 +429,19 @@ const loadPublishersList = async () => {
   }
 }
 
+// Helper functions for task table
+const calculateSuccessRate = (item: any) => {
+  if (item.participants === 0) return '0'
+  return ((item.completedUsers / item.participants) * 100).toFixed(1)
+}
+
+const getSuccessRateColor = (item: any) => {
+  const rate = item.participants > 0 ? (item.completedUsers / item.participants) * 100 : 0
+  if (rate >= 80) return 'success'
+  if (rate >= 60) return 'warning'
+  return 'error'
+}
+
 onMounted(async () => {
   // Load filters data first
   await loadCategories()
@@ -435,7 +462,6 @@ const resetFilters = () => {
   categoryId.value = null
   realName.value = 'all'
   publisherId.value = null
-  successBy.value = 'completion'
   loadAnalytics()
   loadPublishers()
 }

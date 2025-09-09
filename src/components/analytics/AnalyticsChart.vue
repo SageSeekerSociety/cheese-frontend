@@ -4,44 +4,74 @@
       {{ title }}
     </v-card-title>
     <v-card-text>
-      <div v-if="chartType === 'pie'" class="pie-chart">
+      <div v-if="!data || data.length === 0" class="text-center py-8 text-medium-emphasis">
+        暂无数据
+      </div>
+      <div v-else-if="chartType === 'pie'" class="pie-chart">
         <svg :width="size" :height="size" viewBox="0 0 200 200">
           <g transform="translate(100, 100)">
-            <path
+            <g
               v-for="(segment, index) in pieSegments"
               :key="index"
-              :d="segment.path"
-              :fill="colors[index % colors.length]"
-              :stroke="'white'"
-              :stroke-width="2"
-            />
+              :class="['pie-segment', { 'pie-segment-hover': hoveredSegment === index }]"
+              @mouseenter="hoveredSegment = index"
+              @mouseleave="hoveredSegment = null"
+            >
+              <path
+                :d="segment.path"
+                :fill="colors[index % colors.length]"
+                :stroke="'white'"
+                :stroke-width="2"
+                :transform="hoveredSegment === index ? 'scale(1.05)' : 'scale(1)'"
+                style="cursor: pointer; transition: transform 0.2s ease"
+              />
+              <title>{{ data[index].label }}: {{ data[index].count }} ({{ data[index].percentage.toFixed(1) }}%)</title>
+            </g>
           </g>
         </svg>
       </div>
 
-      <div v-else-if="chartType === 'bar'" class="bar-chart">
-        <svg :width="size" :height="size" viewBox="0 0 400 200">
-          <g transform="translate(40, 160)">
-            <rect
-              v-for="(item, index) in data"
-              :key="index"
-              :x="index * barWidth"
-              :y="-item.percentage * 1.5"
-              :width="barWidth - 10"
-              :height="item.percentage * 1.5"
-              :fill="colors[index % colors.length]"
-            />
-            <text
-              v-for="(item, index) in data"
-              :key="`label-${index}`"
-              :x="index * barWidth + (barWidth - 10) / 2"
-              :y="20"
-              text-anchor="middle"
-              font-size="12"
-              class="chart-label"
-            >
-              {{ item.label }}
-            </text>
+      <div v-else-if="chartType === 'bar'" class="bar-chart d-flex justify-center">
+        <svg :width="400" :height="250" viewBox="0 0 400 250">
+          <g transform="translate(50, 200)">
+            <g v-for="(item, index) in data" :key="index">
+              <rect
+                :x="index * (300 / data.length) + 10"
+                :y="-Math.max(item.count * 10, 20)"
+                :width="Math.min(barWidth, 50)"
+                :height="Math.max(item.count * 10, 20)"
+                :fill="colors[index % colors.length]"
+                :opacity="hoveredBar === index ? 1 : 0.8"
+                :transform="hoveredBar === index ? `translate(0, -5)` : 'translate(0, 0)'"
+                style="cursor: pointer; transition: all 0.2s ease"
+                @mouseenter="hoveredBar = index"
+                @mouseleave="hoveredBar = null"
+              />
+              <text
+                :x="index * (300 / data.length) + 10 + Math.min(barWidth, 50) / 2"
+                :y="15"
+                text-anchor="middle"
+                font-size="12"
+                class="chart-label"
+              >
+                {{ item.label }}
+              </text>
+              <text
+                :x="index * (300 / data.length) + 10 + Math.min(barWidth, 50) / 2"
+                :y="-Math.max(item.count * 10, 20) - 5"
+                text-anchor="middle"
+                font-size="12"
+                font-weight="bold"
+                :fill="hoveredBar === index ? colors[index % colors.length] : '#666'"
+              >
+                {{ item.count }}
+              </text>
+              <title>{{ item.label }}: {{ item.count }}</title>
+            </g>
+            <!-- Y轴 -->
+            <line x1="0" y1="0" x2="0" y2="-180" stroke="#ccc" stroke-width="1" />
+            <!-- X轴 -->
+            <line x1="0" y1="0" x2="320" y2="0" stroke="#ccc" stroke-width="1" />
           </g>
         </svg>
       </div>
@@ -60,7 +90,7 @@
 <script setup lang="ts">
 import type { AnalyticsDistributionItem } from '@/network/api/spaces/types'
 
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 interface Props {
   title: string
@@ -72,6 +102,8 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   size: 200,
 })
+
+const hoveredSegment = ref<number | null>(null)
 
 const colors = [
   '#1976D2',
@@ -93,8 +125,11 @@ const colors = [
 ]
 
 const barWidth = computed(() => {
-  return Math.min(320 / props.data.length, 60)
+  if (props.data.length === 0) return 60
+  return Math.min(60, 320 / props.data.length)
 })
+
+const hoveredBar = ref<number | null>(null)
 
 const pieSegments = computed(() => {
   if (props.chartType !== 'pie') return []
