@@ -64,9 +64,9 @@ export interface Task {
   space?: Space
   category?: SpaceCategory
   submissionSchema: TaskSubmissionSchemaEntry[]
-  submitters: {
+  participants: {
     total: number
-    examples: { avatarId: number }[]
+    examples: TaskParticipantSummary[]
   }
   submittable: boolean
   submittableAsTeam?: Team[]

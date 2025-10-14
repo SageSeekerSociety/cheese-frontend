@@ -40,7 +40,7 @@
       <div class="d-flex align-center justify-end gap-3 mt-3">
         <div class="d-flex align-center text-caption">
           <v-icon size="small" color="primary" class="me-1">mdi-account-multiple</v-icon>
-          <span>{{ task.submitters.total }}</span>
+          <span>{{ task.participants.total }}</span>
         </div>
         <div class="d-flex align-center text-caption">
           <v-icon size="small" color="primary" class="me-1">mdi-alarm</v-icon>
