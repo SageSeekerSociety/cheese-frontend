@@ -55,6 +55,7 @@ export interface Task {
   intro: string
   submitterType: TaskSubmitterType
   creator: User
+  registrationStartAt?: number
   deadline: number
   participantLimit: number
   defaultDeadline: number
@@ -157,6 +158,7 @@ export type TaskFormSubmitData = {
   name: string
   submitterType: TaskSubmitterType
   rank: number
+  registrationStartAt?: number | null
   deadline: number | null
   defaultDeadline: number
   resubmittable: boolean

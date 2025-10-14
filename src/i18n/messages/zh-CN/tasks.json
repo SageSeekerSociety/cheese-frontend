@@ -8,6 +8,8 @@
     "beginner": "初级",
     "intermediate": "中级",
     "advanced": "高级",
+    "registrationStartAt": "报名开始日期",
+    "registrationStartAtHint": "留空表示不限制报名开始时间",
     "deadline": "报名截止日期",
     "defaultDeadline": "默认完成期限",
     "allowMultipleSubmissions": "允许多次提交",

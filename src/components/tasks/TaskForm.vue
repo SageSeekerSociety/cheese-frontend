@@ -176,6 +176,17 @@
         <v-row dense>
           <v-col cols="12" md="6">
             <v-date-input
+              v-model="registrationStartAt"
+              :label="t('tasks.form.registrationStartAt')"
+              density="comfortable"
+              :required="false"
+              v-bind="registrationStartAtProps"
+              :allowed-dates="isAllowedDates"
+              :hint="t('tasks.form.registrationStartAtHint')"
+            ></v-date-input>
+          </v-col>
+          <v-col cols="12" md="6">
+            <v-date-input
               v-model="deadline"
               :label="t('tasks.form.deadline')"
               required
@@ -184,7 +195,7 @@
               :allowed-dates="isAllowedDates"
             ></v-date-input>
           </v-col>
-          <v-col cols="12" md="6">
+          <v-col cols="12">
             <v-text-field
               v-model.number="defaultDeadline"
               :label="t('tasks.form.defaultDeadline')"
@@ -556,6 +567,7 @@ const { handleSubmit, defineField, isSubmitting } = useForm({
       .object({
         name: z.string().min(1).max(100),
         submitterType: z.enum(['USER', 'TEAM']),
+        registrationStartAt: z.date().optional().nullable(),
         deadline: z.date(),
         defaultDeadline: z.number().int().default(30),
         rank: z.number().int().min(1).max(3),
@@ -574,6 +586,9 @@ const { handleSubmit, defineField, isSubmitting } = useForm({
   ),
   initialValues: {
     ...(props.initialData ?? {}),
+    registrationStartAt: props.initialData?.registrationStartAt
+      ? new Date(props.initialData.registrationStartAt)
+      : null,
     deadline: props.initialData?.deadline
       ? new Date(props.initialData.deadline)
       : new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
@@ -589,6 +604,7 @@ const { handleSubmit, defineField, isSubmitting } = useForm({
 const [name, nameProps] = defineField('name', vuetifyConfig)
 const [submitterType, submitterTypeProps] = defineField('submitterType', vuetifyConfig)
 const [rank, rankProps] = defineField('rank', vuetifyConfig)
+const [registrationStartAt, registrationStartAtProps] = defineField('registrationStartAt', vuetifyConfig)
 const [deadline, deadlineProps] = defineField('deadline', vuetifyConfig)
 const [defaultDeadline, defaultDeadlineProps] = defineField('defaultDeadline', vuetifyConfig)
 const [topics, topicsProps] = defineField('topics', vuetifyConfig)
@@ -618,11 +634,13 @@ const submitForm = handleSubmit((values) => {
 const submitFormData = (values: any) => {
   const descriptionText = pendingSubmissionData.value?.descriptionText ?? descriptionEditor.value?.editor?.getText()
   const deadlineDate = new Date(values.deadline)
+  const registrationStartAtDate = values.registrationStartAt ? new Date(values.registrationStartAt) : null
   deadlineDate.setHours(23, 59, 59, 999)
   const submissionData: TaskFormSubmitData = {
     ...values,
     description: JSON.stringify(description.value),
     intro: truncateString(descriptionText || '', 255),
+    registrationStartAt: registrationStartAtDate ? registrationStartAtDate.getTime() : null,
     deadline: deadlineDate.getTime(),
     resubmittable: true,
     editable: true,

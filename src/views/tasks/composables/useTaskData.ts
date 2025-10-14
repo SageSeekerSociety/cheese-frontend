@@ -61,6 +61,9 @@ export function useTaskData() {
       submitterType: taskData.value.submitterType,
       rank: taskData.value.rank,
       defaultDeadline: taskData.value.defaultDeadline,
+      registrationStartAt: taskData.value.registrationStartAt
+        ? new Date(taskData.value.registrationStartAt).getTime()
+        : null,
       deadline: new Date(taskData.value.deadline).getTime(),
       resubmittable: taskData.value.resubmittable,
       editable: taskData.value.editable,
