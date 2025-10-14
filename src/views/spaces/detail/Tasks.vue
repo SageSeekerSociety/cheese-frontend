@@ -166,7 +166,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 
-import { usePaging } from '@/utils/paging'
+import { createEmptyResult, usePaging } from '@/utils/paging'
 
 import InfiniteScroll from '@/components/common/InfiniteScroll.vue'
 import { TasksApi } from '@/network/api/tasks'
@@ -295,13 +295,9 @@ const {
   hasMore,
   refreshing,
   loadingMore,
-} = usePaging<Task, QueryOptions>(
+} = usePaging<Task, QueryOptions, string>(
   async (pageStart, queryOptions) => {
-    if (!queryOptions || !queryOptions.space)
-      return {
-        data: [],
-        page: { pageStart: 0, total: 0, pageSize: 0, hasMore: false, nextStart: 0 },
-      }
+    if (!queryOptions || !queryOptions.space) return createEmptyResult<Task, string>()
     const { data } = await TasksApi.list({
       space: queryOptions.space,
       pageStart: pageStart,
@@ -425,7 +421,7 @@ const hasMoreHiddenTopics = computed(() => {
 
 onMounted(async () => {
   await spaceStore.fetchCategories() // 获取分类列表
-  await refresh()
+  // await refresh()
 })
 </script>
 

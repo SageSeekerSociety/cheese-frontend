@@ -3,17 +3,15 @@ import type { Page } from '@/types'
 
 import { ref, watch } from 'vue'
 
-type FetchResult<T> = { data: T[]; page: Page }
+type FetchResult<T, C = number> = { data: T[]; page: Page<C> }
 
-type PagingFetcher<T, P> = (pageStart?: number, customParams?: P) => Promise<FetchResult<T>>
+type PagingFetcher<T, P, C = number> = (pageStart?: C, customParams?: P) => Promise<FetchResult<T, C>>
 
-export const createEmptyResult = <T>(): FetchResult<T> => {
+export const createEmptyResult = <T, C = number>(): FetchResult<T, C> => {
   return {
     data: [],
     page: {
-      pageStart: 0,
       pageSize: 0,
-      nextStart: 0,
       hasMore: false,
     },
   }
@@ -26,9 +24,9 @@ export const createEmptyResult = <T>(): FetchResult<T> => {
  * @param initialPageStart 开始获取的项目ID,undefined 表示从头开始
  * @param initialCustomParams 初始自定义参数
  */
-export function usePaging<T, P extends Record<string, any>>(
-  fetcher: PagingFetcher<T, P>,
-  initialPageStart?: number,
+export function usePaging<T, P = void, C = number>(
+  fetcher: PagingFetcher<T, P, C>,
+  initialPageStart?: C,
   initialCustomParams: P = {} as P
 ) {
   const data = ref<T[]>([]) as Ref<T[]>
@@ -48,7 +46,7 @@ export function usePaging<T, P extends Record<string, any>>(
     if (!hasMore.value || loadingMore.value || refreshing.value) return
     loadingMore.value = true
     try {
-      const { data: newData, page } = await fetcher(nextPageStart.value || 1, customParams.value)
+      const { data: newData, page } = await fetcher(nextPageStart.value, customParams.value)
       data.value = [...data.value, ...newData]
       pageCount.value++
       nextPageStart.value = page.nextStart

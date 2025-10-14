@@ -182,9 +182,9 @@ const {
   hasMore,
   refreshing,
   loadingMore,
-} = usePaging(async (pageStart) => {
+} = usePaging<Task, void, string>(async (pageStart) => {
   if (!currentSpaceId.value) {
-    return createEmptyResult<Task>()
+    return createEmptyResult<Task, string>()
   }
   const { data } = await TasksApi.list({
     space: currentSpaceId.value,

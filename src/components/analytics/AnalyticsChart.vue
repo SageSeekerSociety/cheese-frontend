@@ -4,9 +4,7 @@
       {{ title }}
     </v-card-title>
     <v-card-text>
-      <div v-if="!data || data.length === 0" class="text-center py-8 text-medium-emphasis">
-        暂无数据
-      </div>
+      <div v-if="!data || data.length === 0" class="text-center py-8 text-medium-emphasis">暂无数据</div>
       <div v-else-if="chartType === 'pie'" class="pie-chart">
         <svg :width="size" :height="size" viewBox="0 0 200 200">
           <g transform="translate(100, 100)">

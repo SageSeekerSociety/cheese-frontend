@@ -168,13 +168,13 @@
                     </v-sheet>
                   </v-col>
                 </v-row>
-                
+
                 <!-- 分布图表 -->
                 <v-tabs v-model="participantTab" class="mt-4">
                   <v-tab value="success">成功参与者分布</v-tab>
                   <v-tab value="unsuccess">未完成参与者分布</v-tab>
                 </v-tabs>
-                
+
                 <v-window v-model="participantTab">
                   <v-window-item value="success">
                     <v-row class="mt-4">
@@ -201,7 +201,7 @@
                       </v-col>
                     </v-row>
                   </v-window-item>
-                  
+
                   <v-window-item value="unsuccess">
                     <v-row class="mt-4">
                       <v-col cols="12" md="4">
@@ -257,15 +257,13 @@
                   items-per-page="10"
                   density="comfortable"
                 >
+                  <!-- eslint-disable-next-line vue/valid-v-slot -->
                   <template #item.successRate="{ item }">
-                    <v-chip
-                      :color="getSuccessRateColor(item)"
-                      variant="tonal"
-                      size="small"
-                    >
+                    <v-chip :color="getSuccessRateColor(item)" variant="tonal" size="small">
                       {{ calculateSuccessRate(item) }}%
                     </v-chip>
                   </template>
+                  <!-- eslint-disable-next-line vue/valid-v-slot -->
                   <template #item.taskCount="{ item }">
                     <span v-if="item.taskCount">{{ item.taskCount }}</span>
                     <span v-else class="text-medium-emphasis">-</span>
@@ -305,11 +303,11 @@ const loadingPublishers = ref(false)
 const exporting = ref(false)
 const publisherHeaders = [
   { title: 'Task Name', value: 'publisherName', key: 'publisherName' },
-  { title: 'Rank', value: 'taskCount', key: 'taskCount', align: 'center' },
-  { title: 'Participants', value: 'participants', key: 'participants', align: 'center' },
-  { title: 'Submissions', value: 'completedUsers', key: 'completedUsers', align: 'center' },
-  { title: 'Success Rate', value: 'successRate', key: 'successRate', align: 'center' },
-]
+  { title: 'Rank', value: 'taskCount', key: 'taskCount', align: 'center' as const },
+  { title: 'Participants', value: 'participants', key: 'participants', align: 'center' as const },
+  { title: 'Submissions', value: 'completedUsers', key: 'completedUsers', align: 'center' as const },
+  { title: 'Success Rate', value: 'successRate', key: 'successRate', align: 'center' as const },
+] as const
 
 const from = ref<string>('')
 const to = ref<string>('')

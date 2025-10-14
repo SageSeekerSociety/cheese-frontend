@@ -699,7 +699,7 @@ import { KnowledgesApi } from '@/network/api/knowledges'
 import { MaterialsApi } from '@/network/api/materials'
 import { useDialog } from '@/plugins/dialog'
 import { currentUserId } from '@/services/account'
-import { parseKnowledgeContent, stringifyKnowledgeContent } from '@/types'
+import { Page, parseKnowledgeContent, stringifyKnowledgeContent } from '@/types'
 import { KnowledgeContentData } from '@/types'
 
 // 状态
@@ -710,11 +710,9 @@ const loading = ref(true)
 const viewMode = ref('grid')
 const searchQuery = ref('')
 const knowledges = ref<Knowledge[]>([])
-const page = ref({
-  pageStart: undefined as number | undefined,
+const page = ref<Page>({
   pageSize: 20,
   hasMore: false,
-  nextStart: 0,
   total: 0,
 })
 const resourceDetailDialog = ref(false)

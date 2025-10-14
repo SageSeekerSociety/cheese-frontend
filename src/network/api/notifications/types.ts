@@ -1,4 +1,4 @@
-import type { User } from '@/types'
+import type { EncodedCursorPage } from '@/types'
 
 export type NotificationType =
   | 'MENTION'
@@ -30,15 +30,6 @@ export interface Notification {
   updatedAt?: number
   entities: Record<string, EntityInfo | null>
   contextMetadata: Record<string, any>
-}
-
-export interface EncodedCursorPage {
-  pageStart: string
-  pageSize: number
-  has_prev: boolean
-  hasMore: boolean
-  nextStart?: string
-  total?: number
 }
 
 export interface ListNotificationsParams {

@@ -29,7 +29,7 @@
 <script setup lang="ts">
 import type { User } from '@/types/users'
 
-import { defineProps, withDefaults } from 'vue'
+import { defineProps } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { getAvatarUrl } from '@/utils/materials'
@@ -38,15 +38,7 @@ import BlankPage from '@/components/common/BlankPage.vue'
 import UserAvatar from '@/components/common/UserAvatar.vue'
 const { t } = useI18n()
 
-const { users } = withDefaults(
-  defineProps<{
-    users: User[]
-  }>(),
-  {
-    users: () => [],
-  }
-)
-// onMounted(() => {
-//   console.log(users)
-// })
+const { users = [] } = defineProps<{
+  users: User[]
+}>()
 </script>

@@ -1,6 +1,6 @@
 // src/api/tasks.ts
 
-import type { Page, TaskMembership, TaskSubmission, TeamSummary } from '@/types'
+import type { EncodedCursorPage, Page, TaskMembership, TaskSubmission, TeamSummary } from '@/types'
 import type { Task } from '@/types'
 import type {
   AddTaskParticipantRequestData,
@@ -81,7 +81,7 @@ export namespace TasksApi {
     team?: number
     owner?: number
     pageSize?: number
-    pageStart?: number
+    pageStart?: string
     sort_by: 'createdAt' | 'updatedAt' | 'deadline'
     sort_order: 'asc' | 'desc'
     querySpace?: boolean
@@ -105,7 +105,7 @@ export namespace TasksApi {
         }
       }
     })
-    return NewApiInstance.request<{ tasks: Task[]; page: Page }>({
+    return NewApiInstance.request<{ tasks: Task[]; page: EncodedCursorPage }>({
       url: '/tasks',
       method: 'GET',
       params: finalParams,
