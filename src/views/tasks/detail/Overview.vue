@@ -73,7 +73,7 @@
           <div v-if="noTeams" class="font-weight-medium">
             您需要创建或加入一个小队才能参与此赛题
             <div class="mt-2 d-flex align-center">
-              <v-btn color="primary" variant="tonal" size="small" :to="{ name: 'TeamsIndex' }">
+              <v-btn color="primary" variant="tonal" size="small" :to="{ name: 'HomeTeamsMine' }">
                 前往管理我的小队
                 <v-icon end>mdi-arrow-right</v-icon>
               </v-btn>

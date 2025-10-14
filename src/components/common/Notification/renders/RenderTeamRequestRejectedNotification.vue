@@ -42,7 +42,7 @@ const body = computed(() => {
 // 构建路由链接 - 拒绝后通常不提供链接，或者可以提供查找其他团队的链接
 const routerLink = computed(() => {
   return {
-    name: 'TeamsIndex',
+    name: 'HomeTeamsPending',
     params: {},
     query: { search: team.value?.name || '' },
   }

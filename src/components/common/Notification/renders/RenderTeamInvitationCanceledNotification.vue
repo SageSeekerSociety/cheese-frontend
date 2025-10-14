@@ -37,7 +37,7 @@ const body = computed(() => {
 // 构建路由链接 - 可以导航到团队列表页面
 const routerLink = computed(() => {
   return {
-    name: 'TeamsIndex',
+    name: 'HomeTeamsPending',
     params: {},
   }
 })
