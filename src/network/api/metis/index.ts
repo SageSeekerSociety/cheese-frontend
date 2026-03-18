@@ -14,11 +14,13 @@ export interface MetisConversationResponse {
   created_at: string
 }
 
+type MetisMessageRole = 'user' | 'assistant' | 'tool' | 'USER' | 'ASSISTANT' | 'TOOL'
+
 export interface MetisMessageResponse {
   message_id: string
   conversation_id: string
   parent_message_id?: string | null
-  role: 'user' | 'assistant' | 'tool'
+  role: MetisMessageRole
   message_type: 'TEXT' | 'TOOL_CALL' | 'TOOL_RESULT'
   content: TextContent | ToolCallContent | ToolResultContent
   created_at: string
@@ -32,13 +34,21 @@ export interface TextContent {
 }
 
 export interface ToolCallContent {
-  tool_name: string
-  tool_input: Record<string, any>
+  tool_name?: string
+  tool_input?: Record<string, any>
+  name?: string
+  args?: Record<string, any>
+  arguments?: Record<string, any>
+  id?: string
+  tool_call_id?: string
 }
 
 export interface ToolResultContent {
-  tool_name: string
-  result: string
+  tool_name?: string
+  result?: unknown
+  name?: string
+  output?: unknown
+  tool_call_id?: string
 }
 
 export interface MetisConversationTree {
@@ -130,17 +140,21 @@ export namespace MetisApi {
   }
 
   export interface SSEDeltaEvent {
-    content: string // 纯文本字符串
+    content: {
+      text: string
+    }
   }
 
   export interface SSEToolCallEvent {
     tool_name: string
     tool_input: Record<string, any>
+    tool_call_id?: string
   }
 
   export interface SSEToolResultEvent {
     tool_name: string
-    result: string
+    result: unknown
+    tool_call_id?: string
   }
 
   export interface SSEEndEvent {
@@ -291,11 +305,33 @@ function extractContentText(content: TextContent | ToolCallContent | ToolResultC
       return (content as TextContent).text
     case 'TOOL_CALL': {
       const toolCall = content as ToolCallContent
-      return `[工具调用] ${toolCall.tool_name}`
+      const toolName =
+        toolCall.tool_name ??
+        (toolCall.name as string | undefined) ??
+        (toolCall.id as string | undefined) ??
+        '未命名工具'
+      return `[工具调用] ${toolName}`
     }
     case 'TOOL_RESULT': {
       const toolResult = content as ToolResultContent
-      return `[工具结果] ${toolResult.tool_name}: ${toolResult.result.substring(0, 100)}...`
+      const toolName = toolResult.tool_name ?? (toolResult as unknown as { name?: string }).name ?? '未命名工具'
+      const rawResult = toolResult.result ?? (toolResult as unknown as { output?: unknown }).output ?? ''
+      let snippet = ''
+      let truncated = false
+      if (typeof rawResult === 'string') {
+        snippet = rawResult.substring(0, 100)
+        truncated = rawResult.length > snippet.length
+      } else if (rawResult != null) {
+        try {
+          const serialised = JSON.stringify(rawResult)
+          snippet = serialised.substring(0, 100)
+          truncated = serialised.length > snippet.length
+        } catch {
+          snippet = String(rawResult).substring(0, 100)
+          truncated = String(rawResult).length > snippet.length
+        }
+      }
+      return snippet ? `[工具结果] ${toolName}: ${snippet}${truncated ? '...' : ''}` : `[工具结果] ${toolName}`
     }
     default:
       // 向后兼容性处理

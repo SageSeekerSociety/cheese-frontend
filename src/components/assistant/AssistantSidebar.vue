@@ -154,14 +154,10 @@ const loadConversations = async () => {
 }
 
 // 创建新对话
-const createNewConversation = async () => {
-  try {
-    await assistantService.startNewConversation()
-    router.push('/assistant')
-  } catch (error) {
-    console.error('创建新对话失败:', error)
-    router.push('/assistant')
-  }
+const createNewConversation = () => {
+  router.push({ name: 'AssistantIndex' }).catch((error) => {
+    console.error('跳转到助手首页失败:', error)
+  })
 }
 
 // 重命名对话

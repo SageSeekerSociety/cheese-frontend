@@ -5,6 +5,34 @@ import Prism from 'prismjs'
 
 import markedKatex from './katexExt'
 
+const citeExtension = {
+  name: 'cite',
+  level: 'inline',
+  start(src: string) {
+    return src.indexOf('CITE[') // 仅用于加速，返回 >=0 才尝试 tokenizer
+  },
+  tokenizer(src: string) {
+    // 仅匹配单个对象：CITE[{...}]；跨行匹配
+    const rule = /^CITE\[(\{[\s\S]*?\})\]/
+    const match = rule.exec(src)
+    if (!match) return
+    try {
+      const data = JSON.parse(match[1])
+      return {
+        type: 'cite',
+        raw: match[0],
+        data, // 会传给 renderer
+      }
+    } catch {
+      return // JSON 未闭合或不合法时，留给后续增量渲染再匹配
+    }
+  },
+  renderer(token: any) {
+    const json = JSON.stringify(token.data).replace(/"/g, '&quot;')
+    return `<cite-chip data-cite="${json}"></cite-chip>`
+  },
+}
+
 /**
  * Markdown渲染服务 - 提供安全的Markdown渲染，支持代码高亮和LaTeX
  */
@@ -24,6 +52,7 @@ export class MarkdownRenderer {
       }),
       markedKatex({ strict: 'ignore' })
     )
+    this.marked.use({ extensions: [citeExtension] })
     this.marked.setOptions({
       breaks: true,
       gfm: true,
@@ -40,7 +69,10 @@ export class MarkdownRenderer {
       // 使用 marked 将 Markdown 转换为 HTML
       const rawHtml = this.marked.parse(text, { async: false })
 
-      const sanitizedHtml = DOMPurify.sanitize(rawHtml)
+      const sanitizedHtml = DOMPurify.sanitize(rawHtml, {
+        ADD_TAGS: ['cite-chip'],
+        ADD_ATTR: ['data-cite', 'source-type', 'source-id', 'snippet'],
+      })
 
       // 使用 DOMPurify 清理 HTML，防止 XSS 攻击
       return sanitizedHtml

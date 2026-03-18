@@ -1,302 +1,496 @@
 <template>
-  <div class="chat-message" :class="messageClass">
-    <div class="message-wrapper">
-      <!-- 头像 -->
-      <v-avatar :size="40" class="message-avatar">
-        <v-icon v-if="message.role === 'assistant'" icon="mdi-robot" color="primary"></v-icon>
-        <v-icon v-else icon="mdi-account" color="grey-darken-1"></v-icon>
-      </v-avatar>
+  <div class="assistant-message" :class="containerClass">
+    <v-card
+      variant="flat"
+      :class="[
+        'assistant-message__bubble',
+        bubbleCardClass,
+        { 'assistant-message__bubble--typing': message.isTyping && isAssistantMessage },
+      ]"
+    >
+      <v-card-text v-if="isUserMessage" class="assistant-message__content assistant-message__content--user">
+        {{ message.content }}
+      </v-card-text>
 
-      <!-- 消息内容 -->
-      <div class="message-content">
-        <!-- 消息气泡 -->
-        <div class="message-bubble" :class="bubbleClass">
-          <!-- 消息文本 -->
-          <div class="message-text">
-            <div v-html="renderedContent"></div>
-
-            <!-- 正在输入状态 - 显示在内容后面 -->
-            <span v-if="message.isTyping" class="typing-cursor">▊</span>
+      <v-card-text v-else class="assistant-message__content">
+        <details v-if="thinkingParts.length" class="assistant-message__thinking-group">
+          <summary>
+            <v-icon size="small" class="me-1 assistant-message__thinking-icon">mdi-brain</v-icon>
+            <span>{{ thinkingSummary }}</span>
+            <v-icon size="small" class="assistant-message__preface-icon">mdi-chevron-down</v-icon>
+          </summary>
+          <div class="assistant-message__thinking-body">
+            <div class="assistant-message__timeline">
+              <div
+                v-for="(part, index) in thinkingParts"
+                :key="`thinking-${index}`"
+                class="assistant-message__timeline-row"
+              >
+                <div class="assistant-message__timeline-axis">
+                  <span class="assistant-message__timeline-dot"></span>
+                  <span v-if="index < thinkingParts.length - 1" class="assistant-message__timeline-line"></span>
+                </div>
+                <div class="assistant-message__timeline-content">
+                  <div v-if="part.kind === 'thinking'" class="assistant-message__thinking">
+                    <pre>{{ part.text }}</pre>
+                  </div>
+                  <ToolCard v-else-if="part.kind === 'tool'" :part="part" dense />
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        </details>
 
-        <!-- 消息操作 -->
-        <div v-if="!message.isTyping && message.role === 'assistant'" class="message-actions">
-          <v-btn size="small" variant="text" @click="copyMessage">
-            <v-icon>mdi-content-copy</v-icon>
-            <v-tooltip activator="parent" location="top">复制</v-tooltip>
-          </v-btn>
-          <v-btn size="small" variant="text" @click="likeMessage">
-            <v-icon>mdi-thumb-up-outline</v-icon>
-            <v-tooltip activator="parent" location="top">有帮助</v-tooltip>
-          </v-btn>
-          <v-btn size="small" variant="text" @click="dislikeMessage">
-            <v-icon>mdi-thumb-down-outline</v-icon>
-            <v-tooltip activator="parent" location="top">没帮助</v-tooltip>
-          </v-btn>
-          <v-btn size="small" variant="text" @click="regenerateMessage">
-            <v-icon>mdi-refresh</v-icon>
-            <v-tooltip activator="parent" location="top">重新生成</v-tooltip>
-          </v-btn>
+        <div v-blinking-cursor="{ isStreaming: message.isTyping }" class="assistant-message__body">
+          <template v-if="bodyParts.length">
+            <template v-for="(part, index) in bodyParts" :key="`body-${index}`">
+              <div
+                v-if="part.kind === 'text'"
+                v-cite-markers
+                class="assistant-message__markdown"
+                v-html="renderMarkdown(part.text)"
+              ></div>
+
+              <ToolCard v-else-if="part.kind === 'tool'" :part="part" class="assistant-message__tool-card" />
+
+              <div v-else-if="part.kind === 'divider'" class="assistant-message__divider">
+                <span>{{ part.label ?? '——' }}</span>
+              </div>
+
+              <div v-else-if="part.kind === 'error'" class="assistant-message__error">
+                <v-icon size="small" color="error" class="me-1">mdi-alert-circle</v-icon>
+                {{ part.text }}
+              </div>
+            </template>
+          </template>
+
+          <div
+            v-else-if="hasFallbackContent"
+            class="assistant-message__markdown"
+            v-html="renderMarkdown(message.content ?? '')"
+          ></div>
         </div>
-      </div>
-    </div>
+      </v-card-text>
+    </v-card>
+  </div>
+
+  <div v-if="showActions" class="assistant-message__actions">
+    <v-btn
+      v-for="action in actionButtons"
+      :key="action.icon"
+      v-tooltip="action.label"
+      size="small"
+      variant="text"
+      density="comfortable"
+      :icon="action.icon"
+      color="primary"
+      @click="action.handler"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-// 引入 Prism 语法高亮样式
 import 'prismjs/themes/prism.css'
+
+import type { AssistantMessage, MessagePart } from '@/types/assistant'
 
 import { computed } from 'vue'
 
+import ToolCard from './ToolCard.vue'
+
+import { vBlinkingCursor } from '@/components/chat/directives/cursor-directive'
 import { MarkdownRenderer } from '@/components/chat/services/markdownRenderer'
 
-interface Message {
-  id: string
-  role: 'user' | 'assistant' | 'tool'
-  messageType: 'TEXT' | 'TOOL_CALL' | 'TOOL_RESULT'
-  content: string
-  timestamp: Date
-  isTyping?: boolean
-  toolName?: string
-  toolInput?: Record<string, any>
-  toolResult?: string
-}
+const props = defineProps<{
+  message: AssistantMessage
+}>()
 
-interface Props {
-  message: Message
-}
-
-const props = defineProps<Props>()
-
-// 创建 Markdown 渲染器实例
 const markdownRenderer = new MarkdownRenderer()
 
-// 计算样式类
-const messageClass = computed(() => ({
-  'message-user': props.message.role === 'user',
-  'message-assistant': props.message.role === 'assistant',
+const isUserMessage = computed(() => props.message.role === 'user')
+const isAssistantMessage = computed(() => props.message.role === 'assistant')
+
+const containerClass = computed(() => ({
+  'assistant-message--user': isUserMessage.value,
+  'assistant-message--assistant': isAssistantMessage.value,
 }))
 
-const bubbleClass = computed(() => ({
-  'bubble-user': props.message.role === 'user',
-  'bubble-assistant': props.message.role === 'assistant',
-  'bubble-typing': props.message.isTyping,
-}))
+const bubbleCardClass = computed(() =>
+  isUserMessage.value ? 'assistant-message__bubble--user' : 'assistant-message__bubble--ai'
+)
 
-// 渲染Markdown内容
-const renderedContent = computed(() => {
-  return markdownRenderer.render(props.message.content)
+const parts = computed(() => props.message.parts ?? [])
+
+const thinkingParts = computed(() =>
+  parts.value.filter(
+    (part): part is Extract<MessagePart, { kind: 'thinking' }> | Extract<MessagePart, { kind: 'tool' }> =>
+      part.kind === 'thinking' || (part.kind === 'tool' && part.phase === 'preface')
+  )
+)
+
+const bodyParts = computed(() =>
+  parts.value.filter((part) => {
+    if (part.kind === 'thinking') return false
+    if (part.kind === 'tool' && part.phase === 'preface') return false
+    return true
+  })
+)
+
+const hasFallbackContent = computed(() => Boolean(props.message.content) && !parts.value.length)
+
+const renderMarkdown = (text: string) => markdownRenderer.render(text)
+
+const thinkingStartTs = computed(() => {
+  const thinkingTs = thinkingParts.value.map((part) => part.ts)
+  return thinkingTs.length ? Math.min(...thinkingTs) : null
 })
 
-// 格式化时间
-const formatTime = (date: Date) => {
-  return date.toLocaleTimeString('zh-CN', {
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+const bodyStartTs = computed(() => {
+  const bodyTs = bodyParts.value.map((part) => part.ts)
+  return bodyTs.length ? Math.min(...bodyTs) : null
+})
+
+const thinkingCompleted = computed(() => !props.message.isTyping && thinkingParts.value.length > 0)
+
+const thinkingEndTs = computed(() => {
+  if (!thinkingCompleted.value) return null
+  if (bodyStartTs.value != null) return bodyStartTs.value
+  const tsList = thinkingParts.value.map((part) => part.ts)
+  return tsList.length ? Math.max(...tsList) : null
+})
+
+const thinkingDurationMs = computed(() => {
+  if (!thinkingCompleted.value) return 0
+  const start = thinkingStartTs.value
+  const end = thinkingEndTs.value
+  if (start == null || end == null) return 0
+  return Math.max(0, end - start)
+})
+
+const formatDuration = (ms: number) => {
+  if (ms <= 0) return '不到 1 秒'
+  const totalSeconds = Math.floor(ms / 1000)
+  if (totalSeconds < 60) {
+    if (totalSeconds === 0) return '不到 1 秒'
+    return `${totalSeconds} 秒`
+  }
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+  const segments: string[] = []
+  if (hours) segments.push(`${hours} 小时`)
+  if (minutes) segments.push(`${minutes} 分`)
+  if (seconds) segments.push(`${seconds} 秒`)
+  return segments.join('')
 }
 
-// 复制消息
+const thinkingSummary = computed(() => {
+  if (!thinkingParts.value.length) return '思考过程'
+  if (!thinkingCompleted.value) return props.message.isTyping ? '思考过程 · 思考中…' : '思考过程'
+  const duration = thinkingDurationMs.value
+  if (!duration) return '思考过程 · 思考不到 1 秒'
+  return `思考过程 · 思考 ${formatDuration(duration)}`
+})
+
+const showActions = computed(() => isAssistantMessage.value && !props.message.isTyping)
+
+const actionButtons = computed(() => [
+  { icon: 'mdi-content-copy', label: '复制', handler: copyMessage },
+  { icon: 'mdi-thumb-up-outline', label: '有帮助', handler: likeMessage },
+  { icon: 'mdi-thumb-down-outline', label: '没帮助', handler: dislikeMessage },
+  { icon: 'mdi-refresh', label: '重新生成', handler: regenerateMessage },
+])
+
 const copyMessage = async () => {
   try {
-    await navigator.clipboard.writeText(props.message.content)
-    // TODO: 显示复制成功提示
+    await navigator.clipboard.writeText(props.message.content ?? '')
   } catch (error) {
     console.error('复制失败:', error)
   }
 }
 
-// 点赞消息
 const likeMessage = () => {
-  // TODO: 实现点赞逻辑
   console.log('点赞消息:', props.message.id)
 }
 
-// 踩消息
 const dislikeMessage = () => {
-  // TODO: 实现踩逻辑
   console.log('踩消息:', props.message.id)
 }
 
-// 重新生成消息
 const regenerateMessage = () => {
-  // TODO: 实现重新生成逻辑
   console.log('重新生成消息:', props.message.id)
 }
 </script>
 
-<style scoped>
-.chat-message {
+<style scoped lang="scss">
+.assistant-message {
   display: flex;
-  margin-bottom: 1rem;
-}
-
-.message-user {
-  justify-content: flex-end;
-}
-
-.message-assistant {
-  justify-content: flex-start;
-}
-
-.message-wrapper {
-  display: flex;
-  max-width: 80%;
+  gap: 12px;
+  margin-bottom: 16px;
   align-items: flex-start;
 }
 
-.message-user .message-wrapper {
-  flex-direction: row-reverse;
+.assistant-message--user {
+  justify-content: flex-end;
 }
 
-.message-avatar {
-  flex-shrink: 0;
-  margin: 0 0.5rem;
+.assistant-message--assistant {
+  justify-content: center;
 }
 
-.message-content {
+.assistant-message__bubble {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  font-size: 1rem;
+}
+
+.assistant-message__bubble--typing {
+  box-shadow: 0 0 0 1px rgba(var(--v-theme-primary), 0.12) inset;
+}
+
+.assistant-message--user .assistant-message__bubble {
+  width: auto;
+  max-width: min(80%, 580px);
+  border-bottom-right-radius: 4px;
+}
+
+.assistant-message__bubble--user {
+  background: rgba(var(--v-theme-surface-light), 0.95);
+}
+
+.assistant-message__bubble--ai {
+  background: transparent;
+  box-shadow: none;
+}
+
+.assistant-message__content {
+  padding: 16px 18px;
+  line-height: 1.65;
+}
+
+.assistant-message__content--user {
+  white-space: pre-wrap;
+  color: rgba(var(--v-theme-on-surface), 0.92);
+}
+
+.assistant-message__thinking-group {
+  margin-bottom: 12px;
+  padding: 6px 4px 0;
+
+  summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: rgba(var(--v-theme-on-surface), 0.65);
+    font-weight: 500;
+  }
+
+  .assistant-message__thinking-icon {
+    color: rgba(var(--v-theme-on-surface), 0.45);
+  }
+
+  .assistant-message__preface-icon {
+    margin-left: auto;
+    transition: transform 0.2s ease;
+    color: rgba(var(--v-theme-on-surface), 0.45);
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+}
+
+.assistant-message__thinking-group[open] .assistant-message__preface-icon {
+  transform: rotate(180deg);
+}
+
+.assistant-message__thinking-body {
+  margin-top: 8px;
   display: flex;
   flex-direction: column;
-  min-width: 0;
+  gap: 12px;
+  color: rgba(var(--v-theme-on-surface), 0.65);
 }
 
-.message-bubble {
-  padding: 0.75rem 1rem;
-  border-radius: 1rem;
-  word-wrap: break-word;
-  position: relative;
-}
-
-.bubble-user {
-  background-color: rgb(var(--v-theme-primary));
-  color: rgb(var(--v-theme-on-primary));
-  margin-left: 2rem;
-}
-
-.bubble-assistant {
-  background-color: rgb(var(--v-theme-surface-variant));
-  color: rgb(var(--v-theme-on-surface-variant));
-  margin-right: 2rem;
-}
-
-.bubble-typing {
-  background-color: rgb(var(--v-theme-surface-variant));
-  padding: 1rem 1.25rem;
-}
-
-.message-text {
-  line-height: 1.5;
-}
-
-.message-text :deep(pre) {
-  background-color: rgba(0, 0, 0, 0.05);
-  padding: 0.5rem;
-  border-radius: 0.25rem;
-  overflow-x: auto;
-  margin: 0.5rem 0;
-  position: relative;
-}
-
-.message-text :deep(pre code) {
-  background-color: transparent;
-  padding: 0;
-}
-
-.message-text :deep(code) {
-  background-color: rgba(0, 0, 0, 0.05);
-  padding: 0.125rem 0.25rem;
-  border-radius: 0.25rem;
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-}
-
-.message-text :deep(p) {
-  line-height: 1.5;
-  margin-bottom: 12px;
-}
-
-.message-text :deep(p:last-child) {
-  margin-bottom: 0;
-}
-
-.message-text :deep(ul),
-.message-text :deep(ol) {
-  padding-left: 24px;
-  margin-bottom: 12px;
-}
-
-.message-text :deep(h1),
-.message-text :deep(h2),
-.message-text :deep(h3),
-.message-text :deep(h4),
-.message-text :deep(h5),
-.message-text :deep(h6) {
-  margin-top: 16px;
-  margin-bottom: 12px;
-  font-weight: 600;
-  line-height: 1.3;
-}
-
-.message-text :deep(blockquote) {
-  border-left: 4px solid rgba(var(--v-theme-primary), 0.4);
-  padding: 0 0 0 16px;
-  margin: 12px 0;
-  color: rgba(var(--v-theme-on-surface), 0.7);
-  font-style: italic;
-}
-
-.message-text :deep(table) {
-  border-collapse: collapse;
-  width: 100%;
-  margin: 16px 0;
-  font-size: 0.9em;
-}
-
-.message-text :deep(th),
-.message-text :deep(td) {
-  border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
-  padding: 8px;
-  text-align: left;
-}
-
-.message-text :deep(th) {
-  background-color: rgba(var(--v-theme-primary), 0.05);
-  font-weight: 600;
-}
-
-.message-text :deep(tr:nth-child(even)) {
-  background-color: rgba(0, 0, 0, 0.015);
-}
-
-.message-actions {
+.assistant-message__timeline {
   display: flex;
-  gap: 0.125rem;
-  margin-top: 0.25rem;
-  opacity: 0.6;
-  transition: opacity 0.2s;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
 }
 
-.message-wrapper:hover .message-actions {
+.assistant-message__timeline-row {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.assistant-message__timeline-axis {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.assistant-message__timeline-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: rgba(var(--v-theme-primary), 0.5);
+  box-shadow: 0 0 0 2px rgba(var(--v-theme-surface), 1);
+}
+
+.assistant-message__timeline-line {
+  display: block;
+  flex: 1;
+  width: 1px;
+  background: linear-gradient(to bottom, rgba(var(--v-theme-primary), 0.18), rgba(var(--v-theme-primary), 0.05));
+}
+
+.assistant-message__timeline-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.assistant-message__thinking pre {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  background: transparent;
+  border-radius: 6px;
+  padding: 0;
+  color: rgba(var(--v-theme-on-surface), 0.68);
+}
+
+.assistant-message__body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.assistant-message__markdown {
+  font-size: 1rem;
+
+  :deep(pre) {
+    background-color: rgba(var(--v-theme-surface-light), 0.5);
+    padding: 12px;
+    border-radius: 10px;
+    overflow-x: auto;
+    margin: 12px 0;
+    font-size: 0.85rem;
+  }
+
+  :deep(p) {
+    margin-bottom: 12px;
+  }
+
+  :deep(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  :deep(ul),
+  :deep(ol) {
+    padding-left: 24px;
+    margin-bottom: 12px;
+  }
+
+  :deep(blockquote) {
+    border-left: 4px solid rgba(var(--v-theme-primary), 0.35);
+    padding-left: 12px;
+    margin: 12px 0;
+    color: rgba(var(--v-theme-on-surface), 0.7);
+    font-style: italic;
+  }
+
+  :deep(th),
+  :deep(td) {
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    padding: 8px 12px;
+    text-align: left;
+    border-color: rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.08);
+  }
+
+  :deep(tr:nth-child(even)) {
+    background-color: rgba(255, 255, 255, 0.12);
+  }
+}
+
+.assistant-message__tool-card {
+  margin: 4px 0;
+}
+
+.assistant-message__divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(var(--v-theme-on-surface), 0.45);
+  font-size: 0.8rem;
+}
+
+.assistant-message__divider::before,
+.assistant-message__divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px dashed rgba(var(--v-theme-on-surface), 0.2);
+  margin: 0 12px;
+}
+
+.assistant-message__error {
+  background-color: rgba(var(--v-theme-error), 0.1);
+  border: 1px solid rgba(var(--v-theme-error), 0.3);
+  border-radius: 8px;
+  padding: 12px 14px;
+  color: rgba(var(--v-theme-error), 0.9);
+  display: flex;
+  align-items: center;
+}
+
+.assistant-message__placeholder {
+  padding: 8px 0;
+}
+
+.assistant-message__actions {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+  margin-left: 48px;
+}
+
+.assistant-message__actions .v-btn {
+  opacity: 0.75;
+  transition: opacity 0.2s ease;
+}
+
+.assistant-message__actions .v-btn:hover {
   opacity: 1;
 }
 
-/* 输入光标样式 */
-.typing-cursor {
-  color: rgb(var(--v-theme-primary));
-  font-weight: bold;
-  animation: blink 1s infinite;
+:deep(.input-cursor) {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: rgb(var(--v-theme-primary));
   margin-left: 2px;
+  animation: pulse 1s infinite;
+  vertical-align: middle;
 }
 
-@keyframes blink {
+@keyframes pulse {
   0%,
-  50% {
-    opacity: 1;
-  }
-  51%,
   100% {
-    opacity: 0;
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.5);
   }
 }
 </style>
