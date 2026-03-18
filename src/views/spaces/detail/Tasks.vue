@@ -14,10 +14,11 @@
         ></v-select>
       </div>
 
-      <!-- 过滤和搜索选项 -->
-      <div class="filter-options mb-2">
-        <!-- 搜索框和发布按钮一行 -->
-        <div class="d-flex flex-wrap align-center gap-4 mb-4">
+      <!-- New Layout: Toolbar functionality -->
+      <div class="filter-toolbar mb-4">
+        <!-- Row 1: Search + Sort + Publish -->
+        <div class="d-flex align-center flex-wrap gap-4 mb-3">
+          <!-- Search -->
           <v-form class="search-container flex-grow-1" @submit.prevent="submitSearch">
             <v-text-field
               v-model="searchQueryInput"
@@ -25,116 +26,87 @@
               hide-details
               :placeholder="t('spaces.detail.tasks.searchPlaceholder')"
               prepend-inner-icon="mdi-magnify"
-              variant="solo-filled"
-              flat
-              rounded="lg"
-              bg-color="grey-lighten-4"
+              variant="outlined"
+              bg-color="surface"
               class="search-input"
+              rounded="lg"
             ></v-text-field>
           </v-form>
 
+          <!-- Sort Dropdown -->
+          <v-select
+            v-model="selectedSortOption"
+            :items="sortOptions"
+            item-title="title"
+            item-value="value"
+            density="compact"
+            variant="outlined"
+            hide-details
+            prepend-inner-icon="mdi-sort-variant"
+            class="sort-select"
+            style="max-width: 160px"
+            rounded="lg"
+            return-object
+          ></v-select>
+
+          <!-- Publish Button -->
           <v-btn
             color="primary"
-            class="publish-btn d-none d-md-flex ms-1"
+            class="publish-btn d-none d-md-flex"
             prepend-icon="mdi-plus"
             rounded="lg"
+            height="40"
+            flat
             @click="navigateToPublishTask"
           >
             {{ t('spaces.detail.tasks.publishTask') }}
           </v-btn>
-
-          <v-btn color="primary" class="d-md-none" icon="mdi-plus" @click="navigateToPublishTask"></v-btn>
+          <v-btn
+            color="primary"
+            class="d-md-none"
+            icon="mdi-plus"
+            variant="flat"
+            @click="navigateToPublishTask"
+          ></v-btn>
         </div>
 
-        <!-- 筛选选项使用标签/片段 -->
-        <div class="filter-groups d-flex flex-wrap align-center justify-space-between">
-          <!-- 排序选项 -->
-          <div class="filter-group mb-3">
-            <div class="filter-title mb-2 text-medium-emphasis">
-              <v-icon size="18" class="me-2 title-icon">mdi-sort-variant</v-icon>
-              {{ t('spaces.detail.tasks.sort') }}
-            </div>
-            <div class="d-flex flex-wrap gap-2">
-              <v-chip
-                v-for="(option, index) in sortOptions"
-                :key="index"
-                :color="
-                  selectedSortOption.by === option.value.by && selectedSortOption.order === option.value.order
-                    ? 'primary'
-                    : undefined
-                "
-                :variant="
-                  selectedSortOption.by === option.value.by && selectedSortOption.order === option.value.order
-                    ? 'flat'
-                    : 'text'
-                "
-                density="comfortable"
-                size="small"
-                class="filter-chip"
-                @click="selectedSortOption = option.value"
-              >
-                {{ option.title }}
-              </v-chip>
-            </div>
-          </div>
+        <!-- Row 2: Topic Filter Bar -->
+        <div class="topic-filter-bar d-flex flex-wrap align-center gap-2">
+          <!-- All Topics Chip -->
+          <v-chip
+            :color="selectedTopic === null ? 'primary' : undefined"
+            :variant="selectedTopic === null ? 'flat' : 'outlined'"
+            class="filter-chip"
+            label
+            @click="selectedTopic = null"
+          >
+            {{ t('spaces.detail.tasks.allTopics') }}
+          </v-chip>
 
-          <!-- 话题选项 -->
-          <div v-if="topicOptions.length > 1" class="filter-group mb-3">
-            <div class="filter-title mb-2 text-medium-emphasis">
-              <v-icon size="18" class="me-2 title-icon">mdi-tag-multiple</v-icon>
-              {{ t('spaces.detail.tasks.topic') }}
-            </div>
-            <div class="d-flex flex-wrap gap-2">
-              <!-- 显示常用/固定的话题选项 (最多4个) -->
-              <v-chip
-                v-for="option in displayedTopicOptions"
-                :key="option?.value === null ? 'all' : option?.value ?? 'topic'"
-                :color="selectedTopic === option?.value ? 'primary' : undefined"
-                :variant="selectedTopic === option?.value ? 'flat' : 'text'"
-                density="comfortable"
-                size="small"
-                class="filter-chip"
-                @click="option && (selectedTopic = option.value)"
-              >
-                {{ option?.title }}
-              </v-chip>
+          <!-- Hot Topics -->
+          <v-chip
+            v-for="topic in displayedHotTopics"
+            :key="topic.id"
+            :color="selectedTopic === topic.id ? 'primary' : undefined"
+            :variant="selectedTopic === topic.id ? 'flat' : 'outlined'"
+            class="filter-chip"
+            label
+            @click="selectedTopic = topic.id"
+          >
+            {{ topic.name }}
+          </v-chip>
 
-              <!-- 如果话题数量超过显示限制且选中的话题不在已显示的选项中，显示"更多"选项 -->
-              <v-menu v-if="hasMoreHiddenTopics" location="bottom" :close-on-content-click="true">
-                <template #activator="{ props }">
-                  <v-chip
-                    v-bind="props"
-                    :color="isSelectedTopicHidden ? 'primary' : undefined"
-                    :variant="isSelectedTopicHidden ? 'flat' : 'text'"
-                    density="comfortable"
-                    size="small"
-                    class="filter-chip more-chip"
-                  >
-                    <template v-if="isSelectedTopicHidden">
-                      {{ selectedHiddenTopic?.title }}
-                    </template>
-                    <template v-else>
-                      {{ t('spaces.detail.tasks.moreTopics') }}
-                    </template>
-                    <v-icon size="small" end>mdi-chevron-down</v-icon>
-                  </v-chip>
-                </template>
-                <v-card min-width="180" max-width="300" class="more-topics-menu pa-0">
-                  <v-list density="compact" nav class="py-1">
-                    <v-list-item
-                      v-for="option in currentHiddenTopics"
-                      :key="option?.value === null ? 'all-hidden' : option?.value ?? 'hidden-topic'"
-                      :active="selectedTopic === option?.value"
-                      :title="option?.title || ''"
-                      density="compact"
-                      class="topic-list-item"
-                      @click="option && (selectedTopic = option.value)"
-                    ></v-list-item>
-                  </v-list>
-                </v-card>
-              </v-menu>
-            </div>
-          </div>
+          <!-- More Button -->
+          <v-chip
+            v-if="hotTopics.length > 10"
+            variant="text"
+            class="filter-chip px-2"
+            density="compact"
+            @click="showExpandedTopics = !showExpandedTopics"
+          >
+            {{ showExpandedTopics ? '收起' : '更多' }}
+            <v-icon :icon="showExpandedTopics ? 'mdi-chevron-up' : 'mdi-chevron-down'" end size="small"></v-icon>
+          </v-chip>
         </div>
       </div>
     </div>
@@ -159,7 +131,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Task } from '@/types'
+import type { Task, Topic } from '@/types'
 
 import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -169,6 +141,7 @@ import { storeToRefs } from 'pinia'
 import { createEmptyResult, usePaging } from '@/utils/paging'
 
 import InfiniteScroll from '@/components/common/InfiniteScroll.vue'
+import { SpacesApi } from '@/network/api/spaces'
 import { TasksApi } from '@/network/api/tasks'
 import { currentUserId } from '@/services/account'
 import { useSpaceStore } from '@/stores/space'
@@ -198,7 +171,28 @@ const selectedTopic = ref<number | null>(null)
 const { t } = useI18n()
 
 const spaceStore = useSpaceStore()
-const { currentSpace, classificationTopics, categories } = storeToRefs(spaceStore)
+const { currentSpace, categories } = storeToRefs(spaceStore)
+
+const hotTopics = ref<Topic[]>([])
+const showExpandedTopics = ref(false)
+
+const fetchHotTopics = async () => {
+  const sId = Number(route.params.spaceId)
+  if (!sId) return
+  try {
+    const { data } = await SpacesApi.getSpaceTopics(sId, 20, 'popularity')
+    hotTopics.value = data.topics || []
+  } catch (e) {
+    console.error('Fetch top topics failed', e)
+  }
+}
+
+const displayedHotTopics = computed(() => {
+  if (showExpandedTopics.value) {
+    return hotTopics.value
+  }
+  return hotTopics.value.slice(0, 10)
+})
 
 // 获取活跃分类列表
 const activeCategories = computed(() => {
@@ -322,19 +316,6 @@ const submitSearch = () => {
   searchQuery.value = searchQueryInput.value
 }
 
-const topicOptions = computed<{ title: string; value: number | null }[]>(() => {
-  return [
-    {
-      title: t('spaces.detail.tasks.allTopics'),
-      value: null,
-    },
-    ...classificationTopics.value.map((topic) => ({
-      title: topic.name,
-      value: topic.id,
-    })),
-  ]
-})
-
 const navigateToPublishTask = async () => {
   try {
     if (currentSpace.value) {
@@ -374,54 +355,9 @@ watch(
   { deep: true }
 )
 
-// 限制直接显示的话题数量
-const MAX_VISIBLE_TOPICS = 4
-
-// 前4个固定显示的话题选项（不包括选中的隐藏话题）
-const displayedTopicOptions = computed(() => {
-  // 始终显示"全部"选项
-  const allOption = topicOptions.value.find((option) => option.value === null)
-
-  // 除"全部"外的其他选项（不考虑选中状态）
-  const nonAllOptions = topicOptions.value.filter((option) => option.value !== null)
-
-  // 无论选中什么，始终只显示前 MAX_VISIBLE_TOPICS - 1 个
-  const fixedVisibleOptions = [allOption, ...nonAllOptions.slice(0, MAX_VISIBLE_TOPICS - 1)]
-
-  return fixedVisibleOptions
-})
-
-// 检查选中的话题是否在隐藏列表中
-const isSelectedTopicHidden = computed(() => {
-  if (selectedTopic.value === null) return false
-
-  return !displayedTopicOptions.value.some((option) => option?.value === selectedTopic.value)
-})
-
-// 获取当前选中的隐藏话题
-const selectedHiddenTopic = computed(() => {
-  if (!isSelectedTopicHidden.value) return null
-
-  return topicOptions.value.find((option) => option.value === selectedTopic.value) || null
-})
-
-// 当前隐藏的话题（用于菜单显示）
-const currentHiddenTopics = computed(() => {
-  // 获取所有不在显示列表中的选项
-  return topicOptions.value.filter(
-    (option) =>
-      option.value !== null && !displayedTopicOptions.value.some((displayed) => displayed?.value === option.value)
-  )
-})
-
-// 是否显示"更多"菜单（只要有隐藏的话题就显示）
-const hasMoreHiddenTopics = computed(() => {
-  return currentHiddenTopics.value.length > 0
-})
-
 onMounted(async () => {
   await spaceStore.fetchCategories() // 获取分类列表
-  // await refresh()
+  fetchHotTopics()
 })
 </script>
 
@@ -453,14 +389,6 @@ onMounted(async () => {
     }
   }
 
-  .filter-groups {
-    gap: 16px;
-  }
-
-  .filter-group {
-    min-width: 200px;
-  }
-
   .filter-title {
     font-weight: 500;
     font-size: 15px;
@@ -482,7 +410,6 @@ onMounted(async () => {
   .publish-btn {
     height: 40px;
     font-weight: 500;
-    margin-left: 8px;
   }
 }
 
@@ -495,28 +422,8 @@ onMounted(async () => {
 }
 
 @media (max-width: 600px) {
-  .filter-options {
-    .filter-groups {
-      flex-direction: column;
-      align-items: stretch;
-
-      .filter-group {
-        width: 100%;
-      }
-    }
-  }
-}
-
-.more-topics-menu {
-  border-radius: 8px;
-  overflow: hidden;
-
-  .topic-list-item {
-    min-height: 36px;
-
-    &:hover {
-      background-color: rgba(var(--v-theme-primary), 0.04);
-    }
+  .filter-toolbar {
+    /* Add responsive adjustments here if needed */
   }
 }
 </style>

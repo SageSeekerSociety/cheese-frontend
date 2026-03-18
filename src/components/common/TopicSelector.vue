@@ -1,70 +1,39 @@
 <template>
-  <v-input v-model="topics">
-    <div class="d-flex flex-row flex-wrap justify-start question-topics align-center">
-      <template v-if="topics">
-        <v-chip
-          v-for="(topic, index) in topics"
-          :key="topic.id"
-          class="ma-1"
-          color="primary"
-          label
-          closable
-          @click:close="deleteTopic(index)"
-        >
-          {{ topic.name }}
-        </v-chip>
-      </template>
-      <template v-if="!topics || max <= 0 || topics.length < max">
-        <template v-if="alwaysAdding || isAddingTopic">
-          <div class="question-topics-input">
-            <v-autocomplete
-              v-model="topicSelected"
-              v-model:search="topicInput"
-              label="添加话题"
-              placeholder="搜索已有话题或创建新话题"
-              variant="outlined"
-              :items="addTopicItems"
-              item-title="name"
-              item-value="id"
-              autofocus
-              density="compact"
-              single-line
-              menu-icon=""
-              hide-details
-              @blur="closeTopicInput"
-              @update:model-value="selectTopic"
-              @update:search="fetchTopics"
-            >
-              <template #item="{ props, item }">
-                <template v-if="item.raw.isFakeItem">
-                  <v-list-item
-                    v-bind="props"
-                    :title="t('questions.ask.buttons.createTopic', { name: item.raw.name })"
-                  ></v-list-item>
-                </template>
-                <template v-else>
-                  <v-list-item v-bind="props" :title="item.raw.name"></v-list-item>
-                </template>
-              </template>
-            </v-autocomplete>
-          </div>
-        </template>
-        <template v-else>
-          <v-btn variant="text" color="primary" prepend-icon="mdi-plus" class="included" @click="isAddingTopic = true">
-            {{
-              max > 0
-                ? t(
-                    'questions.ask.buttons.addTopic',
-                    { count: topics?.length || 0, max: props.max },
-                    topics?.length || 0
-                  )
-                : t('questions.ask.buttons.addTopicInfinite')
-            }}
-          </v-btn>
-        </template>
-      </template>
-    </div>
-  </v-input>
+  <v-autocomplete
+    v-model:search="topicInput"
+    :model-value="topics"
+    :items="addTopicItems"
+    :loading="isLoading"
+    label="添加话题"
+    placeholder="搜索已有话题或创建新话题"
+    variant="outlined"
+    item-title="name"
+    item-value="id"
+    chips
+    closable-chips
+    multiple
+    return-object
+    :no-filter="true"
+    hide-no-data
+    auto-select-first
+    @update:model-value="onTopicsUpdate"
+    @update:search="fetchTopics"
+    @focus="onFocus"
+  >
+    <template #chip="{ props, item }">
+      <v-chip v-bind="props" :text="item.raw.name"></v-chip>
+    </template>
+
+    <template #item="{ props, item }">
+      <v-list-item
+        v-if="item.raw.isFakeItem"
+        v-bind="props"
+        :title="t('questions.ask.buttons.createTopic', { name: item.raw.name })"
+        prepend-icon="mdi-plus"
+      ></v-list-item>
+      <v-list-item v-else v-bind="props" :title="item.raw.name"></v-list-item>
+    </template>
+  </v-autocomplete>
 </template>
 
 <script lang="ts" setup>
@@ -79,18 +48,20 @@ import { TopicsApi } from '@/network/api/topics'
 const props = withDefaults(
   defineProps<{
     max?: number
-    alwaysAdding?: boolean
+    defaultTopics?: Topic[]
   }>(),
   {
     max: -1,
-    alwaysAdding: false,
+    defaultTopics: () => [],
   }
 )
 
 const { t } = useI18n()
 
+const topics = defineModel<Topic[]>({ default: () => [] })
+
 const topicInput = ref('')
-const topicSelected = ref<number | null>(null)
+const isLoading = ref(false)
 const addTopicItems = ref<
   {
     id: number
@@ -98,85 +69,94 @@ const addTopicItems = ref<
     isFakeItem?: boolean
   }[]
 >([])
-const isAddingTopic = ref(false)
-
-const topics = defineModel<Topic[]>()
-
-const deleteTopic = (index: number) => {
-  if (!topics.value) {
-    topics.value = []
-    return
-  }
-  topics.value.splice(index, 1)
-}
 
 const createTopic = async (name: string) => {
-  const {
-    data: { id },
-  } = await TopicsApi.create(name)
-  return id
+  try {
+    isLoading.value = true
+    const {
+      data: { id },
+    } = await TopicsApi.create(name)
+    return id
+  } finally {
+    isLoading.value = false
+  }
 }
 
-const selectTopic = (id: number) => {
-  const topic = addTopicItems.value.find((item) => item.id === id)
-  if (!topic) {
-    return
-  }
-  if (id === -1) {
-    // create new topic
-    createTopic(topic.name).then((topicId) => {
-      if (!topics.value) {
-        topics.value = [{ id: topicId, name: topic.name }]
-      } else {
-        topics.value.push({ id: topicId, name: topic.name })
+const onTopicsUpdate = async (newTopics: Topic[]) => {
+  // Optimistic update
+  topics.value = newTopics
+
+  // Check if any topics need creation (id === -1)
+  // We use type assertion since the fake item comes from addTopicItems which has extra props
+  const hasFake = newTopics.some((t: any) => t.id === -1)
+  if (!hasFake) return
+
+  const finalTopics = [...newTopics]
+  let changed = false
+
+  for (let i = 0; i < finalTopics.length; i++) {
+    const topic = finalTopics[i] as any
+    if (topic.id === -1) {
+      try {
+        const newId = await createTopic(topic.name)
+        // successful creation, replace with real topic (stripping isFakeItem)
+        finalTopics[i] = { id: newId, name: topic.name }
+        changed = true
+      } catch (error) {
+        console.error('Create topic failed', error)
+        // If creation failed, remove it from list
+        finalTopics.splice(i, 1)
+        i--
+        changed = true
       }
-      closeTopicInput()
-    })
-    return
+    }
   }
-  if (!topics.value) {
-    topics.value = [topic]
-  } else {
-    topics.value.push(topic)
+
+  if (changed) {
+    topics.value = finalTopics
   }
-  closeTopicInput()
 }
 
 const fetchTopics = debounce(async (value: string) => {
   const q = value?.trim()
   if (!q) {
-    addTopicItems.value = []
+    addTopicItems.value = [...props.defaultTopics]
     return
   }
+
   try {
+    isLoading.value = true
     const {
-      data: { topics },
+      data: { topics: result },
     } = await TopicsApi.search(q)
-    addTopicItems.value = [
-      ...topics,
-      {
+
+    const items: { id: number; name: string; isFakeItem?: boolean }[] = [...result]
+    // Add create option if it doesn't strictly match existing
+    if (!items.find((i) => i.name === q)) {
+      items.push({
         id: -1,
         name: q,
         isFakeItem: true,
-      },
-    ]
+      })
+    }
+
+    addTopicItems.value = items
   } catch (error) {
     console.error('获取话题失败:', error)
+    // On error, still allow creating?
     addTopicItems.value = [{ id: -1, name: q, isFakeItem: true }]
+  } finally {
+    isLoading.value = false
   }
 }, 300)
 
-const closeTopicInput = () => {
-  isAddingTopic.value = false
-  topicInput.value = ''
-  topicSelected.value = null
-  addTopicItems.value = []
+const onFocus = () => {
+  if (!topicInput.value) {
+    fetchTopics('')
+  }
 }
 </script>
 
 <style lang="scss">
-.question-topics-input {
-  min-width: 200px;
-  flex-shrink: 0;
-}
+// Removed custom styles as v-autocomplete handles layout
 </style>

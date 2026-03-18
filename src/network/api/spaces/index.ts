@@ -1,4 +1,4 @@
-import type { Space, SpaceCategory } from '@/types'
+import type { Space, SpaceCategory, Topic } from '@/types'
 import type {
   GetSpacesResponseData,
   PatchSpaceAdminRequestData,
@@ -144,5 +144,12 @@ export namespace SpacesApi {
     NewApiInstance.request<{ category: SpaceCategory }>({
       url: `/spaces/${spaceId}/categories/${categoryId}/archive`,
       method: 'DELETE',
+    })
+
+  export const getSpaceTopics = (spaceId: number, limit = 10, sort?: 'popularity' | 'name', keyword?: string) =>
+    NewApiInstance.request<{ topics: Topic[] }>({
+      url: `/spaces/${spaceId}/topics`,
+      method: 'GET',
+      params: { limit, sort, keyword },
     })
 }

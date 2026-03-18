@@ -166,6 +166,12 @@ import { useSpaceStore } from '@/stores/space'
 
 const TipTapViewer = defineAsyncComponent(() => import('@/components/common/Editor/TipTapViewer.vue'))
 
+interface AuditTask extends Task {
+  submitters?: {
+    total?: number
+  }
+}
+
 const spaceStore = useSpaceStore()
 const { currentSpaceId } = storeToRefs(spaceStore)
 
@@ -182,9 +188,9 @@ const {
   hasMore,
   refreshing,
   loadingMore,
-} = usePaging<Task, void, string>(async (pageStart) => {
+} = usePaging<AuditTask, void, string>(async (pageStart) => {
   if (!currentSpaceId.value) {
-    return createEmptyResult<Task, string>()
+    return createEmptyResult<AuditTask, string>()
   }
   const { data } = await TasksApi.list({
     space: currentSpaceId.value,
@@ -195,7 +201,7 @@ const {
     queryTopics: true,
     querySpace: true,
   })
-  return { data: data.tasks, page: data.page }
+  return { data: data.tasks as AuditTask[], page: data.page }
 })
 
 const toggleExpand = (taskId: number) => {
