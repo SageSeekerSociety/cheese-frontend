@@ -11,7 +11,10 @@ export class ResponseBuilder {
   private phase: Phase = 'preface'
   private currentTextIndex: number | null = null
 
-  constructor(private readonly update: (message: AssistantMessage) => void, seed: AssistantMessage) {
+  constructor(
+    private readonly update: (message: AssistantMessage) => void,
+    seed: AssistantMessage
+  ) {
     this.message = { ...seed, parts: [] }
   }
 
