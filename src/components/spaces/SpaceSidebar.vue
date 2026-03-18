@@ -149,7 +149,7 @@
 
         <v-list-item
           rounded="lg"
-          :to="{ name: 'SpacesDetailAnalyticsTasks', params: { spaceId: spaceId } }"
+          :to="{ name: 'SpacesDetailAnalytics', params: { spaceId: spaceId } }"
           color="primary"
           class="sidebar-item"
         >

@@ -1,5 +1,10 @@
 import type { Space, SpaceCategory, Topic } from '@/types'
 import type {
+  AnalyticsApproveType,
+  AnalyticsCompletionType,
+  AnalyticsGroupBy,
+  AnalyticsRealNameType,
+  AnalyticsSortOrder,
   GetSpacesResponseData,
   PatchSpaceAdminRequestData,
   PatchSpaceCategoryRequestData,
@@ -7,8 +12,11 @@ import type {
   PostSpaceAdminRequestData,
   PostSpaceCategoryRequestData,
   PostSpaceRequestData,
-  PublisherParticipation,
-  SpaceAnalyticsTasksData,
+  SpaceAnalyticsAlerts,
+  SpaceAnalyticsOverview,
+  SpaceAnalyticsParticipants,
+  SpaceAnalyticsPublishers,
+  SpaceTaskAnalytics,
 } from './types'
 
 import { NewApiInstance } from '../index'
@@ -51,34 +59,85 @@ export namespace SpacesApi {
       params,
     })
 
+  export const getAnalyticsOverview = (
+    spaceId: number,
+    params?: Partial<{
+      from: number
+      to: number
+      categoryId: number
+      publisherId: number
+      taskApproved: AnalyticsApproveType
+      groupBy: AnalyticsGroupBy
+    }>
+  ) =>
+    NewApiInstance.request<SpaceAnalyticsOverview>({
+      url: `/spaces/${spaceId}/analytics/overview`,
+      method: 'GET',
+      params,
+    })
+
+  export const getAnalyticsAlerts = (spaceId: number) =>
+    NewApiInstance.request<SpaceAnalyticsAlerts>({
+      url: `/spaces/${spaceId}/analytics/alerts`,
+      method: 'GET',
+    })
+
+  export const getAnalyticsPublishers = (
+    spaceId: number,
+    params?: Partial<{
+      from: number
+      to: number
+      categoryId: number
+      taskApproved: AnalyticsApproveType
+      sortBy: 'taskCount' | 'participantCount' | 'successRate' | 'lastTaskCreatedAt'
+      sortOrder: AnalyticsSortOrder
+    }>
+  ) =>
+    NewApiInstance.request<SpaceAnalyticsPublishers>({
+      url: `/spaces/${spaceId}/analytics/publishers`,
+      method: 'GET',
+      params,
+    })
+
   export const getAnalyticsTasks = (
     spaceId: number,
     params?: Partial<{
-      successBy: 'completion' | 'approve'
       from: number
       to: number
-      taskStatus: string
       categoryId: number
-      realName: 'all' | 'with' | 'without'
       publisherId: number
+      taskApproved: AnalyticsApproveType
+      hasPendingReview: boolean
+      hasPendingApproval: boolean
+      sortBy: 'createdAt' | 'participantCount' | 'successRate' | 'pendingReviewCount'
+      sortOrder: AnalyticsSortOrder
     }>
   ) =>
-    NewApiInstance.request<SpaceAnalyticsTasksData>({
+    NewApiInstance.request<SpaceTaskAnalytics>({
       url: `/spaces/${spaceId}/analytics/tasks`,
       method: 'GET',
       params,
     })
 
-  export const getPublishersParticipation = (spaceId: number, successBy: 'completion' | 'approve' = 'completion') =>
-    NewApiInstance.request<PublisherParticipation[]>({
-      url: `/spaces/${spaceId}/publishers/participation`,
+  export const getAnalyticsParticipants = (
+    spaceId: number,
+    params?: Partial<{
+      from: number
+      to: number
+      categoryId: number
+      publisherId: number
+      taskApproved: AnalyticsApproveType
+      participationApproved: AnalyticsApproveType
+      completionStatus: AnalyticsCompletionType
+      realName: AnalyticsRealNameType
+      groupBy: AnalyticsGroupBy
+    }>
+  ) =>
+    NewApiInstance.request<SpaceAnalyticsParticipants>({
+      url: `/spaces/${spaceId}/analytics/participants`,
       method: 'GET',
-      params: { successBy },
+      params,
     })
-
-  // 导出参与者（CSV 或后续支持 Excel）
-  // 返回 AxiosResponse<Blob> 更适合文件下载，但这里直接返回 ResponseDataType<void>
-  // 实际下载放在视图中用 fetch 处理 Authorization 并保存文件
 
   export const addAdmin = (spaceId: number, data: PostSpaceAdminRequestData) =>
     NewApiInstance.request<{ space: Space }>({

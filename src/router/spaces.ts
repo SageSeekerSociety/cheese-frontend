@@ -140,9 +140,41 @@ export default {
       component: () => import('@/views/spaces/detail/SelectTemplate.vue'),
     },
     {
-      path: 'analytics/tasks',
-      name: 'SpacesDetailAnalyticsTasks',
-      component: () => import('@/views/spaces/detail/AnalyticsTasks.vue'),
+      path: 'analytics',
+      name: 'SpacesDetailAnalytics',
+      component: () => import('@/views/spaces/detail/analytics/Index.vue'),
+      redirect: { name: 'SpacesDetailAnalyticsOverview' },
+      meta: {
+        title: '数据分析',
+        icon: { type: 'icon', value: 'mdi-chart-line' },
+      },
+      children: [
+        {
+          path: '',
+          name: 'SpacesDetailAnalyticsOverview',
+          component: () => import('@/views/spaces/detail/analytics/Overview.vue'),
+        },
+        {
+          path: 'alerts',
+          name: 'SpacesDetailAnalyticsAlerts',
+          component: () => import('@/views/spaces/detail/analytics/Alerts.vue'),
+        },
+        {
+          path: 'publishers',
+          name: 'SpacesDetailAnalyticsPublishers',
+          component: () => import('@/views/spaces/detail/analytics/Publishers.vue'),
+        },
+        {
+          path: 'tasks',
+          name: 'SpacesDetailAnalyticsTasks',
+          component: () => import('@/views/spaces/detail/analytics/Tasks.vue'),
+        },
+        {
+          path: 'participants',
+          name: 'SpacesDetailAnalyticsParticipants',
+          component: () => import('@/views/spaces/detail/analytics/Participants.vue'),
+        },
+      ],
     },
     {
       path: 'manage/topics',

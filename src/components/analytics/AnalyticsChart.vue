@@ -23,7 +23,7 @@
                 :transform="hoveredSegment === index ? 'scale(1.05)' : 'scale(1)'"
                 style="cursor: pointer; transition: transform 0.2s ease"
               />
-              <title>{{ data[index].label }}: {{ data[index].count }} ({{ data[index].percentage.toFixed(1) }}%)</title>
+              <title>{{ data[index].label }}: {{ data[index].count }} ({{ formatPercentage(data[index]) }}%)</title>
             </g>
           </g>
         </svg>
@@ -78,7 +78,7 @@
         <div v-for="(item, index) in data" :key="index" class="legend-item">
           <div class="legend-color" :style="{ backgroundColor: colors[index % colors.length] }" />
           <span class="legend-label">{{ item.label }}</span>
-          <span class="legend-value">{{ item.count }} ({{ item.percentage.toFixed(1) }}%)</span>
+          <span class="legend-value">{{ item.count }} ({{ formatPercentage(item) }}%)</span>
         </div>
       </div>
     </v-card-text>
@@ -134,7 +134,7 @@ const pieSegments = computed(() => {
 
   let cumulativeAngle = 0
   return props.data.map((item) => {
-    const angle = (item.percentage / 100) * 2 * Math.PI
+    const angle = (toPercent(item) / 100) * 2 * Math.PI
     const startAngle = cumulativeAngle
     const endAngle = cumulativeAngle + angle
 
@@ -152,6 +152,13 @@ const pieSegments = computed(() => {
     return { path }
   })
 })
+
+const toPercent = (item: AnalyticsDistributionItem) => {
+  const percentage = item.percentage ?? 0
+  return percentage <= 1 ? percentage * 100 : percentage
+}
+
+const formatPercentage = (item: AnalyticsDistributionItem) => toPercent(item).toFixed(1)
 </script>
 
 <style scoped>
