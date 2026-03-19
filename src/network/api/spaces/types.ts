@@ -1,4 +1,4 @@
-import type { Page, Space } from '@/types'
+import type { Page, Space, TaskSubmitterType } from '@/types'
 
 export type PostSpaceRequestData = {
   name: string
@@ -202,6 +202,92 @@ export type SpaceAnalyticsParticipants = {
   studentMetrics: SpaceAnalyticsParticipantStudentMetrics
   distributions: SpaceAnalyticsParticipantDistributions
   trends: SpaceAnalyticsParticipantTrends
+}
+
+export type SpaceMyPublishingOverview = {
+  spaceId: number
+  taskCount: number
+  approvedTaskCount: number
+  pendingTaskApprovalCount: number
+  disapprovedTaskCount: number
+  participantCount: number
+  approvedParticipantCount: number
+  pendingParticipantApprovalCount: number
+  submittedParticipantCount: number
+  pendingReviewCount: number
+  successfulParticipantCount: number
+}
+
+export type SpaceMyPublishedTaskCategory = {
+  id: number
+  name: string
+}
+
+export type SpaceMyPublishedTask = {
+  taskId: number
+  taskName: string
+  category: SpaceMyPublishedTaskCategory
+  approved: AnalyticsApproveType
+  createdAt: number
+  deadline?: number | null
+  participantCount: number
+  approvedParticipantCount: number
+  pendingParticipantApprovalCount: number
+  submittedParticipantCount: number
+  pendingReviewCount: number
+  successfulParticipantCount: number
+  failedParticipantCount: number
+  submissionConversionRate: number
+  successRate: number
+  latestSubmissionAt?: number | null
+}
+
+export type SpaceMyPublishedTasks = {
+  tasks: SpaceMyPublishedTask[]
+}
+
+export type SpaceMyParticipatingOverview = {
+  spaceId: number
+  participationCount: number
+  approvedParticipationCount: number
+  pendingApprovalCount: number
+  awaitingSubmissionCount: number
+  pendingReviewCount: number
+  resubmittableCount: number
+  successfulCount: number
+  failedCount: number
+}
+
+export type SpaceMyParticipationPublisher = {
+  id: number
+  name: string
+}
+
+export type SpaceMyParticipationCategory = {
+  id: number
+  name: string
+}
+
+export type SpaceMyParticipation = {
+  taskId: number
+  taskName: string
+  publisher: SpaceMyParticipationPublisher
+  category: SpaceMyParticipationCategory
+  participationId: number
+  identityType: TaskSubmitterType
+  teamName?: string | null
+  approved: AnalyticsApproveType
+  completionStatus: AnalyticsCompletionType
+  canSubmit: boolean
+  joinedAt: number
+  deadline?: number | null
+  latestSubmissionAt?: number | null
+  latestReviewAccepted?: boolean | null
+  latestReviewScore?: number | null
+}
+
+export type SpaceMyParticipations = {
+  participations: SpaceMyParticipation[]
 }
 
 export type AnalyticsApproveType = 'NONE' | 'APPROVED' | 'DISAPPROVED'

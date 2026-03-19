@@ -36,6 +36,28 @@ export default {
           },
         },
         {
+          path: 'my/publishing',
+          name: 'SpacesDetailMyPublishing',
+          components: {
+            default: () => import('@/views/spaces/detail/member-tasks/MyPublishing.vue'),
+            header: () => import('@/components/common/PageHeader.vue'),
+          },
+          meta: {
+            titleKey: 'spaces.detail.myPublishedContests',
+          },
+        },
+        {
+          path: 'my/participating',
+          name: 'SpacesDetailMyParticipating',
+          components: {
+            default: () => import('@/views/spaces/detail/member-tasks/MyParticipating.vue'),
+            header: () => import('@/components/common/PageHeader.vue'),
+          },
+          meta: {
+            titleKey: 'spaces.detail.myJoinedContests',
+          },
+        },
+        {
           path: 'publish',
           name: 'SpacesDetailPublishTask',
           components: {

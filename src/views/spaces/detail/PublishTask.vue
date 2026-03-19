@@ -55,10 +55,6 @@ const loadedTemplate = ref(false)
 
 const initialTaskData = ref({})
 
-const goBack = () => {
-  router.go(-1)
-}
-
 const taskSubmissionSchema = ref<TaskSubmissionSchemaEntry[]>([
   {
     prompt: '提交文件',
@@ -101,7 +97,7 @@ const submitTask = async (taskData: TaskFormSubmitData) => {
         toast.success(t('spaces.detail.publishTask.createSuccess'))
       }
 
-      router.replace({ name: 'SpacesDetailTasks', params: { spaceId }, query: { type: 'published' } })
+      router.replace({ name: 'SpacesDetailMyPublishing', params: { spaceId } })
       return approved
     },
     {

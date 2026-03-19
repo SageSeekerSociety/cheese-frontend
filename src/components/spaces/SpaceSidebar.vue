@@ -78,8 +78,8 @@
       <!-- 个人分组 -->
       <v-list-item
         rounded="lg"
-        :to="{ name: 'SpacesDetailTasksList', params: { spaceId: spaceId }, query: { type: 'published' } }"
-        :active="isTasksLinkActive({ type: 'published' })"
+        :to="{ name: 'SpacesDetailMyPublishing', params: { spaceId: spaceId } }"
+        :active="isMyPublishingLinkActive"
         color="primary"
         class="sidebar-item"
       >
@@ -91,8 +91,8 @@
 
       <v-list-item
         rounded="lg"
-        :to="{ name: 'SpacesDetailTasksList', params: { spaceId: spaceId }, query: { type: 'joined' } }"
-        :active="isTasksLinkActive({ type: 'joined' })"
+        :to="{ name: 'SpacesDetailMyParticipating', params: { spaceId: spaceId } }"
+        :active="isMyParticipatingLinkActive"
         color="primary"
         class="sidebar-item"
       >
@@ -216,24 +216,34 @@ const activeCategories = computed(() => {
 })
 
 const spaceId = computed(() => Number(route.params.spaceId))
+const taskOrigin = computed(() => (typeof route.query.from === 'string' ? route.query.from : undefined))
+const isUnderTasksSection = computed(() => route.matched.some((record) => record.name === 'SpacesDetailTasks'))
+
+const isMyPublishingLinkActive = computed(
+  () => isUnderTasksSection.value && (route.name === 'SpacesDetailMyPublishing' || taskOrigin.value === 'my-publishing')
+)
+
+const isMyParticipatingLinkActive = computed(
+  () =>
+    isUnderTasksSection.value &&
+    (route.name === 'SpacesDetailMyParticipating' || taskOrigin.value === 'my-participating')
+)
 
 /**
  * 判断一个指向任务列表的链接是否应该被激活
  * @param {object} query - 该 v-list-item 的 :to.query 对象
  */
 function isTasksLinkActive(query: object = {}): boolean {
-  // 1. 首先，判断当前是否处于任何 "tasks" 相关的路由下。
-  //    使用 `route.matched` 是最可靠的方式，它可以检查当前路由的所有父级记录。
-  const isUnderTasksSection = route.matched.some((record) => record.name === 'SpacesDetailTasks')
-
-  // 如果当前页面根本不属于 tasks 板块，直接返回 false
-  if (!isUnderTasksSection) {
+  if (!isUnderTasksSection.value) {
     return false
   }
 
-  // 2. 如果处于 tasks 板块内（包括列表页、详情页、编辑页等），
-  //    则精确比较当前 URL 的 query 参数和链接目标的 query 参数。
-  return JSON.stringify(route.query) === JSON.stringify(query)
+  if (taskOrigin.value === 'my-publishing' || taskOrigin.value === 'my-participating') {
+    return false
+  }
+
+  const comparableQuery = Object.fromEntries(Object.entries(route.query).filter(([key]) => key === 'category'))
+  return JSON.stringify(comparableQuery) === JSON.stringify(query)
 }
 </script>
 

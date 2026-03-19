@@ -59,7 +59,7 @@
                   color="primary"
                   variant="flat"
                   rounded="lg"
-                  :to="{ name: 'TasksSubmit', params: { taskId: taskData.id } }"
+                  :to="{ name: 'TasksSubmit', params: { taskId: taskData.id }, query: $route.query }"
                 >
                   <v-icon start icon="mdi-upload" class="mr-1"></v-icon>
                   前往提交
@@ -84,7 +84,7 @@ import { getAvatarUrl } from '@/utils/materials'
 
 const props = defineProps<{
   taskData: Task
-  breadcrumbItems: any[] | null
+  breadcrumbItems: unknown[] | null
   taskStatusText: string
   taskStatusType: string
   titleWithPunctuation: boolean

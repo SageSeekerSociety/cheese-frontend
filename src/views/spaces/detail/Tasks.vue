@@ -5,8 +5,8 @@
       <!-- 主分类选项按钮在移动端显示 -->
       <div class="d-md-none category-nav-mobile mb-4">
         <v-select
-          v-model="selectedCategoryOrType"
-          :items="allFilterOptions"
+          v-model="selectedCategoryIdModel"
+          :items="categoryFilterOptions"
           density="comfortable"
           variant="outlined"
           hide-details
@@ -143,7 +143,6 @@ import { createEmptyResult, usePaging } from '@/utils/paging'
 import InfiniteScroll from '@/components/common/InfiniteScroll.vue'
 import { SpacesApi } from '@/network/api/spaces'
 import { TasksApi } from '@/network/api/tasks'
-import { currentUserId } from '@/services/account'
 import { useSpaceStore } from '@/stores/space'
 
 const TaskCard = defineAsyncComponent(() => import('@/components/TaskCard.vue'))
@@ -151,14 +150,11 @@ const TaskCard = defineAsyncComponent(() => import('@/components/TaskCard.vue'))
 type SortBy = 'createdAt' | 'updatedAt' | 'deadline'
 type SortOrder = 'asc' | 'desc'
 
-type QueryType = 'all' | 'published' | 'joined'
 type QueryOptions = {
   space: number
   by: SortBy
   order: SortOrder
   keywords?: string
-  owner?: number
-  queryType: QueryType
   topics?: number[]
   categoryId?: number
 }
@@ -209,58 +205,24 @@ const selectedCategoryId = computed<number | null>(() => {
   return activeCategories.value.some((cat) => cat.id === categoryId) ? categoryId : null
 })
 
-// 获取当前查询类型（全部、我发布的、我参与的）
-const currentQueryType = computed<QueryType>(() => {
-  const typeParam = route.query.type as QueryType
-  return ['all', 'published', 'joined'].includes(typeParam) ? typeParam : 'all'
-})
-
-// 用于移动端的组合选择器选项
-const allFilterOptions = computed(() => {
-  const typeOptions = [
-    { title: t('spaces.detail.allContests'), value: 'all-tasks' },
-    { title: t('spaces.detail.myPublishedContests'), value: 'published' },
-    { title: t('spaces.detail.myJoinedContests'), value: 'joined' },
-  ]
-
-  const categoryOptions = activeCategories.value.map((category) => ({
+const categoryFilterOptions = computed(() => [
+  { title: t('spaces.detail.allContests'), value: null },
+  ...activeCategories.value.map((category) => ({
     title: category.name,
-    value: `category-${category.id}`,
-  }))
+    value: category.id,
+  })),
+])
 
-  return [...typeOptions, ...categoryOptions]
-})
-
-// 移动端组合选择器的值
-const selectedCategoryOrType = computed({
+const selectedCategoryIdModel = computed({
   get() {
-    if (selectedCategoryId.value) {
-      return `category-${selectedCategoryId.value}`
-    }
-    return currentQueryType.value === 'all' ? 'all-tasks' : currentQueryType.value
+    return selectedCategoryId.value
   },
-  set(value: string) {
-    if (value.startsWith('category-')) {
-      const categoryId = value.replace('category-', '')
-      router.push({
-        name: 'SpacesDetailTasks',
-        params: { spaceId: route.params.spaceId },
-        query: { category: categoryId },
-      })
-    } else if (['published', 'joined'].includes(value)) {
-      router.push({
-        name: 'SpacesDetailTasks',
-        params: { spaceId: route.params.spaceId },
-        query: { type: value },
-      })
-    } else {
-      // 默认全部
-      router.push({
-        name: 'SpacesDetailTasks',
-        params: { spaceId: route.params.spaceId },
-        query: { type: 'all' },
-      })
-    }
+  set(value: null | number) {
+    router.push({
+      name: 'SpacesDetailTasksList',
+      params: { spaceId: route.params.spaceId },
+      query: value ? { category: String(value) } : {},
+    })
   },
 })
 
@@ -275,15 +237,12 @@ const queryOptions = computed<QueryOptions>(() => ({
   space: Number(route.params.spaceId),
   ...selectedSortOption.value,
   keywords: searchQuery.value ? searchQuery.value : undefined,
-  queryType: currentQueryType.value,
-  owner: currentQueryType.value === 'published' ? currentUserId.value : undefined,
   topics: selectedTopic.value !== null ? [selectedTopic.value] : undefined,
   categoryId: selectedCategoryId.value || undefined,
 }))
 
 const {
   data: tasks,
-  refresh,
   loadMore,
   reset,
   hasMore,
@@ -298,9 +257,7 @@ const {
       sort_by: queryOptions?.by ?? 'createdAt',
       sort_order: queryOptions?.order ?? 'desc',
       keywords: queryOptions?.keywords,
-      approved: queryOptions.queryType !== 'published' ? 'APPROVED' : undefined,
-      joined: queryOptions.queryType === 'joined' ? true : undefined,
-      owner: queryOptions.owner,
+      approved: 'APPROVED',
       topics: queryOptions.topics,
       categoryId: queryOptions.categoryId,
       queryTopics: true,
