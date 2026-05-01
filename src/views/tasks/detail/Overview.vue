@@ -415,7 +415,7 @@ const tipTapContent = computed(() => {
   try {
     return JSON.parse(props.taskData?.description ?? '{}')
   } catch {
-    return {}
+    return { type: 'doc', content: [] }
   }
 })
 

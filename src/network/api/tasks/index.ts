@@ -33,6 +33,9 @@ import { NEW_API_BASE_URL } from '@/network/utils'
 import AccountService from '@/services/account'
 
 export namespace TasksApi {
+  /** PDF 上传/解析请求的超时时间（毫秒），可通过 VITE_PDF_UPLOAD_TIMEOUT_MS 环境变量配置 */
+  const PDF_TIMEOUT_MS = Number(import.meta.env.VITE_PDF_UPLOAD_TIMEOUT_MS) || 600000
+
   export const previewFromPdf = (data: CreateTaskFromPdfRequestData) => {
     const formData = new FormData()
     formData.append('spaceId', data.spaceId.toString())
@@ -52,7 +55,7 @@ export namespace TasksApi {
       url: '/tasks/publish/from-pdf/preview',
       method: 'POST',
       data: formData,
-      timeout: 300000,
+      timeout: PDF_TIMEOUT_MS,
     })
   }
 
@@ -72,7 +75,7 @@ export namespace TasksApi {
       url: '/tasks/publish/from-pdf',
       method: 'POST',
       data: formData,
-      timeout: 300000,
+      timeout: PDF_TIMEOUT_MS,
     })
   }
 
@@ -81,7 +84,7 @@ export namespace TasksApi {
       url: '/tasks/publish/from-pdf/confirm',
       method: 'POST',
       data,
-      timeout: 300000,
+      timeout: PDF_TIMEOUT_MS,
     })
 
   export const create = (data: PostTaskRequestData) =>
