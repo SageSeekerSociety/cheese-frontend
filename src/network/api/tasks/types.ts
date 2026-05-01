@@ -1,4 +1,4 @@
-import type { TaskSubmissionSchemaEntry, TaskSubmitterType, TaskTeamMembershipLockPolicy } from '@/types'
+import type { Task, TaskSubmissionSchemaEntry, TaskSubmitterType, TaskTeamMembershipLockPolicy } from '@/types'
 
 import { ChatContext } from '@/components/chat'
 
@@ -35,6 +35,34 @@ export type PostTaskRequestData = {
   maxTeamSize?: number
   participantLimit?: number
   teamLockingPolicy?: TaskTeamMembershipLockPolicy
+}
+
+export type CreateTaskFromPdfRequestData = {
+  spaceId: number
+  file: File
+  categoryId?: number
+  templateIndex?: number
+  submitterType?: TaskSubmitterType
+  maxTasks?: number
+}
+
+export type CreateTaskFromPdfResponseData = {
+  task: Task
+}
+
+export type PreviewTaskFromPdfResponseData = {
+  drafts: PostTaskRequestData[]
+  templateUsed: Record<string, any>
+  tokenUsed: number
+}
+
+export type ConfirmTaskFromPdfRequestData = {
+  drafts: PostTaskRequestData[]
+}
+
+export type ConfirmTaskFromPdfResponseData = {
+  tasks: Task[]
+  count: number
 }
 
 export type PatchTaskRequestData = {

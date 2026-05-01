@@ -5,14 +5,19 @@ import type { Task } from '@/types'
 import type {
   AddTaskParticipantRequestData,
   ChatReference,
+  ConfirmTaskFromPdfRequestData,
+  ConfirmTaskFromPdfResponseData,
   ConversationGroupSummary,
   CreateTaskAIAdviceConversationRequest,
+  CreateTaskFromPdfRequestData,
+  CreateTaskFromPdfResponseData,
   PatchTaskParticipantRequestData,
   PatchTaskRequestData,
   PatchTaskSubmissionReviewRequestData,
   PostTaskRequestData,
   PostTaskSubmissionRequestData,
   PostTaskSubmissionReviewRequestData,
+  PreviewTaskFromPdfResponseData,
   TaskAIAdvice,
   TaskAIAdviceConversation,
   TaskAIAdviceConversationContext,
@@ -28,6 +33,57 @@ import { NEW_API_BASE_URL } from '@/network/utils'
 import AccountService from '@/services/account'
 
 export namespace TasksApi {
+  export const previewFromPdf = (data: CreateTaskFromPdfRequestData) => {
+    const formData = new FormData()
+    formData.append('spaceId', data.spaceId.toString())
+    formData.append('file', data.file)
+    formData.append('templateIndex', (data.templateIndex ?? -1).toString())
+    formData.append('maxTasks', (data.maxTasks ?? 5).toString())
+
+    if (data.categoryId !== undefined && data.categoryId !== null) {
+      formData.append('categoryId', data.categoryId.toString())
+    }
+
+    if (data.submitterType) {
+      formData.append('submitterType', data.submitterType)
+    }
+
+    return NewApiInstance.request<PreviewTaskFromPdfResponseData>({
+      url: '/tasks/publish/from-pdf/preview',
+      method: 'POST',
+      data: formData,
+      timeout: 300000,
+    })
+  }
+
+  export const createFromPdf = (data: CreateTaskFromPdfRequestData) => {
+    const formData = new FormData()
+    formData.append('spaceId', data.spaceId.toString())
+    formData.append('file', data.file)
+    formData.append('templateIndex', (data.templateIndex ?? -1).toString())
+    if (data.categoryId !== undefined && data.categoryId !== null) {
+      formData.append('categoryId', data.categoryId.toString())
+    }
+    if (data.submitterType) {
+      formData.append('submitterType', data.submitterType)
+    }
+
+    return NewApiInstance.request<CreateTaskFromPdfResponseData>({
+      url: '/tasks/publish/from-pdf',
+      method: 'POST',
+      data: formData,
+      timeout: 300000,
+    })
+  }
+
+  export const confirmFromPdf = (data: ConfirmTaskFromPdfRequestData) =>
+    NewApiInstance.request<ConfirmTaskFromPdfResponseData>({
+      url: '/tasks/publish/from-pdf/confirm',
+      method: 'POST',
+      data,
+      timeout: 300000,
+    })
+
   export const create = (data: PostTaskRequestData) =>
     NewApiInstance.request<{ task: Task }>({
       url: '/tasks',

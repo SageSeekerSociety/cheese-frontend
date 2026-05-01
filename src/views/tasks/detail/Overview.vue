@@ -196,7 +196,9 @@
 
           <v-card-text>
             <div class="task-description">
-              <TipTapViewer :value="taskDescription" />
+              <TipTapViewer v-if="isTipTapJson" :value="tipTapContent" />
+              <div v-else-if="renderedMarkdown" class="markdown-body" v-html="renderedMarkdown" />
+              <p v-else class="text-medium-emphasis">暂无赛题详情</p>
             </div>
           </v-card-text>
         </v-card>
@@ -364,8 +366,11 @@ import dayjs from 'dayjs'
 
 import { getAvatarUrl } from '@/utils/materials'
 
+import { MarkdownRenderer } from '@/components/chat/services/markdownRenderer'
 import { TaskParticipationInfo } from '@/network/api/tasks/types'
 import AccountService from '@/services/account'
+
+const markdownRenderer = new MarkdownRenderer()
 
 const TipTapViewer = defineAsyncComponent(() => import('@/components/common/Editor/TipTapViewer.vue'))
 const CountdownTimer = defineAsyncComponent(() => import('@/components/common/CountdownTimer.vue'))
@@ -394,12 +399,30 @@ const isSelfTask = computed(() => {
   return props.taskData?.creator.id === AccountService.user?.id
 })
 
-const taskDescription = computed(() => {
+const isTipTapJson = computed(() => {
+  const raw = props.taskData?.description ?? ''
+  if (!raw) return false
+  try {
+    const parsed = JSON.parse(raw)
+    // TipTap JSON 是对象且包含 type: 'doc'
+    return typeof parsed === 'object' && parsed !== null && parsed.type === 'doc'
+  } catch {
+    return false
+  }
+})
+
+const tipTapContent = computed(() => {
   try {
     return JSON.parse(props.taskData?.description ?? '{}')
-  } catch (error) {
-    return props.taskData?.description
+  } catch {
+    return {}
   }
+})
+
+const renderedMarkdown = computed(() => {
+  const raw = props.taskData?.description ?? ''
+  if (!raw || isTipTapJson.value) return ''
+  return markdownRenderer.render(raw)
 })
 
 const rankStars = computed(() => {
@@ -460,6 +483,84 @@ const goToAIAdvice = () => {
 .task-description {
   font-size: 1rem;
   line-height: 1.6;
+}
+
+/* Markdown 渲染内容样式 */
+.markdown-body :deep(h1) {
+  font-size: 1.75rem;
+  margin: 1.5rem 0 1rem;
+  font-weight: 700;
+}
+.markdown-body :deep(h2) {
+  font-size: 1.5rem;
+  margin: 1.25rem 0 0.75rem;
+  font-weight: 600;
+}
+.markdown-body :deep(h3) {
+  font-size: 1.25rem;
+  margin: 1rem 0 0.5rem;
+  font-weight: 600;
+}
+.markdown-body :deep(p) {
+  margin: 0.5rem 0;
+}
+.markdown-body :deep(ul),
+.markdown-body :deep(ol) {
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+}
+.markdown-body :deep(li) {
+  margin: 0.25rem 0;
+}
+.markdown-body :deep(table) {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+}
+.markdown-body :deep(th),
+.markdown-body :deep(td) {
+  border: 1px solid rgba(var(--v-border-color), 1);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+.markdown-body :deep(th) {
+  background: rgba(var(--v-theme-primary), 0.06);
+  font-weight: 600;
+}
+.markdown-body :deep(blockquote) {
+  border-left: 4px solid rgb(var(--v-theme-primary));
+  padding: 0.5rem 1rem;
+  margin: 0.75rem 0;
+  background: rgba(var(--v-theme-primary), 0.04);
+  border-radius: 0 4px 4px 0;
+}
+.markdown-body :deep(code) {
+  background: rgba(var(--v-theme-surface-variant), 0.5);
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+.markdown-body :deep(pre) {
+  background: rgba(var(--v-theme-surface-variant), 0.5);
+  padding: 1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 0.75rem 0;
+}
+.markdown-body :deep(pre code) {
+  background: transparent;
+  padding: 0;
+}
+.markdown-body :deep(img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 0.75rem 0;
+}
+.markdown-body :deep(hr) {
+  border: none;
+  border-top: 1px solid rgba(var(--v-border-color), 1);
+  margin: 1.5rem 0;
 }
 
 .task-detail-card,
