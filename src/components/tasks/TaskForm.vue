@@ -345,6 +345,34 @@
       </v-card-text>
     </v-card>
 
+    <!-- 视频链接 -->
+    <v-card flat rounded="lg" class="mb-4 form-card">
+      <v-card-item>
+        <template #prepend>
+          <div class="me-3">
+            <v-avatar color="primary-lighten-5" size="48" class="elevation-0">
+              <v-icon color="primary" size="28">mdi-video-outline</v-icon>
+            </v-avatar>
+          </div>
+        </template>
+        <v-card-title class="text-h5 ps-0">视频链接</v-card-title>
+      </v-card-item>
+
+      <v-card-text class="pt-2">
+        <v-text-field
+          v-model="videoUrl"
+          label="视频链接（选填）"
+          placeholder="https://..."
+          hint="支持 Bilibili、YouTube 等平台的视频链接"
+          persistent-hint
+        >
+          <template #prepend-inner>
+            <v-icon size="small" color="primary">mdi-link-variant</v-icon>
+          </template>
+        </v-text-field>
+      </v-card-text>
+    </v-card>
+
     <div class="d-flex justify-end">
       <slot name="buttons" :is-submitting="isSubmitting">
         <div class="d-flex gap-4">
@@ -616,6 +644,7 @@ const [participantLimit, participantLimitProps] = defineField('participantLimit'
 const [teamLockingPolicy, teamLockingPolicyProps] = defineField('teamLockingPolicy', vuetifyConfig)
 
 const description = ref(props.initialData?.description || [])
+const videoUrl = ref(props.initialData?.videoUrl || '')
 
 const pendingSubmissionData = ref<{ descriptionText: string | undefined; values: any } | null>(null)
 
@@ -650,6 +679,7 @@ const submitFormData = (values: any) => {
     maxTeamSize: submitterType.value === 'TEAM' ? maxTeamSize.value : undefined,
     participantLimit: participantLimit.value || undefined,
     teamLockingPolicy: submitterType.value === 'TEAM' ? teamLockingPolicy.value : undefined,
+    videoUrl: videoUrl.value || undefined,
   }
   emit('submit', submissionData)
 }

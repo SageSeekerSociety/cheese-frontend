@@ -74,6 +74,7 @@ export function useTaskData() {
       participantLimit: taskData.value.participantLimit,
       teamLockingPolicy: taskData.value.teamLockingPolicy,
       categoryId: taskData.value.category?.id,
+      videoUrl: taskData.value.videoUrl || '',
     }
   })
 
