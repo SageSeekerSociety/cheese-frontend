@@ -202,6 +202,36 @@
             </div>
           </v-card-text>
         </v-card>
+
+        <!-- 赛题视频 -->
+        <v-card v-if="taskData?.videoUrl" flat rounded="lg" class="mt-4 task-info-card" border="sm">
+          <v-card-item>
+            <template #prepend>
+              <div class="me-3">
+                <v-avatar color="primary-lighten-5" size="48" class="elevation-0">
+                  <v-icon color="primary" size="28">mdi-video-outline</v-icon>
+                </v-avatar>
+              </div>
+            </template>
+            <v-card-title class="text-h5 ps-0">赛题视频</v-card-title>
+          </v-card-item>
+          <v-card-text>
+            <div class="video-container">
+              <iframe
+                v-if="videoEmbedUrl"
+                :src="videoEmbedUrl"
+                frameborder="0"
+                allowfullscreen
+                style="width: 100%; aspect-ratio: 16/9; border-radius: 8px"
+              />
+              <div v-else class="d-flex align-center gap-2">
+                <v-icon color="primary">mdi-open-in-new</v-icon>
+                <a :href="taskData.videoUrl" target="_blank" rel="noopener">{{ taskData.videoUrl }}</a>
+              </div>
+            </div>
+          </v-card-text>
+        </v-card>
+
         <v-card flat rounded="lg" class="mt-4 task-info-card" border="sm">
           <v-card-item>
             <template #prepend>
@@ -427,6 +457,25 @@ const renderedMarkdown = computed(() => {
 
 const rankStars = computed(() => {
   return props.taskData?.rank ? props.taskData.rank : 0
+})
+
+const videoEmbedUrl = computed(() => {
+  const url = props.taskData?.videoUrl
+  if (!url) return null
+
+  // Bilibili: https://www.bilibili.com/video/BVxxxx or https://b23.tv/xxxx
+  const bvMatch = url.match(/bilibili\.com\/video\/(BV[\w]+)/)
+  if (bvMatch) {
+    return `//player.bilibili.com/player.html?bvid=${bvMatch[1]}&autoplay=0`
+  }
+
+  // YouTube: https://www.youtube.com/watch?v=xxxx or https://youtu.be/xxxx
+  const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/)
+  if (ytMatch) {
+    return `//www.youtube.com/embed/${ytMatch[1]}`
+  }
+
+  return null
 })
 
 const taskUserDeadline = computed(() => {

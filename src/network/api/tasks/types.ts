@@ -35,6 +35,7 @@ export type PostTaskRequestData = {
   maxTeamSize?: number
   participantLimit?: number
   teamLockingPolicy?: TaskTeamMembershipLockPolicy
+  videoUrl?: string
 }
 
 export type CreateTaskFromPdfRequestData = {
@@ -78,6 +79,7 @@ export type PatchTaskRequestData = {
   requireRealName?: boolean
   participantLimit?: number
   teamLockingPolicy?: TaskTeamMembershipLockPolicy
+  videoUrl?: string
 }
 
 export type AddTaskParticipantRequestData = {
