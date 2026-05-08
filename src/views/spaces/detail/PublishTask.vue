@@ -145,6 +145,7 @@ const pdfConfirmLoading = ref(false)
 const pdfDrafts = ref<Record<string, any>[]>([])
 const pdfTokenUsed = ref<number | null>(null)
 
+/** 当前选中的 PDF 文件（兼容 v-file-input 的单文件或数组返回值） */
 const selectedPdf = computed<File | null>(() => {
   if (Array.isArray(pdfFile.value)) {
     return pdfFile.value[0] ?? null
@@ -152,12 +153,12 @@ const selectedPdf = computed<File | null>(() => {
   return pdfFile.value
 })
 
-// 获取活跃的分类列表
+/** 获取活跃（未归档）的分类列表，按 displayOrder 排序 */
 const activeCategories = computed(() => {
   return categories.value.filter((category) => !category.archivedAt).sort((a, b) => a.displayOrder - b.displayOrder)
 })
 
-// 从URL参数中获取预选的分类ID
+/** 从 URL 查询参数中获取预选的分类 ID，并验证其是否在活跃分类中 */
 const preselectedCategoryId = computed(() => {
   const categoryParam = route.query.categoryId
   if (!categoryParam) return undefined
@@ -167,6 +168,7 @@ const preselectedCategoryId = computed(() => {
   return activeCategories.value.some((cat) => cat.id === categoryId) ? categoryId : undefined
 })
 
+/** 从 URL 查询参数中获取 PDF 解析使用的模板索引，-1 表示空白模板 */
 const pdfTemplateIndex = computed(() => {
   const templateParam = route.query.templateId
   if (!templateParam || templateParam === 'blank') return -1
@@ -194,6 +196,11 @@ const taskSubmissionSchema = ref<TaskSubmissionSchemaEntry[]>([
 //   taskSubmissionSchema.value.splice(index, 1)
 // }
 
+/**
+ * 提交赛题表单，调用 API 创建赛题
+ * @param taskData - 表单填写的赛题数据
+ * @returns 是否提交成功
+ */
 const submitTask = async (taskData: TaskFormSubmitData) => {
   const spaceId = currentSpaceId.value
   if (!spaceId) {
@@ -232,6 +239,10 @@ const submitTask = async (taskData: TaskFormSubmitData) => {
   return result !== undefined
 }
 
+/**
+ * 上传 PDF 并请求后端解析预览
+ * 校验文件大小（≤15MB），调用 previewFromPdf API 获取草稿列表
+ */
 const previewFromPdf = async () => {
   const spaceId = currentSpaceId.value
   if (!spaceId) {
@@ -277,6 +288,10 @@ const previewFromPdf = async () => {
   }
 }
 
+/**
+ * 确认并批量发布 PDF 解析出的赛题草稿
+ * 调用 confirmFromPdf API，成功后跳转到「我发布的」页面
+ */
 const confirmPublishFromPdf = async () => {
   const spaceId = currentSpaceId.value
   if (!spaceId) {
@@ -305,11 +320,17 @@ const confirmPublishFromPdf = async () => {
   }
 }
 
+/** 清空当前的 PDF 预览草稿列表和 token 消耗记录 */
 const clearPdfDrafts = () => {
   pdfDrafts.value = []
   pdfTokenUsed.value = null
 }
 
+/**
+ * 格式化时间戳为本地化日期时间字符串
+ * @param value - 时间戳数值或字符串
+ * @returns 格式化后的日期时间字符串，无效值返回 '-'
+ */
 const formatTimestamp = (value: number | string | null | undefined) => {
   if (!value) return '-'
   const numeric = Number(value)
@@ -335,6 +356,10 @@ onMounted(async () => {
   )
 })
 
+/**
+ * 根据模板 ID 加载模板数据并填充表单初始值
+ * @param templateId - 模板 ID
+ */
 const loadTemplate = async (templateId: number) => {
   const template = templates.value[templateId]
   if (template) {

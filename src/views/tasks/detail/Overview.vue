@@ -400,6 +400,7 @@ import { MarkdownRenderer } from '@/components/chat/services/markdownRenderer'
 import { TaskParticipationInfo } from '@/network/api/tasks/types'
 import AccountService from '@/services/account'
 
+/** Markdown 渲染器实例，用于将非 TipTap 格式的赛题描述渲染为 HTML */
 const markdownRenderer = new MarkdownRenderer()
 
 const TipTapViewer = defineAsyncComponent(() => import('@/components/common/Editor/TipTapViewer.vue'))
@@ -429,6 +430,7 @@ const isSelfTask = computed(() => {
   return props.taskData?.creator.id === AccountService.user?.id
 })
 
+/** 判断赛题描述是否为 TipTap JSON 格式（包含 type: 'doc' 的对象） */
 const isTipTapJson = computed(() => {
   const raw = props.taskData?.description ?? ''
   if (!raw) return false
@@ -441,6 +443,7 @@ const isTipTapJson = computed(() => {
   }
 })
 
+/** 解析 TipTap JSON 内容，解析失败时返回空文档结构 */
 const tipTapContent = computed(() => {
   try {
     return JSON.parse(props.taskData?.description ?? '{}')
@@ -449,6 +452,7 @@ const tipTapContent = computed(() => {
   }
 })
 
+/** 将非 TipTap 格式的赛题描述作为 Markdown 渲染为 HTML，TipTap 格式时返回空字符串 */
 const renderedMarkdown = computed(() => {
   const raw = props.taskData?.description ?? ''
   if (!raw || isTipTapJson.value) return ''

@@ -36,6 +36,11 @@ export namespace TasksApi {
   /** PDF 上传/解析请求的超时时间（毫秒），可通过 VITE_PDF_UPLOAD_TIMEOUT_MS 环境变量配置 */
   const PDF_TIMEOUT_MS = Number(import.meta.env.VITE_PDF_UPLOAD_TIMEOUT_MS) || 600000
 
+  /**
+   * 上传 PDF 并解析生成赛题草稿预览
+   * @param data - 包含空间ID、PDF文件、模板参数等的请求数据
+   * @returns 解析出的赛题草稿列表、使用的模板信息及 token 消耗
+   */
   export const previewFromPdf = (data: CreateTaskFromPdfRequestData) => {
     const formData = new FormData()
     formData.append('spaceId', data.spaceId.toString())
@@ -59,6 +64,11 @@ export namespace TasksApi {
     })
   }
 
+  /**
+   * 上传 PDF 并直接创建赛题（跳过预览步骤）
+   * @param data - 包含空间ID、PDF文件、模板参数等的请求数据
+   * @returns 创建成功的赛题对象
+   */
   export const createFromPdf = (data: CreateTaskFromPdfRequestData) => {
     const formData = new FormData()
     formData.append('spaceId', data.spaceId.toString())
@@ -79,6 +89,11 @@ export namespace TasksApi {
     })
   }
 
+  /**
+   * 确认并批量发布 PDF 解析生成的赛题草稿
+   * @param data - 包含待发布草稿列表的请求数据
+   * @returns 已创建的赛题列表和数量
+   */
   export const confirmFromPdf = (data: ConfirmTaskFromPdfRequestData) =>
     NewApiInstance.request<ConfirmTaskFromPdfResponseData>({
       url: '/tasks/publish/from-pdf/confirm',

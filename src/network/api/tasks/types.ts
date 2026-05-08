@@ -38,6 +38,15 @@ export type PostTaskRequestData = {
   videoUrl?: string
 }
 
+/**
+ * PDF 转赛题请求数据
+ * @property spaceId - 目标空间 ID
+ * @property file - 要上传的 PDF 文件
+ * @property categoryId - 可选的分类 ID
+ * @property templateIndex - 模板索引，-1 表示使用空白模板
+ * @property submitterType - 提交者类型（USER / TEAM）
+ * @property maxTasks - 最大解析赛题数量
+ */
 export type CreateTaskFromPdfRequestData = {
   spaceId: number
   file: File
@@ -47,20 +56,33 @@ export type CreateTaskFromPdfRequestData = {
   maxTasks?: number
 }
 
+/** PDF 直接创建赛题的响应数据 */
 export type CreateTaskFromPdfResponseData = {
   task: Task
 }
 
+/**
+ * PDF 解析预览的响应数据
+ * @property drafts - 解析出的赛题草稿列表
+ * @property templateUsed - 实际使用的模板信息
+ * @property tokenUsed - 本次解析消耗的 token 数量
+ */
 export type PreviewTaskFromPdfResponseData = {
   drafts: PostTaskRequestData[]
   templateUsed: Record<string, any>
   tokenUsed: number
 }
 
+/** 确认发布 PDF 解析草稿的请求数据 */
 export type ConfirmTaskFromPdfRequestData = {
   drafts: PostTaskRequestData[]
 }
 
+/**
+ * 确认发布 PDF 解析草稿的响应数据
+ * @property tasks - 已创建的赛题列表
+ * @property count - 成功创建的赛题数量
+ */
 export type ConfirmTaskFromPdfResponseData = {
   tasks: Task[]
   count: number
