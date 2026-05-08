@@ -204,7 +204,7 @@
         </v-card>
 
         <!-- 赛题视频 -->
-        <v-card v-if="taskData?.videoUrl" flat rounded="lg" class="mt-4 task-info-card" border="sm">
+        <v-card v-if="sanitizedVideoUrl" flat rounded="lg" class="mt-4 task-info-card" border="sm">
           <v-card-item>
             <template #prepend>
               <div class="me-3">
@@ -226,7 +226,7 @@
               />
               <div v-else class="d-flex align-center gap-2">
                 <v-icon color="primary">mdi-open-in-new</v-icon>
-                <a :href="taskData.videoUrl" target="_blank" rel="noopener">{{ taskData.videoUrl }}</a>
+                <a :href="sanitizedVideoUrl" target="_blank" rel="noopener">{{ sanitizedVideoUrl }}</a>
               </div>
             </div>
           </v-card-text>
@@ -461,6 +461,21 @@ const renderedMarkdown = computed(() => {
 
 const rankStars = computed(() => {
   return props.taskData?.rank ? props.taskData.rank : 0
+})
+
+/** 校验 videoUrl 是否为安全的 HTTP(S) 协议，防止 javascript:/data: XSS */
+const sanitizedVideoUrl = computed(() => {
+  const url = props.taskData?.videoUrl
+  if (!url) return null
+  try {
+    const parsed = new URL(url)
+    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+      return url
+    }
+  } catch {
+    // invalid URL
+  }
+  return null
 })
 
 const videoEmbedUrl = computed(() => {

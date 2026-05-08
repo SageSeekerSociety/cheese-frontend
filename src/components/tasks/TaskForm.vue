@@ -365,6 +365,7 @@
           placeholder="https://..."
           hint="支持 Bilibili、YouTube 等平台的视频链接"
           persistent-hint
+          :rules="videoUrlRules"
         >
           <template #prepend-inner>
             <v-icon size="small" color="primary">mdi-link-variant</v-icon>
@@ -536,7 +537,7 @@
 import type { TaskFormSubmitData, Topic } from '@/types'
 import type { SpaceCategory } from '@/types'
 
-import { computed, defineEmits, defineProps, ref, toRefs } from 'vue'
+import { computed, ref, toRefs } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { VDateInput } from 'vuetify/labs/VDateInput'
 import { toTypedSchema } from '@vee-validate/zod'
@@ -645,6 +646,20 @@ const [teamLockingPolicy, teamLockingPolicyProps] = defineField('teamLockingPoli
 
 const description = ref(props.initialData?.description || [])
 const videoUrl = ref(props.initialData?.videoUrl || '')
+
+/** videoUrl 输入校验规则：仅允许 http:// 或 https:// 协议，防止 XSS */
+const videoUrlRules = [
+  (v: string) => {
+    if (!v) return true
+    try {
+      const parsed = new URL(v)
+      if (parsed.protocol === 'http:' || parsed.protocol === 'https:') return true
+    } catch {
+      // fall through
+    }
+    return '请输入有效的 HTTP/HTTPS 链接'
+  },
+]
 
 const pendingSubmissionData = ref<{ descriptionText: string | undefined; values: any } | null>(null)
 
