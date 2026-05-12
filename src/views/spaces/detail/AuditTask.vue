@@ -246,10 +246,44 @@ const rejectTask = async (taskId: number) => {
 }
 
 const parseDescription = (description: string) => {
+  if (!description) return { type: 'doc', content: [] }
   try {
-    return JSON.parse(description)
+    const parsed = JSON.parse(description)
+    // 检查是否为 TipTap JSON 格式
+    if (typeof parsed === 'object' && parsed !== null && parsed.type === 'doc') {
+      return parsed
+    }
+    // 如果不是 TipTap 格式，返回原始字符串作为文本内容
+    return {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            {
+              type: 'text',
+              text: description,
+            },
+          ],
+        },
+      ],
+    }
   } catch (error) {
-    return description
+    // JSON 解析失败，说明是 markdown 或纯文本，返回文本内容
+    return {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            {
+              type: 'text',
+              text: description,
+            },
+          ],
+        },
+      ],
+    }
   }
 }
 
