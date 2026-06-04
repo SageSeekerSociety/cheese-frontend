@@ -85,6 +85,7 @@ export interface Task {
   topics?: Topic[]
   userDeadline?: number
   participationEligibility?: ParticipationEligibility
+  videoUrl?: string
 }
 
 export interface TaskSubmissionReview {
@@ -171,4 +172,5 @@ export type TaskFormSubmitData = {
   maxTeamSize: number
   participantLimit?: number
   teamLockingPolicy?: TaskTeamMembershipLockPolicy
+  videoUrl?: string
 }

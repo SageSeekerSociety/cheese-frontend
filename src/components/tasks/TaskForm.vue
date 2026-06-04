@@ -333,7 +333,19 @@
       </v-card-item>
 
       <v-card-text class="pt-2">
+        <!-- Markdown 格式使用纯文本编辑器 -->
+        <v-textarea
+          v-if="descriptionFormat === 'markdown'"
+          v-model="markdownDescription"
+          label="赛题详情（Markdown 格式）"
+          :rows="10"
+          :max-rows="30"
+          rounded
+          class="markdown-textarea"
+        ></v-textarea>
+        <!-- TipTap JSON 格式使用富文本编辑器 -->
         <TipTapEditor
+          v-else
           ref="descriptionEditor"
           v-model="description"
           output="json"
@@ -342,6 +354,35 @@
           :max-height="1000"
           editor-class="tiptap-editor"
         />
+      </v-card-text>
+    </v-card>
+
+    <!-- 视频链接 -->
+    <v-card flat rounded="lg" class="mb-4 form-card">
+      <v-card-item>
+        <template #prepend>
+          <div class="me-3">
+            <v-avatar color="primary-lighten-5" size="48" class="elevation-0">
+              <v-icon color="primary" size="28">mdi-video-outline</v-icon>
+            </v-avatar>
+          </div>
+        </template>
+        <v-card-title class="text-h5 ps-0">视频链接</v-card-title>
+      </v-card-item>
+
+      <v-card-text class="pt-2">
+        <v-text-field
+          v-model="videoUrl"
+          label="视频链接（选填）"
+          placeholder="https://..."
+          hint="支持 Bilibili、YouTube 等平台的视频链接"
+          persistent-hint
+          :rules="videoUrlRules"
+        >
+          <template #prepend-inner>
+            <v-icon size="small" color="primary">mdi-link-variant</v-icon>
+          </template>
+        </v-text-field>
       </v-card-text>
     </v-card>
 
@@ -508,7 +549,7 @@
 import type { TaskFormSubmitData, Topic } from '@/types'
 import type { SpaceCategory } from '@/types'
 
-import { computed, defineEmits, defineProps, ref, toRefs } from 'vue'
+import { computed, ref, toRefs } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { VDateInput } from 'vuetify/labs/VDateInput'
 import { toTypedSchema } from '@vee-validate/zod'
@@ -535,6 +576,8 @@ const props = withDefaults(
     classificationTopics: Topic[]
     categories?: SpaceCategory[]
     selectedCategoryId?: number
+    descriptionFormat?: 'markdown' | 'tiptap'
+    originalDescription?: string
   }>(),
   {
     initialData: null,
@@ -543,6 +586,8 @@ const props = withDefaults(
     classificationTopics: () => [],
     categories: () => [],
     selectedCategoryId: undefined,
+    descriptionFormat: 'tiptap',
+    originalDescription: '',
   }
 )
 
@@ -615,7 +660,25 @@ const [requireRealName, requireRealNameProps] = defineField('requireRealName', v
 const [participantLimit, participantLimitProps] = defineField('participantLimit', vuetifyConfig)
 const [teamLockingPolicy, teamLockingPolicyProps] = defineField('teamLockingPolicy', vuetifyConfig)
 
-const description = ref(props.initialData?.description || [])
+const description = ref(props.initialData?.description || { type: 'doc', content: [] })
+const videoUrl = ref(props.initialData?.videoUrl || '')
+
+// Markdown 格式的描述内容
+const markdownDescription = ref(props.originalDescription || '')
+
+/** videoUrl 输入校验规则：仅允许 http:// 或 https:// 协议，防止 XSS */
+const videoUrlRules = [
+  (v: string) => {
+    if (!v) return true
+    try {
+      const parsed = new URL(v)
+      if (parsed.protocol === 'http:' || parsed.protocol === 'https:') return true
+    } catch {
+      // fall through
+    }
+    return '请输入有效的 HTTP/HTTPS 链接'
+  },
+]
 
 const pendingSubmissionData = ref<{ descriptionText: string | undefined; values: any } | null>(null)
 
@@ -636,10 +699,24 @@ const submitFormData = (values: any) => {
   const deadlineDate = new Date(values.deadline)
   const registrationStartAtDate = values.registrationStartAt ? new Date(values.registrationStartAt) : null
   deadlineDate.setHours(23, 59, 59, 999)
+
+  // 根据原始格式决定保存的描述内容
+  let savedDescription: string
+  let introText: string
+  if (props.descriptionFormat === 'markdown') {
+    // 如果原始是 markdown 格式，保存纯文本内容
+    savedDescription = markdownDescription.value || ''
+    introText = markdownDescription.value || ''
+  } else {
+    // 如果原始是 TipTap JSON 格式，保存 JSON
+    savedDescription = JSON.stringify(description.value)
+    introText = descriptionText || ''
+  }
+
   const submissionData: TaskFormSubmitData = {
     ...values,
-    description: JSON.stringify(description.value),
-    intro: truncateString(descriptionText || '', 255),
+    description: savedDescription,
+    intro: truncateString(introText, 255),
     registrationStartAt: registrationStartAtDate ? registrationStartAtDate.getTime() : null,
     deadline: deadlineDate.getTime(),
     resubmittable: true,
@@ -650,6 +727,7 @@ const submitFormData = (values: any) => {
     maxTeamSize: submitterType.value === 'TEAM' ? maxTeamSize.value : undefined,
     participantLimit: participantLimit.value || undefined,
     teamLockingPolicy: submitterType.value === 'TEAM' ? teamLockingPolicy.value : undefined,
+    videoUrl: videoUrl.value || undefined,
   }
   emit('submit', submissionData)
 }
@@ -728,6 +806,17 @@ const handleCancel = () => {
 
 .tiptap-editor {
   margin-top: 0;
+}
+
+.markdown-textarea :deep(.v-textarea__textarea) {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.markdown-textarea :deep(.v-textarea__field) {
+  min-height: 200px;
 }
 
 .form-card {

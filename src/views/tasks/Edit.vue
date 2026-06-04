@@ -14,6 +14,8 @@
         :submit-button-text="'保存更改'"
         is-editing
         :classification-topics="taskData.space?.classificationTopics || []"
+        :description-format="editTaskData.descriptionFormat"
+        :original-description="editTaskData.originalDescription"
         @submit="handleSubmitEdit"
         @cancel="navigateToDetail"
       >

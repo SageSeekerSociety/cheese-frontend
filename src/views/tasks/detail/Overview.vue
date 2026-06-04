@@ -196,10 +196,42 @@
 
           <v-card-text>
             <div class="task-description">
-              <TipTapViewer :value="taskDescription" />
+              <TipTapViewer v-if="isTipTapJson" :value="tipTapContent" />
+              <div v-else-if="renderedMarkdown" class="markdown-body" v-html="renderedMarkdown" />
+              <p v-else class="text-medium-emphasis">暂无赛题详情</p>
             </div>
           </v-card-text>
         </v-card>
+
+        <!-- 赛题视频 -->
+        <v-card v-if="sanitizedVideoUrl" flat rounded="lg" class="mt-4 task-info-card" border="sm">
+          <v-card-item>
+            <template #prepend>
+              <div class="me-3">
+                <v-avatar color="primary-lighten-5" size="48" class="elevation-0">
+                  <v-icon color="primary" size="28">mdi-video-outline</v-icon>
+                </v-avatar>
+              </div>
+            </template>
+            <v-card-title class="text-h5 ps-0">赛题视频</v-card-title>
+          </v-card-item>
+          <v-card-text>
+            <div class="video-container">
+              <iframe
+                v-if="videoEmbedUrl"
+                :src="videoEmbedUrl"
+                frameborder="0"
+                allowfullscreen
+                style="width: 100%; aspect-ratio: 16/9; border-radius: 8px"
+              />
+              <div v-else class="d-flex align-center gap-2">
+                <v-icon color="primary">mdi-open-in-new</v-icon>
+                <a :href="sanitizedVideoUrl" target="_blank" rel="noopener">{{ sanitizedVideoUrl }}</a>
+              </div>
+            </div>
+          </v-card-text>
+        </v-card>
+
         <v-card flat rounded="lg" class="mt-4 task-info-card" border="sm">
           <v-card-item>
             <template #prepend>
@@ -364,8 +396,12 @@ import dayjs from 'dayjs'
 
 import { getAvatarUrl } from '@/utils/materials'
 
+import { MarkdownRenderer } from '@/components/chat/services/markdownRenderer'
 import { TaskParticipationInfo } from '@/network/api/tasks/types'
 import AccountService from '@/services/account'
+
+/** Markdown 渲染器实例，用于将非 TipTap 格式的赛题描述渲染为 HTML */
+const markdownRenderer = new MarkdownRenderer()
 
 const TipTapViewer = defineAsyncComponent(() => import('@/components/common/Editor/TipTapViewer.vue'))
 const CountdownTimer = defineAsyncComponent(() => import('@/components/common/CountdownTimer.vue'))
@@ -394,16 +430,71 @@ const isSelfTask = computed(() => {
   return props.taskData?.creator.id === AccountService.user?.id
 })
 
-const taskDescription = computed(() => {
+/** 判断赛题描述是否为 TipTap JSON 格式（包含 type: 'doc' 的对象） */
+const isTipTapJson = computed(() => {
+  const raw = props.taskData?.description ?? ''
+  if (!raw) return false
+  try {
+    const parsed = JSON.parse(raw)
+    // TipTap JSON 是对象且包含 type: 'doc'
+    return typeof parsed === 'object' && parsed !== null && parsed.type === 'doc'
+  } catch {
+    return false
+  }
+})
+
+/** 解析 TipTap JSON 内容，解析失败时返回空文档结构 */
+const tipTapContent = computed(() => {
   try {
     return JSON.parse(props.taskData?.description ?? '{}')
-  } catch (error) {
-    return props.taskData?.description
+  } catch {
+    return { type: 'doc', content: [] }
   }
+})
+
+/** 将非 TipTap 格式的赛题描述作为 Markdown 渲染为 HTML，TipTap 格式时返回空字符串 */
+const renderedMarkdown = computed(() => {
+  const raw = props.taskData?.description ?? ''
+  if (!raw || isTipTapJson.value) return ''
+  return markdownRenderer.render(raw)
 })
 
 const rankStars = computed(() => {
   return props.taskData?.rank ? props.taskData.rank : 0
+})
+
+/** 校验 videoUrl 是否为安全的 HTTP(S) 协议，防止 javascript:/data: XSS */
+const sanitizedVideoUrl = computed(() => {
+  const url = props.taskData?.videoUrl
+  if (!url) return null
+  try {
+    const parsed = new URL(url)
+    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+      return url
+    }
+  } catch {
+    // invalid URL
+  }
+  return null
+})
+
+const videoEmbedUrl = computed(() => {
+  const url = props.taskData?.videoUrl
+  if (!url) return null
+
+  // Bilibili: https://www.bilibili.com/video/BVxxxx or https://b23.tv/xxxx
+  const bvMatch = url.match(/bilibili\.com\/video\/(BV[\w]+)/)
+  if (bvMatch) {
+    return `//player.bilibili.com/player.html?bvid=${bvMatch[1]}&autoplay=0`
+  }
+
+  // YouTube: https://www.youtube.com/watch?v=xxxx or https://youtu.be/xxxx
+  const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/)
+  if (ytMatch) {
+    return `//www.youtube.com/embed/${ytMatch[1]}`
+  }
+
+  return null
 })
 
 const taskUserDeadline = computed(() => {
@@ -460,6 +551,84 @@ const goToAIAdvice = () => {
 .task-description {
   font-size: 1rem;
   line-height: 1.6;
+}
+
+/* Markdown 渲染内容样式 */
+.markdown-body :deep(h1) {
+  font-size: 1.75rem;
+  margin: 1.5rem 0 1rem;
+  font-weight: 700;
+}
+.markdown-body :deep(h2) {
+  font-size: 1.5rem;
+  margin: 1.25rem 0 0.75rem;
+  font-weight: 600;
+}
+.markdown-body :deep(h3) {
+  font-size: 1.25rem;
+  margin: 1rem 0 0.5rem;
+  font-weight: 600;
+}
+.markdown-body :deep(p) {
+  margin: 0.5rem 0;
+}
+.markdown-body :deep(ul),
+.markdown-body :deep(ol) {
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+}
+.markdown-body :deep(li) {
+  margin: 0.25rem 0;
+}
+.markdown-body :deep(table) {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+}
+.markdown-body :deep(th),
+.markdown-body :deep(td) {
+  border: 1px solid rgba(var(--v-border-color), 1);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+.markdown-body :deep(th) {
+  background: rgba(var(--v-theme-primary), 0.06);
+  font-weight: 600;
+}
+.markdown-body :deep(blockquote) {
+  border-left: 4px solid rgb(var(--v-theme-primary));
+  padding: 0.5rem 1rem;
+  margin: 0.75rem 0;
+  background: rgba(var(--v-theme-primary), 0.04);
+  border-radius: 0 4px 4px 0;
+}
+.markdown-body :deep(code) {
+  background: rgba(var(--v-theme-surface-variant), 0.5);
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+.markdown-body :deep(pre) {
+  background: rgba(var(--v-theme-surface-variant), 0.5);
+  padding: 1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 0.75rem 0;
+}
+.markdown-body :deep(pre code) {
+  background: transparent;
+  padding: 0;
+}
+.markdown-body :deep(img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 0.75rem 0;
+}
+.markdown-body :deep(hr) {
+  border: none;
+  border-top: 1px solid rgba(var(--v-border-color), 1);
+  margin: 1.5rem 0;
 }
 
 .task-detail-card,
