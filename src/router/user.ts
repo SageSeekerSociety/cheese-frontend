@@ -1,14 +1,19 @@
 import type { RouteRecordRaw } from 'vue-router'
 
+import RouterPassThrough from '@/layouts/RouterPassThrough.vue'
+
 export default {
   path: '/users',
   name: 'User',
-  component: () => import('@/layouts/user/User.vue'),
+  component: RouterPassThrough,
   children: [
     {
       path: 'settings',
       name: 'UserSettings',
-      component: () => import('@/layouts/user/Settings.vue'),
+      components: {
+        default: () => import('@/layouts/user/Settings.vue'),
+        sidebar: () => import('@/views/user/settings/SettingsSidebar.vue'),
+      },
       redirect: { name: 'UserSettingsProfile' },
       children: [
         {
@@ -21,6 +26,44 @@ export default {
           name: 'UserSettingsSecurity',
           component: () => import('@/views/user/settings/Security.vue'),
         },
+        {
+          path: 'realname',
+          name: 'UserSettingsRealName',
+          component: () => import('@/views/user/settings/RealName.vue'),
+        },
+      ],
+    },
+    {
+      path: 'privacy-center',
+      name: 'UserPrivacyCenter',
+      component: () => import('@/views/user/privacy/PrivacyCenter.vue'),
+      redirect: { name: 'PrivacyCenter' },
+      children: [
+        {
+          path: '',
+          name: 'PrivacyCenter',
+          component: () => import('@/views/user/privacy/Overview.vue'),
+        },
+        {
+          path: 'real-name-info',
+          name: 'PrivacyCenterRealNameInfo',
+          component: () => import('@/views/user/privacy/RealNameInfo.vue'),
+        },
+        {
+          path: 'access-logs',
+          name: 'PrivacyCenterAccessLogs',
+          component: () => import('@/views/user/privacy/AccessLogs.vue'),
+        },
+        {
+          path: 'data-sharing',
+          name: 'PrivacyCenterDataSharing',
+          component: () => import('@/views/user/privacy/DataSharing.vue'),
+        },
+        {
+          path: 'privacy-policy',
+          name: 'PrivacyCenterPolicy',
+          component: () => import('@/views/user/privacy/PrivacyPolicy.vue'),
+        },
       ],
     },
     {
@@ -31,16 +74,7 @@ export default {
         {
           path: '',
           name: 'UserDefault',
-        },
-        {
-          path: 'question',
-          name: 'UserQuestion',
-          component: () => import('@/views/user/Question.vue'),
-        },
-        {
-          path: 'answer',
-          name: 'UserAnswer',
-          component: () => import('@/views/user/Answer.vue'),
+          redirect: { name: 'UserFollowing' },
         },
         {
           path: 'following',
@@ -55,11 +89,4 @@ export default {
       ],
     },
   ],
-  beforeEnter: (to, _, next) => {
-    if (to.name === 'UserDefault' || to.name === 'UserQuestion' || to.name === 'UserAnswer' || to.name === 'User') {
-      next({ name: 'UserFollowing', params: to.params })
-    } else {
-      next()
-    }
-  },
 } as RouteRecordRaw

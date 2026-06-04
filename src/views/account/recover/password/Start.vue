@@ -1,43 +1,66 @@
 <template>
-  <v-card class="mx-auto" max-width="500" rounded="lg">
-    <v-card-item
-      class="bg-primary text-white"
-      prepend-icon="mdi-lock-reset"
-      title="重置账户密码"
-      subtitle="通过注册邮箱验证身份"
-    />
+  <div>
+    <!-- 标题区域 - 美观大气 -->
+    <div class="mb-12">
+      <div class="d-flex align-center mb-3">
+        <v-icon color="primary" size="28" class="mr-3">mdi-lock-reset</v-icon>
+        <h1 class="text-h3 font-weight-light" style="color: #212121; line-height: 1.2">重置账户密码</h1>
+      </div>
+      <p class="text-body-1" style="color: #757575; line-height: 1.5">通过注册邮箱验证身份</p>
+    </div>
 
-    <v-card-text class="pa-6">
-      <v-fade-transition mode="out-in">
-        <div :key="String(isSubmitting)">
-          <v-alert v-if="myAlert.message" :type="myAlert.type" density="compact" class="mb-4">
-            {{ myAlert.message }}
-          </v-alert>
+    <!-- 错误/成功提示区域 -->
+    <div v-if="myAlert.message" class="mb-8">
+      <v-alert :type="myAlert.type" variant="tonal" density="comfortable">
+        {{ myAlert.message }}
+      </v-alert>
+    </div>
 
+    <v-fade-transition mode="out-in">
+      <div :key="String(isSubmitting)">
+        <!-- 重置表单区域 -->
+        <div class="mb-8">
           <v-form @submit.prevent="submit">
             <v-text-field
               v-model="email"
               label="注册邮箱"
               variant="outlined"
-              prepend-inner-icon="mdi-email"
               :loading="isSubmitting"
               v-bind="emailProps"
+              class="mb-6"
             />
 
-            <v-btn block color="primary" size="large" type="submit" :loading="isSubmitting" class="mt-4">
+            <v-btn
+              block
+              color="primary"
+              size="large"
+              type="submit"
+              :loading="isSubmitting"
+              style="text-transform: none; font-weight: 500; height: 48px"
+              class="mb-4"
+            >
               发送重置邮件
             </v-btn>
 
-            <div class="text-center mt-4">
-              <v-btn variant="text" color="primary" to="/account/signin" size="small" prepend-icon="mdi-arrow-left">
+            <p class="text-body-2" style="color: #757575">
+              想起密码了？
+              <v-btn
+                variant="text"
+                color="primary"
+                to="/account/signin"
+                size="small"
+                style="text-transform: none; padding: 0; min-width: auto; height: auto; vertical-align: baseline"
+                class="text-decoration-none"
+              >
+                <v-icon start size="16">mdi-arrow-left</v-icon>
                 返回登录
               </v-btn>
-            </div>
+            </p>
           </v-form>
         </div>
-      </v-fade-transition>
-    </v-card-text>
-  </v-card>
+      </div>
+    </v-fade-transition>
+  </div>
 </template>
 
 <script lang="ts" setup>

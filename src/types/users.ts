@@ -9,4 +9,13 @@ export type User = {
   question_count: number
   answer_count: number
   is_follow?: boolean
+  has_real_name_info?: boolean
+}
+
+// 实名认证状态
+export enum RealNameStatus {
+  NONE = 'none',
+  VERIFIED = 'verified',
+  PENDING = 'pending',
+  REJECTED = 'rejected',
 }

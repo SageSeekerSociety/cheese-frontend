@@ -26,6 +26,7 @@ import {
 } from 'vuetify-pro-tiptap'
 import BulletList from '@tiptap/extension-bullet-list'
 import Document from '@tiptap/extension-document'
+import HardBreak from '@tiptap/extension-hard-break'
 import Link from '@tiptap/extension-link'
 import ListItem from '@tiptap/extension-list-item'
 import OrderedList from '@tiptap/extension-ordered-list'
@@ -54,6 +55,7 @@ const editor = useEditor({
     Document,
     Paragraph,
     Text,
+    HardBreak,
     Bold,
     Italic,
     Underline,

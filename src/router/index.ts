@@ -2,27 +2,25 @@ import type { RouteRecordRaw } from 'vue-router'
 
 import { createRouter, createWebHistory } from 'vue-router'
 
-import { refreshTitle } from '@/utils/title'
-
 import AccountRoutes from './account'
-import GroupRoutes from './group'
+import AssistantRoutes from './assistant'
 import HomeRoutes from './home'
 import ProjectsRoutes from './projects'
 import QuestionRoutes from './question'
 import SpacesRoutes from './spaces'
-import TasksRoutes from './tasks'
 import TeamsRoutes from './teams'
 import UserRoutes from './user'
 
+import { usePageTitleStore } from '@/stores/title'
+
 const routes: RouteRecordRaw[] = [
   AccountRoutes,
-  GroupRoutes,
+  AssistantRoutes,
   HomeRoutes,
   UserRoutes,
   ProjectsRoutes,
   QuestionRoutes,
   SpacesRoutes,
-  TasksRoutes,
   TeamsRoutes,
   {
     name: 'Search',
@@ -47,12 +45,28 @@ const router = createRouter({
   routes,
 })
 
-router.beforeEach((to) => {
-  if (to.meta.disabled) {
-    return false
-  }
-  refreshTitle(to)
-  return true
+router.beforeEach(async (to, from, next) => {
+  const store = usePageTitleStore()
+  to.matched.forEach((record) => {
+    const meta = record.meta
+    if (meta?.getDynamicTitle && !meta.isDynamic) {
+      try {
+        const title = meta.getDynamicTitle(to)
+        if (record.name) {
+          store.setDynamicTitle(title, record.name)
+        }
+      } catch (error) {
+        console.error('路由守卫中设置动态标题失败:', error)
+      }
+    }
+  })
+
+  next()
+})
+
+router.afterEach(async (to) => {
+  const store = usePageTitleStore()
+  store.triggerUpdate()
 })
 
 export default router

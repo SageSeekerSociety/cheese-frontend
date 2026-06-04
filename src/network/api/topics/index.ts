@@ -7,7 +7,7 @@ export namespace TopicsApi {
     ApiInstance.request<SearchTopicsResponse>({
       url: '/topics',
       method: 'GET',
-      params: { q: query, page_size: pageSize },
+      params: { q: query, pageSize: pageSize },
     })
 
   export const create = (name: string) =>

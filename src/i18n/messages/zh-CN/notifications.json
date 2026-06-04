@@ -1,0 +1,100 @@
+{
+  "common": {
+    "justNow": "刚刚",
+    "markAsRead": "标记为已读",
+    "delete": "删除",
+    "noNotifications": "暂无通知",
+    "markAllAsRead": "标记全部已读",
+    "loadMore": "加载更多",
+    "notificationCenter": "通知中心",
+    "deletedEntity": "已删除的用户",
+    "unknownTeam": "未知团队",
+    "unknownDiscussion": "未知讨论",
+    "teamAdmin": "团队管理员",
+    "reason": "原因",
+    "member": "成员"
+  },
+  "default": {
+    "title": "未知类型通知: {type}",
+    "body": "通知内容无法显示"
+  },
+  "MENTION": {
+    "title": "{mentioner} 在讨论中提到了你",
+    "title_anonymous": "有人在讨论中提到了你",
+    "body": "在 \"{discussionTitle}\" 中提到了你"
+  },
+  "REPLY": {
+    "title": "{replier} 回复了你的评论",
+    "title_anonymous": "有人回复了你的评论",
+    "body": "在 \"{discussionTitle}\" 中回复了你",
+    "action": {
+      "reply": "回复"
+    }
+  },
+  "REACTION": {
+    "title": "{reactor} 对你的内容做出了反应",
+    "title_anonymous": "有人对你的内容做出了反应",
+    "body": "用 {reactionEmoji} 回应了你的评论"
+  },
+  "PROJECT_INVITE": {
+    "title": "{inviter} 邀请你加入项目",
+    "title_anonymous": "你收到了项目邀请",
+    "body": "邀请你加入项目 \"{projectName}\"",
+    "action": {
+      "accept": "接受",
+      "decline": "拒绝"
+    }
+  },
+  "DEADLINE_REMIND": {
+    "title": "截止日期提醒",
+    "body": "项目 \"{projectName}\" 将在 {daysLeft} 天后截止"
+  },
+  "TEAM_JOIN_REQUEST": {
+    "title": "{requester} 请求加入团队",
+    "title_anonymous": "有人请求加入团队",
+    "body": "请求加入团队 \"{team}\"",
+    "action": {
+      "approve": "批准",
+      "reject": "拒绝"
+    }
+  },
+  "TEAM_INVITATION": {
+    "title": "{inviter} 邀请你加入团队",
+    "title_anonymous": "你收到了团队邀请",
+    "body": "以 {role} 身份邀请你加入团队 \"{team}\"",
+    "action": {
+      "accept": "接受",
+      "decline": "拒绝"
+    }
+  },
+  "TEAM_REQUEST_APPROVED": {
+    "title": "你的加入请求已获批准",
+    "body": "{approver} 已批准你加入团队 \"{team}\" 的请求",
+    "status": "已批准"
+  },
+  "TEAM_REQUEST_REJECTED": {
+    "title": "你的加入请求被拒绝",
+    "body": "{rejector} 拒绝了你加入团队 \"{team}\" 的请求",
+    "status": "已拒绝"
+  },
+  "TEAM_INVITATION_ACCEPTED": {
+    "title": "{accepter} 接受了你的邀请",
+    "title_anonymous": "你的团队邀请已被接受",
+    "body": "接受了加入团队 \"{team}\" 的邀请"
+  },
+  "TEAM_INVITATION_DECLINED": {
+    "title": "{decliner} 拒绝了你的邀请",
+    "title_anonymous": "你的团队邀请已被拒绝",
+    "body": "拒绝了加入团队 \"{team}\" 的邀请"
+  },
+  "TEAM_INVITATION_CANCELED": {
+    "title": "团队邀请已取消",
+    "body": "{canceler} 取消了邀请你加入团队 \"{team}\" 的邀请"
+  },
+  "TEAM_REQUEST_CANCELED": {
+    "title": "{canceler} 取消了加入请求",
+    "title_anonymous": "加入请求已取消",
+    "body": "已取消加入团队 \"{team}\" 的请求",
+    "status": "已取消"
+  }
+}

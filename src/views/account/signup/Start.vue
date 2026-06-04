@@ -1,18 +1,24 @@
 <template>
-  <v-card class="mx-auto" max-width="500" rounded="lg">
-    <v-card-item
-      class="bg-primary text-white"
-      prepend-icon="mdi-account-plus"
-      title="加入知是社区"
-      subtitle="开启您的知识共享之旅"
-    />
+  <div>
+    <!-- 标题区域 - 美观大气 -->
+    <div class="mb-12">
+      <div class="d-flex align-center mb-3">
+        <v-icon color="primary" size="28" class="mr-3">mdi-account-plus</v-icon>
+        <h1 class="text-h3 font-weight-light" style="color: #212121; line-height: 1.2">加入知是社区</h1>
+      </div>
+      <p class="text-body-1" style="color: #757575; line-height: 1.5">开启您的知识共享之旅</p>
+    </div>
 
-    <v-card-text class="pa-6">
-      <v-alert v-if="error" closable type="error" density="compact" class="mb-4">
+    <!-- 错误提示区域 -->
+    <div v-if="error" class="mb-8">
+      <v-alert closable type="error" variant="tonal" density="comfortable">
         {{ error }}
       </v-alert>
+    </div>
 
-      <v-fade-transition>
+    <v-fade-transition>
+      <!-- 注册表单区域 -->
+      <div class="mb-8">
         <v-form ref="signupForm" @submit.prevent="submit">
           <v-row dense>
             <v-col cols="12" md="6">
@@ -20,9 +26,9 @@
                 v-model="username"
                 label="用户名"
                 variant="outlined"
-                prepend-inner-icon="mdi-account"
                 :loading="isSubmitting"
                 v-bind="usernameProps"
+                class="mb-4"
               />
             </v-col>
             <v-col cols="12" md="6">
@@ -30,9 +36,9 @@
                 v-model="nickname"
                 label="显示名称"
                 variant="outlined"
-                prepend-inner-icon="mdi-card-account-details"
                 :loading="isSubmitting"
                 v-bind="nicknameProps"
+                class="mb-4"
               />
             </v-col>
           </v-row>
@@ -44,9 +50,9 @@
                 label="密码"
                 type="password"
                 variant="outlined"
-                prepend-inner-icon="mdi-lock"
                 :loading="isSubmitting"
                 v-bind="passwordProps"
+                class="mb-4"
               />
             </v-col>
             <v-col cols="12" md="6">
@@ -55,44 +61,66 @@
                 label="确认密码"
                 type="password"
                 variant="outlined"
-                prepend-inner-icon="mdi-lock-check"
                 :loading="isSubmitting"
                 v-bind="confirmPasswordProps"
+                class="mb-4"
               />
             </v-col>
           </v-row>
 
-          <v-row dense>
-            <v-col cols="12">
-              <v-text-field
-                v-model="email"
-                label="电子邮箱"
-                type="email"
-                variant="outlined"
-                prepend-inner-icon="mdi-email"
-                :loading="isSubmitting"
-                v-bind="emailProps"
-              />
-            </v-col>
-          </v-row>
+          <v-text-field
+            v-model="email"
+            label="电子邮箱"
+            type="email"
+            variant="outlined"
+            :loading="isSubmitting"
+            v-bind="emailProps"
+            class="mb-6"
+          />
 
-          <div class="d-flex justify-space-between align-center mb-4">
-            <v-checkbox v-model="agree" density="compact" class="flex-grow-0" v-bind="agreeProps">
+          <div class="d-flex justify-space-between align-center mb-6">
+            <v-checkbox v-model="agree" density="compact" v-bind="agreeProps" hide-details>
               <template #label>
-                <span class="text-caption"
-                  >同意 <a href="#" class="text-primary">用户协议</a>和
-                  <a href="#" class="text-primary">隐私政策</a>
+                <span class="text-body-2" style="color: #616161; line-height: 1.4">
+                  同意 <a href="#" class="text-primary text-decoration-none">用户协议</a>和
+                  <a href="#" class="text-primary text-decoration-none">隐私政策</a>
                 </span>
               </template>
             </v-checkbox>
-            <v-btn variant="text" color="primary" to="/account/signin" size="small">已有账号</v-btn>
+            <v-btn variant="text" color="primary" to="/account/signin" size="small" style="text-transform: none">
+              已有账号
+            </v-btn>
           </div>
 
-          <v-btn block color="primary" size="large" type="submit" :loading="isSubmitting"> 立即注册 </v-btn>
+          <v-btn
+            block
+            color="primary"
+            size="large"
+            type="submit"
+            :loading="isSubmitting"
+            style="text-transform: none; font-weight: 500; height: 48px"
+            class="mb-4"
+          >
+            立即注册
+          </v-btn>
+
+          <p class="text-body-2" style="color: #757575">
+            已经有账号了？
+            <v-btn
+              variant="text"
+              color="primary"
+              to="/account/signin"
+              size="small"
+              style="text-transform: none; padding: 0; min-width: auto; height: auto; vertical-align: baseline"
+              class="text-decoration-none"
+            >
+              立即登录
+            </v-btn>
+          </p>
         </v-form>
-      </v-fade-transition>
-    </v-card-text>
-  </v-card>
+      </div>
+    </v-fade-transition>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -107,7 +135,7 @@ import { z } from 'zod'
 import { REGEX_PASSWORD, vuetifyConfig } from '@/utils/form'
 
 import { ServerError } from '@/network/types/error'
-import { useSignupStore } from '@/store/signup'
+import { useSignupStore } from '@/stores/signup'
 
 const error = ref('')
 

@@ -1,88 +1,144 @@
 <template>
-  <v-card class="mx-auto" max-width="500" rounded="lg">
-    <v-card-item class="bg-primary text-white" prepend-icon="mdi-login" title="登录" subtitle="欢迎回到知是社区" />
+  <div>
+    <!-- 标题区域 - 美观大气 -->
+    <div class="mb-12">
+      <h1 class="text-h3 font-weight-light mb-3" style="color: #212121; line-height: 1.2">登录</h1>
+      <p class="text-body-1" style="color: #757575; line-height: 1.5">欢迎回到知是社区</p>
+    </div>
 
-    <v-card-text class="pa-6">
-      <!-- 错误提示 -->
-      <v-alert v-if="errorMessage" type="error" density="compact" class="mb-4">
+    <!-- 错误/成功提示区域 -->
+    <div v-if="errorMessage || route.query.message" class="mb-8">
+      <v-alert v-if="errorMessage" type="error" variant="tonal" density="comfortable" class="mb-4">
         {{ errorMessage }}
       </v-alert>
-
-      <!-- 成功提示 -->
-      <v-alert v-if="route.query.message" type="success" density="compact" class="mb-4">
+      <v-alert v-if="route.query.message" type="success" variant="tonal" density="comfortable">
         {{ route.query.message }}
       </v-alert>
+    </div>
 
-      <v-fade-transition mode="out-in">
-        <div :key="String(isPasskeyLoading)">
-          <!-- 用户名密码登录 -->
+    <v-fade-transition mode="out-in">
+      <div :key="String(isPasskeyLoading)">
+        <!-- 主要登录表单区域 -->
+        <div class="mb-10">
           <v-form ref="loginForm" @submit.prevent="login">
-            <v-text-field
-              v-model="username"
-              label="用户名"
-              variant="outlined"
-              prepend-inner-icon="mdi-account"
-              v-bind="usernameProps"
-            />
+            <!-- 表单字段组 - 预留错误提示空间 -->
+            <div class="mb-4">
+              <v-text-field v-model="username" label="用户名" variant="outlined" v-bind="usernameProps" class="mb-4" />
 
-            <v-text-field
-              v-model="password"
-              label="密码"
-              type="password"
-              variant="outlined"
-              prepend-inner-icon="mdi-lock"
-              v-bind="passwordProps"
-            />
-
-            <div class="d-flex justify-space-between align-center mb-4">
-              <v-checkbox v-model="agree" density="compact" class="flex-grow-0" hide-details="auto" v-bind="agreeProps">
-                <template #label>
-                  <span class="text-caption">
-                    同意<a href="#" class="text-primary">用户协议</a>和<a href="#" class="text-primary">隐私政策</a>
-                  </span>
-                </template>
-              </v-checkbox>
-              <v-btn variant="text" color="primary" to="recover/password" size="small">找回密码</v-btn>
+              <v-text-field v-model="password" label="密码" type="password" variant="outlined" v-bind="passwordProps" />
             </div>
 
-            <v-btn block color="primary" size="large" type="submit" :loading="isSubmitting"> 立即登录 </v-btn>
-
-            <div class="text-center mt-2">
-              <v-btn variant="text" color="primary" to="signup" size="small">没有账号？立即注册</v-btn>
+            <!-- 功能选项行 -->
+            <div class="mb-6">
+              <div class="d-flex justify-space-between align-center">
+                <v-checkbox v-model="agree" density="compact" v-bind="agreeProps" hide-details>
+                  <template #label>
+                    <span class="text-body-2" style="color: #616161; line-height: 1.4">
+                      同意<a href="#" class="text-primary text-decoration-none ml-1">用户协议</a>和<a
+                        href="#"
+                        class="text-primary text-decoration-none"
+                        >隐私政策</a
+                      >
+                    </span>
+                  </template>
+                </v-checkbox>
+                <v-btn variant="text" color="primary" to="recover/password" size="small" style="text-transform: none">
+                  找回密码
+                </v-btn>
+              </div>
             </div>
+
+            <!-- 主要操作按钮 -->
+            <v-btn
+              block
+              color="primary"
+              size="large"
+              type="submit"
+              :loading="isSubmitting"
+              style="text-transform: none; font-weight: 500; height: 48px"
+              class="mb-4"
+            >
+              立即登录
+            </v-btn>
+
+            <!-- 注册链接 - 自然文本流 -->
+            <p class="text-body-2" style="color: #757575">
+              还没有账号？<v-btn
+                variant="text"
+                color="primary"
+                to="signup"
+                size="small"
+                style="text-transform: none; padding: 0; min-width: auto; height: auto; vertical-align: baseline"
+                class="text-decoration-none"
+                >立即注册</v-btn
+              >
+            </p>
           </v-form>
+        </div>
 
-          <!-- 分割线 -->
-          <div class="d-flex align-center my-4">
-            <v-divider />
-            <span class="px-4 text-caption text-medium-emphasis">或</span>
-            <v-divider />
+        <!-- 替代登录方式区域 -->
+        <div>
+          <!-- 优雅的分割线 -->
+          <div class="d-flex align-center mb-6">
+            <v-divider class="flex-grow-1" />
+            <span class="px-4 text-body-2" style="color: #9e9e9e">或</span>
+            <v-divider class="flex-grow-1" />
           </div>
 
           <!-- 通行密钥登录 -->
-          <v-btn
-            block
-            color="primary"
-            variant="tonal"
-            size="large"
-            :loading="isPasskeyLoading"
-            :disabled="!webAuthnSupported"
-            @click="handlePasskeyLogin"
-          >
-            <v-icon start icon="mdi-key-chain" />
-            使用通行密钥登录
-          </v-btn>
-          <div v-if="!webAuthnSupported" class="text-caption text-medium-emphasis mt-2 text-center">
-            当前环境暂不支持通行密钥
+          <div class="mb-6">
+            <v-btn
+              block
+              color="primary"
+              variant="outlined"
+              size="large"
+              :loading="isPasskeyLoading"
+              :disabled="!webAuthnSupported"
+              style="text-transform: none; font-weight: 500; height: 48px"
+              @click="handlePasskeyLogin"
+            >
+              <v-icon start icon="mdi-key-chain" size="20" />
+              通行密钥登录
+            </v-btn>
+            <p v-if="!webAuthnSupported" class="text-body-2 mt-2" style="color: #9e9e9e">当前环境暂不支持通行密钥</p>
+          </div>
+
+          <!-- 第三方登录 -->
+          <div v-if="oAuthProviders.length > 0">
+            <div class="text-body-1 font-weight-medium mb-4" style="color: #424242">第三方登录</div>
+            <div class="d-flex flex-column" style="gap: 12px">
+              <v-btn
+                v-for="provider in oAuthProviders"
+                :key="provider.id"
+                block
+                variant="outlined"
+                size="large"
+                :loading="oAuthLoading === provider.id"
+                style="
+                  text-transform: none;
+                  font-weight: 500;
+                  height: 48px;
+                  border-color: #e0e0e0;
+                  justify-content: flex-start;
+                  padding-left: 16px;
+                "
+                @click="handleOAuthLogin(provider.id)"
+              >
+                <v-icon start :icon="getProviderIcon(provider.id)" size="20" />
+                {{ provider.name }}
+              </v-btn>
+            </div>
           </div>
         </div>
-      </v-fade-transition>
-    </v-card-text>
-  </v-card>
+      </div>
+    </v-fade-transition>
+  </div>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import type { OAuthProvider } from '@/network/api/users/types'
+
+import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vuetify-sonner'
 import { startAuthentication } from '@simplewebauthn/browser'
@@ -104,7 +160,7 @@ const route = useRoute()
 const { handleSubmit, defineField, isSubmitting } = useForm({
   validationSchema: toTypedSchema(
     z.object({
-      username: z.string().min(4).max(16),
+      username: z.string().min(4).max(30),
       password: z.string().min(8),
       agree: z.boolean().refine((v) => v, {
         message: '请同意用户协议和隐私政策',
@@ -120,6 +176,8 @@ const [agree, agreeProps] = defineField('agree', vuetifyConfig)
 const errorMessage = ref('')
 const isPasskeyLoading = ref(false)
 const webAuthnSupported = ref(browserSupportsWebAuthn())
+const oAuthProviders = ref<OAuthProvider[]>([])
+const oAuthLoading = ref<string | null>(null)
 
 // 如果 URL 中有 username 参数，自动填充用户名
 if (route.query.username) {
@@ -238,4 +296,50 @@ const handlePasskeyLogin = async () => {
     isPasskeyLoading.value = false
   }
 }
+
+// 获取 OAuth 提供商
+const fetchOAuthProviders = async () => {
+  try {
+    const response = await UserApi.getOAuthProviders()
+    oAuthProviders.value = response.data.providers
+  } catch (error) {
+    console.error('获取 OAuth 提供商失败:', error)
+  }
+}
+
+// 处理 OAuth 登录
+const handleOAuthLogin = async (providerId: string) => {
+  oAuthLoading.value = providerId
+  try {
+    // 生成随机 state 参数用于防止 CSRF 攻击
+    const state = crypto.randomUUID()
+
+    // 将 state 存储到 localStorage，用于后续验证
+    localStorage.setItem('oauth_state', state)
+
+    // 跳转到 OAuth 登录页面
+    UserApi.redirectToOAuthLogin(providerId, state)
+  } catch (error) {
+    oAuthLoading.value = null
+    console.error('OAuth 登录失败:', error)
+    toast.error('OAuth 登录失败')
+  }
+}
+
+// 获取提供商图标
+const getProviderIcon = (providerId: string) => {
+  const iconMap: Record<string, string> = {
+    github: 'mdi-github',
+    google: 'mdi-google',
+    microsoft: 'mdi-microsoft',
+    qq: 'mdi-qqchat',
+    wechat: 'mdi-wechat',
+    weibo: 'mdi-sina-weibo',
+  }
+  return iconMap[providerId] || 'mdi-account-circle'
+}
+
+onMounted(() => {
+  fetchOAuthProviders()
+})
 </script>

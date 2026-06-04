@@ -1,10 +1,11 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
     "target": "ESNext",
     "useDefineForClassFields": true,
     "module": "ESNext",
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
     "strict": true,
     "jsx": "preserve",
     "jsxImportSource": "vue",
@@ -13,7 +14,8 @@
     "esModuleInterop": true,
     "lib": [
       "ESNext",
-      "DOM"
+      "DOM",
+      "esnext.asynciterable"
     ],
     "skipLibCheck": true,
     "noEmit": true,
@@ -23,7 +25,9 @@
       ],
     },
     "types": [
-      "vitest/globals"
+      "vitest/globals",
+      "vue/jsx",
+      "vuetify"
     ],
   },
   "include": [

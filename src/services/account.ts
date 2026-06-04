@@ -39,10 +39,10 @@ export class AccountService {
   }
 
   public async updateUserInfo() {
-    if (!this.loggedIn || !this.user?.id) return
+    if (!this.loggedIn || !this.accessToken) return
 
     try {
-      const { data } = await UserApi.getUserInfo(this.user.id)
+      const { data } = await UserApi.getCurrentUser()
       if (data.user) {
         this.user = data.user
         localStorage.setItem('user', JSON.stringify(data.user))
@@ -64,12 +64,19 @@ export class AccountService {
     }
   }
 
-  public async login(accessToken: string, user: User) {
+  public async login(accessToken: string, user?: User) {
     this.loggedIn = true
-    this.user = user
     this.accessToken = accessToken
     localStorage.setItem('accessToken', accessToken)
-    localStorage.setItem('user', JSON.stringify(user))
+
+    if (user) {
+      // 如果提供了用户信息，直接使用
+      this.user = user
+      localStorage.setItem('user', JSON.stringify(user))
+    } else {
+      // 如果没有提供用户信息（如 OAuth 登录），获取完整的用户信息
+      await this.updateUserInfo()
+    }
   }
 
   public async logout() {

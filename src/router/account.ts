@@ -4,6 +4,9 @@ export default {
   path: '/account',
   name: 'Account',
   component: () => import('@/layouts/account/Account.vue'),
+  meta: {
+    hideAppBar: true,
+  },
   children: [
     {
       path: 'signin',
@@ -66,6 +69,38 @@ export default {
       component: () => import('@/views/account/Verify2FA.vue'),
       meta: {
         title: '两步验证',
+      },
+    },
+    {
+      path: 'oauth/complete',
+      name: 'OAuthComplete',
+      component: () => import('@/views/account/OAuthComplete.vue'),
+      meta: {
+        title: 'OAuth 账户选择',
+      },
+    },
+    {
+      path: 'oauth/verify',
+      name: 'OAuthVerify',
+      component: () => import('@/views/account/OAuthVerify.vue'),
+      meta: {
+        title: 'OAuth 验证',
+      },
+    },
+    {
+      path: 'oauth/success',
+      name: 'OAuthSuccess',
+      component: () => import('@/views/account/OAuthSuccess.vue'),
+      meta: {
+        title: 'OAuth 登录成功',
+      },
+    },
+    {
+      path: 'oauth/error',
+      name: 'OAuthError',
+      component: () => import('@/views/account/OAuthError.vue'),
+      meta: {
+        title: 'OAuth 登录失败',
       },
     },
   ],

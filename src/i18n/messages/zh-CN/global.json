@@ -1,0 +1,39 @@
+{
+  "cancel": "取消",
+  "publish": "发布",
+  "reply": "回复",
+  "edit": "编辑",
+  "delete": "删除",
+  "save": "保存",
+  "submit": "提交",
+  "confirm": "确认",
+  "back": "返回",
+  "close": "关闭",
+  "yes": "是",
+  "no": "否",
+  "loading": "加载中...",
+  "error": "发生错误",
+  "success": "操作成功",
+  "replySuccess": "回复成功",
+  "deleteSuccess": "删除成功",
+  "deleteFailed": "删除失败",
+  "publishSuccess": "发布成功",
+  "publishFailed": "发布失败",
+  "loadFailed": "加载失败",
+  "updateSuccess": "更新成功",
+  "updateFailed": "更新失败",
+  "createSuccess": "创建成功",
+  "createFailed": "创建失败",
+  "confirmDelete": "确定要删除吗？此操作无法撤销。",
+  "confirmDeleteReply": "确定要删除这条回复吗？",
+  "editor": {
+    "placeholder": "说点什么..."
+  },
+  "formValidation": {
+    "required": "此字段为必填项",
+    "maxLength": "内容不能超过 {max} 个字符",
+    "minLength": "内容至少需要 {min} 个字符",
+    "email": "请输入有效的电子邮件地址",
+    "numeric": "此字段必须是数字"
+  }
+}

@@ -8,11 +8,20 @@
     "beginner": "初级",
     "intermediate": "中级",
     "advanced": "高级",
+    "registrationStartAt": "报名开始日期",
+    "registrationStartAtHint": "留空表示不限制报名开始时间",
     "deadline": "报名截止日期",
     "defaultDeadline": "默认完成期限",
     "allowMultipleSubmissions": "允许多次提交",
     "allowEditSubmissions": "允许编辑提交",
-    "taskDescription": "赛题描述"
+    "taskDescription": "赛题描述",
+    "participantLimitHint": "留空表示不限制参与人数",
+    "teamLockingPolicy": "队伍成员锁定策略",
+    "teamLockingPolicyNoLock": "允许自由调整",
+    "teamLockingPolicyNoLockDesc": "参与申请通过后，队伍仍可自由添加或移除成员（变更不影响已记录的参与情况）",
+    "teamLockingPolicyLockOnApproval": "审核通过后锁定",
+    "teamLockingPolicyLockOnApprovalDesc": "参与申请通过后，队伍成员名单将被完全锁定，无法进行任何成员变更",
+    "teamMemberManagement": "队伍成员管理说明"
   },
   "detail": {
     "editTask": "编辑赛题",
@@ -28,6 +37,7 @@
   },
   "status": {
     "pending": "审核中",
+    "notStarted": "未开始",
     "ongoing": "报名中",
     "ended": "已截止",
     "rejected": "审核未通过",

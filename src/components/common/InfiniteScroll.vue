@@ -30,9 +30,9 @@
         </div>
       </slot>
       <slot v-if="!hasMore && !isEmpty" name="no-more">
-        <div class="no-more d-flex justify-center align-center flex-row">
-          <v-icon>mdi-alert-circle</v-icon>
-          <span class="text-caption ml-2">没有更多数据了</span>
+        <div class="no-more d-flex justify-center align-center flex-row text-medium-emphasis gap-1">
+          <v-icon size="small">mdi-alert-circle-outline</v-icon>
+          <span class="text-caption">没有更多了</span>
         </div>
       </slot>
     </template>

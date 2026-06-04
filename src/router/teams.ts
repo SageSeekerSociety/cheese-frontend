@@ -1,17 +1,14 @@
 import type { RouteRecordRaw } from 'vue-router'
 
+import RouterPassThrough from '@/layouts/RouterPassThrough.vue'
+
 export default {
   path: '/teams',
-  component: () => import('@/layouts/teams/Teams.vue'),
+  component: RouterPassThrough,
   meta: {
     title: '小队',
   },
   children: [
-    {
-      path: '',
-      name: 'TeamsIndex',
-      component: () => import('@/views/teams/Index.vue'),
-    },
     {
       path: ':teamId',
       name: 'TeamsDetail',
@@ -20,31 +17,39 @@ export default {
         {
           path: '',
           name: 'TeamsDetailDefault',
-        },
-        {
-          path: 'tasks',
-          name: 'TeamsDetailTasks',
-          component: () => import('@/views/teams/detail/Tasks.vue'),
-        },
-        {
-          path: 'projects',
-          name: 'TeamsDetailProjects',
           component: () => import('@/views/teams/detail/Projects.vue'),
+        },
+        {
+          path: 'channels/:channelId',
+          name: 'TeamsDetailChannels',
+          component: () => import('@/views/teams/detail/Projects.vue'),
+        },
+        {
+          path: 'discussions/:discussionId',
+          name: 'TeamsDetailDiscussion',
+          components: {
+            default: () => import('@/views/teams/detail/DiscussionDetail.vue'),
+            header: () => import('@/views/teams/detail/DiscussionHeader.vue'),
+          },
+          meta: {
+            isDiscussionDetail: true,
+          },
+          props: {
+            default: true,
+            header: true,
+          },
         },
         {
           path: 'members',
           name: 'TeamsDetailMembers',
           component: () => import('@/views/teams/detail/Members.vue'),
         },
+        {
+          path: 'knowledge',
+          name: 'TeamsDetailKnowledge',
+          component: () => import('@/views/teams/detail/Knowledge.vue'),
+        },
       ],
-      beforeEnter: (to, _, next) => {
-        console.log('to', to)
-        if (to.name === 'TeamsDetailDefault' || to.name === 'TeamsDetail') {
-          next({ name: 'TeamsDetailProjects', params: to.params })
-        } else {
-          next()
-        }
-      },
     },
   ],
 } as RouteRecordRaw

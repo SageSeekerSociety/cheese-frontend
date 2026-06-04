@@ -7,14 +7,15 @@ export type AttitudeStats = {
   user_attitude?: NewAttitudeType
 }
 
-export type Page = {
-  page_start: number
-  page_size: number
-  has_prev: boolean
-  prev_start: number
-  has_more: boolean
-  next_start: number
+export type Page<C = number> = {
+  pageStart?: C
+  pageSize: number
+  hasMore: boolean
+  nextStart?: C
+  total?: number
 }
+
+export type EncodedCursorPage = Page<string>
 
 export type Topic = {
   id: number
