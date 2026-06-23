@@ -44,6 +44,8 @@ jobs:
         with:
           context: .
           target: prod
+          build-args: |
+            API_BASE_URL=${{ secrets.API_BASE_URL }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
